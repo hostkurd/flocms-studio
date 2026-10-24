@@ -57,7 +57,7 @@ struct FileChange
 
 // The copy against the project, in path order.
 FLOSTUDIOCORE_EXPORT QList<FileChange> previewChanges(const QString &projectDir, const QString &copyDir,
-                                                      qint64 maxBytes = 256 * 1024);
+                                                      qint64 maxBytes = 256LL * 1024);
 
 // A changed file's lines: kind ' ' (the same), '+', '-', or '~' for a run
 // of unchanged lines left out (its text says how many).

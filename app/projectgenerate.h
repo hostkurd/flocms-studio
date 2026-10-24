@@ -4,7 +4,6 @@
 #include <flostudio/core/settings.h>
 
 #include <QObject>
-#include <QPointer>
 #include <QStringList>
 #include <QVariantList>
 #include <QVariantMap>
@@ -13,7 +12,6 @@
 #include <memory>
 
 class QProcess;
-class QTimer;
 
 // One project's Generate tab (stage 7, board 3): a form per FloCMS
 // generator, its preview (D5: the real generator in a temporary copy of
@@ -104,13 +102,13 @@ private:
     int m_previewRun = 0;           // a newer preview makes an older one's results void
     std::shared_ptr<std::atomic<bool>> m_cancel = std::make_shared<std::atomic<bool>>(false);
     QString m_copy;                 // the copy while its generator runs
-    QPointer<QProcess> m_previewProcess;
+    QProcess *m_previewProcess = nullptr; // a child of this while it runs
     QStringList m_previewOut;
     QStringList m_previewErr;
     int m_copying = 0; // copies and removals still on a worker
 
     QVariantMap m_created;
-    QPointer<QProcess> m_createProcess;
+    QProcess *m_createProcess = nullptr; // the same
     QStringList m_createOut;
     QStringList m_createErr;
 };

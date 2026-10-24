@@ -221,7 +221,7 @@ private slots:
         const QString previews = dir.filePath(QStringLiteral("previews"));
         const auto made = makePreviewCopy(project, previews);
         QVERIFY2(made.ok(), qUtf8Printable(made ? QString() : made.error().code));
-        const QString copy = made.value();
+        const QString &copy = made.value();
         QCOMPARE(QFileInfo(copy).fileName(), QStringLiteral("my-shop"));
         // The project's files, without what generators don't need
         QCOMPARE(readFile(copy + QStringLiteral("/config/admin.php")), readFile(project + QStringLiteral("/config/admin.php")));

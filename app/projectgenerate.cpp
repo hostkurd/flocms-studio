@@ -84,7 +84,7 @@ ProjectGenerate::~ProjectGenerate()
     // A copy whose generator still runs: the process ends, and the copy
     // goes now (a copy still being made is removed at the next start)
     m_cancel->store(true);
-    for (QProcess *process : {m_previewProcess.data(), m_createProcess.data()}) {
+    for (QProcess *process : {m_previewProcess, m_createProcess}) {
         if (process) {
             QObject::disconnect(process, nullptr, this, nullptr);
             process->kill();
@@ -169,7 +169,7 @@ QVariantMap ProjectGenerate::preview() const
 bool ProjectGenerate::busy() const
 {
     const QString state = m_preview.value(QStringLiteral("state")).toString();
-    return state == u"copying" || state == u"running" || m_createProcess;
+    return state == u"copying" || state == u"running" || m_createProcess != nullptr;
 }
 
 void ProjectGenerate::choose(const QString &generator)
@@ -316,10 +316,8 @@ void ProjectGenerate::previewCopied(int run, const QString &copy, const QString 
         },
         [this, run, copy](int exitCode, bool crashed) { previewRan(run, copy, exitCode, crashed); });
     // A generator that waits on something (a question it should not ask)
-    QTimer::singleShot(g_timeoutSeconds * 1000, m_previewProcess, [process = m_previewProcess] {
-        if (process)
-            stopProcess(process);
-    });
+    // Cancelled with the process (it is the timer's context)
+    QTimer::singleShot(g_timeoutSeconds * 1000, m_previewProcess, [process = m_previewProcess] { stopProcess(process); });
 }
 
 void ProjectGenerate::previewRan(int run, const QString &copy, int exitCode, bool crashed)
@@ -420,10 +418,8 @@ void ProjectGenerate::create()
             emit previewChanged();
             emit changedProject();
         });
-    QTimer::singleShot(g_timeoutSeconds * 1000, m_createProcess, [process = m_createProcess] {
-        if (process)
-            stopProcess(process);
-    });
+    // Cancelled with the process (it is the timer's context)
+    QTimer::singleShot(g_timeoutSeconds * 1000, m_createProcess, [process = m_createProcess] { stopProcess(process); });
     emit createdChanged();
     emit busyChanged();
 }

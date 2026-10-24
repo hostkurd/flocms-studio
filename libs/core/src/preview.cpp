@@ -13,6 +13,10 @@
 #include <vector>
 
 #ifdef Q_OS_WIN
+// windows.h without its min and max macros (std::max below)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <winioctl.h>
 #endif
