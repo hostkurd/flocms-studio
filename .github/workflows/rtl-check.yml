@@ -41,7 +41,29 @@ jobs:
         with:
           python-version: "3.12"
 
+      # On Windows install-qt-action fails with no readable message, so
+      # Qt is installed with aqtinstall directly and its output is kept.
+      - name: Install Qt 6.12 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install -q "aqtinstall>=3.2"
+          python -m aqt list-qt windows desktop --arch 6.12.0 > archs.txt 2>&1 || true
+          echo "::warning::aqt archs for 6.12.0: $(tr '\n' ' ' < archs.txt)"
+          set +e
+          python -m aqt install-qt windows desktop 6.12.0 ${{ matrix.arch }} -O "$RUNNER_TEMP/Qt" > aqt.log 2>&1
+          status=$?
+          cat aqt.log
+          if [ $status -ne 0 ]; then
+            tail -15 aqt.log | sed 's/^/::error::/'
+            exit $status
+          fi
+          qtdir=$(dirname "$(find "$RUNNER_TEMP/Qt/6.12.0" -maxdepth 2 -name bin -type d | head -1)")
+          echo "Qt in $qtdir"
+          echo "CMAKE_PREFIX_PATH=$qtdir" >> "$GITHUB_ENV"
+          echo "$qtdir/bin" >> "$GITHUB_PATH"
+
       - name: Install Qt 6.12
+        if: runner.os != 'Windows'
         uses: jurplel/install-qt-action@v4
         with:
           version: "6.12.0"
