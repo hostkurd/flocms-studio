@@ -22,7 +22,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022, macos-14, ubuntu-24.04]
+        include:
+          - os: windows-2022
+            arch: win64_msvc2022_64
+          - os: macos-14
+            arch: clang_64
+          - os: ubuntu-24.04
+            arch: linux_gcc_64
     defaults:
       run:
         shell: bash
@@ -33,6 +39,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "6.12.0"
+          arch: ${{ matrix.arch }}
           cache: true
           aqtversion: ">=3.2"
 
@@ -45,8 +52,17 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S prototypes/rtl-check -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
+          # Job logs can't always be read from outside, so failures are
+          # repeated as annotations.
+          set +e
+          { cmake -S prototypes/rtl-check -B build -DCMAKE_BUILD_TYPE=Release \
+            && cmake --build build --config Release; } > build.log 2>&1
+          status=$?
+          cat build.log
+          if [ $status -ne 0 ]; then
+            grep -iE "error|undefined|cannot|not found|failed" build.log | head -25 | sed 's/^/::error::/'
+          fi
+          exit $status
 
       - name: Find the program
         run: |
