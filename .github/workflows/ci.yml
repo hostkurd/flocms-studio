@@ -143,8 +143,8 @@ jobs:
 
       - name: Check the build
         run: |
-          echo "::notice::$("$STUDIO" --version | tr '\n' ';')"
-          version=$("$STUDIO" --version | head -1 | awk '{print $3}')
+          echo "::notice::$("$STUDIO" --version | tr -d '\r' | tr '\n' ';')"
+          version=$("$STUDIO" --version | tr -d '\r' | head -1 | awk '{print $3}')
           echo "VERSION=$version" >> "$GITHUB_ENV"
           files=$(find "$APP_DIR" -type f | wc -l | tr -d ' ')
           size=$(du -sk "$APP_DIR" | cut -f1)
@@ -188,8 +188,10 @@ jobs:
           "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
           for i in $(seq 1 30); do [ -f "$installed/Studio.exe" ] || break; sleep 1; done
           if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
-          left=$(find "$installed" -type f 2>/dev/null | wc -l)
-          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled ($left files left)"
+          # The uninstaller removes its own files a moment after it exits.
+          for i in $(seq 1 20); do [ -z "$(find "$installed" -type f 2>/dev/null)" ] && break; sleep 1; done
+          left=$(find "$installed" -type f 2>/dev/null | sed "s|$installed/||" | tr '\n' ' ')
+          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled (left behind: ${left:-nothing})"
 
       - name: macOS disk image dry run
         if: runner.os == 'macOS'
