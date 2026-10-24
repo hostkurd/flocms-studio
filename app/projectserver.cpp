@@ -9,6 +9,7 @@
 
 #include <flostudio/core/tools.h>
 
+#include <QFileInfo>
 #include <QFutureWatcher>
 #include <QProcess>
 #include <QtConcurrent>
@@ -300,7 +301,9 @@ void ProjectServer::learnTimeZone(const Settings &settings)
     Command command;
     command.program = php.value();
     command.arguments = {QStringLiteral("-r"), QStringLiteral("echo date('P');")};
-    command.workingDir = m_projectDir;
+    // Not the project folder: on Windows a running program's folder can't
+    // be deleted or renamed, and this needs nothing from the project
+    command.workingDir = QFileInfo(php.value()).absolutePath();
     auto *watcher = new QFutureWatcher<Captured>(this); // a child of this, deleted when it finishes
     connect(watcher, &QFutureWatcher<Captured>::finished, this, [this, watcher] {
         const Captured out = watcher->result();
