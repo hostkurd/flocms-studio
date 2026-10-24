@@ -133,6 +133,7 @@ QVariantMap infoMap(const ProjectInfo &info)
                      {QStringLiteral("configured"), db.configured}}},
         {QStringLiteral("packages"), packageList(info.packages)},
         {QStringLiteral("otherPackages"), static_cast<int>(info.otherPackages.size())},
+        {QStringLiteral("others"), packageList(info.otherPackages)},
         {QStringLiteral("hasEnv"), info.hasEnv},
         {QStringLiteral("hasVendor"), info.hasVendor},
         {QStringLiteral("hasLock"), info.hasLock},
@@ -267,6 +268,9 @@ Result<Done> Studio::startDemo(const QString &file)
     if (!m_currentPath.isEmpty()) {
         checksFor(m_currentPath)->showDemo(demo.value(QStringLiteral("checks")).toObject().toVariantMap());
         generateFor(m_currentPath)->showDemo(demo.value(QStringLiteral("generate")).toObject().toVariantMap());
+        ProjectPackages *packages = packagesFor(m_currentPath);
+        packages->setProject(m_current);
+        packages->showDemo(demo.value(QStringLiteral("packages")).toObject().toVariantMap());
     }
     if (!m_currentPath.isEmpty())
         serverFor(m_currentPath)->showDemo(demo.value(QStringLiteral("server")).toObject().toVariantMap(),
@@ -437,7 +441,9 @@ void Studio::addProject(const QUrl &folder)
 void Studio::removeProject(const QString &path)
 {
     const ProjectGenerate *generate = m_generate.value(path);
-    if (const ProjectChecks *checks = m_checks.value(path); (checks && checks->busy()) || (generate && generate->busy())) {
+    const ProjectPackages *packages = m_packagesTab.value(path);
+    if (const ProjectChecks *checks = m_checks.value(path);
+        (checks && checks->busy()) || (generate && generate->busy()) || (packages && packages->busy())) {
         setProblem(QStringLiteral("project_busy"), path);
         return;
     }
@@ -509,6 +515,28 @@ ProjectGenerate *Studio::generateFor(const QString &path)
     return generate;
 }
 
+ProjectPackages *Studio::packagesFor(const QString &path)
+{
+    if (ProjectPackages *packages = m_packagesTab.value(path))
+        return packages;
+    // A child of this, which outlives it, so the settings stay valid
+    auto *packages = new ProjectPackages(path, m_demo ? nullptr : &m_settings, this);
+    m_packagesTab.insert(path, packages);
+    connect(packages, &ProjectPackages::runChanged, this, &Studio::commandRunningChanged);
+    // An update or a new package: composer.lock, the project's type, its
+    // migrations and Doctor change
+    connect(packages, &ProjectPackages::changedProject, this, [this, path] {
+        if (path == m_currentPath)
+            loadCurrent();
+        refreshProjects();
+        if (ProjectChecks *checks = m_checks.value(path)) {
+            checks->refreshDatabase();
+            checks->runDoctor();
+        }
+    });
+    return packages;
+}
+
 bool Studio::currentHasAdmin() const
 {
     const QString type = m_current.value(QStringLiteral("type")).toString();
@@ -519,7 +547,8 @@ bool Studio::commandRunning() const
 {
     return m_wizard.state() == u"running"
            || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); })
-           || std::any_of(m_generate.cbegin(), m_generate.cend(), [](const ProjectGenerate *generate) { return generate->busy(); });
+           || std::any_of(m_generate.cbegin(), m_generate.cend(), [](const ProjectGenerate *generate) { return generate->busy(); })
+           || std::any_of(m_packagesTab.cbegin(), m_packagesTab.cend(), [](const ProjectPackages *packages) { return packages->busy(); });
 }
 
 void Studio::serversChanged()
@@ -585,6 +614,13 @@ void Studio::openEnvFile()
         return;
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(env)))
         setProblem(QStringLiteral("open_failed"), QDir::toNativeSeparators(env));
+}
+
+void Studio::openRepository(const QString &url)
+{
+    // Only hostkurd's own repositories (a package's changelog)
+    if (url.startsWith(QStringLiteral("https://github.com/hostkurd/")) && !url.contains(QStringLiteral("..")))
+        QDesktopServices::openUrl(QUrl(url));
 }
 
 void Studio::openUrl(const QString &url)
@@ -658,6 +694,10 @@ void Studio::refreshProjects()
         if (m_projects.indexOf(path) < 0 && !m_generate.value(path)->busy())
             m_generate.take(path)->deleteLater();
     }
+    for (const QString &path : m_packagesTab.keys()) {
+        if (m_projects.indexOf(path) < 0 && !m_packagesTab.value(path)->busy())
+            m_packagesTab.take(path)->deleteLater();
+    }
     serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
@@ -685,6 +725,7 @@ void Studio::loadCurrent()
             serverFor(m_currentPath);
             checksFor(m_currentPath);
             generateFor(m_currentPath);
+            packagesFor(m_currentPath)->setProject(m_current);
         }
     }
     emit currentChanged();

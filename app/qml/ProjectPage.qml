@@ -222,7 +222,7 @@ Item {
             GenerateTab {}
             DatabaseTab { startAction: page.startAction }
             LogsTab {}
-            LaterTab { stage: 8 }
+            PackagesTab {}
             DoctorTab {}
         }
     }

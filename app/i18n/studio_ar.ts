@@ -840,7 +840,14 @@
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="421" />
         <source>The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?</source>
-        <translation><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في ثانية واحدة، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في ثانيتين، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثوانٍ، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform></translation>
+        <translation>
+            <numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+            <numerusform>لم ينتهِ المولّد في ثانية واحدة، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+            <numerusform>لم ينتهِ المولّد في ثانيتين، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+            <numerusform>لم ينتهِ المولّد في %Ln ثوانٍ، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+            <numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+            <numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/GenerateTab.qml" line="422" />
@@ -865,7 +872,14 @@
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="535" />
         <source>%Ln more line(s), not shown</source>
-        <translation><numerusform>لا أسطر أخرى</numerusform><numerusform>سطر آخر لا يُعرض</numerusform><numerusform>سطران آخران لا يُعرضان</numerusform><numerusform>%Ln أسطر أخرى لا تُعرض</numerusform><numerusform>%Ln سطرًا آخر لا يُعرض</numerusform><numerusform>%Ln سطر آخر لا يُعرض</numerusform></translation>
+        <translation>
+            <numerusform>لا أسطر أخرى</numerusform>
+            <numerusform>سطر آخر لا يُعرض</numerusform>
+            <numerusform>سطران آخران لا يُعرضان</numerusform>
+            <numerusform>%Ln أسطر أخرى لا تُعرض</numerusform>
+            <numerusform>%Ln سطرًا آخر لا يُعرض</numerusform>
+            <numerusform>%Ln سطر آخر لا يُعرض</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="536" />
@@ -897,14 +911,6 @@
         <location filename="../qml/LanguageChip.qml" line="30" />
         <source>default</source>
         <translation>افتراضية</translation>
-    </message>
-</context>
-<context>
-    <name>LaterTab</name>
-    <message>
-        <location filename="../qml/LaterTab.qml" line="14" />
-        <source>This tab comes in a later version of the native Studio.</source>
-        <translation>يأتي هذا التبويب في إصدار لاحق من Studio الأصلي.</translation>
     </message>
 </context>
 <context>
@@ -1555,6 +1561,238 @@
         <location filename="../qml/OverviewTab.qml" line="192" />
         <source>Optimize</source>
         <translation>تحسين</translation>
+    </message>
+</context>
+<context>
+    <name>PackagesTab</name>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="89" />
+        <source>FloCMS packages</source>
+        <translation>حزم FloCMS</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="92" />
+        <source>Checking…</source>
+        <translation>جارٍ الفحص…</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="92" />
+        <source>Check for updates</source>
+        <translation>البحث عن تحديثات</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/PackagesTab.qml" line="99" />
+        <source>%Ln update(s).</source>
+        <translation>
+            <numerusform>لا تحديثات.</numerusform>
+            <numerusform>تحديث واحد.</numerusform>
+            <numerusform>تحديثان.</numerusform>
+            <numerusform>%Ln تحديثات.</numerusform>
+            <numerusform>%Ln تحديثًا.</numerusform>
+            <numerusform>%Ln تحديث.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="99" />
+        <source>Everything is up to date.</source>
+        <translation>كل شيء محدّث.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="100" />
+        <source>Checked just now.</source>
+        <translation>فُحص للتو.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/PackagesTab.qml" line="100" />
+        <source>Checked %Ln min ago.</source>
+        <translation>
+            <numerusform>فُحص قبل %Ln دقيقة.</numerusform>
+            <numerusform>فُحص قبل دقيقة.</numerusform>
+            <numerusform>فُحص قبل دقيقتين.</numerusform>
+            <numerusform>فُحص قبل %Ln دقائق.</numerusform>
+            <numerusform>فُحص قبل %Ln دقيقة.</numerusform>
+            <numerusform>فُحص قبل %Ln دقيقة.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="132" />
+        <source>Package</source>
+        <translation>الحزمة</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="133" />
+        <source>Installed</source>
+        <translation>المثبّت</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="134" />
+        <source>Latest</source>
+        <translation>الأحدث</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="135" />
+        <source>Status</source>
+        <translation>الحالة</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="171" />
+        <source>Not installed</source>
+        <translation>غير مثبّت</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="192" />
+        <source>Abandoned</source>
+        <translation>متروكة</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="193" />
+        <source>Up to date</source>
+        <translation>محدّثة</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="194" />
+        <location filename="../qml/PackagesTab.qml" line="413" />
+        <source>Update</source>
+        <translation>تحديث</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="195" />
+        <source>New major version</source>
+        <translation>إصدار رئيسي جديد</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="195" />
+        <source>New 0.x version</source>
+        <translation>إصدار 0.x جديد</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="196" />
+        <source>Through another package</source>
+        <translation>عبر حزمة أخرى</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="324" />
+        <source>`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.</source>
+        <translation>لا يذكر `.env` أي قاعدة بيانات، لذا لا يُشغَّل `migrate`. شغّله من تبويب قاعدة البيانات بعد ضبطها.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="331" />
+        <source>`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.</source>
+        <translation>يقول `APP_ENV` إن هذا موقع إنتاج: يترك Composer حزم التطوير (`--update-no-dev`)، وسيغيّر `migrate` قاعدة بياناته.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="58" />
+        <location filename="../qml/PackagesTab.qml" line="211" />
+        <source>Review update</source>
+        <translation>مراجعة التحديث</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="57" />
+        <location filename="../qml/PackagesTab.qml" line="218" />
+        <source>Add the API</source>
+        <translation>إضافة الـAPI</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="56" />
+        <location filename="../qml/PackagesTab.qml" line="218" />
+        <location filename="../qml/PackagesTab.qml" line="268" />
+        <source>Add the admin panel</source>
+        <translation>إضافة لوحة الإدارة</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="237" />
+        <source>Other packages (%1)</source>
+        <translation>حزم أخرى (%1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="268" />
+        <source>Add the JSON API</source>
+        <translation>إضافة JSON API</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="269" />
+        <source>Update %1</source>
+        <translation>تحديث %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="287" />
+        <source>Before 1.0, a new minor version may change how things work. Read the changelog first.</source>
+        <translation>قبل الإصدار 1.0، قد يغيّر الإصدار الفرعي الجديد طريقة عمل الأشياء. اقرأ سجل التغييرات أولًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="288" />
+        <source>A new major version: it may change how things work. Read the changelog first.</source>
+        <translation>إصدار رئيسي جديد: قد يغيّر طريقة عمل الأشياء. اقرأ سجل التغييرات أولًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="296" />
+        <source>Read the changelog</source>
+        <translation>قراءة سجل التغييرات</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="297" />
+        <source>Read UPGRADING.md</source>
+        <translation>قراءة UPGRADING.md</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="311" />
+        <source>After Composer adds it</source>
+        <translation>بعد أن يضيفها Composer</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="311" />
+        <source>After the update</source>
+        <translation>بعد التحديث</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="314" />
+        <source>Studio runs `admin:install`, which only adds what is missing, and then `migrate`.</source>
+        <translation>يشغّل Studio الأمر `admin:install`، الذي يضيف الناقص فقط، ثم `migrate`.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="316" />
+        <source>Studio runs `api:install`, which only adds what is missing, and then `migrate`.</source>
+        <translation>يشغّل Studio الأمر `api:install`، الذي يضيف الناقص فقط، ثم `migrate`.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="317" />
+        <source>Studio runs `migrate` for the package's new tables.</source>
+        <translation>يشغّل Studio الأمر `migrate` لجداول الحزمة الجديدة.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="341" />
+        <source>Commands</source>
+        <translation>الأوامر</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="374" />
+        <source>Added. The project's tabs show it now.</source>
+        <translation>أُضيفت. تعرضها تبويبات المشروع الآن.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="374" />
+        <source>Updated to %1.</source>
+        <translation>حُدّثت إلى %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="386" />
+        <source>A command failed (exit code %1). What ran before it stays done.</source>
+        <translation>فشل أمر (رمز الخروج %1). ما نُفّذ قبله يبقى منجزًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="406" />
+        <source>Close</source>
+        <translation>إغلاق</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="406" />
+        <source>Cancel</source>
+        <translation>إلغاء</translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="413" />
+        <source>Add</source>
+        <translation>إضافة</translation>
     </message>
 </context>
 <context>
@@ -2471,96 +2709,101 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="139" />
+        <source>Composer could not say what is newer. It asks Packagist, so this needs the internet.</source>
+        <translation>تعذّر على Composer معرفة ما هو أحدث. فهو يسأل Packagist، لذا يحتاج هذا إلى الإنترنت.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="140" />
         <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation>لا يحتوي المشروع على المجلد `vendor/` بعد: شغّل `composer install` فيه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="140" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation>المشروع أكبر من أن يُنسخ للمعاينة (أكثر من 400 ميغابايت أو 40,000 ملف، دون المرفوعات والسجلات). يعمل الإنشاء دون معاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="141" />
+        <location filename="../qml/Texts.qml" line="142" />
         <source>Studio could not copy the project for the preview.</source>
         <translation>تعذّر على Studio نسخ المشروع للمعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="142" />
+        <location filename="../qml/Texts.qml" line="143" />
         <source>The preview was stopped.</source>
         <translation>أُوقفت المعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="143" />
+        <location filename="../qml/Texts.qml" line="144" />
         <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation>تعذّر على Studio حذف نسخة المعاينة. سيحاول مجددًا عند تشغيله التالي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="144" />
+        <location filename="../qml/Texts.qml" line="145" />
         <source>Studio does not run this command.</source>
         <translation>لا يشغّل Studio هذا الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="145" />
+        <location filename="../qml/Texts.qml" line="146" />
         <source>There is no secure store for passwords on this computer.</source>
         <translation>لا يوجد مخزن آمن لكلمات المرور على هذا الحاسوب.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="146" />
+        <location filename="../qml/Texts.qml" line="147" />
         <source>The secure store did not give the password.</source>
         <translation>لم يُعطِ المخزن الآمن كلمة المرور.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="147" />
+        <location filename="../qml/Texts.qml" line="148" />
         <source>No password is saved for this database user.</source>
         <translation>لا توجد كلمة مرور محفوظة لمستخدم قاعدة البيانات هذا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="148" />
+        <location filename="../qml/Texts.qml" line="149" />
         <source>The secure store did not answer.</source>
         <translation>لم يستجب المخزن الآمن.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="149" />
+        <location filename="../qml/Texts.qml" line="150" />
         <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>لم يُعثر على Composer. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="150" />
+        <location filename="../qml/Texts.qml" line="151" />
         <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation>لا يزال أمر قيد التشغيل في هذا المشروع. أزله من القائمة حين ينتهي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="151" />
+        <location filename="../qml/Texts.qml" line="152" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>لا يحتوي المشروع على ملف `.env`. انسخ `.env.example` إلى `.env`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="152" />
+        <location filename="../qml/Texts.qml" line="153" />
         <source>The command could not run.</source>
         <translation>تعذّر تشغيل الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="153" />
+        <location filename="../qml/Texts.qml" line="154" />
         <source>Studio could not read what the check printed.</source>
         <translation>تعذّر على Studio قراءة ما طبعه الفحص.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="154" />
+        <location filename="../qml/Texts.qml" line="155" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>تعذّر على Studio قراءة قاعدة البيانات. هل خادم قاعدة البيانات يعمل، وهل إعدادات `.env` صحيحة؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="155" />
+        <location filename="../qml/Texts.qml" line="156" />
         <source>Studio could not read the migrations.</source>
         <translation>تعذّر على Studio قراءة الترحيلات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="156" />
+        <location filename="../qml/Texts.qml" line="157" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>لا يوجد `storage/logs/app.log` بعد. يكتبه FloCMS عند أول رسالة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="158" />
+        <location filename="../qml/Texts.qml" line="159" />
         <source>Something went wrong (%1).</source>
         <translation>حدث خطأ (%1).</translation>
     </message>

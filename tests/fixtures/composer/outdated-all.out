@@ -1,0 +1,74 @@
+{
+    "installed": [
+        {
+            "name": "hostkurd/flocms-captcha",
+            "direct-dependency": true,
+            "homepage": null,
+            "source": "https://github.com/hostkurd/flocms-captcha/tree/v1.1.0",
+            "version": "v1.1.0",
+            "release-age": "from last week",
+            "release-date": "2026-10-11T17:58:48+00:00",
+            "latest": "v1.1.0",
+            "latest-status": "up-to-date",
+            "latest-release-date": "2026-10-11T17:58:48+00:00",
+            "description": "Image captcha package for FloCMS guest form verification.",
+            "abandoned": false
+        },
+        {
+            "name": "hostkurd/flocms-cli",
+            "direct-dependency": true,
+            "homepage": "https://github.com/hostkurd/flocms-cli",
+            "source": "https://github.com/hostkurd/flocms-cli",
+            "version": "v2.0.1",
+            "release-age": "from last week",
+            "release-date": "2026-10-10T19:58:06+00:00",
+            "latest": "v2.0.1",
+            "latest-status": "up-to-date",
+            "latest-release-date": "2026-10-10T19:58:06+00:00",
+            "description": "Command line interface for FloCMS: one command kernel for the framework, its packages and your application.",
+            "abandoned": false
+        },
+        {
+            "name": "hostkurd/flocms-core",
+            "direct-dependency": true,
+            "homepage": null,
+            "source": "https://github.com/hostkurd/flocms-core/tree/v2.8.0",
+            "version": "v2.8.0",
+            "release-age": "from this week",
+            "release-date": "2026-10-23T11:29:01+00:00",
+            "latest": "v2.9.0",
+            "latest-status": "semver-safe-update",
+            "latest-release-date": "2026-10-23T22:06:13+00:00",
+            "description": "Core runtime for Flo Framework: application services, HTTP primitives, dependency injection, and modular architecture.",
+            "abandoned": false
+        },
+        {
+            "name": "hostkurd/flocms-uploader",
+            "direct-dependency": true,
+            "homepage": null,
+            "source": "https://github.com/hostkurd/flocms-uploader/tree/v1.2.0",
+            "version": "v1.2.1",
+            "release-age": "2 weeks old",
+            "release-date": "2026-10-10T05:17:18+00:00",
+            "latest": "v1.2.1",
+            "latest-status": "up-to-date",
+            "latest-release-date": "2026-10-16T12:06:25+00:00",
+            "description": "Professional file and image upload package for FloCMS with local, private and S3-ready storage drivers.",
+            "abandoned": false
+        },
+        {
+            "name": "phpunit/phpunit",
+            "direct-dependency": true,
+            "homepage": "https://phpunit.de/",
+            "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.66",
+            "version": "10.5.66",
+            "release-age": "2 weeks old",
+            "release-date": "2026-10-05T05:46:26+00:00",
+            "latest": "10.5.66",
+            "latest-status": "up-to-date",
+            "latest-release-date": "2026-10-05T05:46:26+00:00",
+            "description": "The PHP Unit Testing framework.",
+            "abandoned": false
+        }
+    ]
+}

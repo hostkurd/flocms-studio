@@ -428,7 +428,7 @@ Item {
                                 // Why it failed: Studio's own words, or what the command said
                                 RichText {
                                     visible: !!modelData.code
-                                    raw: modelData.code === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(modelData.detail))
+                                    raw: modelData.code === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(parseInt(modelData.detail) || 0))
                                                                         : (modelData.code ? Texts.problem(modelData.code) : "")
                                     color: Theme.badText
                                     wrapMode: Text.Wrap

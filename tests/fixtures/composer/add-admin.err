@@ -1,0 +1,18 @@
+./composer.json has been updated
+Running composer update hostkurd/flocms-admin
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 2 installs, 0 updates, 0 removals
+  - Locking hostkurd/flocms-admin (v0.39.3)
+  - Locking hostkurd/flocms-reactive (v0.5.1)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Package operations: 2 installs, 0 updates, 0 removals
+  - Downloading hostkurd/flocms-reactive (v0.5.1)
+  - Downloading hostkurd/flocms-admin (v0.39.3)
+  - Installing hostkurd/flocms-reactive (v0.5.1): Extracting archive
+  - Installing hostkurd/flocms-admin (v0.39.3): Extracting archive
+Generating autoload files
+24 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+Using version ^0.39.3 for hostkurd/flocms-admin

@@ -1,0 +1,119 @@
+{
+    "name": "hostkurd/flocms-admin",
+    "description": "Admin panel builder for FloCMS: resources declared in PHP, server-rendered CRUD pages, translatable fields and RTL support.",
+    "keywords": [
+        "admin",
+        "crud",
+        "admin-panel",
+        "multilingual",
+        "rtl",
+        "flocms"
+    ],
+    "type": "library",
+    "homepage": "https://github.com/hostkurd/flocms-admin",
+    "names": [
+        "hostkurd/flocms-admin"
+    ],
+    "versions": [
+        "0.39.x-dev",
+        "v0.39.3",
+        "v0.39.2",
+        "v0.39.1",
+        "v0.39.0",
+        "v0.38.0",
+        "v0.37.0",
+        "v0.36.2",
+        "v0.36.0",
+        "v0.35.0",
+        "v0.34.0",
+        "v0.33.0",
+        "v0.32.2",
+        "v0.32.1",
+        "v0.32.0",
+        "v0.31.0",
+        "v0.30.1",
+        "v0.30.0",
+        "v0.29.0",
+        "v0.28.2",
+        "v0.28.1",
+        "v0.28.0",
+        "v0.27.0",
+        "v0.26.0",
+        "v0.25.0",
+        "v0.24.1",
+        "v0.24.0",
+        "v0.23.1",
+        "v0.23.0",
+        "v0.22.0",
+        "v0.21.0",
+        "v0.20.0",
+        "v0.19.0",
+        "v0.18.0",
+        "v0.17.0",
+        "v0.16.0",
+        "v0.15.5",
+        "v0.15.4",
+        "v0.15.3",
+        "v0.15.2",
+        "v0.15.1",
+        "v0.15.0",
+        "v0.14.0",
+        "v0.13.1",
+        "v0.13.0",
+        "v0.12.0",
+        "v0.11.0",
+        "v0.10.0",
+        "v0.9.0",
+        "v0.8.0",
+        "v0.7.0",
+        "v0.6.0",
+        "v0.5.0",
+        "v0.4.1",
+        "v0.4.0",
+        "v0.3.0",
+        "v0.2.1",
+        "v0.2.0",
+        "v0.1.0",
+        "dev-main"
+    ],
+    "licenses": [
+        {
+            "name": "MIT License",
+            "osi": "MIT",
+            "url": "https://spdx.org/licenses/MIT.html#licenseText"
+        }
+    ],
+    "source": {
+        "type": "git",
+        "url": "https://github.com/hostkurd/flocms-admin.git",
+        "reference": "6c02d1e35c03ce4f2c5589f909374ab87de6eb2b"
+    },
+    "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/hostkurd/flocms-admin/zipball/6c02d1e35c03ce4f2c5589f909374ab87de6eb2b",
+        "reference": "6c02d1e35c03ce4f2c5589f909374ab87de6eb2b"
+    },
+    "support": {
+        "docs": "https://github.com/hostkurd/flocms-admin#readme",
+        "issues": "https://github.com/hostkurd/flocms-admin/issues",
+        "source": "https://github.com/hostkurd/flocms-admin"
+    },
+    "autoload": {
+        "psr-4": {
+            "FloCMS\\Admin\\": "src/"
+        }
+    },
+    "requires": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "hostkurd/flocms-reactive": "^0.5.1",
+        "hostkurd/flocms-uploader": "^1.2.1",
+        "hostkurd/flocms-core": "^2.7.0"
+    },
+    "devRequires": {
+        "hostkurd/flocms-cli": "^2.0.1",
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    }
+}

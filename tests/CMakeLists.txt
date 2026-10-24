@@ -28,6 +28,7 @@ flostudio_add_test(tst_tools FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_server FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_wizard FloStudio::Core)
 flostudio_add_test(tst_generators FloStudio::Core)
+flostudio_add_test(tst_packages FloStudio::Core)
 flostudio_add_test(tst_commands FloStudio::Core)
 flostudio_add_test(tst_process FloStudio::Core)
 flostudio_add_test(tst_realproject FloStudio::Core)
@@ -44,6 +45,7 @@ target_sources(tst_studio PRIVATE
     ../app/newproject.cpp ../app/newproject.h
     ../app/projectchecks.cpp ../app/projectchecks.h
     ../app/projectgenerate.cpp ../app/projectgenerate.h
+    ../app/projectpackages.cpp ../app/projectpackages.h
     ../app/projectserver.cpp ../app/projectserver.h
     ../app/projectsmodel.cpp ../app/projectsmodel.h
     ../app/studio.cpp ../app/studio.h)

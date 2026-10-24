@@ -808,7 +808,10 @@
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="421" />
         <source>The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?</source>
-        <translation><numerusform>The generator did not finish in %Ln second, so the preview stopped it. Is the database answering?</numerusform><numerusform>The generator did not finish in %Ln seconds, so the preview stopped it. Is the database answering?</numerusform></translation>
+        <translation>
+            <numerusform>The generator did not finish in %Ln second, so the preview stopped it. Is the database answering?</numerusform>
+            <numerusform>The generator did not finish in %Ln seconds, so the preview stopped it. Is the database answering?</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/GenerateTab.qml" line="422" />
@@ -833,7 +836,10 @@
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="535" />
         <source>%Ln more line(s), not shown</source>
-        <translation><numerusform>%Ln more line, not shown</numerusform><numerusform>%Ln more lines, not shown</numerusform></translation>
+        <translation>
+            <numerusform>%Ln more line, not shown</numerusform>
+            <numerusform>%Ln more lines, not shown</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/GenerateTab.qml" line="536" />
@@ -860,14 +866,6 @@
         <location filename="../qml/LanguageChip.qml" line="18" />
         <location filename="../qml/LanguageChip.qml" line="30" />
         <source>default</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>LaterTab</name>
-    <message>
-        <location filename="../qml/LaterTab.qml" line="14" />
-        <source>This tab comes in a later version of the native Studio.</source>
         <translation type="unfinished" />
     </message>
 </context>
@@ -1506,6 +1504,230 @@
     <message>
         <location filename="../qml/OverviewTab.qml" line="192" />
         <source>Optimize</source>
+        <translation type="unfinished" />
+    </message>
+</context>
+<context>
+    <name>PackagesTab</name>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="89" />
+        <source>FloCMS packages</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="92" />
+        <source>Checking…</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="92" />
+        <source>Check for updates</source>
+        <translation type="unfinished" />
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/PackagesTab.qml" line="99" />
+        <source>%Ln update(s).</source>
+        <translation>
+            <numerusform>%Ln update.</numerusform>
+            <numerusform>%Ln updates.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="99" />
+        <source>Everything is up to date.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="100" />
+        <source>Checked just now.</source>
+        <translation type="unfinished" />
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/PackagesTab.qml" line="100" />
+        <source>Checked %Ln min ago.</source>
+        <translation>
+            <numerusform>Checked %Ln min ago.</numerusform>
+            <numerusform>Checked %Ln min ago.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="132" />
+        <source>Package</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="133" />
+        <source>Installed</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="134" />
+        <source>Latest</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="135" />
+        <source>Status</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="171" />
+        <source>Not installed</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="192" />
+        <source>Abandoned</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="193" />
+        <source>Up to date</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="194" />
+        <location filename="../qml/PackagesTab.qml" line="413" />
+        <source>Update</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="195" />
+        <source>New major version</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="195" />
+        <source>New 0.x version</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="196" />
+        <source>Through another package</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="324" />
+        <source>`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="331" />
+        <source>`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="58" />
+        <location filename="../qml/PackagesTab.qml" line="211" />
+        <source>Review update</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="57" />
+        <location filename="../qml/PackagesTab.qml" line="218" />
+        <source>Add the API</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="56" />
+        <location filename="../qml/PackagesTab.qml" line="218" />
+        <location filename="../qml/PackagesTab.qml" line="268" />
+        <source>Add the admin panel</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="237" />
+        <source>Other packages (%1)</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="268" />
+        <source>Add the JSON API</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="269" />
+        <source>Update %1</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="287" />
+        <source>Before 1.0, a new minor version may change how things work. Read the changelog first.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="288" />
+        <source>A new major version: it may change how things work. Read the changelog first.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="296" />
+        <source>Read the changelog</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="297" />
+        <source>Read UPGRADING.md</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="311" />
+        <source>After Composer adds it</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="311" />
+        <source>After the update</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="314" />
+        <source>Studio runs `admin:install`, which only adds what is missing, and then `migrate`.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="316" />
+        <source>Studio runs `api:install`, which only adds what is missing, and then `migrate`.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="317" />
+        <source>Studio runs `migrate` for the package's new tables.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="341" />
+        <source>Commands</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="374" />
+        <source>Added. The project's tabs show it now.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="374" />
+        <source>Updated to %1.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="386" />
+        <source>A command failed (exit code %1). What ran before it stays done.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="406" />
+        <source>Close</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="406" />
+        <source>Cancel</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/PackagesTab.qml" line="413" />
+        <source>Add</source>
         <translation type="unfinished" />
     </message>
 </context>
@@ -2415,96 +2637,101 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="139" />
-        <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
+        <source>Composer could not say what is newer. It asks Packagist, so this needs the internet.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="140" />
-        <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
+        <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="141" />
-        <source>Studio could not copy the project for the preview.</source>
+        <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="142" />
-        <source>The preview was stopped.</source>
+        <source>Studio could not copy the project for the preview.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="143" />
-        <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
+        <source>The preview was stopped.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="144" />
-        <source>Studio does not run this command.</source>
+        <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="145" />
-        <source>There is no secure store for passwords on this computer.</source>
+        <source>Studio does not run this command.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="146" />
-        <source>The secure store did not give the password.</source>
+        <source>There is no secure store for passwords on this computer.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="147" />
-        <source>No password is saved for this database user.</source>
+        <source>The secure store did not give the password.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="148" />
-        <source>The secure store did not answer.</source>
+        <source>No password is saved for this database user.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="149" />
-        <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
+        <source>The secure store did not answer.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="150" />
-        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
+        <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="151" />
-        <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
+        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="152" />
-        <source>The command could not run.</source>
+        <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="153" />
-        <source>Studio could not read what the check printed.</source>
+        <source>The command could not run.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="154" />
-        <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
+        <source>Studio could not read what the check printed.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="155" />
-        <source>Studio could not read the migrations.</source>
+        <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="156" />
+        <source>Studio could not read the migrations.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="157" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="158" />
+        <location filename="../qml/Texts.qml" line="159" />
         <source>Something went wrong (%1).</source>
         <translation type="unfinished" />
     </message>

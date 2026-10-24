@@ -9,6 +9,7 @@ flostudio_add_library(FloStudioCore Core
         src/generators.cpp
         src/logs.cpp
         src/output.cpp
+        src/packages.cpp
         src/preview.cpp
         src/process.cpp
         src/project.cpp
@@ -24,6 +25,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/generators.h
         include/flostudio/core/logs.h
         include/flostudio/core/output.h
+        include/flostudio/core/packages.h
         include/flostudio/core/preview.h
         include/flostudio/core/process.h
         include/flostudio/core/project.h

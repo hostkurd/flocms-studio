@@ -10,6 +10,8 @@ qt_add_executable(Studio
     projectchecks.cpp
     projectgenerate.h
     projectgenerate.cpp
+    projectpackages.h
+    projectpackages.cpp
     projectserver.h
     projectserver.cpp
     projectsmodel.h
@@ -78,6 +80,7 @@ set(STUDIO_QML
     qml/DoctorTab.qml
     qml/FormField.qml
     qml/GenerateTab.qml
+    qml/PackagesTab.qml
     qml/Choice.qml
     qml/LanguageChip.qml
     qml/LogsTab.qml
@@ -86,7 +89,6 @@ set(STUDIO_QML
     qml/ProblemText.qml
     qml/ServerCard.qml
     qml/StatusIcon.qml
-    qml/LaterTab.qml
     qml/SettingsPage.qml
     qml/DownloadsDialog.qml
 )
