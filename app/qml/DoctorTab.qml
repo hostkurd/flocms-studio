@@ -82,8 +82,8 @@ ScrollView {
                 Layout.fillWidth: true
                 Layout.columnSpan: tab.hasAdmin ? 1 : cards.columns
                 // Fixed shares of the row, whatever the content asks for
-                Layout.preferredWidth: cards.columns === 1 || !tab.hasAdmin ? cards.width : (cards.width - cards.columnSpacing) / 2
-                Layout.maximumWidth: cards.columns === 1 || !tab.hasAdmin ? cards.width : (cards.width - cards.columnSpacing) / 2
+                Layout.preferredWidth: cards.columns === 1 || !tab.hasAdmin ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) / 2
+                Layout.maximumWidth: cards.columns === 1 || !tab.hasAdmin ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) / 2
                 Layout.minimumWidth: 0
                 Layout.alignment: Qt.AlignTop
                 RowLayout {
@@ -122,8 +122,8 @@ ScrollView {
                 visible: tab.hasAdmin
                 Layout.fillWidth: true
                 // Fixed shares of the row, whatever the content asks for
-                Layout.preferredWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 1 / 2
-                Layout.maximumWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 1 / 2
+                Layout.preferredWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 1 / 2
+                Layout.maximumWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 1 / 2
                 Layout.minimumWidth: 0
                 Layout.alignment: Qt.AlignTop
                 RowLayout {

@@ -13,13 +13,14 @@ AbstractButton {
     leftPadding: 12
     rightPadding: 12
     implicitWidth: row.implicitWidth + leftPadding + rightPadding
+    hoverEnabled: true
     Accessible.role: Accessible.CheckBox
     Accessible.checked: chosen
     Accessible.name: name + (isDefault ? " · " + qsTr("default") : "")
     background: Rectangle {
         radius: height / 2
-        color: chip.chosen ? Theme.selectedBg : Theme.surface
-        border.color: chip.visualFocus ? Theme.accent : (chip.chosen ? Theme.accent : Theme.borderStrong)
+        color: chip.chosen ? Theme.selectedBg : (chip.down ? Theme.pressedBg : (chip.hovered ? Theme.hoverBg : Theme.controlBg))
+        border.color: chip.visualFocus ? Theme.accent : (chip.chosen ? Theme.accent : (chip.hovered ? Theme.controlBorderHover : Theme.controlBorder))
         border.width: chip.visualFocus ? 2 : 1
     }
     contentItem: RowLayout {

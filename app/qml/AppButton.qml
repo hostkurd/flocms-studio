@@ -13,9 +13,11 @@ Button {
     property bool iconFilled: false // a solid shape (play, stop)
     property bool iconDirectional: false // flipped in right-to-left languages (a "back" arrow)
 
-    implicitHeight: small ? 34 : 40
-    leftPadding: small ? 12 : 14
-    rightPadding: small ? 12 : 14
+    implicitHeight: small ? 30 : 36
+    topPadding: 0
+    bottomPadding: 0
+    leftPadding: small ? 10 : 14
+    rightPadding: small ? 10 : 14
     font.family: Lang.uiFont
     font.pixelSize: small ? 13 : 14
     font.weight: Font.Medium
@@ -24,10 +26,18 @@ Button {
 
     background: Rectangle {
         radius: 8
-        color: control.primary ? Theme.accent : (control.checked ? Theme.selectedBg : Theme.surface)
-        border.color: control.primary ? Theme.accent : (control.checked || control.visualFocus ? Theme.accent : Theme.borderStrong)
+        // Hover and pressed show, as on native buttons; disabled is the only
+        // faded state
+        color: control.primary
+               ? (control.down ? Theme.accentPressed : (control.hovered && control.enabled ? Theme.accentHover : Theme.accent))
+               : (control.down ? Theme.pressedBg : (control.checked ? Theme.selectedBg
+                  : (control.hovered && control.enabled ? Theme.hoverBg : Theme.controlBg)))
+        border.color: control.primary ? (control.visualFocus ? Theme.text : "transparent")
+                      : (control.checked || control.visualFocus ? Theme.accent
+                         : (control.hovered && control.enabled ? Theme.controlBorderHover : Theme.controlBorder))
         border.width: control.dashed && !control.visualFocus ? 0 : (control.visualFocus ? 2 : 1)
-        opacity: !control.enabled ? 0.45 : (control.down ? 0.8 : 1)
+        opacity: control.enabled ? 1 : 0.45
+        Behavior on color { ColorAnimation { duration: 90 } }
         DashedBox {
             visible: control.dashed && !control.visualFocus
             anchors.fill: parent
@@ -46,10 +56,21 @@ Button {
             filled: control.iconFilled
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
         }
-        RichText {
-            raw: control.text
+        // Plain text, centred on the button's middle: rich text (only for a
+        // label with a `code word`) lays its line out taller, low in the button
+        AppText {
+            visible: control.text.indexOf("`") < 0
+            ui: visible ? control.text : ""
             font: control.font
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
+            Layout.alignment: Qt.AlignVCenter
+        }
+        RichText {
+            visible: control.text.indexOf("`") >= 0
+            raw: visible ? control.text : ""
+            font: control.font
+            color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
+            Layout.alignment: Qt.AlignVCenter
         }
         Item { Layout.fillWidth: true }
     }

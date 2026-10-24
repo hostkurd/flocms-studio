@@ -225,6 +225,7 @@ private:
     QString m_platform = FloStudio::Core::currentPlatform();
     QString m_demoDialog;
     QString m_demoTab;
+    QStringList m_demoDownloaded;
     QString m_demoToolsFolder;
     QHash<QString, ProjectServer *> m_servers; // children of this, one per project opened
     QHash<QString, ProjectChecks *> m_checks;  // children of this, one per project opened

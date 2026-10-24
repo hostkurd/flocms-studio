@@ -25,13 +25,19 @@ Popup {
     property bool wantComposer: true
     property bool wantMariadb: false
 
+    // What this computer has already (found by Studio, not downloaded)
+    function found(tool) {
+        const row = Studio.tools.find(t => t.tool === tool)
+        return row && (row.state === "found" || row.state === "running") ? row : null
+    }
     function missing(tool) {
         const row = Studio.tools.find(t => t.tool === tool)
         return !row || row.state === "missing" || row.state === "unsupported" || row.state === "failed"
     }
 
     onAboutToShow: {
-        phpChoice = missing("php") && phps.length > 0 ? phps[0].id : ""
+        const firstNew = phps.find(p => !p.installed)
+        phpChoice = missing("php") && firstNew ? firstNew.id : ""
         wantComposer = missing("composer") && !!composer && !composer.installed
         wantMariadb = false
     }
@@ -94,6 +100,8 @@ Popup {
                             radio: true
                             group: phpGroup
                             checked: dialog.phpChoice === modelData.id
+                            // Already downloaded: nothing to download again
+                            enabled: !modelData.installed
                             title: "PHP " + modelData.version
                             note: (index === 0 ? qsTr("Newest · from %1").arg(modelData.source) : qsTr("from %1").arg(modelData.source))
                                   + (modelData.installed ? " · " + qsTr("already downloaded") : "")
@@ -115,19 +123,24 @@ Popup {
                     OptionRow {
                         visible: !!dialog.composer
                         Layout.fillWidth: true
-                        checked: dialog.wantComposer
+                        checked: dialog.wantComposer && enabled
+                        enabled: !!dialog.composer && !dialog.composer.installed
                         title: "Composer"
                         note: qsTr("Needed to create projects · from %1").arg(dialog.composer ? dialog.composer.source : "")
-                              + (dialog.composer && dialog.composer.installed ? " · " + qsTr("already downloaded") : "")
+                              + (dialog.composer && dialog.composer.installed ? " · " + qsTr("already downloaded")
+                                 : (dialog.found("composer") ? " · " + qsTr("this computer has %1").arg(dialog.found("composer").version || "Composer") : ""))
                         size: dialog.composer ? dialog.composer.size : 0
                         onToggled: (on) => dialog.wantComposer = on
                     }
                     OptionRow {
                         visible: !!dialog.mariadb
                         Layout.fillWidth: true
-                        checked: dialog.wantMariadb
+                        checked: dialog.wantMariadb && enabled
+                        enabled: !!dialog.mariadb && !dialog.mariadb.installed
                         title: dialog.mariadb ? "MariaDB " + dialog.mariadb.version : ""
                         note: qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb ? dialog.mariadb.source : "")
+                              + (dialog.mariadb && dialog.mariadb.installed ? " · " + qsTr("already downloaded")
+                                 : (dialog.found("mariadb") ? " · " + qsTr("this computer has %1").arg(dialog.found("mariadb").version || "MariaDB") : ""))
                         size: dialog.mariadb ? dialog.mariadb.size : 0
                         onToggled: (on) => dialog.wantMariadb = on
                     }
@@ -204,12 +217,13 @@ Popup {
                 primary: true
                 text: qsTr("Download")
                 iconPath: Icons.download
-                enabled: dialog.phpChoice !== "" || dialog.wantComposer || dialog.wantMariadb
+                enabled: dialog.phpChoice !== "" || (dialog.wantComposer && !!dialog.composer && !dialog.composer.installed)
+                         || (dialog.wantMariadb && !!dialog.mariadb && !dialog.mariadb.installed)
                 onClicked: {
                     const ids = []
                     if (dialog.phpChoice !== "") ids.push(dialog.phpChoice)
-                    if (dialog.wantComposer && dialog.composer) ids.push(dialog.composer.id)
-                    if (dialog.wantMariadb && dialog.mariadb) ids.push(dialog.mariadb.id)
+                    if (dialog.wantComposer && dialog.composer && !dialog.composer.installed) ids.push(dialog.composer.id)
+                    if (dialog.wantMariadb && dialog.mariadb && !dialog.mariadb.installed) ids.push(dialog.mariadb.id)
                     Studio.startDownloads(ids)
                 }
             }

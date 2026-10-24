@@ -12,6 +12,7 @@
 #include <QNetworkProxyFactory>
 #include <QQuickStyle>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QImage>
 #include <QMutex>
 #include <QMutexLocker>
@@ -112,10 +113,10 @@ void attachParentConsole()
 // The window's background colour in qml/Main.qml (Theme.bg, light).
 constexpr QRgb kBackground = 0xFFF4F7F9;
 
-// The bundled fonts (D8). Each UI font falls back to the other for the
-// script it lacks: a Latin project name in a Kurdish window uses
-// Instrument Sans, Arabic letters in an English window Noto Sans Arabic,
-// never whatever the system happens to have.
+// The bundled fonts (D8), and the system's UI font for English labels
+// (a native look). Each falls back to the other for the script it lacks:
+// a Latin project name in a Kurdish window uses the system font, Arabic
+// letters in an English window Noto Sans Arabic.
 bool loadFonts()
 {
     bool all = true;
@@ -126,7 +127,10 @@ bool loadFonts()
             all = false;
         }
     }
-    QFont::insertSubstitution(QStringLiteral("Noto Sans Arabic"), QStringLiteral("Instrument Sans"));
+    // The labels use the system's font (Language::systemFont)
+    const QString system = Language::systemFont();
+    QFont::insertSubstitution(QStringLiteral("Noto Sans Arabic"), system);
+    QFont::insertSubstitution(system, QStringLiteral("Noto Sans Arabic"));
     QFont::insertSubstitution(QStringLiteral("Instrument Sans"), QStringLiteral("Noto Sans Arabic"));
     QFont::insertSubstitution(QStringLiteral("Bricolage Grotesque"), QStringLiteral("Noto Sans Arabic"));
     QFont::insertSubstitution(QStringLiteral("JetBrains Mono"), QStringLiteral("Noto Sans Arabic"));
@@ -149,6 +153,13 @@ int main(int argc, char *argv[])
     QGuiApplication::setOrganizationName(QStringLiteral("HostKurd"));
     QGuiApplication::setApplicationVersion(FloStudio::Core::currentBuildInfo().version);
     QQuickStyle::setStyle(QStringLiteral("Basic"));
+    // The logo in the title bar and the taskbar; on Linux the desktop file
+    // (flocms-studio.desktop) names it for Wayland
+    QIcon icon;
+    for (const int size : {64, 128, 256, 512})
+        icon.addFile(QStringLiteral(":/icons/logo-%1.png").arg(size), QSize(size, size));
+    QGuiApplication::setWindowIcon(icon);
+    QGuiApplication::setDesktopFileName(QStringLiteral("flocms-studio"));
     QNetworkProxyFactory::setUseSystemConfiguration(true); // tool downloads behind a company proxy
 
     QCommandLineParser parser;

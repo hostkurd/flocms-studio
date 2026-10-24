@@ -36,8 +36,10 @@ public:
     // The language "system" stands for on this computer.
     static QString systemLanguage();
 
-    // The font of headings (Bricolage Grotesque has no Arabic letters).
+    // The font of headings: the same as the labels, as in native programs.
     QString displayFont() const;
+    // The system's UI font (the labels in English).
+    static QString systemFont();
 
     // Turns a translated string into rich text (HTML) for display:
     //  - `code words` become JetBrains Mono, wrapped in LRI ... PDI so

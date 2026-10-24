@@ -74,7 +74,10 @@ ScrollView {
             Card {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.preferredWidth: 1
+                // Fixed shares of the row, whatever the fields hold
+                Layout.preferredWidth: tab.twoColumns ? (tab.availableWidth - 16) / 2 : tab.availableWidth
+                Layout.maximumWidth: Layout.preferredWidth
+                Layout.minimumWidth: 0
                 padding: 20
                 gap: 16
 
@@ -382,7 +385,10 @@ ScrollView {
             Card {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.preferredWidth: 1
+                // Fixed shares of the row, whatever the fields hold
+                Layout.preferredWidth: tab.twoColumns ? (tab.availableWidth - 16) / 2 : tab.availableWidth
+                Layout.maximumWidth: Layout.preferredWidth
+                Layout.minimumWidth: 0
                 padding: 20
                 gap: 14
 

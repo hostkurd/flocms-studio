@@ -335,98 +335,105 @@
 <context>
     <name>DownloadsDialog</name>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="53" />
+        <location filename="../qml/DownloadsDialog.qml" line="59" />
         <source>Download the tools Studio needs</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="53" />
+        <location filename="../qml/DownloadsDialog.qml" line="59" />
         <source>Downloading the tools</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="80" />
+        <location filename="../qml/DownloadsDialog.qml" line="86" />
         <source>They go into Studio's own folder for your user. Nothing else on the computer changes, and no administrator rights are needed.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="98" />
+        <location filename="../qml/DownloadsDialog.qml" line="106" />
         <source>Newest · from %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="98" />
+        <location filename="../qml/DownloadsDialog.qml" line="106" />
         <source>from %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="99" />
-        <location filename="../qml/DownloadsDialog.qml" line="121" />
+        <location filename="../qml/DownloadsDialog.qml" line="107" />
+        <location filename="../qml/DownloadsDialog.qml" line="130" />
+        <location filename="../qml/DownloadsDialog.qml" line="142" />
         <source>already downloaded</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="109" />
+        <location filename="../qml/DownloadsDialog.qml" line="117" />
         <source>No PHP</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="110" />
+        <location filename="../qml/DownloadsDialog.qml" line="118" />
         <source>Keep the PHP this computer has</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="114" />
+        <location filename="../qml/DownloadsDialog.qml" line="122" />
         <source>Also download</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="120" />
+        <location filename="../qml/DownloadsDialog.qml" line="129" />
         <source>Needed to create projects · from %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="130" />
+        <location filename="../qml/DownloadsDialog.qml" line="131" />
+        <location filename="../qml/DownloadsDialog.qml" line="143" />
+        <source>this computer has %1</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/DownloadsDialog.qml" line="141" />
         <source>Only for projects that use MySQL; SQLite needs nothing · from %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="136" />
+        <location filename="../qml/DownloadsDialog.qml" line="149" />
         <source>MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="148" />
+        <location filename="../qml/DownloadsDialog.qml" line="161" />
         <source>Every file is checked against its `SHA-256` before Studio uses it.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="157" />
+        <location filename="../qml/DownloadsDialog.qml" line="170" />
         <source>Into:</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="177" />
+        <location filename="../qml/DownloadsDialog.qml" line="190" />
         <source>Each file is used only after its `SHA-256` check.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="193" />
+        <location filename="../qml/DownloadsDialog.qml" line="206" />
         <source>Choose my own PHP…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="199" />
+        <location filename="../qml/DownloadsDialog.qml" line="212" />
         <source>Cancel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="205" />
+        <location filename="../qml/DownloadsDialog.qml" line="218" />
         <source>Download</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="219" />
+        <location filename="../qml/DownloadsDialog.qml" line="233" />
         <source>Close</source>
         <translation type="unfinished" />
     </message>
@@ -455,8 +462,8 @@
     </message>
     <message>
         <location filename="../qml/GenerateTab.qml" line="53" />
-        <location filename="../qml/GenerateTab.qml" line="204" />
         <location filename="../qml/GenerateTab.qml" line="207" />
+        <location filename="../qml/GenerateTab.qml" line="210" />
         <source>Widget</source>
         <translation type="unfinished" />
     </message>
@@ -467,8 +474,8 @@
     </message>
     <message>
         <location filename="../qml/GenerateTab.qml" line="55" />
-        <location filename="../qml/GenerateTab.qml" line="253" />
         <location filename="../qml/GenerateTab.qml" line="256" />
+        <location filename="../qml/GenerateTab.qml" line="259" />
         <source>Migration</source>
         <translation type="unfinished" />
     </message>
@@ -478,307 +485,307 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="88" />
         <source>New admin resource</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="88" />
         <source>New admin page</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="86" />
+        <location filename="../qml/GenerateTab.qml" line="89" />
         <source>New block</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="86" />
+        <location filename="../qml/GenerateTab.qml" line="89" />
         <source>New dashboard widget</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="87" />
+        <location filename="../qml/GenerateTab.qml" line="90" />
         <source>New controller</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="87" />
+        <location filename="../qml/GenerateTab.qml" line="90" />
         <source>New migration</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="101" />
+        <location filename="../qml/GenerateTab.qml" line="104" />
         <source>What it does</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="101" />
-        <location filename="../qml/GenerateTab.qml" line="114" />
+        <location filename="../qml/GenerateTab.qml" line="104" />
+        <location filename="../qml/GenerateTab.qml" line="117" />
         <source>Name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="102" />
+        <location filename="../qml/GenerateTab.qml" line="105" />
         <source>A class name, e.g. `Property` or `BlogPost`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="103" />
+        <location filename="../qml/GenerateTab.qml" line="106" />
         <source>A class name, e.g. `SalesReport`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="104" />
+        <location filename="../qml/GenerateTab.qml" line="107" />
         <source>A class name, e.g. `LatestProjects`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="105" />
+        <location filename="../qml/GenerateTab.qml" line="108" />
         <source>A class name, e.g. `PostStats` or `RecentPosts`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="106" />
+        <location filename="../qml/GenerateTab.qml" line="109" />
         <source>E.g. `Blog` or `BlogPost`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="107" />
+        <location filename="../qml/GenerateTab.qml" line="110" />
         <source>E.g. `create_posts_table` or `add_slug_to_posts`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="123" />
-        <location filename="../qml/GenerateTab.qml" line="127" />
-        <location filename="../qml/GenerateTab.qml" line="280" />
+        <location filename="../qml/GenerateTab.qml" line="126" />
+        <location filename="../qml/GenerateTab.qml" line="130" />
         <location filename="../qml/GenerateTab.qml" line="283" />
+        <location filename="../qml/GenerateTab.qml" line="286" />
         <source>Table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="124" />
+        <location filename="../qml/GenerateTab.qml" line="127" />
         <source>Empty: the plural of the name.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="131" />
-        <location filename="../qml/GenerateTab.qml" line="135" />
+        <location filename="../qml/GenerateTab.qml" line="134" />
+        <location filename="../qml/GenerateTab.qml" line="138" />
         <source>URL</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="135" />
+        <location filename="../qml/GenerateTab.qml" line="138" />
         <source>the table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="141" />
-        <location filename="../qml/GenerateTab.qml" line="145" />
+        <location filename="../qml/GenerateTab.qml" line="144" />
+        <location filename="../qml/GenerateTab.qml" line="148" />
         <source>Sidebar group</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="142" />
+        <location filename="../qml/GenerateTab.qml" line="145" />
         <source>E.g. Reports. Empty: no group.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="152" />
         <location filename="../qml/GenerateTab.qml" line="155" />
+        <location filename="../qml/GenerateTab.qml" line="158" />
         <source>Create and Edit open as</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="159" />
+        <location filename="../qml/GenerateTab.qml" line="162" />
         <source>A full page</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="160" />
+        <location filename="../qml/GenerateTab.qml" line="163" />
         <source>A dialog</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="161" />
+        <location filename="../qml/GenerateTab.qml" line="164" />
         <source>A slide-over panel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="170" />
+        <location filename="../qml/GenerateTab.qml" line="173" />
         <source>Also create a migration for the table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="171" />
+        <location filename="../qml/GenerateTab.qml" line="174" />
         <source>Editors can drag records into order (a `sort` column)</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="175" />
+        <location filename="../qml/GenerateTab.qml" line="178" />
         <source>The resource starts with a title field. Add the other fields in the file.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="185" />
         <location filename="../qml/GenerateTab.qml" line="188" />
+        <location filename="../qml/GenerateTab.qml" line="191" />
         <source>The page shows</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="192" />
+        <location filename="../qml/GenerateTab.qml" line="195" />
         <source>Content of its own</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="193" />
+        <location filename="../qml/GenerateTab.qml" line="196" />
         <source>A form with Save</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="194" />
+        <location filename="../qml/GenerateTab.qml" line="197" />
         <source>A database table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="195" />
+        <location filename="../qml/GenerateTab.qml" line="198" />
         <source>A resource's records</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="211" />
+        <location filename="../qml/GenerateTab.qml" line="214" />
         <source>Numbers</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="212" />
+        <location filename="../qml/GenerateTab.qml" line="215" />
         <source>Latest records</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="213" />
+        <location filename="../qml/GenerateTab.qml" line="216" />
         <source>A chart</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="222" />
         <location filename="../qml/GenerateTab.qml" line="225" />
+        <location filename="../qml/GenerateTab.qml" line="228" />
         <source>Actions</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="229" />
+        <location filename="../qml/GenerateTab.qml" line="232" />
         <source>A page</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="230" />
+        <location filename="../qml/GenerateTab.qml" line="233" />
         <source>Pages and admin actions (CRUD)</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="231" />
+        <location filename="../qml/GenerateTab.qml" line="234" />
         <source>Admin actions</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="232" />
+        <location filename="../qml/GenerateTab.qml" line="235" />
         <source>JSON API</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="239" />
+        <location filename="../qml/GenerateTab.qml" line="242" />
         <source>With the resource actions: list, show, add, change, delete</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="245" />
+        <location filename="../qml/GenerateTab.qml" line="248" />
         <source>Also create its model</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="260" />
+        <location filename="../qml/GenerateTab.qml" line="263" />
         <source>Empty</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="261" />
+        <location filename="../qml/GenerateTab.qml" line="264" />
         <source>Create a table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="262" />
+        <location filename="../qml/GenerateTab.qml" line="265" />
         <source>Change a table</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="269" />
+        <location filename="../qml/GenerateTab.qml" line="272" />
         <source>A name like `create_posts_table` creates the `posts` table.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="304" />
-        <location filename="../qml/GenerateTab.qml" line="308" />
+        <location filename="../qml/GenerateTab.qml" line="307" />
+        <location filename="../qml/GenerateTab.qml" line="311" />
         <source>Resource</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="305" />
+        <location filename="../qml/GenerateTab.qml" line="308" />
         <source>Optional: the resource it counts.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="328" />
+        <location filename="../qml/GenerateTab.qml" line="331" />
         <source>Also write its view, with the panel's parts</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="333" />
+        <location filename="../qml/GenerateTab.qml" line="336" />
         <source>Overwrite files that are there</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="361" />
+        <location filename="../qml/GenerateTab.qml" line="364" />
         <source>Preview</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="367" />
+        <location filename="../qml/GenerateTab.qml" line="370" />
         <source>Create resource</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="367" />
+        <location filename="../qml/GenerateTab.qml" line="370" />
         <source>Create page</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="368" />
+        <location filename="../qml/GenerateTab.qml" line="371" />
         <source>Create block</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="368" />
+        <location filename="../qml/GenerateTab.qml" line="371" />
         <source>Create widget</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="369" />
+        <location filename="../qml/GenerateTab.qml" line="372" />
         <source>Create controller</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="369" />
+        <location filename="../qml/GenerateTab.qml" line="372" />
         <source>Create migration</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="392" />
+        <location filename="../qml/GenerateTab.qml" line="398" />
         <source>Preview: what it will write</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="395" />
+        <location filename="../qml/GenerateTab.qml" line="401" />
         <source>%Ln file(s)</source>
         <translation>
             <numerusform>%Ln file</numerusform>
@@ -786,27 +793,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="403" />
+        <location filename="../qml/GenerateTab.qml" line="409" />
         <source>Preview runs the generator in a temporary copy of the project and shows the files it writes. Your project changes only with Create.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="413" />
+        <location filename="../qml/GenerateTab.qml" line="419" />
         <source>Copying the project…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="413" />
+        <location filename="../qml/GenerateTab.qml" line="419" />
         <source>Running the generator in the copy…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="420" />
+        <location filename="../qml/GenerateTab.qml" line="426" />
         <source>The command ended with exit code %1.</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="421" />
+        <location filename="../qml/GenerateTab.qml" line="427" />
         <source>The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?</source>
         <translation>
             <numerusform>The generator did not finish in %Ln second, so the preview stopped it. Is the database answering?</numerusform>
@@ -814,27 +821,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="422" />
+        <location filename="../qml/GenerateTab.qml" line="428" />
         <source>`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="437" />
+        <location filename="../qml/GenerateTab.qml" line="443" />
         <source>The form changed since this preview. Preview again to see what it writes now.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="446" />
+        <location filename="../qml/GenerateTab.qml" line="452" />
         <source>The project itself changed while the preview ran: %1. Check these files: the generator may have written there.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="461" />
+        <location filename="../qml/GenerateTab.qml" line="467" />
         <source>It writes no files.</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="535" />
+        <location filename="../qml/GenerateTab.qml" line="541" />
         <source>%Ln more line(s), not shown</source>
         <translation>
             <numerusform>%Ln more line, not shown</numerusform>
@@ -842,7 +849,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="536" />
+        <location filename="../qml/GenerateTab.qml" line="542" />
         <source>%Ln unchanged line(s)</source>
         <translation>
             <numerusform>%Ln unchanged line</numerusform>
@@ -850,12 +857,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="548" />
+        <location filename="../qml/GenerateTab.qml" line="554" />
         <source>Not a text file.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="548" />
+        <location filename="../qml/GenerateTab.qml" line="554" />
         <source>Too large to show here.</source>
         <translation type="unfinished" />
     </message>
@@ -863,8 +870,8 @@
 <context>
     <name>LanguageChip</name>
     <message>
-        <location filename="../qml/LanguageChip.qml" line="18" />
-        <location filename="../qml/LanguageChip.qml" line="30" />
+        <location filename="../qml/LanguageChip.qml" line="19" />
+        <location filename="../qml/LanguageChip.qml" line="31" />
         <source>default</source>
         <translation type="unfinished" />
     </message>
@@ -994,7 +1001,7 @@
     </message>
     <message>
         <location filename="../qml/NewProjectPage.qml" line="18" />
-        <location filename="../qml/NewProjectPage.qml" line="279" />
+        <location filename="../qml/NewProjectPage.qml" line="281" />
         <source>Database</source>
         <translation type="unfinished" />
     </message>
@@ -1014,317 +1021,317 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="98" />
+        <location filename="../qml/NewProjectPage.qml" line="100" />
         <source>New FloCMS project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="100" />
+        <location filename="../qml/NewProjectPage.qml" line="102" />
         <source>Close</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="100" />
+        <location filename="../qml/NewProjectPage.qml" line="102" />
         <source>Cancel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="159" />
-        <location filename="../qml/NewProjectPage.qml" line="169" />
+        <location filename="../qml/NewProjectPage.qml" line="161" />
+        <location filename="../qml/NewProjectPage.qml" line="171" />
         <source>Project name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="161" />
+        <location filename="../qml/NewProjectPage.qml" line="163" />
         <source>The folder will be `%1`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="162" />
+        <location filename="../qml/NewProjectPage.qml" line="164" />
         <source>Lower case, used for the folder and the database.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="175" />
-        <location filename="../qml/NewProjectPage.qml" line="187" />
+        <location filename="../qml/NewProjectPage.qml" line="177" />
+        <location filename="../qml/NewProjectPage.qml" line="189" />
         <source>Folder</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="176" />
+        <location filename="../qml/NewProjectPage.qml" line="178" />
         <source>Made in: %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="189" />
+        <location filename="../qml/NewProjectPage.qml" line="191" />
         <source>Browse…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="195" />
+        <location filename="../qml/NewProjectPage.qml" line="197" />
         <source>Languages</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="196" />
+        <location filename="../qml/NewProjectPage.qml" line="198" />
         <source>Sets `LANGUAGES` and `DEFAULT_LANG` in `.env`. Click a chosen language again to make it the default. Right-to-left languages get the right-to-left styles automatically.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="232" />
+        <location filename="../qml/NewProjectPage.qml" line="234" />
         <source>What are you building?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="233" />
+        <location filename="../qml/NewProjectPage.qml" line="235" />
         <source>You can add the admin panel or the API later from Packages.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="243" />
+        <location filename="../qml/NewProjectPage.qml" line="245" />
         <source>Website + admin panel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="243" />
+        <location filename="../qml/NewProjectPage.qml" line="245" />
         <source>Your website, with the admin panel to manage its pages and content.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="244" />
+        <location filename="../qml/NewProjectPage.qml" line="246" />
         <source>Website only</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="244" />
+        <location filename="../qml/NewProjectPage.qml" line="246" />
         <source>Your website with the default theme. Nothing to add.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="245" />
+        <location filename="../qml/NewProjectPage.qml" line="247" />
         <source>Admin panel only</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="245" />
+        <location filename="../qml/NewProjectPage.qml" line="247" />
         <source>No website: the home page opens the admin panel.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="246" />
+        <location filename="../qml/NewProjectPage.qml" line="248" />
         <source>API + admin panel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="246" />
+        <location filename="../qml/NewProjectPage.qml" line="248" />
         <source>A JSON API for apps, with the admin panel to manage the data.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="247" />
+        <location filename="../qml/NewProjectPage.qml" line="249" />
         <source>API only</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="247" />
+        <location filename="../qml/NewProjectPage.qml" line="249" />
         <source>A JSON API for apps. The home page answers in JSON.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="265" />
+        <location filename="../qml/NewProjectPage.qml" line="267" />
         <source>Also add the JSON API</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="266" />
+        <location filename="../qml/NewProjectPage.qml" line="268" />
         <source>For apps or a JavaScript front end.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="282" />
+        <location filename="../qml/NewProjectPage.qml" line="284" />
         <source>SQLite: a file in the project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="283" />
+        <location filename="../qml/NewProjectPage.qml" line="285" />
         <source>MySQL / MariaDB</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="289" />
+        <location filename="../qml/NewProjectPage.qml" line="291" />
         <source>The database is the file `storage/database.sqlite`, made by the first migration. Nothing to install; good for trying things and small sites.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="301" />
-        <location filename="../qml/NewProjectPage.qml" line="305" />
+        <location filename="../qml/NewProjectPage.qml" line="303" />
+        <location filename="../qml/NewProjectPage.qml" line="307" />
         <source>Database name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="302" />
+        <location filename="../qml/NewProjectPage.qml" line="304" />
         <source>It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="308" />
-        <location filename="../qml/NewProjectPage.qml" line="314" />
+        <location filename="../qml/NewProjectPage.qml" line="310" />
+        <location filename="../qml/NewProjectPage.qml" line="316" />
         <source>Server</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="320" />
+        <location filename="../qml/NewProjectPage.qml" line="322" />
         <source>Port</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="328" />
-        <location filename="../qml/NewProjectPage.qml" line="331" />
+        <location filename="../qml/NewProjectPage.qml" line="330" />
+        <location filename="../qml/NewProjectPage.qml" line="333" />
         <source>User</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="334" />
-        <location filename="../qml/NewProjectPage.qml" line="341" />
-        <location filename="../qml/NewProjectPage.qml" line="388" />
-        <location filename="../qml/NewProjectPage.qml" line="392" />
+        <location filename="../qml/NewProjectPage.qml" line="336" />
+        <location filename="../qml/NewProjectPage.qml" line="343" />
+        <location filename="../qml/NewProjectPage.qml" line="390" />
+        <location filename="../qml/NewProjectPage.qml" line="394" />
         <source>Password</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="335" />
+        <location filename="../qml/NewProjectPage.qml" line="337" />
         <source>Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="342" />
+        <location filename="../qml/NewProjectPage.qml" line="344" />
         <source>Use saved</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="350" />
+        <location filename="../qml/NewProjectPage.qml" line="352" />
         <source>Remember the password in the Keychain</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="351" />
+        <location filename="../qml/NewProjectPage.qml" line="353" />
         <source>Remember the password in Windows Credential Manager</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="352" />
+        <location filename="../qml/NewProjectPage.qml" line="354" />
         <source>Remember the password in the system's keyring</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="353" />
+        <location filename="../qml/NewProjectPage.qml" line="355" />
         <source>For your next project on this database server. Studio keeps no copy of its own.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="364" />
+        <location filename="../qml/NewProjectPage.qml" line="366" />
         <source>The first user of the admin panel, with every right (super admin).</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="375" />
-        <location filename="../qml/NewProjectPage.qml" line="378" />
+        <location filename="../qml/NewProjectPage.qml" line="377" />
+        <location filename="../qml/NewProjectPage.qml" line="380" />
         <source>Name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="381" />
-        <location filename="../qml/NewProjectPage.qml" line="385" />
+        <location filename="../qml/NewProjectPage.qml" line="383" />
+        <location filename="../qml/NewProjectPage.qml" line="387" />
         <source>Email</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="382" />
+        <location filename="../qml/NewProjectPage.qml" line="384" />
         <source>Also the login name.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="389" />
+        <location filename="../qml/NewProjectPage.qml" line="391" />
         <source>At least 8 characters. It goes to FloCMS on its input, never on a command line or in a log.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="424" />
+        <location filename="../qml/NewProjectPage.qml" line="426" />
         <source>Studio writes `.env`: name, address, languages, database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="431" />
+        <location filename="../qml/NewProjectPage.qml" line="433" />
         <source>The command ended with exit code %1.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="456" />
+        <location filename="../qml/NewProjectPage.qml" line="458" />
         <source>`%1` is ready. Open it to start its server.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="464" />
+        <location filename="../qml/NewProjectPage.qml" line="466" />
         <source>A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="478" />
+        <location filename="../qml/NewProjectPage.qml" line="480" />
         <source>Start over</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="481" />
+        <location filename="../qml/NewProjectPage.qml" line="483" />
         <source>Start over?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="482" />
+        <location filename="../qml/NewProjectPage.qml" line="484" />
         <source>Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="483" />
+        <location filename="../qml/NewProjectPage.qml" line="485" />
         <source>Delete and start over</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="525" />
+        <location filename="../qml/NewProjectPage.qml" line="527" />
         <source>Open the project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="489" />
+        <location filename="../qml/NewProjectPage.qml" line="491" />
         <source>Back</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="497" />
+        <location filename="../qml/NewProjectPage.qml" line="499" />
         <source>Next: Database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="497" />
+        <location filename="../qml/NewProjectPage.qml" line="499" />
         <source>Next: First admin</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="497" />
+        <location filename="../qml/NewProjectPage.qml" line="499" />
         <source>Next: Create</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="503" />
+        <location filename="../qml/NewProjectPage.qml" line="505" />
         <source>Create the project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="509" />
+        <location filename="../qml/NewProjectPage.qml" line="511" />
         <source>Stop</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="518" />
+        <location filename="../qml/NewProjectPage.qml" line="520" />
         <source>Try again</source>
         <translation type="unfinished" />
     </message>
@@ -1510,22 +1517,22 @@
 <context>
     <name>PackagesTab</name>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="89" />
+        <location filename="../qml/PackagesTab.qml" line="93" />
         <source>FloCMS packages</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="92" />
+        <location filename="../qml/PackagesTab.qml" line="96" />
         <source>Checking…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="92" />
+        <location filename="../qml/PackagesTab.qml" line="96" />
         <source>Check for updates</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/PackagesTab.qml" line="99" />
+        <location filename="../qml/PackagesTab.qml" line="103" />
         <source>%Ln update(s).</source>
         <translation>
             <numerusform>%Ln update.</numerusform>
@@ -1533,17 +1540,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="99" />
+        <location filename="../qml/PackagesTab.qml" line="103" />
         <source>Everything is up to date.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="100" />
+        <location filename="../qml/PackagesTab.qml" line="104" />
         <source>Checked just now.</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/PackagesTab.qml" line="100" />
+        <location filename="../qml/PackagesTab.qml" line="104" />
         <source>Checked %Ln min ago.</source>
         <translation>
             <numerusform>Checked %Ln min ago.</numerusform>
@@ -1551,182 +1558,182 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="132" />
+        <location filename="../qml/PackagesTab.qml" line="136" />
         <source>Package</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="133" />
+        <location filename="../qml/PackagesTab.qml" line="137" />
         <source>Installed</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="134" />
+        <location filename="../qml/PackagesTab.qml" line="138" />
         <source>Latest</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="135" />
+        <location filename="../qml/PackagesTab.qml" line="139" />
         <source>Status</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="171" />
+        <location filename="../qml/PackagesTab.qml" line="175" />
         <source>Not installed</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="192" />
+        <location filename="../qml/PackagesTab.qml" line="196" />
         <source>Abandoned</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="193" />
+        <location filename="../qml/PackagesTab.qml" line="197" />
         <source>Up to date</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="194" />
-        <location filename="../qml/PackagesTab.qml" line="413" />
+        <location filename="../qml/PackagesTab.qml" line="198" />
+        <location filename="../qml/PackagesTab.qml" line="419" />
         <source>Update</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="195" />
+        <location filename="../qml/PackagesTab.qml" line="199" />
         <source>New major version</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="195" />
+        <location filename="../qml/PackagesTab.qml" line="199" />
         <source>New 0.x version</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="196" />
+        <location filename="../qml/PackagesTab.qml" line="200" />
         <source>Through another package</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="324" />
+        <location filename="../qml/PackagesTab.qml" line="330" />
         <source>`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="331" />
+        <location filename="../qml/PackagesTab.qml" line="337" />
         <source>`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="58" />
-        <location filename="../qml/PackagesTab.qml" line="211" />
+        <location filename="../qml/PackagesTab.qml" line="60" />
+        <location filename="../qml/PackagesTab.qml" line="215" />
         <source>Review update</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="57" />
-        <location filename="../qml/PackagesTab.qml" line="218" />
+        <location filename="../qml/PackagesTab.qml" line="59" />
+        <location filename="../qml/PackagesTab.qml" line="222" />
         <source>Add the API</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="56" />
-        <location filename="../qml/PackagesTab.qml" line="218" />
-        <location filename="../qml/PackagesTab.qml" line="268" />
+        <location filename="../qml/PackagesTab.qml" line="58" />
+        <location filename="../qml/PackagesTab.qml" line="222" />
+        <location filename="../qml/PackagesTab.qml" line="274" />
         <source>Add the admin panel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="237" />
+        <location filename="../qml/PackagesTab.qml" line="241" />
         <source>Other packages (%1)</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="268" />
+        <location filename="../qml/PackagesTab.qml" line="274" />
         <source>Add the JSON API</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="269" />
+        <location filename="../qml/PackagesTab.qml" line="275" />
         <source>Update %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="287" />
+        <location filename="../qml/PackagesTab.qml" line="293" />
         <source>Before 1.0, a new minor version may change how things work. Read the changelog first.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="288" />
+        <location filename="../qml/PackagesTab.qml" line="294" />
         <source>A new major version: it may change how things work. Read the changelog first.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="296" />
+        <location filename="../qml/PackagesTab.qml" line="302" />
         <source>Read the changelog</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="297" />
+        <location filename="../qml/PackagesTab.qml" line="303" />
         <source>Read UPGRADING.md</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="311" />
+        <location filename="../qml/PackagesTab.qml" line="317" />
         <source>After Composer adds it</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="311" />
+        <location filename="../qml/PackagesTab.qml" line="317" />
         <source>After the update</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="314" />
+        <location filename="../qml/PackagesTab.qml" line="320" />
         <source>Studio runs `admin:install`, which only adds what is missing, and then `migrate`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="316" />
+        <location filename="../qml/PackagesTab.qml" line="322" />
         <source>Studio runs `api:install`, which only adds what is missing, and then `migrate`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="317" />
+        <location filename="../qml/PackagesTab.qml" line="323" />
         <source>Studio runs `migrate` for the package's new tables.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="341" />
+        <location filename="../qml/PackagesTab.qml" line="347" />
         <source>Commands</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="374" />
+        <location filename="../qml/PackagesTab.qml" line="380" />
         <source>Added. The project's tabs show it now.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="374" />
+        <location filename="../qml/PackagesTab.qml" line="380" />
         <source>Updated to %1.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="386" />
+        <location filename="../qml/PackagesTab.qml" line="392" />
         <source>A command failed (exit code %1). What ran before it stays done.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="406" />
+        <location filename="../qml/PackagesTab.qml" line="412" />
         <source>Close</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="406" />
+        <location filename="../qml/PackagesTab.qml" line="412" />
         <source>Cancel</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="413" />
+        <location filename="../qml/PackagesTab.qml" line="419" />
         <source>Add</source>
         <translation type="unfinished" />
     </message>
@@ -2164,84 +2171,84 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="63" />
-        <location filename="../qml/Sidebar.qml" line="74" />
+        <location filename="../qml/Sidebar.qml" line="59" />
+        <location filename="../qml/Sidebar.qml" line="70" />
         <source>Projects</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="84" />
+        <location filename="../qml/Sidebar.qml" line="80" />
         <source>Missing</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="84" />
+        <location filename="../qml/Sidebar.qml" line="80" />
         <source>Running</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="91" />
+        <location filename="../qml/Sidebar.qml" line="87" />
         <source>New project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="99" />
+        <location filename="../qml/Sidebar.qml" line="95" />
         <source>Open existing folder…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="115" />
+        <location filename="../qml/Sidebar.qml" line="111" />
         <source>Back to projects</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="122" />
-        <location filename="../qml/Sidebar.qml" line="194" />
+        <location filename="../qml/Sidebar.qml" line="118" />
+        <location filename="../qml/Sidebar.qml" line="190" />
         <source>Settings</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="125" />
+        <location filename="../qml/Sidebar.qml" line="121" />
         <source>General</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="126" />
+        <location filename="../qml/Sidebar.qml" line="122" />
         <source>PHP and tools</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="127" />
+        <location filename="../qml/Sidebar.qml" line="123" />
         <source>Server</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="128" />
+        <location filename="../qml/Sidebar.qml" line="124" />
         <source>Editor</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="129" />
+        <location filename="../qml/Sidebar.qml" line="125" />
         <source>Project folders</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="141" />
+        <location filename="../qml/Sidebar.qml" line="137" />
         <source>FloCMS Studio %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="155" />
+        <location filename="../qml/Sidebar.qml" line="151" />
         <source>This computer</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="177" />
+        <location filename="../qml/Sidebar.qml" line="173" />
         <source>Looking for PHP, Composer and MariaDB…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="184" />
+        <location filename="../qml/Sidebar.qml" line="180" />
         <source>Download…</source>
         <translation type="unfinished" />
     </message>
