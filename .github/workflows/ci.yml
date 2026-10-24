@@ -173,7 +173,7 @@ jobs:
             case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
             # Every library must come from inside the bundle or from macOS.
             bad=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -L {} \; 2>/dev/null \
-                  | awk '/^\t/{print $1}' | grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' | sort -u)
+                  | awk '/^\t/{print $1}' | { grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' || true; } | sort -u)
             if [ -n "$bad" ]; then echo "::error::libraries from outside the bundle: $(echo $bad)"; exit 1; fi
           fi
 
