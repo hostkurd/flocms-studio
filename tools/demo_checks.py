@@ -39,9 +39,16 @@ def status_with_pending() -> dict:
     return {"out": text, "err": "", "code": 0}
 
 
+def doctor_two_pending() -> dict:
+    """The doctor run of the same state: two migrations wait."""
+    result = run("doctor-pending.json")
+    result["out"] = result["out"].replace("13 pending", "2 pending")
+    return result
+
+
 def checks(minutes: int, output: dict | None = None) -> dict:
     result = {
-        "doctor": run("doctor-pending.json"),
+        "doctor": doctor_two_pending(),
         "adminDoctor": run("admin-doctor-problem"),
         "show": run("db-show.json"),
         "status": status_with_pending(),

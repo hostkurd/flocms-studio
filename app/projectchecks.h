@@ -54,6 +54,8 @@ public:
     QVariantMap migrations() const { return m_migrations; }
     QVariantMap output() const { return m_output; }
     bool busy() const { return m_running != nullptr; }
+    // A read is still running (tests wait for this before deleting a folder)
+    bool reading() const { return m_databaseReads > 0 || m_doctorReads > 0; }
 
     // Runs `php flo doctor` (and `admin:doctor` with the admin panel).
     Q_INVOKABLE void runDoctor();
@@ -62,9 +64,11 @@ public:
     // What a database action asks first: {action, command, confirm (none,
     // ask, typeDatabase), force, database, production, pending}.
     Q_INVOKABLE QVariantMap plan(const QString &action) const;
-    // Runs it; the confirmation (if plan() asked for one) was given.
-    // `typed` is the database name for typeDatabase.
-    Q_INVOKABLE void runAction(const QString &action, const QString &typed = {});
+    // Runs it; the confirmation (if plan() asked for one) was given for
+    // plan()'s `production`. `typed` is the database name for typeDatabase.
+    // Refused (false) when .env no longer matches what was asked: then
+    // the person is asked again.
+    Q_INVOKABLE bool runAction(const QString &action, const QString &typed, bool plannedProduction);
     // cache:clear, view:clear, optimize, optimize:clear.
     Q_INVOKABLE void runQuick(const QString &command);
     Q_INVOKABLE void clearOutput();
@@ -87,11 +91,12 @@ private:
     void capture(const QStringList &arguments, Finished onDone);
     void stream(const QStringList &arguments, const QString &command, bool changesData);
     bool production() const;
+    QString configuredDatabase() const;
     // Reading each command's output (a real run, or a demo's saved output)
     void takeDoctor(const FloStudio::Core::Captured &out);
     void takeAdminDoctor(const FloStudio::Core::Captured &out);
-    void takeShow(const FloStudio::Core::Captured &out, QVariantList *tables);
-    void takeStatus(const FloStudio::Core::Captured &out);
+    static QVariantMap takeShow(const FloStudio::Core::Captured &out, QVariantList *tables);
+    static QVariantMap takeStatus(const FloStudio::Core::Captured &out);
     static void takeAdminList(const FloStudio::Core::Captured &out, QHash<QString, QString> *adminUrls);
     void linkTables(const QVariantList &tables, const QHash<QString, QString> &adminUrls);
     bool demo() const { return m_settings == nullptr; }
@@ -108,4 +113,6 @@ private:
     QProcess *m_running = nullptr; // a child of this while a button's command runs
     bool m_refreshAgain = false;
     int m_databaseReads = 0; // db:show, migrate:status, admin:list still running
+    bool m_doctorAgain = false;
+    int m_doctorReads = 0;   // doctor, admin:doctor still running
 };

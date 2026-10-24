@@ -55,6 +55,8 @@ class Studio : public QObject
     Q_PROPERTY(LogModel *logs READ logs NOTIFY serverChanged)
     // The open project's Doctor and Database (stage 5)
     Q_PROPERTY(ProjectChecks *checks READ checks NOTIFY currentChanged)
+    // A command that changes a database or caches still runs (quitting asks)
+    Q_PROPERTY(bool commandRunning READ commandRunning NOTIFY commandRunningChanged)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -107,6 +109,7 @@ public:
     QVariantMap server() const;
     LogModel *logs() const;
     ProjectChecks *checks() const { return m_checks.value(m_currentPath); }
+    bool commandRunning() const;
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -169,6 +172,7 @@ signals:
     void toolsChanged();
     void downloadsChanged();
     void serverChanged();
+    void commandRunningChanged();
 
 private:
     void changeSettings(const std::function<void(FloStudio::Core::Settings &)> &change);

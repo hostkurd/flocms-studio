@@ -8,6 +8,8 @@ namespace {
 constexpr QChar kLri{0x2066}; // LEFT-TO-RIGHT ISOLATE
 constexpr QChar kPdi{0x2069}; // POP DIRECTIONAL ISOLATE
 constexpr QChar kRlm{0x200F}; // RIGHT-TO-LEFT MARK
+constexpr QChar kLro{0x202D}; // LEFT-TO-RIGHT OVERRIDE
+constexpr QChar kPdf{0x202C}; // POP DIRECTIONAL FORMATTING
 } // namespace
 
 Language::Language(QObject *parent)
@@ -76,8 +78,12 @@ QString Language::rich(const QString &text) const
     bool inCode = false;
     for (const QChar c : text) {
         if (c == QLatin1Char('`')) {
-            out += inCode ? QString(kPdi) + QStringLiteral("</span>")
-                          : QStringLiteral("<span style=\"font-family:'JetBrains Mono'\">") + kLri;
+            // A left-to-right override inside the isolate too: Qt's rich
+            // text layout doesn't honour the isolate alone, and a code word
+            // that starts or ends with a neutral character (.env,
+            // storage/cache/) had it moved to the other end
+            out += inCode ? QString(kPdf) + kPdi + QStringLiteral("</span>")
+                          : QStringLiteral("<span style=\"font-family:'JetBrains Mono'\">") + kLri + kLro;
             inCode = !inCode;
             continue;
         }
@@ -89,7 +95,7 @@ QString Language::rich(const QString &text) const
         }
     }
     if (inCode) // unbalanced backtick: close it so the markup stays valid
-        out += QString(kPdi) + QStringLiteral("</span>");
+        out += QString(kPdf) + kPdi + QStringLiteral("</span>");
     return out;
 }
 

@@ -16,9 +16,12 @@ Item {
     readonly property bool running: serverState === "running"
     // Asks what plan() says, then runs it
     function startAction(action) {
-        const plan = Studio.checks.plan(action)
+        const checks = Studio.checks
+        const plan = checks.plan(action)
         if (plan.confirm === "none") {
-            Studio.checks.runAction(action, "")
+            // .env changed between plan and run: ask with what it says now
+            if (!checks.runAction(action, "", plan.production) && !checks.busy)
+                Qt.callLater(page.startAction, action)
             return
         }
         const texts = {
@@ -43,7 +46,10 @@ Item {
                 confirm: qsTr("Drop and migrate"), danger: true
             }
         }[action]
+        // The answer goes to this project's checks, as planned
         confirm.action = action
+        confirm.checks = checks
+        confirm.production = plan.production
         confirm.ask({
             title: texts.title,
             message: texts.message + (plan.production && action !== "migrate" ? " " + qsTr("This is a production site.") : ""),
@@ -57,9 +63,16 @@ Item {
     ConfirmDialog {
         id: confirm
         property string action
+        property var checks: null
+        property bool production: false
         parent: T.Overlay.overlay
         anchors.centerIn: parent
-        onAccepted: (typed) => Studio.checks.runAction(action, typed)
+        onAccepted: (typed) => {
+            // Refused when .env changed while the question was open (production,
+            // or the database fresh would drop): ask again with what it says now
+            if (checks && !checks.runAction(action, typed, production) && !checks.busy && checks === Studio.checks)
+                Qt.callLater(page.startAction, action)
+        }
     }
 
 

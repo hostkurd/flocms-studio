@@ -95,6 +95,7 @@ QtObject {
         case "php_not_found": return qsTr("PHP was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
         case "php_unsafe": return qsTr("PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose `php.exe` in Settings > PHP and tools.")
         case "no_launcher": return qsTr("The project has no `flo` launcher yet: run `composer install` in it.")
+        case "project_busy": return qsTr("A command is still running in this project. Remove it from the list when it has finished.")
         case "no_env_file": return qsTr("The project has no `.env` file. Copy `.env.example` to `.env`.")
         case "command_failed": return qsTr("The command could not run.")
         case "doctor_unreadable": return qsTr("Studio could not read what the check printed.")

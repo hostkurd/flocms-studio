@@ -87,6 +87,14 @@ bool ProjectChecks::production() const
     return isProduction(parseEnv(readEnvFile(m_projectDir)));
 }
 
+QString ProjectChecks::configuredDatabase() const
+{
+    // What `migrate:fresh` will drop: DB_NAME as .env says it now (for
+    // SQLite the file as written there), not what was read a while ago
+    const auto env = parseEnv(readEnvFile(m_projectDir));
+    return env.value(QStringLiteral("DB_DSN")).isEmpty() ? env.value(QStringLiteral("DB_NAME")).trimmed() : QString();
+}
+
 // The analyzer misses the watcher's parent (see Studio::refreshTools), and
 // reports it in every function that calls capture()
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
@@ -110,7 +118,8 @@ void ProjectChecks::capture(const QStringList &arguments, Finished onDone)
         watcher->deleteLater();
         onDone(out);
     });
-    watcher->setFuture(QtConcurrent::run([command = command.value()] { return runCaptured(command, 120000); }));
+    // A read: quitting Studio waits for it, so not too long
+    watcher->setFuture(QtConcurrent::run([command = command.value()] { return runCaptured(command, 30000); }));
 }
 
 void ProjectChecks::refreshAll()
@@ -121,17 +130,34 @@ void ProjectChecks::refreshAll()
 
 void ProjectChecks::runDoctor()
 {
-    if (demo() || m_doctor.value(QStringLiteral("state")).toString() == u"running")
+    if (demo())
         return;
+    if (m_doctorReads > 0) {
+        m_doctorAgain = true; // once this run ends: it may predate a change
+        return;
+    }
+    m_doctorReads = m_hasAdmin ? 2 : 1;
     m_doctor.insert(QStringLiteral("state"), QStringLiteral("running"));
     if (m_hasAdmin)
         m_adminDoctor.insert(QStringLiteral("state"), QStringLiteral("running"));
     emit doctorChanged();
 
-    capture({QStringLiteral("doctor"), QStringLiteral("--format=json")}, [this](const Captured &out) { takeDoctor(out); });
+    const auto done = [this] {
+        if (--m_doctorReads > 0)
+            return;
+        if (std::exchange(m_doctorAgain, false))
+            runDoctor();
+    };
+    capture({QStringLiteral("doctor"), QStringLiteral("--format=json")}, [this, done](const Captured &out) {
+        takeDoctor(out);
+        done();
+    });
     if (!m_hasAdmin)
         return;
-    capture({QStringLiteral("admin:doctor")}, [this](const Captured &out) { takeAdminDoctor(out); });
+    capture({QStringLiteral("admin:doctor")}, [this, done](const Captured &out) {
+        takeAdminDoctor(out);
+        done();
+    });
 }
 
 void ProjectChecks::takeDoctor(const Captured &out)
@@ -200,24 +226,33 @@ void ProjectChecks::refreshDatabase()
     m_migrations.insert(QStringLiteral("state"), QStringLiteral("running"));
     emit databaseChanged();
     m_databaseReads = m_hasAdmin ? 3 : 2;
-    auto adminUrls = std::make_shared<QHash<QString, QString>>(); // table → /admin/... (admin:list)
-    auto tables = std::make_shared<QVariantList>();
-    const auto done = [this, adminUrls, tables] {
+    // Each read lands here; the screens get them together, once all are in
+    struct Reads
+    {
+        QVariantMap database;
+        QVariantMap migrations;
+        QVariantList tables;
+        QHash<QString, QString> adminUrls; // table → /admin/... (admin:list)
+    };
+    auto reads = std::make_shared<Reads>();
+    auto adminUrls = std::shared_ptr<QHash<QString, QString>>(reads, &reads->adminUrls);
+    const auto done = [this, reads] {
         if (--m_databaseReads > 0)
             return;
-        // The links once both db:show and admin:list are in
-        linkTables(*tables, *adminUrls);
+        m_database = reads->database;
+        m_migrations = reads->migrations;
+        linkTables(reads->tables, reads->adminUrls);
         emit databaseChanged();
         if (std::exchange(m_refreshAgain, false))
             refreshDatabase();
     };
 
-    capture(Db::showArguments(), [this, tables, done](const Captured &out) {
-        takeShow(out, tables.get());
+    capture(Db::showArguments(), [reads, done](const Captured &out) {
+        reads->database = takeShow(out, &reads->tables);
         done();
     });
-    capture(Db::statusArguments(), [this, done](const Captured &out) {
-        takeStatus(out);
+    capture(Db::statusArguments(), [reads, done](const Captured &out) {
+        reads->migrations = takeStatus(out);
         done();
     });
     if (m_hasAdmin) {
@@ -230,45 +265,48 @@ void ProjectChecks::refreshDatabase()
 
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
-void ProjectChecks::takeShow(const Captured &out, QVariantList *tables)
+QVariantMap ProjectChecks::takeShow(const Captured &out, QVariantList *tables)
 {
-    {
-        const auto show = parseDatabaseShow(out.out);
-        if (!show) {
-            m_database = failure(out, QStringLiteral("database_unreadable"));
-        } else {
-            for (const DatabaseTable &table : show->tables)
-                *tables << QVariantMap{{QStringLiteral("name"), table.name}, {QStringLiteral("rows"), table.rows}};
-            m_database = {{QStringLiteral("state"), QStringLiteral("done")},
-                          {QStringLiteral("driver"), show->driver},
-                          {QStringLiteral("server"), show->server},
-                          {QStringLiteral("host"), show->host},
-                          {QStringLiteral("port"), show->port},
-                          {QStringLiteral("database"), show->database},
-                          {QStringLiteral("username"), show->username}};
-        }
-    }
+    const auto show = parseDatabaseShow(out.out);
+    if (!show)
+        return failure(out, QStringLiteral("database_unreadable"));
+    for (const DatabaseTable &table : show->tables)
+        *tables << QVariantMap{{QStringLiteral("name"), table.name}, {QStringLiteral("rows"), table.rows}};
+    return {{QStringLiteral("state"), QStringLiteral("done")},
+            {QStringLiteral("driver"), show->driver},
+            {QStringLiteral("server"), show->server},
+            {QStringLiteral("host"), show->host},
+            {QStringLiteral("port"), show->port},
+            {QStringLiteral("database"), show->database},
+            {QStringLiteral("username"), show->username}};
 }
 
-void ProjectChecks::takeStatus(const Captured &out)
+QVariantMap ProjectChecks::takeStatus(const Captured &out)
 {
-    {
-        const auto rows = parseMigrateStatus(out.out);
-        if (!rows) {
-            m_migrations = failure(out, QStringLiteral("migrations_unreadable"));
-        } else {
-            QVariantList list;
-            // Newest first, as on board 5: what waits is on top
-            for (auto it = rows->crbegin(); it != rows->crend(); ++it)
-                list << QVariantMap{{QStringLiteral("name"), it->name},
-                                    {QStringLiteral("package"), it->package},
-                                    {QStringLiteral("batch"), it->batch},
-                                    {QStringLiteral("state"), migrationState(it->state)}};
-            m_migrations = {{QStringLiteral("state"), QStringLiteral("done")},
-                            {QStringLiteral("pending"), pendingMigrations(rows.value())},
-                            {QStringLiteral("rows"), list}};
-        }
-    }
+    const auto parsed = parseMigrateStatus(out.out);
+    if (!parsed)
+        return failure(out, QStringLiteral("migrations_unreadable"));
+    // As on board 5: what waits on top, then the newest batch first;
+    // flocms-cli lists by file name and puts runs whose file is gone last
+    QList<Migration> rows = parsed.value();
+    std::stable_sort(rows.begin(), rows.end(), [](const Migration &a, const Migration &b) {
+        const bool aWaits = a.state == MigrationState::Pending;
+        const bool bWaits = b.state == MigrationState::Pending;
+        if (aWaits != bWaits)
+            return aWaits;
+        if (a.batch != b.batch)
+            return a.batch > b.batch;
+        return a.name > b.name;
+    });
+    QVariantList list;
+    for (const Migration &row : std::as_const(rows))
+        list << QVariantMap{{QStringLiteral("name"), row.name},
+                            {QStringLiteral("package"), row.package},
+                            {QStringLiteral("batch"), row.batch},
+                            {QStringLiteral("state"), migrationState(row.state)}};
+    return {{QStringLiteral("state"), QStringLiteral("done")},
+            {QStringLiteral("pending"), pendingMigrations(parsed.value())},
+            {QStringLiteral("rows"), list}};
 }
 
 void ProjectChecks::takeAdminList(const Captured &out, QHash<QString, QString> *adminUrls)
@@ -308,21 +346,27 @@ QVariantMap ProjectChecks::plan(const QString &action) const
             {QStringLiteral("confirm"), confirm},
             {QStringLiteral("force"), plan.force},
             {QStringLiteral("production"), onProduction},
-            {QStringLiteral("database"), m_database.value(QStringLiteral("database"))},
+            {QStringLiteral("database"), demo() ? m_database.value(QStringLiteral("database")).toString() : configuredDatabase()},
             {QStringLiteral("pending"), m_migrations.value(QStringLiteral("pending"), 0)}};
 }
 
-void ProjectChecks::runAction(const QString &action, const QString &typed)
+bool ProjectChecks::runAction(const QString &action, const QString &typed, bool plannedProduction)
 {
     Db::Action which{};
     if (demo() || busy() || !Db::actionFromName(action, &which))
-        return;
-    const Db::ActionPlan plan = Db::planAction(which, production());
-    // Fresh drops every table: only with the database's name typed
-    if (plan.confirm == Db::Confirm::TypeDatabase
-        && !Db::typedNameMatches(typed, m_database.value(QStringLiteral("database")).toString()))
-        return;
+        return false;
+    // What the person agreed to: .env may have changed since the question
+    // (another editor, a deploy); then nothing runs and they are asked again
+    const bool onProduction = production();
+    if (onProduction != plannedProduction)
+        return false;
+    const Db::ActionPlan plan = Db::planAction(which, onProduction);
+    // Fresh drops every table: only with the database's name typed, as .env
+    // names it now
+    if (plan.confirm == Db::Confirm::TypeDatabase && !Db::typedNameMatches(typed, configuredDatabase()))
+        return false;
     stream(plan.arguments, action, plan.changesData);
+    return true;
 }
 
 void ProjectChecks::runQuick(const QString &command)
@@ -410,9 +454,9 @@ void ProjectChecks::showDemo(const QVariantMap &demo)
     QVariantList tables;
     QHash<QString, QString> adminUrls;
     if (demo.contains(QStringLiteral("show")))
-        takeShow(captured(QStringLiteral("show")), &tables);
+        m_database = takeShow(captured(QStringLiteral("show")), &tables);
     if (demo.contains(QStringLiteral("status")))
-        takeStatus(captured(QStringLiteral("status")));
+        m_migrations = takeStatus(captured(QStringLiteral("status")));
     if (demo.contains(QStringLiteral("adminList")))
         takeAdminList(captured(QStringLiteral("adminList")), &adminUrls);
     linkTables(tables, adminUrls);

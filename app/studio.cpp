@@ -416,6 +416,10 @@ void Studio::addProject(const QUrl &folder)
 
 void Studio::removeProject(const QString &path)
 {
+    if (const ProjectChecks *checks = m_checks.value(path); checks && checks->busy()) {
+        setProblem(QStringLiteral("project_busy"), path);
+        return;
+    }
     changeSettings([&path](Settings &s) { s.projects.removeAll(path); });
     if (m_currentPath == path)
         m_currentPath.clear();
@@ -458,9 +462,15 @@ ProjectChecks *Studio::checksFor(const QString &path)
     // A child of this, which outlives it, so the settings stay valid
     auto *checks = new ProjectChecks(path, m_demo ? nullptr : &m_settings, hasAdmin, this);
     m_checks.insert(path, checks);
+    connect(checks, &ProjectChecks::outputChanged, this, &Studio::commandRunningChanged);
     if (!m_demo)
         checks->refreshAll();
     return checks;
+}
+
+bool Studio::commandRunning() const
+{
+    return std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); });
 }
 
 void Studio::serversChanged()
@@ -573,7 +583,9 @@ void Studio::refreshProjects()
             m_servers.take(path)->deleteLater();
     }
     for (const QString &path : m_checks.keys()) {
-        if (m_projects.indexOf(path) < 0)
+        // One whose migration still runs stays until it ends: stopping it
+        // halfway could leave the database half migrated
+        if (m_projects.indexOf(path) < 0 && !m_checks.value(path)->busy())
             m_checks.take(path)->deleteLater();
     }
     serversChanged();

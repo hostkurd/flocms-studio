@@ -11,6 +11,7 @@
 #include "projectserver.h"
 #include "studio.h"
 
+#include <flostudio/core/env.h>
 #include <flostudio/core/server.h>
 #include <flostudio/core/settings.h>
 #include <flostudio/core/tools.h>
@@ -59,11 +60,7 @@ bool checksDone(const Studio &studio)
     const ProjectChecks *checks = const_cast<Studio &>(studio).checks();
     if (!checks)
         return true;
-    for (const QVariantMap &report : {checks->doctor(), checks->database(), checks->migrations()}) {
-        if (report.value(QStringLiteral("state")).toString() == u"running")
-            return false;
-    }
-    return !checks->busy();
+    return !checks->reading() && !checks->busy();
 }
 
 } // namespace
@@ -278,11 +275,49 @@ private slots:
         QCOMPARE(checks->migrations().value(QStringLiteral("rows")).toList().first().toMap().value(QStringLiteral("state")).toString(),
                  QStringLiteral("pending"));
         // A demo runs nothing
-        checks->runAction(QStringLiteral("migrate"));
+        QVERIFY(!checks->runAction(QStringLiteral("migrate"), {}, false));
         checks->runQuick(QStringLiteral("cache:clear"));
         QVERIFY(!checks->busy());
         QCOMPARE(checks->plan(QStringLiteral("fresh")).value(QStringLiteral("confirm")).toString(), QStringLiteral("typeDatabase"));
         QVERIFY(checks->plan(QStringLiteral("drop")).isEmpty());
+    }
+
+    // What runs is what was agreed to: .env read again at run time
+    void runsOnlyWhatWasConfirmed()
+    {
+        const QTemporaryDir dir;
+        const QString site = dir.filePath(QStringLiteral("fresh"));
+        makeSite(site); // DB_TYPE=sqlite, DB_NAME=storage/database.sqlite
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProject(QUrl::fromLocalFile(site));
+        ProjectChecks *checks = studio.checks();
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+
+        // Fresh asks for the name .env gives
+        QVariantMap plan = checks->plan(QStringLiteral("fresh"));
+        QCOMPARE(plan.value(QStringLiteral("confirm")).toString(), QStringLiteral("typeDatabase"));
+        QCOMPARE(plan.value(QStringLiteral("database")).toString(), QStringLiteral("storage/database.sqlite"));
+        QVERIFY(!plan.value(QStringLiteral("production")).toBool());
+        // .env changes while the question is open: the old name no longer runs it
+        QVERIFY(writeEnvValues(site, {{QStringLiteral("DB_NAME"), QStringLiteral("storage/other.sqlite")}}).ok());
+        QVERIFY(!checks->runAction(QStringLiteral("fresh"), QStringLiteral("storage/database.sqlite"), false));
+        QVERIFY(!checks->busy());
+        // ... and the site turns production: nothing asked for that runs
+        QVERIFY(writeEnvValues(site, {{QStringLiteral("APP_ENV"), QStringLiteral("production")}}).ok());
+        QVERIFY(!checks->runAction(QStringLiteral("rollback"), {}, false));
+        QVERIFY(!checks->runAction(QStringLiteral("migrate"), {}, false));
+        QVERIFY(!checks->busy());
+        plan = checks->plan(QStringLiteral("migrate"));
+        QVERIFY(plan.value(QStringLiteral("production")).toBool());
+        QCOMPARE(plan.value(QStringLiteral("confirm")).toString(), QStringLiteral("ask"));
+        QVERIFY(plan.value(QStringLiteral("command")).toString().endsWith(QStringLiteral("--force")));
+        // The name as .env says it now, for the production asked about: runs
+        QVERIFY(checks->runAction(QStringLiteral("fresh"), QStringLiteral(" storage/other.sqlite "), true));
+        QCOMPARE(checks->output().value(QStringLiteral("command")).toString(), QStringLiteral("fresh"));
+        QTRY_VERIFY_WITH_TIMEOUT(!checks->busy(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio) && !studio.checkingTools(), 60000);
     }
 
     void readsARealProjectsDoctorAndDatabase()
@@ -309,11 +344,11 @@ private slots:
         QCOMPARE(checks->migrations().value(QStringLiteral("pending")).toInt(), 0);
 
         // Fresh without the name typed runs nothing
-        checks->runAction(QStringLiteral("fresh"), QStringLiteral("not the name"));
+        QVERIFY(!checks->runAction(QStringLiteral("fresh"), QStringLiteral("not the name"), false));
         QVERIFY(!checks->busy());
         // Migrate with nothing to run, then a quick command, with their output
         QSignalSpy changed(checks, &ProjectChecks::changedData);
-        checks->runAction(QStringLiteral("migrate"));
+        QVERIFY(checks->runAction(QStringLiteral("migrate"), {}, false));
         QVERIFY(checks->busy());
         QTRY_VERIFY_WITH_TIMEOUT(!checks->busy(), 60000);
         QCOMPARE(checks->output().value(QStringLiteral("state")).toString(), QStringLiteral("done"));

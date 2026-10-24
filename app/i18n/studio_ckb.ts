@@ -91,7 +91,10 @@
     <message numerus="yes">
         <location filename="../qml/DatabaseTab.qml" line="118" />
         <source>Run %Ln migration(s)</source>
-        <translation><numerusform>جێبەجێکردنی %Ln مایگرەیشن</numerusform><numerusform>جێبەجێکردنی %Ln مایگرەیشن</numerusform></translation>
+        <translation>
+            <numerusform>جێبەجێکردنی %Ln مایگرەیشن</numerusform>
+            <numerusform>جێبەجێکردنی %Ln مایگرەیشن</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DatabaseTab.qml" line="118" />
@@ -186,7 +189,10 @@
     <message numerus="yes">
         <location filename="../qml/DatabaseTab.qml" line="228" />
         <source>%Ln table(s) and their row counts. Edit data in the admin panel.</source>
-        <translation><numerusform>%Ln خشتە و ژمارەی ڕیزەکانیان. داتا لە پانێڵی بەڕێوەبردندا دەستکاری بکە.</numerusform><numerusform>%Ln خشتە و ژمارەی ڕیزەکانیان. داتا لە پانێڵی بەڕێوەبردندا دەستکاری بکە.</numerusform></translation>
+        <translation>
+            <numerusform>%Ln خشتە و ژمارەی ڕیزەکانیان. داتا لە پانێڵی بەڕێوەبردندا دەستکاری بکە.</numerusform>
+            <numerusform>%Ln خشتە و ژمارەی ڕیزەکانیان. داتا لە پانێڵی بەڕێوەبردندا دەستکاری بکە.</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -194,17 +200,26 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="37" />
         <source>%Ln problem(s)</source>
-        <translation><numerusform>%Ln کێشە</numerusform><numerusform>%Ln کێشە</numerusform></translation>
+        <translation>
+            <numerusform>%Ln کێشە</numerusform>
+            <numerusform>%Ln کێشە</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="44" />
         <source>%Ln warning(s)</source>
-        <translation><numerusform>%Ln ئاگاداری</numerusform><numerusform>%Ln ئاگاداری</numerusform></translation>
+        <translation>
+            <numerusform>%Ln ئاگاداری</numerusform>
+            <numerusform>%Ln ئاگاداری</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="51" />
         <source>%Ln OK</source>
-        <translation><numerusform>%Ln باشە</numerusform><numerusform>%Ln باشە</numerusform></translation>
+        <translation>
+            <numerusform>%Ln باشە</numerusform>
+            <numerusform>%Ln باشە</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="57" />
@@ -220,7 +235,10 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="60" />
         <source>Last checked: %Ln min ago</source>
-        <translation><numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform><numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform></translation>
+        <translation>
+            <numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform>
+            <numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="66" />
@@ -240,7 +258,10 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="115" />
         <source>%Ln more check(s), all OK</source>
-        <translation><numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform><numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform></translation>
+        <translation>
+            <numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform>
+            <numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="131" />
@@ -514,9 +535,24 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="18" />
+        <location filename="../qml/Main.qml" line="19" />
         <source>%1 – FloCMS Studio</source>
         <translation>%1 – FloCMS Studio</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="27" />
+        <source>A command is still running</source>
+        <translation>فەرمانێک هێشتا کار دەکات</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="28" />
+        <source>Quitting now stops it halfway, which can leave the database half migrated.</source>
+        <translation>داخستن ئێستا لە نیوەی ڕێگادا دەیوەستێنێت، و لەوانەیە داتابەیسەکە بە نیوەچڵی مایگرەیشن کراو بهێڵێتەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="29" />
+        <source>Quit anyway</source>
+        <translation>هەر دابخە</translation>
     </message>
 </context>
 <context>
@@ -605,12 +641,18 @@
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="60" />
         <source>%Ln table(s)</source>
-        <translation><numerusform>%Ln خشتە</numerusform><numerusform>%Ln خشتە</numerusform></translation>
+        <translation>
+            <numerusform>%Ln خشتە</numerusform>
+            <numerusform>%Ln خشتە</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="64" />
         <source>%Ln migration(s) waiting</source>
-        <translation><numerusform>%Ln مایگرەیشن لە چاوەڕوانیدان</numerusform><numerusform>%Ln مایگرەیشن لە چاوەڕوانیدان</numerusform></translation>
+        <translation>
+            <numerusform>%Ln مایگرەیشن لە چاوەڕوانیدان</numerusform>
+            <numerusform>%Ln مایگرەیشن لە چاوەڕوانیدان</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/OverviewTab.qml" line="72" />
@@ -721,132 +763,135 @@
 <context>
     <name>ProjectPage</name>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="24" />
+        <location filename="../qml/ProjectPage.qml" line="29" />
         <source>Run the migrations on this production site?</source>
         <translation>مایگرەیشنەکان لەسەر ئەم ماڵپەڕی بەرهەمهێنانە جێبەجێ بکرێن؟</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/ProjectPage.qml" line="25" />
+        <location filename="../qml/ProjectPage.qml" line="30" />
         <source>`APP_ENV` says this is a production site. %Ln migration(s) will change its database.</source>
-        <translation><numerusform>`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە. %Ln مایگرەیشن داتابەیسەکەی دەگۆڕن.</numerusform><numerusform>`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە. %Ln مایگرەیشن داتابەیسەکەی دەگۆڕن.</numerusform></translation>
+        <translation>
+            <numerusform>`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە. %Ln مایگرەیشن داتابەیسەکەی دەگۆڕن.</numerusform>
+            <numerusform>`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە. %Ln مایگرەیشن داتابەیسەکەی دەگۆڕن.</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="26" />
+        <location filename="../qml/ProjectPage.qml" line="31" />
         <source>Run migrations</source>
         <translation>جێبەجێکردنی مایگرەیشنەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="29" />
+        <location filename="../qml/ProjectPage.qml" line="34" />
         <source>Roll back the last batch?</source>
         <translation>دوایین دەستە بگەڕێنرێتەوە؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="30" />
+        <location filename="../qml/ProjectPage.qml" line="35" />
         <source>This undoes the migrations of the last batch. Tables or columns they made, and the data in them, are dropped.</source>
         <translation>ئەمە مایگرەیشنەکانی دوایین دەستە هەڵدەوەشێنێتەوە. ئەو خشتە یان ستوونانەی دروستیان کردوون، و داتاکانیان، دەسڕێنەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="31" />
+        <location filename="../qml/ProjectPage.qml" line="36" />
         <source>Roll back</source>
         <translation>گەڕاندنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="34" />
+        <location filename="../qml/ProjectPage.qml" line="39" />
         <source>Seed the database?</source>
         <translation>داتابەیسەکە پڕ بکرێتەوە؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="35" />
+        <location filename="../qml/ProjectPage.qml" line="40" />
         <source>This runs `database/seeders/DatabaseSeeder`, which adds rows to the tables.</source>
         <translation>ئەمە `database/seeders/DatabaseSeeder` جێبەجێ دەکات، کە ڕیز بۆ خشتەکان زیاد دەکات.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="36" />
+        <location filename="../qml/ProjectPage.qml" line="41" />
         <source>Seed</source>
         <translation>پڕکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="39" />
+        <location filename="../qml/ProjectPage.qml" line="44" />
         <source>Drop every table and migrate again?</source>
         <translation>هەموو خشتەکان بسڕدرێنەوە و مایگرەیشن لە نوێوە بکرێت؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="40" />
+        <location filename="../qml/ProjectPage.qml" line="45" />
         <source>`migrate:fresh` deletes every table in this database, with all its data, then runs every migration again. This can't be undone.</source>
         <translation>`migrate:fresh` هەموو خشتەیەکی ئەم داتابەیسە لەگەڵ هەموو داتاکانی دەسڕێتەوە، پاشان هەموو مایگرەیشنەکان دووبارە جێبەجێ دەکات. ناکرێت بگەڕێنرێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="41" />
+        <location filename="../qml/ProjectPage.qml" line="46" />
         <source>Drop and migrate</source>
         <translation>سڕینەوە و مایگرەیشن</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="47" />
+        <location filename="../qml/ProjectPage.qml" line="55" />
         <source>This is a production site.</source>
         <translation>ئەمە ماڵپەڕێکی بەرهەمهێنانە.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="99" />
+        <location filename="../qml/ProjectPage.qml" line="120" />
         <source>Open site</source>
         <translation>کردنەوەی ماڵپەڕ</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="106" />
+        <location filename="../qml/ProjectPage.qml" line="127" />
         <source>Open admin</source>
         <translation>کردنەوەی پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="111" />
+        <location filename="../qml/ProjectPage.qml" line="132" />
         <source>Open folder</source>
         <translation>کردنەوەی فۆڵدەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="116" />
+        <location filename="../qml/ProjectPage.qml" line="137" />
         <source>Open in editor</source>
         <translation>کردنەوە لە دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="124" />
+        <location filename="../qml/ProjectPage.qml" line="145" />
         <source>Stop server</source>
         <translation>وەستاندنی سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="124" />
+        <location filename="../qml/ProjectPage.qml" line="145" />
         <source>Start server</source>
         <translation>دەستپێکردنی سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="145" />
+        <location filename="../qml/ProjectPage.qml" line="166" />
         <source>Remove from the list</source>
         <translation>لابردن لە لیستەکە</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Overview</source>
         <translation>گشتی</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Generate</source>
         <translation>دروستکەرەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Database</source>
         <translation>داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Logs</source>
         <translation>تۆمارەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Packages</source>
         <translation>پاکێجەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Doctor</source>
         <translation>پشکنین</translation>
     </message>
@@ -1461,36 +1506,41 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="98" />
+        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
+        <translation>فەرمانێک هێشتا لەم پڕۆژەیەدا کار دەکات. کاتێک تەواو بوو لە لیستەکە لایببە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="99" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>پڕۆژەکە فایلی `.env` ـی نییە. `.env.example` بۆ `.env` کۆپی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="99" />
+        <location filename="../qml/Texts.qml" line="100" />
         <source>The command could not run.</source>
         <translation>فەرمانەکە نەتوانرا جێبەجێ بکرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="100" />
+        <location filename="../qml/Texts.qml" line="101" />
         <source>Studio could not read what the check printed.</source>
         <translation>Studio نەیتوانی ئەوە بخوێنێتەوە کە پشکنینەکە چاپی کرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="101" />
+        <location filename="../qml/Texts.qml" line="102" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>Studio نەیتوانی داتابەیسەکە بخوێنێتەوە. ئایا سێرڤەری داتابەیس کار دەکات، و ڕێکخستنەکانی `.env` دروستن؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="102" />
+        <location filename="../qml/Texts.qml" line="103" />
         <source>Studio could not read the migrations.</source>
         <translation>Studio نەیتوانی مایگرەیشنەکان بخوێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="103" />
+        <location filename="../qml/Texts.qml" line="104" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>هێشتا `storage/logs/app.log` نییە. FloCMS لە یەکەم پەیامدا دەینووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="105" />
+        <location filename="../qml/Texts.qml" line="106" />
         <source>Something went wrong (%1).</source>
         <translation>هەڵەیەک ڕوویدا (%1).</translation>
     </message>

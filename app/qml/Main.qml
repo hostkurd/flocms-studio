@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QtQuick.Templates as T
 import FloStudio.Backend
 
 // The window: the sidebar and the page it shows (welcome, a project,
@@ -16,6 +17,26 @@ ApplicationWindow {
     color: Theme.bg
     title: Studio.page === "project" && Studio.current.name
            ? qsTr("%1 – FloCMS Studio").arg(Studio.current.name) : "FloCMS Studio"
+
+    // Quitting while a migration runs would stop it halfway: ask first
+    property bool quitAnyway: false
+    onClosing: (close) => {
+        if (Studio.commandRunning && !window.quitAnyway) {
+            close.accepted = false
+            quitQuestion.ask({
+                title: qsTr("A command is still running"),
+                message: qsTr("Quitting now stops it halfway, which can leave the database half migrated."),
+                confirmText: qsTr("Quit anyway"),
+                danger: true
+            })
+        }
+    }
+    ConfirmDialog {
+        id: quitQuestion
+        parent: T.Overlay.overlay
+        anchors.centerIn: parent
+        onAccepted: { window.quitAnyway = true; window.close() }
+    }
 
     Item {
         id: root

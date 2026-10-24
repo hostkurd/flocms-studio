@@ -91,7 +91,14 @@
     <message numerus="yes">
         <location filename="../qml/DatabaseTab.qml" line="118" />
         <source>Run %Ln migration(s)</source>
-        <translation><numerusform>تشغيل %Ln ترحيل</numerusform><numerusform>تشغيل ترحيل واحد</numerusform><numerusform>تشغيل ترحيلين</numerusform><numerusform>تشغيل %Ln ترحيلات</numerusform><numerusform>تشغيل %Ln ترحيلًا</numerusform><numerusform>تشغيل %Ln ترحيل</numerusform></translation>
+        <translation>
+            <numerusform>تشغيل %Ln ترحيل</numerusform>
+            <numerusform>تشغيل ترحيل واحد</numerusform>
+            <numerusform>تشغيل ترحيلين</numerusform>
+            <numerusform>تشغيل %Ln ترحيلات</numerusform>
+            <numerusform>تشغيل %Ln ترحيلًا</numerusform>
+            <numerusform>تشغيل %Ln ترحيل</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DatabaseTab.qml" line="118" />
@@ -186,7 +193,14 @@
     <message numerus="yes">
         <location filename="../qml/DatabaseTab.qml" line="228" />
         <source>%Ln table(s) and their row counts. Edit data in the admin panel.</source>
-        <translation><numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform><numerusform>جدول واحد وعدد صفوفه. عدّل البيانات في لوحة الإدارة.</numerusform><numerusform>جدولان وعدد صفوفهما. عدّل البيانات في لوحة الإدارة.</numerusform><numerusform>%Ln جداول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform><numerusform>%Ln جدولًا وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform><numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform></translation>
+        <translation>
+            <numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
+            <numerusform>جدول واحد وعدد صفوفه. عدّل البيانات في لوحة الإدارة.</numerusform>
+            <numerusform>جدولان وعدد صفوفهما. عدّل البيانات في لوحة الإدارة.</numerusform>
+            <numerusform>%Ln جداول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
+            <numerusform>%Ln جدولًا وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
+            <numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -194,17 +208,38 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="37" />
         <source>%Ln problem(s)</source>
-        <translation><numerusform>لا مشكلات</numerusform><numerusform>مشكلة واحدة</numerusform><numerusform>مشكلتان</numerusform><numerusform>%Ln مشكلات</numerusform><numerusform>%Ln مشكلة</numerusform><numerusform>%Ln مشكلة</numerusform></translation>
+        <translation>
+            <numerusform>لا مشكلات</numerusform>
+            <numerusform>مشكلة واحدة</numerusform>
+            <numerusform>مشكلتان</numerusform>
+            <numerusform>%Ln مشكلات</numerusform>
+            <numerusform>%Ln مشكلة</numerusform>
+            <numerusform>%Ln مشكلة</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="44" />
         <source>%Ln warning(s)</source>
-        <translation><numerusform>لا تحذيرات</numerusform><numerusform>تحذير واحد</numerusform><numerusform>تحذيران</numerusform><numerusform>%Ln تحذيرات</numerusform><numerusform>%Ln تحذيرًا</numerusform><numerusform>%Ln تحذير</numerusform></translation>
+        <translation>
+            <numerusform>لا تحذيرات</numerusform>
+            <numerusform>تحذير واحد</numerusform>
+            <numerusform>تحذيران</numerusform>
+            <numerusform>%Ln تحذيرات</numerusform>
+            <numerusform>%Ln تحذيرًا</numerusform>
+            <numerusform>%Ln تحذير</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="51" />
         <source>%Ln OK</source>
-        <translation><numerusform>%Ln سليم</numerusform><numerusform>%Ln سليم</numerusform><numerusform>%Ln سليم</numerusform><numerusform>%Ln سليمة</numerusform><numerusform>%Ln سليمًا</numerusform><numerusform>%Ln سليم</numerusform></translation>
+        <translation>
+            <numerusform>%Ln سليم</numerusform>
+            <numerusform>%Ln سليم</numerusform>
+            <numerusform>%Ln سليم</numerusform>
+            <numerusform>%Ln سليمة</numerusform>
+            <numerusform>%Ln سليمًا</numerusform>
+            <numerusform>%Ln سليم</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="57" />
@@ -220,7 +255,14 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="60" />
         <source>Last checked: %Ln min ago</source>
-        <translation><numerusform>آخر فحص: قبل %Ln دقيقة</numerusform><numerusform>آخر فحص: قبل دقيقة</numerusform><numerusform>آخر فحص: قبل دقيقتين</numerusform><numerusform>آخر فحص: قبل %Ln دقائق</numerusform><numerusform>آخر فحص: قبل %Ln دقيقة</numerusform><numerusform>آخر فحص: قبل %Ln دقيقة</numerusform></translation>
+        <translation>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل دقيقتين</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقائق</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="66" />
@@ -240,7 +282,14 @@
     <message numerus="yes">
         <location filename="../qml/DoctorTab.qml" line="115" />
         <source>%Ln more check(s), all OK</source>
-        <translation><numerusform>لا فحوص أخرى</numerusform><numerusform>فحص آخر، سليم</numerusform><numerusform>فحصان آخران، كلاهما سليم</numerusform><numerusform>%Ln فحوص أخرى، كلها سليمة</numerusform><numerusform>%Ln فحصًا آخر، كلها سليمة</numerusform><numerusform>%Ln فحص آخر، كلها سليمة</numerusform></translation>
+        <translation>
+            <numerusform>لا فحوص أخرى</numerusform>
+            <numerusform>فحص آخر، سليم</numerusform>
+            <numerusform>فحصان آخران، كلاهما سليم</numerusform>
+            <numerusform>%Ln فحوص أخرى، كلها سليمة</numerusform>
+            <numerusform>%Ln فحصًا آخر، كلها سليمة</numerusform>
+            <numerusform>%Ln فحص آخر، كلها سليمة</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/DoctorTab.qml" line="131" />
@@ -514,9 +563,24 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="18" />
+        <location filename="../qml/Main.qml" line="19" />
         <source>%1 – FloCMS Studio</source>
         <translation>%1 – FloCMS Studio</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="27" />
+        <source>A command is still running</source>
+        <translation>لا يزال أمر قيد التشغيل</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="28" />
+        <source>Quitting now stops it halfway, which can leave the database half migrated.</source>
+        <translation>الخروج الآن يوقفه في منتصفه، وقد يترك قاعدة البيانات مرحّلة جزئيًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="29" />
+        <source>Quit anyway</source>
+        <translation>الخروج على أي حال</translation>
     </message>
 </context>
 <context>
@@ -605,12 +669,26 @@
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="60" />
         <source>%Ln table(s)</source>
-        <translation><numerusform>لا جداول</numerusform><numerusform>جدول واحد</numerusform><numerusform>جدولان</numerusform><numerusform>%Ln جداول</numerusform><numerusform>%Ln جدولًا</numerusform><numerusform>%Ln جدول</numerusform></translation>
+        <translation>
+            <numerusform>لا جداول</numerusform>
+            <numerusform>جدول واحد</numerusform>
+            <numerusform>جدولان</numerusform>
+            <numerusform>%Ln جداول</numerusform>
+            <numerusform>%Ln جدولًا</numerusform>
+            <numerusform>%Ln جدول</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="64" />
         <source>%Ln migration(s) waiting</source>
-        <translation><numerusform>لا ترحيلات بالانتظار</numerusform><numerusform>ترحيل واحد بالانتظار</numerusform><numerusform>ترحيلان بالانتظار</numerusform><numerusform>%Ln ترحيلات بالانتظار</numerusform><numerusform>%Ln ترحيلًا بالانتظار</numerusform><numerusform>%Ln ترحيل بالانتظار</numerusform></translation>
+        <translation>
+            <numerusform>لا ترحيلات بالانتظار</numerusform>
+            <numerusform>ترحيل واحد بالانتظار</numerusform>
+            <numerusform>ترحيلان بالانتظار</numerusform>
+            <numerusform>%Ln ترحيلات بالانتظار</numerusform>
+            <numerusform>%Ln ترحيلًا بالانتظار</numerusform>
+            <numerusform>%Ln ترحيل بالانتظار</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/OverviewTab.qml" line="72" />
@@ -725,132 +803,139 @@
 <context>
     <name>ProjectPage</name>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="24" />
+        <location filename="../qml/ProjectPage.qml" line="29" />
         <source>Run the migrations on this production site?</source>
         <translation>تشغيل الترحيلات على موقع الإنتاج هذا؟</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/ProjectPage.qml" line="25" />
+        <location filename="../qml/ProjectPage.qml" line="30" />
         <source>`APP_ENV` says this is a production site. %Ln migration(s) will change its database.</source>
-        <translation><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. لن يغيّر أي ترحيل قاعدة بياناته.</numerusform><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر ترحيل واحد قاعدة بياناته.</numerusform><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر ترحيلان قاعدة بياناته.</numerusform><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. ستغيّر %Ln ترحيلات قاعدة بياناته.</numerusform><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر %Ln ترحيلًا قاعدة بياناته.</numerusform><numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر %Ln ترحيل قاعدة بياناته.</numerusform></translation>
+        <translation>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. لن يغيّر أي ترحيل قاعدة بياناته.</numerusform>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر ترحيل واحد قاعدة بياناته.</numerusform>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر ترحيلان قاعدة بياناته.</numerusform>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. ستغيّر %Ln ترحيلات قاعدة بياناته.</numerusform>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر %Ln ترحيلًا قاعدة بياناته.</numerusform>
+            <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. سيغيّر %Ln ترحيل قاعدة بياناته.</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="26" />
+        <location filename="../qml/ProjectPage.qml" line="31" />
         <source>Run migrations</source>
         <translation>تشغيل الترحيلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="29" />
+        <location filename="../qml/ProjectPage.qml" line="34" />
         <source>Roll back the last batch?</source>
         <translation>التراجع عن آخر دفعة؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="30" />
+        <location filename="../qml/ProjectPage.qml" line="35" />
         <source>This undoes the migrations of the last batch. Tables or columns they made, and the data in them, are dropped.</source>
         <translation>يتراجع هذا عن ترحيلات آخر دفعة. تُحذف الجداول أو الأعمدة التي أنشأتها، والبيانات التي فيها.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="31" />
+        <location filename="../qml/ProjectPage.qml" line="36" />
         <source>Roll back</source>
         <translation>تراجع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="34" />
+        <location filename="../qml/ProjectPage.qml" line="39" />
         <source>Seed the database?</source>
         <translation>تعبئة قاعدة البيانات؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="35" />
+        <location filename="../qml/ProjectPage.qml" line="40" />
         <source>This runs `database/seeders/DatabaseSeeder`, which adds rows to the tables.</source>
         <translation>يشغّل هذا `database/seeders/DatabaseSeeder` الذي يضيف صفوفًا إلى الجداول.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="36" />
+        <location filename="../qml/ProjectPage.qml" line="41" />
         <source>Seed</source>
         <translation>تعبئة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="39" />
+        <location filename="../qml/ProjectPage.qml" line="44" />
         <source>Drop every table and migrate again?</source>
         <translation>حذف كل الجداول والترحيل من جديد؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="40" />
+        <location filename="../qml/ProjectPage.qml" line="45" />
         <source>`migrate:fresh` deletes every table in this database, with all its data, then runs every migration again. This can't be undone.</source>
         <translation>يحذف `migrate:fresh` كل جدول في قاعدة البيانات هذه مع كل بياناته، ثم يشغّل كل الترحيلات من جديد. لا يمكن التراجع عن هذا.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="41" />
+        <location filename="../qml/ProjectPage.qml" line="46" />
         <source>Drop and migrate</source>
         <translation>حذف وترحيل</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="47" />
+        <location filename="../qml/ProjectPage.qml" line="55" />
         <source>This is a production site.</source>
         <translation>هذا موقع إنتاج.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="99" />
+        <location filename="../qml/ProjectPage.qml" line="120" />
         <source>Open site</source>
         <translation>فتح الموقع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="106" />
+        <location filename="../qml/ProjectPage.qml" line="127" />
         <source>Open admin</source>
         <translation>فتح لوحة الإدارة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="111" />
+        <location filename="../qml/ProjectPage.qml" line="132" />
         <source>Open folder</source>
         <translation>فتح المجلد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="116" />
+        <location filename="../qml/ProjectPage.qml" line="137" />
         <source>Open in editor</source>
         <translation>فتح في المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="124" />
+        <location filename="../qml/ProjectPage.qml" line="145" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="124" />
+        <location filename="../qml/ProjectPage.qml" line="145" />
         <source>Start server</source>
         <translation>تشغيل الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="145" />
+        <location filename="../qml/ProjectPage.qml" line="166" />
         <source>Remove from the list</source>
         <translation>إزالة من القائمة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Overview</source>
         <translation>نظرة عامة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Generate</source>
         <translation>المولّدات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="163" />
+        <location filename="../qml/ProjectPage.qml" line="184" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>
@@ -1469,36 +1554,41 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="98" />
+        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
+        <translation>لا يزال أمر قيد التشغيل في هذا المشروع. أزله من القائمة حين ينتهي.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="99" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>لا يحتوي المشروع على ملف `.env`. انسخ `.env.example` إلى `.env`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="99" />
+        <location filename="../qml/Texts.qml" line="100" />
         <source>The command could not run.</source>
         <translation>تعذّر تشغيل الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="100" />
+        <location filename="../qml/Texts.qml" line="101" />
         <source>Studio could not read what the check printed.</source>
         <translation>تعذّر على Studio قراءة ما طبعه الفحص.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="101" />
+        <location filename="../qml/Texts.qml" line="102" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>تعذّر على Studio قراءة قاعدة البيانات. هل خادم قاعدة البيانات يعمل، وهل إعدادات `.env` صحيحة؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="102" />
+        <location filename="../qml/Texts.qml" line="103" />
         <source>Studio could not read the migrations.</source>
         <translation>تعذّر على Studio قراءة الترحيلات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="103" />
+        <location filename="../qml/Texts.qml" line="104" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>لا يوجد `storage/logs/app.log` بعد. يكتبه FloCMS عند أول رسالة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="105" />
+        <location filename="../qml/Texts.qml" line="106" />
         <source>Something went wrong (%1).</source>
         <translation>حدث خطأ (%1).</translation>
     </message>
