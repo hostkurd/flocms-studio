@@ -29,7 +29,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR "Build in a separate folder, for example: cmake -S . -B build")
 endif()
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Concurrent Gui Network Qml Quick QuickControls2)
 qt_standard_project_setup()
 # Qt 6.8+: also write a qmldir for QML files in subfolders (the future default).
 if(QT_KNOWN_POLICY_QTP0004)

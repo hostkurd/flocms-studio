@@ -4,6 +4,7 @@ flostudio_add_library(FloStudioCore Core
     SOURCES
         src/buildinfo.cpp
         src/commands.cpp
+        src/downloads.cpp
         src/env.cpp
         src/logs.cpp
         src/output.cpp
@@ -14,6 +15,7 @@ flostudio_add_library(FloStudioCore Core
     HEADERS
         include/flostudio/core/buildinfo.h
         include/flostudio/core/commands.h
+        include/flostudio/core/downloads.h
         include/flostudio/core/env.h
         include/flostudio/core/logs.h
         include/flostudio/core/output.h
@@ -23,9 +25,16 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/settings.h
         include/flostudio/core/tools.h
         "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/core/version.h"
-    # Network: portAnswers() (is the database or the server listening)
-    QT Network
+    # Network: portAnswers(), tool downloads; Concurrent: unpacking off the
+    # interface thread
+    QT Network Concurrent
 )
+
+# The tool list Studio may download from (D15), made by tools/tool_manifest.py
+qt_add_resources(FloStudioCore "tools"
+    PREFIX /flostudio/core
+    BASE resources
+    FILES resources/tools.json)
 
 target_compile_definitions(FloStudioCore PRIVATE
     FLOSTUDIO_QT_STATIC_BUILD=$<BOOL:${FLOSTUDIO_QT_STATIC}>

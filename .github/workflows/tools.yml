@@ -1,0 +1,96 @@
+name: Tool downloads
+
+# D15: the tools Studio may download (libs/core/resources/tools.json).
+#  - list:     tools/tool_manifest.py finds the newest files at the
+#              official sources, checks their hashes, and fails when the
+#              committed list is out of date (new PHP patch releases), so
+#              the weekly run says when Studio needs an update.
+#  - install:  Studio's own download code (tst_downloads, online) downloads
+#              this system's PHP and Composer from the committed list,
+#              installs and runs them, and checks PHP has what FloCMS needs.
+
+on:
+  pull_request:
+    paths:
+      - "tools/tool_manifest.py"
+      - "libs/core/resources/tools.json"
+      - "libs/core/src/downloads.cpp"
+      - "libs/core/include/flostudio/core/downloads.h"
+      - "tests/tst_downloads.cpp"
+      - ".github/workflows/tools.yml"
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  QT_VERSION: "6.12.0"
+
+jobs:
+  list:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Find the newest files and check the committed list
+        run: python tools/tool_manifest.py --check
+
+  install:
+    name: install (${{ matrix.os }})
+    needs: list
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, macos-15, ubuntu-24.04]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build tools
+        run: python -m pip install -q ninja
+      - name: MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Install Qt 6.12 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          set -o pipefail
+          python .github/scripts/install_qt_windows.py "$QT_VERSION" win64_msvc2022_64 "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log \
+            || { tail -5 qt.log | sed 's/^/::error::/'; exit 1; }
+          echo "QT_DIR=$(tail -1 qt.log | tr -d '\r')" >> "$GITHUB_ENV"
+      - name: Install Qt 6.12
+        if: runner.os != 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: ${{ runner.os == 'macOS' && 'clang_64' || 'linux_gcc_64' }}
+          cache: true
+          setup-python: false
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev
+      - name: Build the download test
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then extra=("-DCMAKE_PREFIX_PATH=$QT_DIR"); else extra=(); fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "${extra[@]}"
+          cmake --build build --target tst_downloads
+      - name: Download, install and run this system's PHP and Composer
+        env:
+          FLOSTUDIO_ONLINE: "1"
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
+          .github/scripts/run_tests.sh build -R tst_downloads -V
+          grep -E "QINFO" ctest.log | sed 's/^/::notice::/' || true

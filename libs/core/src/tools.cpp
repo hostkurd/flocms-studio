@@ -1,3 +1,4 @@
+#include <flostudio/core/downloads.h>
 #include <flostudio/core/process.h>
 #include <flostudio/core/tools.h>
 
@@ -170,6 +171,9 @@ QStringList toolSearchPath()
 #endif
         for (const QString &folder : commonToolFolders(QDir::homePath()))
             addFolder(list, folder);
+        // Last: what Studio downloaded itself (D15)
+        for (const QString &folder : installedToolFolders())
+            addFolder(list, QDir::fromNativeSeparators(folder));
         for (QString &folder : list)
             folder = QDir::toNativeSeparators(folder);
         return list;
