@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QGuiApplication>
 #include <QLocale>
+#include <QTimeZone>
 
 using namespace FloStudio::Core;
 
@@ -305,7 +306,7 @@ QString LogModel::shownTime(const Entry &entry) const
     if (!m_appOffsetKnown || !entry.appStamp.isValid())
         return entry.time;
     QDateTime stamp = entry.appStamp;
-    stamp.setOffsetFromUtc(m_appOffset);
+    stamp.setTimeZone(QTimeZone(m_appOffset)); // a fixed offset from UTC
     return stamp.toLocalTime().toString(QStringLiteral("HH:mm:ss"));
 }
 

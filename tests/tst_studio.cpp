@@ -23,6 +23,7 @@
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #ifdef Q_OS_UNIX
 #include <unistd.h>
@@ -326,7 +327,7 @@ private slots:
         logs.setAppTimeOffset(0); // PHP said UTC
         QCOMPARE(changed.count(), 1);
         QDateTime utc = QDateTime::fromString(QStringLiteral("2026-10-24 09:53:57"), QStringLiteral("yyyy-MM-dd HH:mm:ss"));
-        utc.setOffsetFromUtc(0);
+        utc.setTimeZone(QTimeZone(0));
         QCOMPARE(logs.data(logs.index(0), LogModel::TimeRole).toString(), utc.toLocalTime().toString(QStringLiteral("HH:mm:ss")));
         int seconds = 0;
         QVERIFY(ProjectServer::readUtcOffset(QStringLiteral("+03:00\n"), &seconds));
