@@ -5,11 +5,13 @@ on:
     paths:
       - "prototypes/rtl-check/**"
       - ".github/workflows/rtl-check.yml"
+      - ".github/scripts/**"
   push:
     branches: [main]
     paths:
       - "prototypes/rtl-check/**"
       - ".github/workflows/rtl-check.yml"
+      - ".github/scripts/**"
   workflow_dispatch:
 
 permissions:
@@ -119,6 +121,39 @@ jobs:
           done
           run --lang ckb --page doctor --dark --screenshot shots/ckb-doctor-dark.png
           run --lang ar --page overview --dark --screenshot shots/ar-overview-dark.png
+
+      # A folder you can copy to any Windows 10/11 PC and run: the exe, the
+      # Qt DLLs and QML files (windeployqt) and the Visual C++ runtime.
+      - name: Portable Windows build
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p portable
+          cp "$RTLCHECK" portable/
+          windeployqt --release --qmldir prototypes/rtl-check --no-translations portable/rtlcheck.exe
+          vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
+          crt=$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)
+          test -n "$crt" || { echo "::error::Visual C++ runtime folder not found"; exit 1; }
+          cp "$crt"/*.dll portable/
+          cp prototypes/rtl-check/package/README.txt portable/
+          ls portable
+
+      # Run the copied folder with Qt removed from PATH, so it can only use
+      # the files next to it, as on a PC without Qt.
+      - name: Test the portable build
+        if: runner.os == 'Windows'
+        run: |
+          export PATH="/c/Windows/System32:/c/Windows:/usr/bin"
+          portable/rtlcheck.exe --self-test > portable-selftest.txt
+          tail -1 portable-selftest.txt
+          portable/rtlcheck.exe --lang ckb --page doctor --screenshot shots/portable-ckb-doctor.png
+          test -s shots/portable-ckb-doctor.png || { echo "::error::the portable build did not start"; exit 1; }
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: rtlcheck-windows-portable
+          path: portable/
+          if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         if: always()
