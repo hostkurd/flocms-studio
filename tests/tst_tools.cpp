@@ -140,9 +140,16 @@ private slots:
         QVERIFY(!path.isEmpty());
         for (const QString &folder : path)
             QVERIFY2(QDir::isAbsolutePath(folder), qUtf8Printable(folder));
-        const QString first = qEnvironmentVariable("PATH").split(QDir::listSeparator(), Qt::SkipEmptyParts).value(0);
+        // PATH's first absolute folder comes first (relative ones are left out)
+        QString first;
+        for (const QString &folder : qEnvironmentVariable("PATH").split(QDir::listSeparator(), Qt::SkipEmptyParts)) {
+            if (QDir::isAbsolutePath(QDir::cleanPath(folder))) {
+                first = QDir::toNativeSeparators(QDir::cleanPath(folder));
+                break;
+            }
+        }
         if (!first.isEmpty())
-            QCOMPARE(path.first(), QDir::toNativeSeparators(QDir::cleanPath(first)));
+            QCOMPARE(path.first(), first);
     }
 
     void composerThroughPhp()
