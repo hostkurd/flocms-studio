@@ -3,6 +3,7 @@
 
 #include <flostudio/core/commands.h>
 #include <flostudio/core/packages.h>
+#include <flostudio/core/tools.h>
 
 #include <QFile>
 #include <QTest>
@@ -75,6 +76,30 @@ private slots:
         QVERIFY(!hasUpgradeNotes(QStringLiteral("hostkurd/flocms-core")));
     }
 
+    // What the project is changes the commands
+    void projectOptions()
+    {
+        PackageProject live;
+        live.production = true;
+        live.database = false;
+        QList<PackageStep> steps = updateSteps(QStringLiteral("hostkurd/flocms-admin"), QStringLiteral("0.39.3"), live);
+        QCOMPARE(steps.at(0).arguments,
+                 (QStringList{QStringLiteral("require"), QStringLiteral("hostkurd/flocms-admin:^0.39.3"), QStringLiteral("-W"),
+                              QStringLiteral("--update-no-dev")}));
+        QCOMPARE(steps.size(), 2); // no migrate without a database
+        // Composer as a .bat: no ^ for cmd.exe; Composer writes it
+        PackageProject batch;
+        batch.batchComposer = true;
+        steps = updateSteps(QStringLiteral("hostkurd/flocms-core"), QStringLiteral("2.9.0"), batch);
+        QCOMPARE(steps.at(0).arguments, (QStringList{QStringLiteral("require"), QStringLiteral("hostkurd/flocms-core"), QStringLiteral("-W")}));
+        for (const QString &argument : steps.at(0).arguments)
+            QVERIFY(safeForBatchFile(argument));
+        // Not a release: nothing to run
+        QVERIFY(updateSteps(QStringLiteral("hostkurd/flocms-core"), QStringLiteral("dev-main 1a2b3c")).isEmpty());
+        QVERIFY(isReleaseVersion(QStringLiteral("v2.9.0")));
+        QVERIFY(!isReleaseVersion(QStringLiteral("2.9.x-dev")));
+    }
+
     // Board 8's commands, and what the capture ran
     void steps()
     {
@@ -94,9 +119,11 @@ private slots:
 
         steps = addSteps(QStringLiteral("hostkurd/flocms-api"));
         QCOMPARE(steps.size(), 3);
-        QCOMPARE(steps.at(0).arguments, (QStringList{QStringLiteral("require"), QStringLiteral("hostkurd/flocms-api")}));
+        QCOMPARE(steps.at(0).arguments, (QStringList{QStringLiteral("require"), QStringLiteral("hostkurd/flocms-api"), QStringLiteral("-W")}));
         QCOMPARE(addSteps(QStringLiteral("hostkurd/flocms-admin")).at(1).arguments, QStringList{QStringLiteral("admin:install")});
         QVERIFY(addSteps(QStringLiteral("psr/log")).isEmpty());
+        // Adding also lets Composer update what the package needs
+        QVERIFY(steps.at(0).arguments.contains(QStringLiteral("-W")));
         // Every command is one Core runs
         for (const PackageStep &each : updateSteps(QStringLiteral("hostkurd/flocms-admin"), QStringLiteral("0.39.3")) + steps)
             QVERIFY(isAllowed(each.program, each.arguments));

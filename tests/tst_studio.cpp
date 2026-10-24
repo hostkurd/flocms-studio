@@ -17,6 +17,7 @@
 #include <flostudio/core/env.h>
 #include <flostudio/core/server.h>
 #include <flostudio/core/settings.h>
+#include <flostudio/core/packages.h>
 #include <flostudio/core/preview.h>
 #include <flostudio/core/tools.h>
 
@@ -592,14 +593,15 @@ private slots:
         QCOMPARE(packages->planAdd(QStringLiteral("hostkurd/flocms-api")).value(QStringLiteral("steps")).toStringList().size(), 3);
         QVERIFY(packages->planAdd(QStringLiteral("psr/log")).isEmpty());
         // A demo runs nothing
-        packages->update(QStringLiteral("hostkurd/flocms-core"));
+        packages->update(QStringLiteral("hostkurd/flocms-core"), QStringLiteral("2.9.0"));
         packages->checkUpdates();
         QVERIFY(!packages->busy());
     }
 
     // A real project: composer outdated (Packagist, so only with the
-    // network: FLOSTUDIO_WIZARD_TESTS=1 in CI), then an update to the
-    // version it has, which runs every step and changes nothing
+    // network: FLOSTUDIO_WIZARD_TESTS=1 in CI), then an update of
+    // flocms-cli to its latest version, which runs every step. It writes
+    // that ^ constraint into composer.json: CI's project is made for the run
     void readsARealProjectsPackages()
     {
         const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
@@ -617,16 +619,16 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!packages->busy(), 180000);
         QVERIFY2(packages->check().value(QStringLiteral("state")).toString() == u"done",
                  qUtf8Printable(packages->check().value(QStringLiteral("message")).toString()));
-        QString cli;
+        QString latest;
         for (const QVariant &row : packages->packages()) {
             const QVariantMap map = row.toMap();
-            if (map.value(QStringLiteral("name")).toString() == u"hostkurd/flocms-cli") {
-                cli = map.value(QStringLiteral("version")).toString();
-                QVERIFY(!map.value(QStringLiteral("latest")).toString().isEmpty());
-            }
+            if (map.value(QStringLiteral("name")).toString() == u"hostkurd/flocms-cli")
+                latest = map.value(QStringLiteral("latest")).toString();
         }
-        QVERIFY(!cli.isEmpty());
-        packages->update(QStringLiteral("hostkurd/flocms-cli"));
+        QVERIFY(isReleaseVersion(latest));
+        packages->update(QStringLiteral("hostkurd/flocms-cli"), QStringLiteral("0.0.1")); // not what the plan says
+        QVERIFY(!packages->busy());
+        packages->update(QStringLiteral("hostkurd/flocms-cli"), latest);
         QVERIFY(studio.commandRunning());
         QTRY_VERIFY_WITH_TIMEOUT(!packages->busy(), 300000);
         QVERIFY2(packages->run().value(QStringLiteral("state")).toString() == u"done",

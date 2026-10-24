@@ -86,25 +86,44 @@ std::optional<QList<PackageStatus>> parseOutdated(const QString &json)
     return packages;
 }
 
-QList<PackageStep> updateSteps(const QString &package, const QString &latest)
+bool isReleaseVersion(const QString &version)
 {
-    QList<PackageStep> steps{step("require", Program::Composer,
-                                  {QStringLiteral("require"), package + QStringLiteral(":^") + plainVersion(latest),
-                                   QStringLiteral("-W")})};
+    static const QRegularExpression release(QStringLiteral(R"(^\d+(\.\d+){0,3}$)"));
+    return release.match(plainVersion(version)).hasMatch();
+}
+
+namespace {
+
+QList<PackageStep> requireThen(const QString &package, const QString &constraint, const PackageProject &project)
+{
+    QStringList require{QStringLiteral("require"), constraint, QStringLiteral("-W")};
+    if (project.production)
+        require << QStringLiteral("--update-no-dev");
+    QList<PackageStep> steps{step("require", Program::Composer, require)};
     if (const QString install = installer(package); !install.isEmpty())
         steps << step("install", Program::Flo, {install});
-    steps << step("migrate", Program::Flo, {QStringLiteral("migrate"), QStringLiteral("--force")});
+    if (project.database)
+        steps << step("migrate", Program::Flo, {QStringLiteral("migrate"), QStringLiteral("--force")});
     return steps;
 }
 
-QList<PackageStep> addSteps(const QString &package)
+} // namespace
+
+QList<PackageStep> updateSteps(const QString &package, const QString &latest, const PackageProject &project)
 {
-    const QString install = installer(package);
-    if (install.isEmpty())
+    if (!isReleaseVersion(latest))
         return {};
-    return {step("require", Program::Composer, {QStringLiteral("require"), package}),
-            step("install", Program::Flo, {install}),
-            step("migrate", Program::Flo, {QStringLiteral("migrate"), QStringLiteral("--force")})};
+    // pkg:^2.9.0; through a batch file just the package: Composer requires
+    // its newest version and writes the ^ itself
+    const QString constraint = project.batchComposer ? package : package + QStringLiteral(":^") + plainVersion(latest);
+    return requireThen(package, constraint, project);
+}
+
+QList<PackageStep> addSteps(const QString &package, const PackageProject &project)
+{
+    if (installer(package).isEmpty())
+        return {};
+    return requireThen(package, package, project);
 }
 
 } // namespace FloStudio::Core

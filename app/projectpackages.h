@@ -44,8 +44,9 @@ public:
     QVariantMap run() const { return m_run; }
     bool busy() const { return m_process != nullptr || m_check.value(QStringLiteral("state")).toString() == u"running"; }
 
-    // What composer.lock lists (Studio reads it): [{name, version}]
-    void setInstalled(const QVariantList &packages, const QVariantList &others);
+    // The project as Studio read it (infoMap): its composer.lock packages
+    // and others, its database, production, vendor/
+    void setProject(const QVariantMap &current);
 
     // Asks Composer what is newer (it asks Packagist).
     Q_INVOKABLE void checkUpdates();
@@ -53,7 +54,9 @@ public:
     // from, to, steps: [shown], changelog, upgrading}.
     Q_INVOKABLE QVariantMap planUpdate(const QString &name) const;
     Q_INVOKABLE QVariantMap planAdd(const QString &name) const;
-    Q_INVOKABLE void update(const QString &name);
+    // Refused when what would run is no longer `expectedTo` (a check
+    // since the plan was shown found a newer one)
+    Q_INVOKABLE void update(const QString &name, const QString &expectedTo);
     Q_INVOKABLE void add(const QString &name);
     Q_INVOKABLE void clearRun();
 
@@ -74,10 +77,14 @@ private:
     void runStep(int index);
     void setStepState(int index, const QString &state);
     bool demo() const { return m_settings == nullptr; }
+    FloStudio::Core::PackageProject options() const;
 
     QString m_projectDir;
     const FloStudio::Core::Settings *m_settings; // Studio's; null for a demo
     QVariantList m_installed;                    // [{name, version}] from composer.lock
+    bool m_database = true;
+    bool m_production = false;
+    bool m_hasVendor = true;
     QStringList m_others;
     QList<FloStudio::Core::PackageStatus> m_status; // from composer outdated
     QVariantMap m_check{{QStringLiteral("state"), QStringLiteral("idle")}};
@@ -88,4 +95,5 @@ private:
     QStringList m_lines;
     QStringList m_errors;
     QProcess *m_process = nullptr; // a child of this while a step runs
+    bool m_linesPending = false;   // output lines go to the screen in batches
 };

@@ -39,8 +39,6 @@ T = {
     "Studio فەرمانی `api:install` جێبەجێ دەکات، کە تەنها ئەوەی کەمە زیادی دەکات، پاشان `migrate`."),
  "Studio runs `migrate` for the package's new tables.":
    ("يشغّل Studio الأمر `migrate` لجداول الحزمة الجديدة.", "Studio فەرمانی `migrate` بۆ خشتە نوێیەکانی پاکێجەکە جێبەجێ دەکات."),
- "`APP_ENV` says this is a production site: `migrate` changes its database.":
-   ("يقول `APP_ENV` إن هذا موقع إنتاج: سيغيّر `migrate` قاعدة بياناته.", "`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە: `migrate` داتابەیسەکەی دەگۆڕێت."),
  "Commands": ("الأوامر", "فەرمانەکان"),
  "Added. The project's tabs show it now.": ("أُضيفت. تعرضها تبويبات المشروع الآن.", "زیادکرا. تابەکانی پڕۆژەکە ئێستا پیشانی دەدەن."),
  "Updated to %1.": ("حُدّثت إلى %1.", "نوێکرایەوە بۆ %1."),
@@ -50,6 +48,18 @@ T = {
  "Composer could not say what is newer. It asks Packagist, so this needs the internet.":
    ("تعذّر على Composer معرفة ما هو أحدث. فهو يسأل Packagist، لذا يحتاج هذا إلى الإنترنت.",
     "Composer نەیتوانی بڵێت چی نوێترە. پرسیار لە Packagist دەکات، بۆیە پێویستی بە ئینتەرنێتە."),
+ # Review fixes
+ "Abandoned": ("متروكة", "وازلێهێنراو"),
+ "New 0.x version": ("إصدار 0.x جديد", "وەشانی 0.x ـی نوێ"),
+ "`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.":
+   ("لا يذكر `.env` أي قاعدة بيانات، لذا لا يُشغَّل `migrate`. شغّله من تبويب قاعدة البيانات بعد ضبطها.",
+    "`.env` هیچ داتابەیسێک ناو نابات، بۆیە `migrate` جێبەجێ ناکرێت. دوای دانانی داتابەیس لە تابی داتابەیسەوە جێبەجێی بکە."),
+ "`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.":
+   ("يقول `APP_ENV` إن هذا موقع إنتاج: يترك Composer حزم التطوير (`--update-no-dev`)، وسيغيّر `migrate` قاعدة بياناته.",
+    "`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە: Composer پاکێجەکانی گەشەپێدان دانانێت (`--update-no-dev`)، و `migrate` داتابەیسەکەی دەگۆڕێت."),
+ "Before 1.0, a new minor version may change how things work. Read the changelog first.":
+   ("قبل الإصدار 1.0، قد يغيّر الإصدار الفرعي الجديد طريقة عمل الأشياء. اقرأ سجل التغييرات أولًا.",
+    "پێش وەشانی 1.0، وەشانێکی لاوەکیی نوێ لەوانەیە شێوەی کارکردنی شتەکان بگۆڕێت. سەرەتا تۆماری گۆڕانکارییەکان بخوێنەوە."),
 }
 
 P = {

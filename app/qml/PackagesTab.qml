@@ -11,36 +11,53 @@ ScrollView {
     readonly property var pk: Studio.packagesTab
     readonly property var rows: pk ? pk.packages : []
     readonly property var check: pk ? pk.check : ({})
-    readonly property var run: pk ? pk.run : ({})
+    readonly property var run: pk && pk.run ? pk.run : ({})
     readonly property bool running: run.state === "running"
     readonly property bool production: !!(Studio.current && Studio.current.production)
     // The package whose update (or addition) is shown on the right
     property string chosen: ""
     property string chosenKind: ""
-    readonly property var plan: !pk || chosen === "" ? ({})
-                                : (chosenKind === "add" ? pk.planAdd(chosen) : pk.planUpdate(chosen))
+    // Read again whenever the rows change (a check found something newer)
+    readonly property var plan: (rows, !pk || chosen === "" ? ({})
+                                       : (chosenKind === "add" ? pk.planAdd(chosen) : pk.planUpdate(chosen)))
     property real now: Date.now()
     readonly property int minutes: check.checkedAt ? Math.max(0, Math.floor((now - Date.parse(check.checkedAt)) / 60000)) : -1
     readonly property int updates: rows.filter(r => r.status === "update" || r.status === "major").length
     // The table's columns
     readonly property int versionWidth: 90
     readonly property int statusWidth: 140
-    readonly property int actionWidth: 170
+    readonly property int actionWidth: Math.max(measureAdmin.implicitWidth, measureApi.implicitWidth, measureReview.implicitWidth)
     contentWidth: availableWidth
     clip: true
 
     Timer { interval: 30000; repeat: true; running: tab.visible; onTriggered: tab.now = Date.now() }
-    // Asked once, the first time the tab is shown: Composer asks Packagist
-    onVisibleChanged: if (visible && tab.pk && tab.check.state === "idle") tab.pk.checkUpdates()
+    // Asked once per project, the first time its tab is shown: Composer
+    // asks Packagist
+    function checkOnce() { if (visible && tab.pk && tab.check.state === "idle") tab.pk.checkUpdates() }
+    onVisibleChanged: checkOnce()
+    // Another project: its own run (one still going, or one that ended)
+    property var shownPk: null
+    onPkChanged: {
+        if (tab.pk === tab.shownPk) return
+        tab.shownPk = tab.pk
+        // Read from the new project itself: tab.run may not follow yet
+        const run = tab.pk ? tab.pk.run : null
+        tab.chosen = run && run.name ? run.name : ""
+        tab.chosenKind = run && run.kind ? run.kind : ""
+        checkOnce()
+    }
     // A demo can open on an update
     Component.onCompleted: {
+        tab.shownPk = tab.pk
         if (tab.run.name) { tab.chosen = tab.run.name; tab.chosenKind = tab.run.kind }
         else if (Studio.demoDialog) { tab.chosen = Studio.demoDialog; tab.chosenKind = tab.rows.some(r => r.name === Studio.demoDialog && r.canAdd) ? "add" : "update" }
     }
-    Connections {
-        target: Studio
-        function onCurrentChanged() { if (!tab.running) { tab.chosen = ""; tab.chosenKind = "" } }
-    }
+    // An isolated left-to-right run: versions read the same in Arabic
+    function ltr(text) { return "\u2066" + text + "\u2069" }
+    // Measures for the action column: as wide as its widest button
+    AppButton { id: measureAdmin; visible: false; small: true; text: qsTr("Add the admin panel") }
+    AppButton { id: measureApi; visible: false; small: true; text: qsTr("Add the API") }
+    AppButton { id: measureReview; visible: false; small: true; text: qsTr("Review update") }
 
     function shortName(name) { return name.replace("hostkurd/", "") }
     function choose(name, kind) {
@@ -171,13 +188,16 @@ ScrollView {
                             id: statusPill
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
+                            width: Math.min(implicitWidth, parent.width)
+                            clip: true
                             visible: row.modelData.status !== "missing" && row.modelData.status !== "unknown"
-                            text: row.modelData.status === "current" ? qsTr("Up to date")
+                            text: row.modelData.abandoned ? qsTr("Abandoned")
+                                  : row.modelData.status === "current" ? qsTr("Up to date")
                                   : row.modelData.status === "update" ? qsTr("Update")
-                                  : row.modelData.status === "major" ? qsTr("New major version")
+                                  : row.modelData.status === "major" ? ((row.modelData.version || "").startsWith("0.") ? qsTr("New 0.x version") : qsTr("New major version"))
                                   : qsTr("Through another package")
-                            color: row.modelData.status === "current" ? Theme.okBg : (row.hasUpdate ? Theme.warnBg : Theme.border)
-                            fg: row.modelData.status === "current" ? Theme.okText : (row.hasUpdate ? Theme.warnText : Theme.muted)
+                            color: row.modelData.abandoned ? Theme.badBg : row.modelData.status === "current" ? Theme.okBg : (row.hasUpdate ? Theme.warnBg : Theme.border)
+                            fg: row.modelData.abandoned ? Theme.badText : row.modelData.status === "current" ? Theme.okText : (row.hasUpdate ? Theme.warnText : Theme.muted)
                         }
                         }
                         Item {
@@ -252,7 +272,7 @@ ScrollView {
             }
             Mono {
                 visible: tab.chosenKind === "update"
-                text: (tab.plan.from || "") + " → " + (tab.plan.to || "")
+                text: tab.ltr((tab.plan.from || "") + " → " + (tab.plan.to || ""))
                 font.family: Lang.displayFont
                 font.pixelSize: 22
                 font.weight: Font.DemiBold
@@ -265,7 +285,9 @@ ScrollView {
             }
             RichText {
                 visible: !!tab.plan.major
-                raw: qsTr("A new major version: it may change how things work. Read the changelog first.")
+                raw: (tab.plan.from || "").startsWith("0.")
+                     ? qsTr("Before 1.0, a new minor version may change how things work. Read the changelog first.")
+                     : qsTr("A new major version: it may change how things work. Read the changelog first.")
                 color: Theme.warnText
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
@@ -300,8 +322,15 @@ ScrollView {
                         Layout.fillWidth: true
                     }
                     RichText {
+                        visible: !!tab.plan.noDatabase
+                        raw: qsTr("`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.")
+                        color: Theme.warnText
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
+                    RichText {
                         visible: tab.production
-                        raw: qsTr("`APP_ENV` says this is a production site: `migrate` changes its database.")
+                        raw: qsTr("`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.")
                         color: Theme.warnText
                         font.weight: Font.DemiBold
                         wrapMode: Text.Wrap
@@ -385,7 +414,7 @@ ScrollView {
                     primary: true
                     text: tab.chosenKind === "add" ? qsTr("Add") : qsTr("Update")
                     enabled: !!tab.pk && !tab.pk.busy
-                    onClicked: tab.chosenKind === "add" ? tab.pk.add(tab.chosen) : tab.pk.update(tab.chosen)
+                    onClicked: tab.chosenKind === "add" ? tab.pk.add(tab.chosen) : tab.pk.update(tab.chosen, tab.plan.to)
                 }
             }
         }

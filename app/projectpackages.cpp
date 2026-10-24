@@ -3,8 +3,12 @@
 #include <flostudio/core/commands.h>
 #include <flostudio/core/output.h>
 #include <flostudio/core/process.h>
+#include <flostudio/core/tools.h>
 
 #include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
+#include <QTimer>
 #include <QFutureWatcher>
 #include <QProcess>
 #include <QtConcurrent>
@@ -49,11 +53,14 @@ ProjectPackages::~ProjectPackages()
     }
 }
 
-void ProjectPackages::setInstalled(const QVariantList &packages, const QVariantList &others)
+void ProjectPackages::setProject(const QVariantMap &current)
 {
-    m_installed = packages;
+    m_installed = current.value(QStringLiteral("packages")).toList();
+    m_database = current.value(QStringLiteral("database")).toMap().value(QStringLiteral("configured"), true).toBool();
+    m_production = current.value(QStringLiteral("production")).toBool();
+    m_hasVendor = current.value(QStringLiteral("hasVendor"), true).toBool();
     m_others.clear();
-    for (const QVariant &value : others) {
+    for (const QVariant &value : current.value(QStringLiteral("others")).toList()) {
         const QVariantMap package = value.toMap();
         m_others << package.value(QStringLiteral("name")).toString() + u' ' + package.value(QStringLiteral("version")).toString();
     }
@@ -112,10 +119,32 @@ QVariantList ProjectPackages::packages() const
 // The analyzer misses the watcher's parent and reports it at the end of
 // the function, where a line NOLINT can't reach
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+PackageProject ProjectPackages::options() const
+{
+    PackageProject project;
+    project.database = m_database;
+    project.production = m_production;
+    if (m_settings) {
+        if (const auto composer = composerLaunch(*m_settings)) {
+            const QString suffix = QFileInfo(composer->program).suffix().toLower();
+            project.batchComposer = suffix == u"bat" || suffix == u"cmd";
+        }
+    }
+    return project;
+}
+
 void ProjectPackages::checkUpdates()
 {
-    if (demo() || m_check.value(QStringLiteral("state")).toString() == u"running")
+    // Not while an update runs: it asks again when it ends
+    if (demo() || m_process || m_check.value(QStringLiteral("state")).toString() == u"running")
         return;
+    if (!m_hasVendor) {
+        m_check = {{QStringLiteral("state"), QStringLiteral("failed")},
+                   {QStringLiteral("error"), QStringLiteral("no_vendor")},
+                   {QStringLiteral("detail"), QDir::toNativeSeparators(m_projectDir)}};
+        emit packagesChanged();
+        return;
+    }
     CommandRequest request;
     request.program = Program::Composer;
     request.projectDir = m_projectDir;
@@ -171,7 +200,10 @@ QVariantMap ProjectPackages::planUpdate(const QString &name) const
         if (row.value(QStringLiteral("name")).toString() != name || row.value(QStringLiteral("latest")).toString().isEmpty())
             continue;
         QStringList commands;
-        for (const PackageStep &step : updateSteps(name, row.value(QStringLiteral("latest")).toString()))
+        const QList<PackageStep> steps = updateSteps(name, row.value(QStringLiteral("latest")).toString(), options());
+        if (steps.isEmpty())
+            return {}; // not a release Composer can require
+        for (const PackageStep &step : steps)
             commands << shown(step);
         const QString repository = row.value(QStringLiteral("repository")).toString();
         const QString tag = QStringLiteral("/blob/v") + row.value(QStringLiteral("latest")).toString();
@@ -181,6 +213,7 @@ QVariantMap ProjectPackages::planUpdate(const QString &name) const
                 {QStringLiteral("to"), row.value(QStringLiteral("latest"))},
                 {QStringLiteral("major"), row.value(QStringLiteral("status")).toString() == u"major"},
                 {QStringLiteral("steps"), commands},
+                {QStringLiteral("noDatabase"), !m_database},
                 {QStringLiteral("changelog"), repository + tag + QStringLiteral("/CHANGELOG.md")},
                 {QStringLiteral("upgrading"), hasUpgradeNotes(name) ? repository + tag + QStringLiteral("/UPGRADING.md") : QString()}};
     }
@@ -189,22 +222,25 @@ QVariantMap ProjectPackages::planUpdate(const QString &name) const
 
 QVariantMap ProjectPackages::planAdd(const QString &name) const
 {
-    const QList<PackageStep> steps = addSteps(name);
+    const QList<PackageStep> steps = addSteps(name, options());
     if (steps.isEmpty())
         return {};
     QStringList commands;
     for (const PackageStep &step : steps)
         commands << shown(step);
-    return {{QStringLiteral("kind"), QStringLiteral("add")}, {QStringLiteral("name"), name}, {QStringLiteral("steps"), commands}};
+    return {{QStringLiteral("kind"), QStringLiteral("add")},
+            {QStringLiteral("name"), name},
+            {QStringLiteral("steps"), commands},
+            {QStringLiteral("noDatabase"), !m_database}};
 }
 
-void ProjectPackages::update(const QString &name)
+void ProjectPackages::update(const QString &name, const QString &expectedTo)
 {
     const QVariantMap plan = planUpdate(name);
-    if (plan.isEmpty())
+    if (plan.isEmpty() || plan.value(QStringLiteral("to")).toString() != expectedTo)
         return;
-    start(QStringLiteral("update"), name, plan.value(QStringLiteral("from")).toString(), plan.value(QStringLiteral("to")).toString(),
-          updateSteps(name, plan.value(QStringLiteral("to")).toString()));
+    start(QStringLiteral("update"), name, plan.value(QStringLiteral("from")).toString(), expectedTo,
+          updateSteps(name, expectedTo, options()));
 }
 
 void ProjectPackages::add(const QString &name)
@@ -214,7 +250,7 @@ void ProjectPackages::add(const QString &name)
         if (value.toMap().value(QStringLiteral("name")).toString() == name)
             return;
     }
-    start(QStringLiteral("add"), name, {}, {}, addSteps(name));
+    start(QStringLiteral("add"), name, {}, {}, addSteps(name, options()));
 }
 
 void ProjectPackages::start(const QString &kind, const QString &name, const QString &from, const QString &to,
@@ -222,6 +258,13 @@ void ProjectPackages::start(const QString &kind, const QString &name, const QStr
 {
     if (demo() || m_process || steps.isEmpty())
         return;
+    // A check still running reads the project as it was: it is dropped,
+    // and asked again when this ends
+    if (m_check.value(QStringLiteral("state")).toString() == u"running") {
+        ++m_checkRun;
+        m_check = {{QStringLiteral("state"), QStringLiteral("idle")}};
+        emit packagesChanged();
+    }
     m_steps = steps;
     m_lines.clear();
     QVariantList shownSteps;
@@ -284,7 +327,13 @@ void ProjectPackages::runStep(int index)
             if (m_lines.size() > kOutputLines)
                 m_lines.remove(0, m_lines.size() - kOutputLines);
             m_run.insert(QStringLiteral("lines"), m_lines);
-            emit runChanged();
+            // Composer prints many lines: the screen gets them together
+            if (!std::exchange(m_linesPending, true)) {
+                QTimer::singleShot(100, this, [this] {
+                    m_linesPending = false;
+                    emit runChanged();
+                });
+            }
         },
         [this, index](int exitCode, bool crashed) {
             if (m_process)

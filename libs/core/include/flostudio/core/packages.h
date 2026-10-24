@@ -14,11 +14,12 @@
 // the admin panel. Versions installed come from composer.lock (project.h,
 // D4); what is newer from `composer outdated` (it asks Packagist).
 //
-// Update:  composer require "<package>:^<latest>" -W
+// Update:  composer require "<package>:^<latest>" -W [--update-no-dev]
 //          php flo admin:install | api:install   (flocms-admin, flocms-api:
 //                                                 they only add what is missing)
-//          php flo migrate --force               (the update's migrations)
-// Add:     composer require hostkurd/flocms-api | flocms-admin
+//          php flo migrate --force               (the update's migrations;
+//                                                 not without a database)
+// Add:     composer require hostkurd/flocms-api | flocms-admin -W
 //          php flo api:install | admin:install
 //          php flo migrate --force
 namespace FloStudio::Core {
@@ -61,9 +62,22 @@ struct PackageStep
     bool operator==(const PackageStep &) const = default;
 };
 
-// Updating a package to `latest`.
-FLOSTUDIOCORE_EXPORT QList<PackageStep> updateSteps(const QString &package, const QString &latest);
+// What the project is, for its commands
+struct PackageProject
+{
+    bool database = true;    // .env names a database: migrate runs
+    bool production = false; // APP_ENV: no require-dev packages (--update-no-dev)
+    bool batchComposer = false; // Composer is a .bat/.cmd: no ^ (cmd.exe reads
+                                // it), Composer then picks the newest itself
+};
+
+// A version Composer can require: digits and dots (2.9.0, 0.39.3), not
+// "dev-main abc123".
+FLOSTUDIOCORE_EXPORT bool isReleaseVersion(const QString &version);
+
+// Updating a package to `latest` (empty when that isn't a release).
+FLOSTUDIOCORE_EXPORT QList<PackageStep> updateSteps(const QString &package, const QString &latest, const PackageProject &project = {});
 // Adding hostkurd/flocms-api or hostkurd/flocms-admin; empty for others.
-FLOSTUDIOCORE_EXPORT QList<PackageStep> addSteps(const QString &package);
+FLOSTUDIOCORE_EXPORT QList<PackageStep> addSteps(const QString &package, const PackageProject &project = {});
 
 } // namespace FloStudio::Core

@@ -269,7 +269,7 @@ Result<Done> Studio::startDemo(const QString &file)
         checksFor(m_currentPath)->showDemo(demo.value(QStringLiteral("checks")).toObject().toVariantMap());
         generateFor(m_currentPath)->showDemo(demo.value(QStringLiteral("generate")).toObject().toVariantMap());
         ProjectPackages *packages = packagesFor(m_currentPath);
-        packages->setInstalled(m_current.value(QStringLiteral("packages")).toList(), m_current.value(QStringLiteral("others")).toList());
+        packages->setProject(m_current);
         packages->showDemo(demo.value(QStringLiteral("packages")).toObject().toVariantMap());
     }
     if (!m_currentPath.isEmpty())
@@ -725,8 +725,7 @@ void Studio::loadCurrent()
             serverFor(m_currentPath);
             checksFor(m_currentPath);
             generateFor(m_currentPath);
-            packagesFor(m_currentPath)->setInstalled(m_current.value(QStringLiteral("packages")).toList(),
-                                                     m_current.value(QStringLiteral("others")).toList());
+            packagesFor(m_currentPath)->setProject(m_current);
         }
     }
     emit currentChanged();
