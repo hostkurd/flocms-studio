@@ -10,9 +10,8 @@ constexpr QChar kPdi{0x2069}; // POP DIRECTIONAL ISOLATE
 constexpr QChar kRlm{0x200F}; // RIGHT-TO-LEFT MARK
 } // namespace
 
-Language::Language(QQmlEngine *engine, QObject *parent)
+Language::Language(QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
 {
 }
 
@@ -45,7 +44,8 @@ bool Language::set(const QString &code)
     m_code = code;
     QLocale::setDefault(localeFor(code));
     QGuiApplication::setLayoutDirection(rtl() ? Qt::RightToLeft : Qt::LeftToRight);
-    m_engine->retranslate();
+    if (m_engine)
+        m_engine->retranslate();
     emit changed();
     return true;
 }

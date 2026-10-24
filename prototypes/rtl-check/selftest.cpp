@@ -15,6 +15,7 @@
 #include <QTextOption>
 
 #include <cstdio>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -45,10 +46,10 @@ const bool g_github = qEnvironmentVariableIsSet("GITHUB_ACTIONS");
 void report(bool ok, const QString &what)
 {
     if (ok) {
-        std::printf("PASS  %s\n", qPrintable(what));
+        std::printf("PASS  %s\n", qUtf8Printable(what));
     } else {
         ++g_failures;
-        std::printf("%s  %s\n", g_github ? "::error::FAIL" : "FAIL", qPrintable(what));
+        std::printf("%s  %s\n", g_github ? "::error::FAIL" : "FAIL", qUtf8Printable(what));
     }
 }
 
@@ -73,49 +74,100 @@ std::optional<qreal> glyphX(QTextLayout *layout, int pos)
     return x;
 }
 
-// Lays out rich() output the way a QML Text with RichText does and checks
-// the visual order: each code word left to right, sentence-final period
-// at the far left in RTL.
-void checkLayout(Language &language, const QString &label, const QString &translated)
+// The font family Qt actually used for one character (after fallback).
+QString glyphFamily(QTextLayout *layout, int pos)
 {
-    QTextDocument doc;
-    doc.setDefaultFont(QFont(language.uiFont(), 20));
-    QTextOption option;
-    option.setTextDirection(language.rtl() ? Qt::RightToLeft : Qt::LeftToRight);
-    doc.setDefaultTextOption(option);
-    doc.setHtml(language.rich(translated));
-    doc.setTextWidth(4000); // one line
-    doc.documentLayout()->documentSize(); // force layout
+    const QList<QGlyphRun> runs = layout->glyphRuns(pos, 1);
+    return runs.isEmpty() ? QString() : runs.constFirst().rawFont().familyName();
+}
 
-    const QString plain = doc.toPlainText();
-    QTextLayout *layout = doc.firstBlock().layout();
-    if (!layout || layout->lineCount() != 1) {
+// Lays out HTML the way a QML Text with textFormat RichText does: no text
+// direction is forced, so the paragraph direction comes from the text
+// itself (the RLM that rich() adds for RTL languages).
+struct Laid {
+    std::unique_ptr<QTextDocument> doc = std::make_unique<QTextDocument>();
+    QString plain;
+    QTextLayout *layout = nullptr;
+};
+
+Laid layOut(const Language &language, const QString &html)
+{
+    Laid laid;
+    laid.doc->setDefaultFont(QFont(language.uiFont(), 20));
+    laid.doc->setHtml(html);
+    laid.doc->setTextWidth(4000); // one line
+    laid.doc->documentLayout()->documentSize(); // force layout
+    laid.plain = laid.doc->toPlainText();
+    QTextLayout *layout = laid.doc->firstBlock().layout();
+    if (layout && layout->lineCount() == 1)
+        laid.layout = layout;
+    return laid;
+}
+
+// Checks the visual order and fonts of one translated string: each code
+// word left to right in JetBrains Mono, Arabic-script prose in Noto Sans
+// Arabic, and a sentence-final period at the far left in RTL.
+void checkLayout(Language &language, const QString &label, const QString &shown)
+{
+    const Laid laid = layOut(language, language.rich(shown));
+    if (!laid.layout) {
         report(false, label + QStringLiteral(": could not lay out the text"));
         return;
     }
+    const QString &plain = laid.plain;
+    QTextLayout *layout = laid.layout;
 
-    for (const QString &word : codeWords(translated)) {
-        const int start = plain.indexOf(word);
+    QList<bool> inCode(plain.size(), false);
+    for (const QString &word : codeWords(shown)) {
+        // rich() puts an LRI right before each code word, so this finds the
+        // word itself, not the same letters somewhere in the prose.
+        int start = plain.indexOf(QChar(0x2066) + word);
         if (start < 0) {
             report(false, label + QStringLiteral(": `%1` missing after rendering").arg(word));
             continue;
         }
+        ++start;
         bool ordered = true;
+        bool mono = true;
+        int letters = 0;
+        int measured = 0;
         std::optional<qreal> previous;
         for (int i = start; i < start + word.size(); ++i) {
-            if (word.at(i - start).isSpace())
+            inCode[i] = true;
+            if (plain.at(i).isSpace())
                 continue;
+            ++letters;
             const std::optional<qreal> x = glyphX(layout, i);
             if (!x)
                 continue;
+            ++measured;
             if (previous && *x <= *previous)
                 ordered = false;
             previous = x;
+            if (glyphFamily(layout, i) != QLatin1String("JetBrains Mono"))
+                mono = false;
         }
-        report(ordered, label + QStringLiteral(": `%1` reads left to right").arg(word));
+        report(ordered && measured == letters && letters > 0,
+               label + QStringLiteral(": `%1` reads left to right (%2 of %3 letters measured)")
+                           .arg(word).arg(measured).arg(letters));
+        report(mono, label + QStringLiteral(": `%1` uses JetBrains Mono").arg(word));
     }
 
-    if (language.rtl() && translated.endsWith(QLatin1Char('.'))) {
+    int arabic = 0;
+    int arabicInFont = 0;
+    for (int i = 0; i < plain.size(); ++i) {
+        if (inCode[i] || plain.at(i).script() != QChar::Script_Arabic)
+            continue;
+        ++arabic;
+        if (glyphFamily(layout, i) == QLatin1String("Noto Sans Arabic"))
+            ++arabicInFont;
+    }
+    if (language.rtl())
+        report(arabic > 0 && arabicInFont == arabic,
+               label + QStringLiteral(": Arabic-script text uses Noto Sans Arabic (%1 of %2)")
+                           .arg(arabicInFont).arg(arabic));
+
+    if (language.rtl() && shown.endsWith(QLatin1Char('.'))) {
         const int period = plain.lastIndexOf(QLatin1Char('.'));
         const std::optional<qreal> periodX = glyphX(layout, period);
         bool leftmost = periodX.has_value();
@@ -130,10 +182,38 @@ void checkLayout(Language &language, const QString &label, const QString &transl
     }
 }
 
+// A string that starts with a code word has no strong RTL letter first;
+// without the RLM from rich() the whole line would read left to right.
+void checkLeadingCodeWord(Language &language)
+{
+    const QString lang = language.code();
+    const Laid laid = layOut(language, language.rich(QStringLiteral("`.env` فایلە")));
+    if (!laid.layout) {
+        report(false, lang + QStringLiteral(": could not lay out the leading-code-word sample"));
+        return;
+    }
+    std::optional<qreal> codeLeft;
+    std::optional<qreal> proseRight;
+    for (int i = 0; i < laid.plain.size(); ++i) {
+        const QList<QGlyphRun> runs = laid.layout->glyphRuns(i, 1);
+        if (runs.isEmpty() || laid.plain.at(i).isSpace())
+            continue;
+        const QRectF box = runs.constFirst().boundingRect();
+        if (laid.plain.at(i).script() == QChar::Script_Arabic)
+            proseRight = proseRight ? qMax(*proseRight, box.right()) : box.right();
+        else if (laid.plain.at(i).isLetter() || laid.plain.at(i) == QLatin1Char('.'))
+            codeLeft = codeLeft ? qMin(*codeLeft, box.left()) : box.left();
+    }
+    report(codeLeft && proseRight && *codeLeft >= *proseRight - 0.5,
+           lang + QStringLiteral(": a sentence that starts with a code word still reads right to left"));
+}
+
 } // namespace
 
-int runSelfTest(Language &language)
+int runSelfTest(Language &language, bool fontsLoaded)
 {
+    report(fontsLoaded, QStringLiteral("all bundled fonts load"));
+
     for (const char *code : {"ar", "ckb"}) {
         const QString lang = QString::fromLatin1(code);
         report(language.set(lang), lang + QStringLiteral(": translation file loads"));
@@ -143,7 +223,7 @@ int runSelfTest(Language &language)
         const QString zero = language.zeroDigit();
         report(zero == QString(QChar(0x0660)),
                lang + QStringLiteral(": locale uses Arabic-Indic digits (zero is U+%1)")
-                          .arg(zero.isEmpty() ? 0 : zero.at(0).unicode(), 4, 16, QLatin1Char('0')));
+                          .arg(uint(zero.isEmpty() ? 0 : zero.at(0).unicode()), 4, 16, QLatin1Char('0')));
         report(language.num(24) == QStringLiteral("٢٤"),
                lang + QStringLiteral(": 24 shows as ٢٤"));
 
@@ -162,8 +242,12 @@ int runSelfTest(Language &language)
                        && QSet<QString>(translatedWords.cbegin(), translatedWords.cend())
                               == QSet<QString>(sourceWords.cbegin(), sourceWords.cend()),
                    label + QStringLiteral(" keeps its code words unchanged"));
-            checkLayout(language, label, translated);
+            // The screen shows %1 filled in, and digits take part in bidi.
+            const QString shown = source.contains(QLatin1String("%1"))
+                ? translated.arg(QStringLiteral("11.8")) : translated;
+            checkLayout(language, label, shown);
         }
+        checkLeadingCodeWord(language);
     }
 
     report(language.set(QStringLiteral("en")), QStringLiteral("en: translation file loads"));

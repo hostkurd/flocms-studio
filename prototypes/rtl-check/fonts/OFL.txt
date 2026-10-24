@@ -1,11 +1,12 @@
 Fonts in this folder, all under the SIL Open Font License 1.1 (full text below):
 
-- Noto Sans Arabic (NotoSansArabic-Regular.ttf, NotoSansArabic-Bold.ttf)
-  and Noto Sans (NotoSans-Regular.ttf, NotoSans-Bold.ttf):
-  Copyright 2010, 2012-2020 Google Inc.; 2015-2020 Google LLC.
-- JetBrains Mono (JetBrainsMono-Regular.ttf):
+- Noto Sans 2.004 (NotoSans-Regular.ttf, NotoSans-Bold.ttf):
+  Copyright 2015 Google LLC. All Rights Reserved.
+- Noto Sans Arabic 2.005 (NotoSansArabic-Regular.ttf, NotoSansArabic-Bold.ttf):
+  Copyright 2015-2020 Google LLC. All Rights Reserved.
+- JetBrains Mono 2.304 (JetBrainsMono-Regular.ttf):
   Copyright 2020 The JetBrains Mono Project Authors
-  (https://github.com/JetBrains/JetBrainsMono).
+  (https://github.com/JetBrains/JetBrainsMono)
 
 The files were taken unmodified from Ubuntu 24.04's fonts-noto-core and
 fonts-jetbrains-mono packages.

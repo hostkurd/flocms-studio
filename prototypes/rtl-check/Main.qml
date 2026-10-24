@@ -78,9 +78,11 @@ ApplicationWindow {
                                 id: tab
                                 required property var modelData
                                 readonly property bool current: root.page === modelData.key
+                                text: modelData.label // the accessible name
                                 implicitHeight: 41
                                 implicitWidth: tabLabel.implicitWidth + 8
                                 enabled: modelData.key === "overview" || modelData.key === "doctor"
+                                opacity: enabled ? 1 : 0.55
                                 onClicked: root.page = modelData.key
                                 contentItem: AppText {
                                     id: tabLabel

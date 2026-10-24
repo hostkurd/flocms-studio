@@ -12,7 +12,7 @@ folders; this one can be deleted once stage 1 is merged.
 |---|---|---|---|
 | 1 | Arabic and Kurdish letters join, including ڕ ڵ ۆ ێ | screenshots | pass |
 | 2 | The whole layout mirrors: sidebar, icons, button order | screenshots; the Settings chevron is measured | pass |
-| 3 | Code words (`.env`, `storage/cache/`) keep LTR order and punctuation | `--self-test` measures glyph positions | pass |
+| 3 | Code words (`.env`, `storage/cache/`) keep LTR order and punctuation | `--self-test` measures glyph positions and fonts | pass |
 | 4 | Typing Arabic/Kurdish, cursor and selection | typed into the search field with xdotool | pass |
 | 5 | Kurdish uses Arabic digits | `--self-test` (QLocale `ckb_IQ`) | pass |
 | 6 | Language switches while the app runs | the buttons at the bottom of the sidebar | pass |
@@ -36,6 +36,18 @@ in the workflow run's artifacts.
 - Command output (the terminal block, `admin:doctor` lines) is always
   shown left to right with mirroring turned off.
 
+## The self-test
+
+`--self-test` lays out every string that holds code words, in Arabic and
+Kurdish, the way a QML `Text` does (no forced direction), and checks with
+`QTextLayout` that: each code word's letters run left to right and all
+were measured; code words use JetBrains Mono and Arabic-script text uses
+Noto Sans Arabic; a sentence-final period lands on the left; a sentence
+that starts with a code word still reads right to left (the RLM); the
+fonts load; digits are Arabic-Indic; plural forms work in all three
+languages. It was checked to fail when the isolates, the RLM or the font
+are removed.
+
 ## Findings
 
 - Isolates (LRI…PDI) work in Qt's plain, styled and rich text, in Qt 6.4
@@ -43,10 +55,14 @@ in the workflow run's artifacts.
   its trailing slash in RTL; the self-test fails in that case.
 - `StyledText` cannot set a font family, so code words need `RichText`.
 - Plural strings (`%Ln table(s)`) need a translation file for English too,
-  or English shows "24 table(s)". Arabic has six plural forms, Kurdish one.
-- Qt 6.4's `lupdate` refuses to update a `ckb` file that has translations
-  ("target language is not recognized"); Qt 6.12's `lupdate` accepts it.
-  `lrelease` works in both.
+  or English shows "24 table(s)". Arabic has six plural forms; Kurdish
+  nouns stay the same after any number.
+- Qt's `lupdate` (6.4 and 6.12) refuses to update a `.ts` file whose
+  language is `ckb` once it holds translations ("target language is not
+  recognized"). The Kurdish file is therefore marked `language="ku"`
+  (Kurdish), which both versions accept; it keeps its `_ckb` name and the
+  app loads it by name. `ku` has two plural forms, and Kurdish uses the
+  same noun after any number, so both forms hold the same text.
 - Fonts are bundled (Noto Sans Arabic for Arabic and Kurdish), so text
   looks the same on every system. Instrument Sans and Bricolage Grotesque
   are not available here yet; this check uses Noto Sans for Latin text.

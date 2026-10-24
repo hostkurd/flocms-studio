@@ -1,11 +1,30 @@
 <?xml version='1.0' encoding='utf-8'?>
-<TS version="2.1" language="ckb">
+<TS version="2.1" language="ku">
+<context>
+    <name>CheckRow</name>
+    <message>
+        <location filename="../CheckRow.qml" line="47" />
+        <source>Passed</source>
+        <translation>سەرکەوتوو</translation>
+    </message>
+    <message>
+        <location filename="../CheckRow.qml" line="48" />
+        <source>Warning</source>
+        <translation>ئاگاداری</translation>
+    </message>
+    <message>
+        <location filename="../CheckRow.qml" line="48" />
+        <source>Problem</source>
+        <translation>کێشە</translation>
+    </message>
+</context>
 <context>
     <name>Doctor</name>
     <message numerus="yes">
         <location filename="../Doctor.qml" line="12" />
         <source>%Ln problem(s)</source>
         <translation>
+            <numerusform>%Ln کێشە</numerusform>
             <numerusform>%Ln کێشە</numerusform>
         </translation>
     </message>
@@ -14,6 +33,7 @@
         <source>%Ln warning(s)</source>
         <translation>
             <numerusform>%Ln ئاگاداری</numerusform>
+            <numerusform>%Ln ئاگاداری</numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -21,12 +41,14 @@
         <source>%Ln OK</source>
         <translation>
             <numerusform>%Ln باشە</numerusform>
+            <numerusform>%Ln باشە</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../Doctor.qml" line="15" />
         <source>Last run: %Ln minute(s) ago</source>
         <translation>
+            <numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform>
             <numerusform>دوایین پشکنین: پێش %Ln خولەک</numerusform>
         </translation>
     </message>
@@ -79,6 +101,7 @@
         <location filename="../Doctor.qml" line="43" />
         <source>%Ln more check(s), all OK</source>
         <translation>
+            <numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform>
             <numerusform>%Ln پشکنینی تر، هەموویان باشن</numerusform>
         </translation>
     </message>
@@ -158,6 +181,7 @@
         <source>Started %Ln minute(s) ago</source>
         <translation>
             <numerusform>پێش %Ln خولەک دەستی پێکرد</numerusform>
+            <numerusform>پێش %Ln خولەک دەستی پێکرد</numerusform>
         </translation>
     </message>
     <message>
@@ -167,8 +191,12 @@
     </message>
     <message numerus="yes">
         <location filename="../Overview.qml" line="37" />
+        <location filename="../selftest.cpp" line="230" />
+        <location filename="../selftest.cpp" line="256" />
+        <location filename="../selftest.cpp" line="257" />
         <source>%Ln table(s)</source>
         <translation>
+            <numerusform>%Ln خشتە</numerusform>
             <numerusform>%Ln خشتە</numerusform>
         </translation>
     </message>
@@ -176,6 +204,7 @@
         <location filename="../Overview.qml" line="39" />
         <source>%Ln migration(s) waiting</source>
         <translation>
+            <numerusform>%Ln مایگرەیشن چاوەڕێی جێبەجێکردنە</numerusform>
             <numerusform>%Ln مایگرەیشن چاوەڕێی جێبەجێکردنە</numerusform>
         </translation>
     </message>

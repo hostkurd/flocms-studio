@@ -56,7 +56,9 @@
     </message>
     <message numerus="yes">
         <location filename="../Overview.qml" line="37"/>
-        <location filename="../selftest.cpp" line="150"/>
+        <location filename="../selftest.cpp" line="230"/>
+        <location filename="../selftest.cpp" line="256"/>
+        <location filename="../selftest.cpp" line="257"/>
         <source>%Ln table(s)</source>
         <translation>
             <numerusform>%Ln table</numerusform>

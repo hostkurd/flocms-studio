@@ -16,22 +16,26 @@
 
 namespace {
 
-void loadFonts()
+bool loadFonts()
 {
+    bool all = true;
     const char *files[] = {
         ":/fonts/NotoSans-Regular.ttf",       ":/fonts/NotoSans-Bold.ttf",
         ":/fonts/NotoSansArabic-Regular.ttf", ":/fonts/NotoSansArabic-Bold.ttf",
         ":/fonts/JetBrainsMono-Regular.ttf",
     };
     for (const char *file : files) {
-        if (QFontDatabase::addApplicationFont(QString::fromLatin1(file)) < 0)
+        if (QFontDatabase::addApplicationFont(QString::fromLatin1(file)) < 0) {
             qWarning("Could not load font %s", file);
+            all = false;
+        }
     }
     // Each UI font falls back to the other for the script it lacks, so a
     // Latin word in Kurdish text (or Arabic in English text) never falls
     // back to whatever font the system happens to have.
     QFont::insertSubstitution(QStringLiteral("Noto Sans Arabic"), QStringLiteral("Noto Sans"));
     QFont::insertSubstitution(QStringLiteral("Noto Sans"), QStringLiteral("Noto Sans Arabic"));
+    return all;
 }
 
 } // namespace
@@ -41,7 +45,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("FloCMS Studio RTL check"));
     QQuickStyle::setStyle(QStringLiteral("Basic"));
-    loadFonts();
+    const bool fontsLoaded = loadFonts();
 
     QCommandLineParser parser;
     parser.addHelpOption();
@@ -58,12 +62,15 @@ int main(int argc, char *argv[])
     parser.addOptions({langOpt, pageOpt, darkOpt, shotOpt, testOpt});
     parser.process(app);
 
-    QQmlApplicationEngine engine;
-    Language language(&engine);
-    qmlRegisterSingletonInstance("RtlCheck.Backend", 1, 0, "Lang", &language);
-
+    // Declared before the engine so it is destroyed after it: the engine
+    // holds it as a QML singleton instance.
+    Language language;
     if (parser.isSet(testOpt))
-        return runSelfTest(language);
+        return runSelfTest(language, fontsLoaded);
+
+    QQmlApplicationEngine engine;
+    language.setEngine(&engine);
+    qmlRegisterSingletonInstance("RtlCheck.Backend", 1, 0, "Lang", &language);
 
     if (!language.set(parser.value(langOpt))) {
         qCritical("Unknown language or missing translation: %s", qPrintable(parser.value(langOpt)));

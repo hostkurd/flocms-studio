@@ -182,6 +182,7 @@ Rectangle {
             spacing: 8
             AppText { text: qsTr("Settings"); color: Theme.navText; Layout.fillWidth: true }
             Canvas {
+                Accessible.ignored: true // decoration; the label says where it goes
                 width: 16; height: 16
                 property color tint: Theme.navText
                 onTintChanged: requestPaint()

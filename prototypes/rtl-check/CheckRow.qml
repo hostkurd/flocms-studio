@@ -14,7 +14,7 @@ Rectangle {
     property bool ltr: false
     property bool last: false
 
-    LayoutMirroring.enabled: ltr ? false : undefined
+    LayoutMirroring.enabled: !ltr && Lang.rtl
     LayoutMirroring.childrenInherit: true
 
     Layout.fillWidth: true
@@ -43,6 +43,9 @@ Rectangle {
 
         Canvas {
             id: icon
+            Accessible.role: Accessible.Graphic
+            Accessible.name: row.status === "ok" ? qsTr("Passed")
+                           : (row.status === "warn" ? qsTr("Warning") : qsTr("Problem"))
             Layout.preferredWidth: 18
             Layout.preferredHeight: 18
             Layout.alignment: row.ltr ? Qt.AlignTop : Qt.AlignVCenter

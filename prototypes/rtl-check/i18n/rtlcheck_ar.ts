@@ -1,10 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ar">
+<context>
+    <name>CheckRow</name>
+    <message>
+        <location filename="../CheckRow.qml" line="47" />
+        <source>Passed</source>
+        <translation>ناجح</translation>
+    </message>
+    <message>
+        <location filename="../CheckRow.qml" line="48" />
+        <source>Warning</source>
+        <translation>تحذير</translation>
+    </message>
+    <message>
+        <location filename="../CheckRow.qml" line="48" />
+        <source>Problem</source>
+        <translation>مشكلة</translation>
+    </message>
+</context>
 <context>
     <name>Doctor</name>
     <message numerus="yes">
-        <location filename="../Doctor.qml" line="12"/>
+        <location filename="../Doctor.qml" line="12" />
         <source>%Ln problem(s)</source>
         <translation>
             <numerusform>لا مشكلات</numerusform>
@@ -16,7 +33,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../Doctor.qml" line="13"/>
+        <location filename="../Doctor.qml" line="13" />
         <source>%Ln warning(s)</source>
         <translation>
             <numerusform>لا تحذيرات</numerusform>
@@ -28,7 +45,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../Doctor.qml" line="14"/>
+        <location filename="../Doctor.qml" line="14" />
         <source>%Ln OK</source>
         <translation>
             <numerusform>لا فحوص سليمة</numerusform>
@@ -40,7 +57,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../Doctor.qml" line="15"/>
+        <location filename="../Doctor.qml" line="15" />
         <source>Last run: %Ln minute(s) ago</source>
         <translation>
             <numerusform>آخر فحص: الآن</numerusform>
@@ -52,52 +69,52 @@
         </translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="17"/>
+        <location filename="../Doctor.qml" line="17" />
         <source>Run again</source>
         <translation>إعادة الفحص</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="32"/>
+        <location filename="../Doctor.qml" line="32" />
         <source>Framework checks</source>
         <translation>فحوص إطار العمل</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="35"/>
+        <location filename="../Doctor.qml" line="35" />
         <source>`PHP` version</source>
         <translation>إصدار `PHP`</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="36"/>
+        <location filename="../Doctor.qml" line="36" />
         <source>The `pdo_mysql` extension</source>
         <translation>إضافة `pdo_mysql`</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="37"/>
+        <location filename="../Doctor.qml" line="37" />
         <source>The `storage/cache/` folder</source>
         <translation>مجلد `storage/cache/`</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="38"/>
+        <location filename="../Doctor.qml" line="38" />
         <source>The `.env` file</source>
         <translation>ملف `.env`</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="40"/>
+        <location filename="../Doctor.qml" line="40" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="41"/>
+        <location filename="../Doctor.qml" line="41" />
         <source>Migrations</source>
         <translation>الترحيلات</translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="42"/>
+        <location filename="../Doctor.qml" line="42" />
         <source>Debug mode</source>
         <translation>وضع التصحيح</translation>
     </message>
     <message numerus="yes">
-        <location filename="../Doctor.qml" line="43"/>
+        <location filename="../Doctor.qml" line="43" />
         <source>%Ln more check(s), all OK</source>
         <translation>
             <numerusform>لا فحوص أخرى</numerusform>
@@ -109,7 +126,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../Doctor.qml" line="54"/>
+        <location filename="../Doctor.qml" line="54" />
         <source>Admin panel checks</source>
         <translation>فحوص لوحة الإدارة</translation>
     </message>
@@ -117,52 +134,52 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../Main.qml" line="55"/>
+        <location filename="../Main.qml" line="55" />
         <source>Open site</source>
         <translation>فتح الموقع</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="56"/>
+        <location filename="../Main.qml" line="56" />
         <source>Open admin</source>
         <translation>فتح لوحة الإدارة</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="57"/>
+        <location filename="../Main.qml" line="57" />
         <source>Open in `VS Code`</source>
         <translation>فتح في `VS Code`</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="58"/>
+        <location filename="../Main.qml" line="58" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="70"/>
+        <location filename="../Main.qml" line="70" />
         <source>Overview</source>
         <translation>نظرة عامة</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="71"/>
+        <location filename="../Main.qml" line="71" />
         <source>Generators</source>
         <translation>المولّدات</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="72"/>
+        <location filename="../Main.qml" line="72" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="73"/>
+        <location filename="../Main.qml" line="73" />
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="74"/>
+        <location filename="../Main.qml" line="74" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../Main.qml" line="75"/>
+        <location filename="../Main.qml" line="75" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>
@@ -170,17 +187,17 @@
 <context>
     <name>Overview</name>
     <message>
-        <location filename="../Overview.qml" line="19"/>
+        <location filename="../Overview.qml" line="19" />
         <source>Server</source>
         <translation>الخادم</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="23"/>
+        <location filename="../Overview.qml" line="23" />
         <source>Running</source>
         <translation>يعمل</translation>
     </message>
     <message numerus="yes">
-        <location filename="../Overview.qml" line="26"/>
+        <location filename="../Overview.qml" line="26" />
         <source>Started %Ln minute(s) ago</source>
         <translation>
             <numerusform>بدأ للتو</numerusform>
@@ -192,12 +209,15 @@
         </translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="33"/>
+        <location filename="../Overview.qml" line="33" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message numerus="yes">
-        <location filename="../Overview.qml" line="37"/>
+        <location filename="../Overview.qml" line="37" />
+        <location filename="../selftest.cpp" line="230" />
+        <location filename="../selftest.cpp" line="256" />
+        <location filename="../selftest.cpp" line="257" />
         <source>%Ln table(s)</source>
         <translation>
             <numerusform>لا جداول</numerusform>
@@ -209,7 +229,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../Overview.qml" line="39"/>
+        <location filename="../Overview.qml" line="39" />
         <source>%Ln migration(s) waiting</source>
         <translation>
             <numerusform>لا ترحيلات بانتظار التشغيل</numerusform>
@@ -221,63 +241,63 @@
         </translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="41"/>
+        <location filename="../Overview.qml" line="41" />
         <source>Run migrations</source>
         <translation>تشغيل الترحيلات</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="48"/>
+        <location filename="../Overview.qml" line="48" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="58"/>
+        <location filename="../Overview.qml" line="58" />
         <source>Update</source>
         <translation>تحديث</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="73"/>
+        <location filename="../Overview.qml" line="73" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="74"/>
+        <location filename="../Overview.qml" line="74" />
         <source>Run again</source>
         <translation>إعادة الفحص</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="76"/>
+        <location filename="../Overview.qml" line="76" />
         <source>The `.env` file and the app key</source>
         <translation>ملف `.env` ومفتاح التطبيق</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="76"/>
-        <location filename="../Overview.qml" line="77"/>
+        <location filename="../Overview.qml" line="76" />
+        <location filename="../Overview.qml" line="77" />
         <source>OK</source>
         <translation>سليم</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="77"/>
+        <location filename="../Overview.qml" line="77" />
         <source>Storage folders are writable</source>
         <translation>مجلدات التخزين قابلة للكتابة</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="80"/>
+        <location filename="../Overview.qml" line="80" />
         <source>The slug `properties` clashes with `PropertiesController`.</source>
         <translation>الرابط `properties` يتعارض مع `PropertiesController`.</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="81"/>
+        <location filename="../Overview.qml" line="81" />
         <source>How to fix</source>
         <translation>كيفية الإصلاح</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="85"/>
-        <source>Mail settings are missing, so password reset won&apos;t work. Set `MAIL_HOST` in `.env`.</source>
+        <location filename="../Overview.qml" line="85" />
+        <source>Mail settings are missing, so password reset won't work. Set `MAIL_HOST` in `.env`.</source>
         <translation>إعدادات البريد ناقصة، لذا لن تعمل استعادة كلمة المرور. اضبط `MAIL_HOST` في `.env`.</translation>
     </message>
     <message>
-        <location filename="../Overview.qml" line="86"/>
+        <location filename="../Overview.qml" line="86" />
         <source>Open `.env`</source>
         <translation>فتح `.env`</translation>
     </message>
@@ -285,42 +305,42 @@
 <context>
     <name>Sidebar</name>
     <message>
-        <location filename="../Sidebar.qml" line="43"/>
+        <location filename="../Sidebar.qml" line="43" />
         <source>Projects</source>
         <translation>المشاريع</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="55"/>
+        <location filename="../Sidebar.qml" line="55" />
         <source>Search projects</source>
         <translation>البحث في المشاريع</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="101"/>
+        <location filename="../Sidebar.qml" line="101" />
         <source>Running</source>
         <translation>يعمل</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="110"/>
+        <location filename="../Sidebar.qml" line="110" />
         <source>New project</source>
         <translation>مشروع جديد</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="120"/>
+        <location filename="../Sidebar.qml" line="120" />
         <source>This computer</source>
         <translation>هذا الحاسوب</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="138"/>
+        <location filename="../Sidebar.qml" line="138" />
         <source>Running · `%1`</source>
         <translation>يعمل · `%1`</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="171"/>
+        <location filename="../Sidebar.qml" line="171" />
         <source>Dark theme</source>
         <translation>المظهر الداكن</translation>
     </message>
     <message>
-        <location filename="../Sidebar.qml" line="183"/>
+        <location filename="../Sidebar.qml" line="183" />
         <source>Settings</source>
         <translation>الإعدادات</translation>
     </message>

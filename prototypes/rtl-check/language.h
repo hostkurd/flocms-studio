@@ -18,7 +18,11 @@ class Language : public QObject
     Q_PROPERTY(QString uiFont READ uiFont NOTIFY changed)
 
 public:
-    explicit Language(QQmlEngine *engine, QObject *parent = nullptr);
+    explicit Language(QObject *parent = nullptr);
+
+    // The engine to retranslate on a switch. Language must outlive it,
+    // because it is registered as a QML singleton instance.
+    void setEngine(QQmlEngine *engine) { m_engine = engine; }
 
     QString code() const { return m_code; }
     bool rtl() const { return m_code == QLatin1String("ar") || m_code == QLatin1String("ckb"); }
@@ -47,7 +51,7 @@ signals:
 private:
     static QLocale localeFor(const QString &code);
 
-    QQmlEngine *m_engine;
+    QQmlEngine *m_engine = nullptr;
     QTranslator m_translator;
     QString m_code = QStringLiteral("en");
 };

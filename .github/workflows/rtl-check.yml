@@ -29,6 +29,9 @@ jobs:
             arch: clang_64
           - os: ubuntu-24.04
             arch: linux_gcc_64
+    env:
+      # A Windows GUI program sends warnings to the debugger, not stderr.
+      QT_FORCE_STDERR_LOGGING: "1"
     defaults:
       run:
         shell: bash
@@ -88,14 +91,16 @@ jobs:
       - name: Find the program
         run: |
           exe=$(find build -name 'rtlcheck' -type f -perm -u+x -o -name 'rtlcheck.exe' -type f | head -1)
+          test -n "$exe" || { echo "::error::rtlcheck was not built"; exit 1; }
           echo "Program: $exe"
           echo "RTLCHECK=$exe" >> "$GITHUB_ENV"
 
       - name: Self-test (layout order, digits, plurals, translations)
         run: |
+          # The job's bash runs with pipefail, so a failing test fails the step.
           if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; fi
-          "$RTLCHECK" --self-test | tee selftest.txt
-          test "${PIPESTATUS[0]}" -eq 0
+          mkdir -p shots
+          "$RTLCHECK" --self-test | tee shots/selftest.txt
 
       - name: Screenshots
         run: |
@@ -114,11 +119,12 @@ jobs:
           done
           run --lang ckb --page doctor --dark --screenshot shots/ckb-doctor-dark.png
           run --lang ar --page overview --dark --screenshot shots/ar-overview-dark.png
-          cp selftest.txt shots/
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: rtl-check-${{ matrix.os }}
-          path: shots/
+          path: |
+            shots/
+            build.log
           if-no-files-found: warn

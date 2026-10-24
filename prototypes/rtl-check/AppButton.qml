@@ -12,6 +12,7 @@ Button {
     leftPadding: small ? 12 : 14
     rightPadding: small ? 12 : 14
     font.family: Lang.uiFont
+    Accessible.name: text.replace(/`/g, "")
     font.pixelSize: small ? 13 : 14
 
     background: Rectangle {
