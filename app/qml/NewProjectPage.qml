@@ -18,6 +18,7 @@ Item {
     readonly property var stepNames: [qsTr("Project"), qsTr("Database"), qsTr("First admin"), qsTr("Create")]
     readonly property bool running: wizard.state === "running"
     readonly property bool started: wizard.state !== "editing"
+    readonly property bool failed: wizard.state === "failed"
 
     // The fields each step holds (to tell which step a problem is on)
     readonly property var stepFields: [
@@ -41,9 +42,30 @@ Item {
         const steps = ["project", "database", "admin", "create"]
         if (steps.indexOf(Studio.demoTab) >= 0) page.step = steps.indexOf(Studio.demoTab)
     }
+    // A run shows its steps; a new form starts at the first step. After a
+    // failure the person can go back to fix the database or the admin.
+    property string shownState: "editing"
     Connections {
         target: page.wizard
-        function onStepsChanged() { if (page.wizard.state !== "editing") page.step = 3 }
+        function onStepsChanged() {
+            if (page.wizard.state === page.shownState) return
+            page.shownState = page.wizard.state
+            page.step = page.wizard.state === "editing" ? 0 : 3
+        }
+    }
+    function create() {
+        if (page.started) page.wizard.retry(); else page.wizard.start()
+        // Not started: show the first step with a problem
+        if (page.wizard.state === "editing" || page.failed) {
+            for (let i = 0; i < 3; ++i) {
+                if (page.stepHasProblems(i)) { page.step = i; return }
+            }
+        }
+    }
+
+    ConfirmDialog {
+        id: startOverDialog
+        onAccepted: page.wizard.startOver()
     }
 
     FolderDialog {
@@ -121,9 +143,10 @@ Item {
                 padding: 28
                 gap: 22
 
-                // Step 1: the project
+                // Step 1: the project (fixed once the folder is made)
                 ColumnLayout {
                     visible: page.step === 0
+                    enabled: !page.started
                     spacing: 22
                     Layout.fillWidth: true
 
@@ -252,6 +275,7 @@ Item {
                     spacing: 18
                     Layout.fillWidth: true
                     Segmented {
+                        enabled: !page.started
                         label: qsTr("Database")
                         value: page.form.database
                         options: [
@@ -294,7 +318,8 @@ Item {
                                     validator: IntValidator { bottom: 1; top: 65535 }
                                     Layout.preferredWidth: 90
                                     Accessible.name: qsTr("Port")
-                                    onTextEdited: page.wizard.set("dbPort", parseInt(text) || 0)
+                                    // Only a whole port: clearing the field to type another keeps the old one
+                                    onTextEdited: if (acceptableInput && parseInt(text) !== page.form.dbPort) page.wizard.set("dbPort", parseInt(text))
                                     onEditingFinished: page.wizard.touch("dbPort")
                                 }
                             }
@@ -400,9 +425,18 @@ Item {
                                     color: modelData.state === "waiting" || !modelData.state ? Theme.muted : Theme.text
                                     Layout.fillWidth: true
                                 }
+                                // Why it failed: Studio's own words, or what the command said
+                                RichText {
+                                    visible: !!modelData.code
+                                    raw: modelData.code === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(modelData.detail))
+                                                                        : (modelData.code ? Texts.problem(modelData.code) : "")
+                                    color: Theme.badText
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
                                 Mono {
-                                    visible: !!modelData.message
-                                    text: modelData.message || ""
+                                    visible: !!modelData.message || (!!modelData.detail && modelData.code !== "step_exit")
+                                    text: modelData.message || modelData.detail || ""
                                     color: Theme.badText
                                     font.pixelSize: 12
                                     wrapMode: Text.WrapAnywhere
@@ -419,7 +453,7 @@ Item {
                     }
                     RichText {
                         visible: page.wizard.state === "done"
-                        raw: qsTr("`%1` is ready. Start its server from the project page.").arg(page.form.name)
+                        raw: qsTr("`%1` is ready. Open it to start its server.").arg(page.form.name)
                         color: Theme.okText
                         font.weight: Font.DemiBold
                         wrapMode: Text.Wrap
@@ -427,7 +461,7 @@ Item {
                     }
                     RichText {
                         visible: page.wizard.state === "failed"
-                        raw: qsTr("A step failed. Fix what it says, then try again: Studio continues from that step.")
+                        raw: qsTr("A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.")
                         color: Theme.badText
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
@@ -438,9 +472,20 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 10
-                    Item { Layout.fillWidth: true }
+                    Item { visible: !page.failed; Layout.fillWidth: true }
                     AppButton {
-                        visible: page.step > 0 && !page.started
+                        visible: page.failed
+                        text: qsTr("Start over")
+                        danger: true
+                        onClicked: startOverDialog.ask({
+                            title: qsTr("Start over?"),
+                            message: qsTr("Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.").arg(page.form.folder),
+                            confirmText: qsTr("Delete and start over")
+                        })
+                    }
+                    Item { visible: page.failed; Layout.fillWidth: true }
+                    AppButton {
+                        visible: page.step > 0 && (!page.started || page.failed)
                         text: qsTr("Back")
                         iconPath: Icons.back
                         iconDirectional: true
@@ -457,8 +502,7 @@ Item {
                         primary: true
                         text: qsTr("Create the project")
                         iconPath: Icons.plus
-                        enabled: page.wizard.ready
-                        onClicked: page.wizard.start()
+                        onClicked: page.create()
                     }
                     AppButton {
                         visible: page.running
@@ -469,11 +513,17 @@ Item {
                         onClicked: page.wizard.cancel()
                     }
                     AppButton {
-                        visible: page.wizard.state === "failed"
+                        visible: page.failed && page.step === 3
                         primary: true
                         text: qsTr("Try again")
                         iconPath: Icons.refresh
-                        onClicked: page.wizard.retry()
+                        onClicked: page.create()
+                    }
+                    AppButton {
+                        visible: page.wizard.state === "done"
+                        primary: true
+                        text: qsTr("Open the project")
+                        onClicked: Studio.openNewProject()
                     }
                 }
             }

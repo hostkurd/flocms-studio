@@ -163,7 +163,9 @@ Studio::Studio(Language *language, QObject *parent)
     : QObject(parent)
     , m_language(language)
 {
-    // A new project is listed (in a project folder, or on its own) and opened
+    // A new project is listed (in a project folder, or on its own); the
+    // wizard's page stays until the person opens it
+    connect(&m_wizard, &NewProjectWizard::stepsChanged, this, &Studio::commandRunningChanged);
     connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
         const QString folderOfIt = QDir::toNativeSeparators(QFileInfo(path).absolutePath());
         const bool inFolder = std::any_of(m_settings.projectFolders.begin(), m_settings.projectFolders.end(),
@@ -171,7 +173,6 @@ Studio::Studio(Language *language, QObject *parent)
         if (!inFolder)
             changeSettings([&path](Settings &s) { s.projects << path; });
         refreshProjects();
-        selectProject(projectSummary(path).path);
     });
     connect(&m_wizard, &NewProjectWizard::problem, this, [this](const QString &code, const QString &detail) { setProblem(code, detail); });
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
@@ -483,7 +484,8 @@ ProjectChecks *Studio::checksFor(const QString &path)
 
 bool Studio::commandRunning() const
 {
-    return std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); });
+    return m_wizard.state() == u"running"
+           || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); });
 }
 
 void Studio::serversChanged()
@@ -585,6 +587,15 @@ void Studio::showNewProject()
         m_wizard.reset();
     m_page = QStringLiteral("new");
     emit pageChanged();
+}
+
+void Studio::openNewProject()
+{
+    if (m_wizard.state() != u"done")
+        return;
+    const QString path = projectSummary(m_wizard.projectPath()).path;
+    m_wizard.reset();
+    selectProject(path);
 }
 
 void Studio::showProjects()

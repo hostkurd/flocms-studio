@@ -79,7 +79,9 @@ QList<FieldProblem> checkNewProject(const NewProject &project)
 {
     QList<FieldProblem> problems;
     static const QRegularExpression folder(QStringLiteral("^[a-z0-9][a-z0-9_-]{0,63}$"));
-    if (!folder.match(project.name).hasMatch())
+    // Windows keeps these names for devices, with or without an extension
+    static const QRegularExpression device(QStringLiteral("^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\\..*)?$"));
+    if (!folder.match(project.name).hasMatch() || device.match(project.name).hasMatch())
         problems << FieldProblem{QStringLiteral("name"), QStringLiteral("name_invalid")};
     else if (QFileInfo::exists(newProjectFolder(project)))
         problems << FieldProblem{QStringLiteral("name"), QStringLiteral("folder_exists")};
@@ -115,9 +117,12 @@ QList<FieldProblem> checkNewProject(const NewProject &project)
     if (setupHasAdmin(project.setup)) {
         if (project.adminName.trimmed().isEmpty())
             problems << FieldProblem{QStringLiteral("adminName"), QStringLiteral("admin_name_empty")};
-        // The shape FloCMS's Users::validateEmail accepts (filter_var's
-        // FILTER_VALIDATE_EMAIL): something@something.something, no spaces
-        static const QRegularExpression email(QStringLiteral("^[^@\\s]+@[^@\\s]+\\.[^@\\s.]+$"));
+        // A part of what FloCMS's Users::validateEmail accepts (filter_var's
+        // FILTER_VALIDATE_EMAIL): dot-separated atoms, then a domain with a
+        // dot whose labels don't start or end with -
+        static const QRegularExpression email(QStringLiteral(
+            "^(?=.{1,64}@)[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
+            "@([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$"));
         if (!email.match(project.adminEmail.trimmed()).hasMatch())
             problems << FieldProblem{QStringLiteral("adminEmail"), QStringLiteral("email_invalid")};
         // FloCMS counts bytes (strlen)
@@ -158,7 +163,7 @@ QList<QPair<QString, QString>> newProjectEnv(const NewProject &project)
 
 namespace {
 
-WizardStep command(const QString &id, Program program, const QString &dir, const QStringList &arguments, const QString &shown)
+WizardStep command(const QString &id, Program program, const QString &dir, const QStringList &arguments)
 {
     WizardStep step;
     step.id = id;
@@ -166,7 +171,7 @@ WizardStep command(const QString &id, Program program, const QString &dir, const
     step.request.program = program;
     step.request.projectDir = dir;
     step.request.arguments = arguments;
-    step.shown = shown;
+    step.shown = shownCommand(program, arguments);
     return step;
 }
 
@@ -177,8 +182,7 @@ QList<WizardStep> newProjectSteps(const NewProject &project)
     const QString folder = newProjectFolder(project);
     QList<WizardStep> steps;
     steps << command(QStringLiteral("create"), Program::Composer, project.parentDir,
-                     {QStringLiteral("create-project"), QStringLiteral("hostkurd/flocms"), project.name},
-                     QStringLiteral("composer create-project hostkurd/flocms ") + project.name);
+                     {QStringLiteral("create-project"), QStringLiteral("hostkurd/flocms"), project.name});
     WizardStep env;
     env.id = QStringLiteral("env");
     env.kind = StepKind::WriteEnv;
@@ -187,32 +191,25 @@ QList<WizardStep> newProjectSteps(const NewProject &project)
     // A plain website is what create-project made
     if (project.setup != Setup::Site) {
         steps << command(QStringLiteral("setup"), Program::Flo, folder,
-                         {QStringLiteral("setup"), QStringLiteral("--as=") + setupName(project.setup)},
-                         QStringLiteral("php flo setup --as=") + setupName(project.setup));
+                         {QStringLiteral("setup"), QStringLiteral("--as=") + setupName(project.setup)});
     }
     // Website + API: the package, then its installer (never setup to add one)
     if (project.addApi && setupHasSite(project.setup)) {
         steps << command(QStringLiteral("api-require"), Program::Composer, folder,
-                         {QStringLiteral("require"), QStringLiteral("hostkurd/flocms-api")},
-                         QStringLiteral("composer require hostkurd/flocms-api"))
-              << command(QStringLiteral("api-install"), Program::Flo, folder, {QStringLiteral("api:install")},
-                         QStringLiteral("php flo api:install"));
+                         {QStringLiteral("require"), QStringLiteral("hostkurd/flocms-api")})
+              << command(QStringLiteral("api-install"), Program::Flo, folder, {QStringLiteral("api:install")});
     }
     if (project.mysql) {
-        steps << command(QStringLiteral("db-check"), Program::Flo, folder, {QStringLiteral("db:check")},
-                         QStringLiteral("php flo db:check"));
+        steps << command(QStringLiteral("db-check"), Program::Flo, folder, {QStringLiteral("db:check")});
     }
     // APP_ENV=local was just written, so --force changes nothing but is
     // explicit: the wizard never stops on a question
-    steps << command(QStringLiteral("migrate"), Program::Flo, folder, {QStringLiteral("migrate"), QStringLiteral("--force")},
-                     QStringLiteral("php flo migrate"));
+    steps << command(QStringLiteral("migrate"), Program::Flo, folder, {QStringLiteral("migrate"), QStringLiteral("--force")});
     if (setupHasAdmin(project.setup)) {
         WizardStep admin = command(QStringLiteral("admin"), Program::Flo, folder,
                                    {QStringLiteral("user:create"), QStringLiteral("--name=") + project.adminName.trimmed(),
                                     QStringLiteral("--email=") + project.adminEmail.trimmed(),
-                                    QStringLiteral("--role=super-admin"), QStringLiteral("--password-stdin")},
-                                   QStringLiteral("php flo user:create --name=\"%1\" --email=%2 --role=super-admin --password-stdin")
-                                       .arg(project.adminName.trimmed(), project.adminEmail.trimmed()));
+                                    QStringLiteral("--role=super-admin"), QStringLiteral("--password-stdin")});
         admin.request.input = project.adminPassword.toUtf8() + '\n';
         steps << admin;
     }

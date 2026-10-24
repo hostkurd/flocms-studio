@@ -573,7 +573,7 @@
     </message>
     <message>
         <location filename="../qml/NewProjectPage.qml" line="18" />
-        <location filename="../qml/NewProjectPage.qml" line="255" />
+        <location filename="../qml/NewProjectPage.qml" line="279" />
         <source>Database</source>
         <translation>داتابەیس</translation>
     </message>
@@ -588,292 +588,322 @@
         <translation>دروستکردن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="51" />
+        <location filename="../qml/NewProjectPage.qml" line="73" />
         <source>Where to make the project</source>
         <translation>پڕۆژەکە لە کوێ دروست بکرێت</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="76" />
+        <location filename="../qml/NewProjectPage.qml" line="98" />
         <source>New FloCMS project</source>
         <translation>پڕۆژەیەکی نوێی FloCMS</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="78" />
+        <location filename="../qml/NewProjectPage.qml" line="100" />
         <source>Close</source>
         <translation>داخستن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="78" />
+        <location filename="../qml/NewProjectPage.qml" line="100" />
         <source>Cancel</source>
         <translation>هەڵوەشاندنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="136" />
-        <location filename="../qml/NewProjectPage.qml" line="146" />
+        <location filename="../qml/NewProjectPage.qml" line="159" />
+        <location filename="../qml/NewProjectPage.qml" line="169" />
         <source>Project name</source>
         <translation>ناوی پڕۆژە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="138" />
+        <location filename="../qml/NewProjectPage.qml" line="161" />
         <source>The folder will be `%1`.</source>
         <translation>فۆڵدەرەکە دەبێتە `%1`.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="139" />
+        <location filename="../qml/NewProjectPage.qml" line="162" />
         <source>Lower case, used for the folder and the database.</source>
         <translation>بە پیتی بچووک، بۆ فۆڵدەر و داتابەیس بەکاردێت.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="152" />
-        <location filename="../qml/NewProjectPage.qml" line="164" />
+        <location filename="../qml/NewProjectPage.qml" line="175" />
+        <location filename="../qml/NewProjectPage.qml" line="187" />
         <source>Folder</source>
         <translation>فۆڵدەر</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="153" />
+        <location filename="../qml/NewProjectPage.qml" line="176" />
         <source>Made in: %1</source>
         <translation>دروست دەکرێت لە: %1</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="166" />
+        <location filename="../qml/NewProjectPage.qml" line="189" />
         <source>Browse…</source>
         <translation>گەڕان…</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="172" />
+        <location filename="../qml/NewProjectPage.qml" line="195" />
         <source>Languages</source>
         <translation>زمانەکان</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="173" />
+        <location filename="../qml/NewProjectPage.qml" line="196" />
         <source>Sets `LANGUAGES` and `DEFAULT_LANG` in `.env`. Click a chosen language again to make it the default. Right-to-left languages get the right-to-left styles automatically.</source>
         <translation>`LANGUAGES` و `DEFAULT_LANG` لە `.env` دادەنێت. دووبارە کرتە لە زمانێکی هەڵبژێردراو بکە بۆ ئەوەی ببێتە بنەڕەت. زمانەکانی ڕاست بۆ چەپ شێوازی ڕاست بۆ چەپ خۆکارانە وەردەگرن.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="209" />
+        <location filename="../qml/NewProjectPage.qml" line="232" />
         <source>What are you building?</source>
         <translation>چی دروست دەکەیت؟</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="210" />
+        <location filename="../qml/NewProjectPage.qml" line="233" />
         <source>You can add the admin panel or the API later from Packages.</source>
         <translation>دەتوانیت پانێڵی بەڕێوەبردن یان API دواتر لە پاکێجەکانەوە زیاد بکەیت.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="220" />
+        <location filename="../qml/NewProjectPage.qml" line="243" />
         <source>Website + admin panel</source>
         <translation>ماڵپەڕ + پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="220" />
+        <location filename="../qml/NewProjectPage.qml" line="243" />
         <source>Your website, with the admin panel to manage its pages and content.</source>
         <translation>ماڵپەڕەکەت، لەگەڵ پانێڵی بەڕێوەبردن بۆ بەڕێوەبردنی پەڕە و ناوەڕۆکەکانی.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="221" />
+        <location filename="../qml/NewProjectPage.qml" line="244" />
         <source>Website only</source>
         <translation>تەنها ماڵپەڕ</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="221" />
+        <location filename="../qml/NewProjectPage.qml" line="244" />
         <source>Your website with the default theme. Nothing to add.</source>
         <translation>ماڵپەڕەکەت بە ڕووکاری بنەڕەت. هیچ زیادکردنێک نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="222" />
+        <location filename="../qml/NewProjectPage.qml" line="245" />
         <source>Admin panel only</source>
         <translation>تەنها پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="222" />
+        <location filename="../qml/NewProjectPage.qml" line="245" />
         <source>No website: the home page opens the admin panel.</source>
         <translation>بێ ماڵپەڕ: پەڕەی سەرەکی پانێڵی بەڕێوەبردن دەکاتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="223" />
+        <location filename="../qml/NewProjectPage.qml" line="246" />
         <source>API + admin panel</source>
         <translation>API + پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="223" />
+        <location filename="../qml/NewProjectPage.qml" line="246" />
         <source>A JSON API for apps, with the admin panel to manage the data.</source>
         <translation>API ـیەکی JSON بۆ ئەپەکان، لەگەڵ پانێڵی بەڕێوەبردن بۆ بەڕێوەبردنی داتا.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="224" />
+        <location filename="../qml/NewProjectPage.qml" line="247" />
         <source>API only</source>
         <translation>تەنها API</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="224" />
+        <location filename="../qml/NewProjectPage.qml" line="247" />
         <source>A JSON API for apps. The home page answers in JSON.</source>
         <translation>API ـیەکی JSON بۆ ئەپەکان. پەڕەی سەرەکی بە JSON وەڵام دەداتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="242" />
+        <location filename="../qml/NewProjectPage.qml" line="265" />
         <source>Also add the JSON API</source>
         <translation>هەروەها JSON API زیاد بکە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="243" />
+        <location filename="../qml/NewProjectPage.qml" line="266" />
         <source>For apps or a JavaScript front end.</source>
         <translation>بۆ ئەپەکان یان ڕووکارێکی پێشەوەی JavaScript.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="258" />
+        <location filename="../qml/NewProjectPage.qml" line="282" />
         <source>SQLite: a file in the project</source>
         <translation>SQLite: فایلێک لە پڕۆژەکەدا</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="259" />
+        <location filename="../qml/NewProjectPage.qml" line="283" />
         <source>MySQL / MariaDB</source>
         <translation>MySQL / MariaDB</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="265" />
+        <location filename="../qml/NewProjectPage.qml" line="289" />
         <source>The database is the file `storage/database.sqlite`, made by the first migration. Nothing to install; good for trying things and small sites.</source>
         <translation>داتابەیسەکە فایلی `storage/database.sqlite` ـە، کە یەکەم مایگرەیشن دروستی دەکات. هیچ دانانێک ناوێت؛ باشە بۆ تاقیکردنەوە و ماڵپەڕی بچووک.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="277" />
-        <location filename="../qml/NewProjectPage.qml" line="281" />
+        <location filename="../qml/NewProjectPage.qml" line="301" />
+        <location filename="../qml/NewProjectPage.qml" line="305" />
         <source>Database name</source>
         <translation>ناوی داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="278" />
+        <location filename="../qml/NewProjectPage.qml" line="302" />
         <source>It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.</source>
         <translation>دەبێت پێشتر هەبێت: لە phpMyAdmin یان HeidiSQL یان `mysql` دروستی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="284" />
-        <location filename="../qml/NewProjectPage.qml" line="290" />
+        <location filename="../qml/NewProjectPage.qml" line="308" />
+        <location filename="../qml/NewProjectPage.qml" line="314" />
         <source>Server</source>
         <translation>سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="296" />
+        <location filename="../qml/NewProjectPage.qml" line="320" />
         <source>Port</source>
         <translation>پۆرت</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="303" />
-        <location filename="../qml/NewProjectPage.qml" line="306" />
+        <location filename="../qml/NewProjectPage.qml" line="328" />
+        <location filename="../qml/NewProjectPage.qml" line="331" />
         <source>User</source>
         <translation>بەکارهێنەر</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="309" />
-        <location filename="../qml/NewProjectPage.qml" line="316" />
-        <location filename="../qml/NewProjectPage.qml" line="363" />
-        <location filename="../qml/NewProjectPage.qml" line="367" />
+        <location filename="../qml/NewProjectPage.qml" line="334" />
+        <location filename="../qml/NewProjectPage.qml" line="341" />
+        <location filename="../qml/NewProjectPage.qml" line="388" />
+        <location filename="../qml/NewProjectPage.qml" line="392" />
         <source>Password</source>
         <translation>وشەی نهێنی</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="310" />
+        <location filename="../qml/NewProjectPage.qml" line="335" />
         <source>Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.</source>
         <translation>لە `DB_PASSWORD` ـی `.env` دەنووسرێت، کە FloCMS لەوێ دەیخوێنێتەوە. بۆ root ـی XAMPP بەتاڵە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="317" />
+        <location filename="../qml/NewProjectPage.qml" line="342" />
         <source>Use saved</source>
         <translation>بەکارهێنانی پاشەکەوتکراو</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="325" />
+        <location filename="../qml/NewProjectPage.qml" line="350" />
         <source>Remember the password in the Keychain</source>
         <translation>وشەی نهێنی لە Keychain بیربخەرەوە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="326" />
+        <location filename="../qml/NewProjectPage.qml" line="351" />
         <source>Remember the password in Windows Credential Manager</source>
         <translation>وشەی نهێنی لە Credential Manager ـی Windows بیربخەرەوە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="327" />
+        <location filename="../qml/NewProjectPage.qml" line="352" />
         <source>Remember the password in the system's keyring</source>
         <translation>وشەی نهێنی لە کلیلدانی سیستەمەکەدا بیربخەرەوە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="328" />
+        <location filename="../qml/NewProjectPage.qml" line="353" />
         <source>For your next project on this database server. Studio keeps no copy of its own.</source>
         <translation>بۆ پڕۆژەی داهاتووت لەسەر ئەم سێرڤەری داتابەیسە. Studio هیچ کۆپییەکی خۆی هەڵناگرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="339" />
+        <location filename="../qml/NewProjectPage.qml" line="364" />
         <source>The first user of the admin panel, with every right (super admin).</source>
         <translation>یەکەم بەکارهێنەری پانێڵی بەڕێوەبردن، بە هەموو مافەکانەوە (بەڕێوەبەری باڵا).</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="350" />
-        <location filename="../qml/NewProjectPage.qml" line="353" />
+        <location filename="../qml/NewProjectPage.qml" line="375" />
+        <location filename="../qml/NewProjectPage.qml" line="378" />
         <source>Name</source>
         <translation>ناو</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="356" />
-        <location filename="../qml/NewProjectPage.qml" line="360" />
+        <location filename="../qml/NewProjectPage.qml" line="381" />
+        <location filename="../qml/NewProjectPage.qml" line="385" />
         <source>Email</source>
         <translation>ئیمەیڵ</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="357" />
+        <location filename="../qml/NewProjectPage.qml" line="382" />
         <source>Also the login name.</source>
         <translation>هەروەها ناوی چوونەژوورەوەیە.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="364" />
+        <location filename="../qml/NewProjectPage.qml" line="389" />
         <source>At least 8 characters. It goes to FloCMS on its input, never on a command line or in a log.</source>
         <translation>لانیکەم 8 پیت. لە ڕێگەی چوونەژوورەوەی خۆیەوە دەدرێتە FloCMS، هەرگیز لە هێڵی فەرمان یان لە تۆمارێکدا نا.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="399" />
+        <location filename="../qml/NewProjectPage.qml" line="424" />
         <source>Studio writes `.env`: name, address, languages, database</source>
         <translation>Studio فایلی `.env` دەنووسێت: ناو، ناونیشان، زمانەکان، داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="422" />
-        <source>`%1` is ready. Start its server from the project page.</source>
-        <translation>`%1` ئامادەیە. سێرڤەرەکەی لە پەڕەی پڕۆژەکەوە دەستپێبکە.</translation>
+        <location filename="../qml/NewProjectPage.qml" line="431" />
+        <source>The command ended with exit code %1.</source>
+        <translation>فەرمانەکە بە کۆدی دەرچوونی %1 کۆتایی هات.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="430" />
-        <source>A step failed. Fix what it says, then try again: Studio continues from that step.</source>
-        <translation>هەنگاوێک سەرکەوتوو نەبوو. ئەوەی دەیڵێت چاک بکە، پاشان دووبارە هەوڵ بدەرەوە: Studio لەو هەنگاوەوە بەردەوام دەبێت.</translation>
+        <location filename="../qml/NewProjectPage.qml" line="456" />
+        <source>`%1` is ready. Open it to start its server.</source>
+        <translation>`%1` ئامادەیە. بیکەرەوە بۆ دەستپێکردنی سێرڤەرەکەی.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="444" />
+        <location filename="../qml/NewProjectPage.qml" line="464" />
+        <source>A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.</source>
+        <translation>هەنگاوێک سەرکەوتوو نەبوو. ئەوەی دەیڵێت چاک بکە («گەڕانەوە» دەتباتە ڕێکخستنەکانی داتابەیس و بەڕێوەبەر)، پاشان دووبارە هەوڵ بدەرەوە: Studio لەو هەنگاوەوە بەردەوام دەبێت.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="478" />
+        <source>Start over</source>
+        <translation>دەستپێکردنەوە لە سەرەتاوە</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="481" />
+        <source>Start over?</source>
+        <translation>لە سەرەتاوە دەست پێبکەیتەوە؟</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="482" />
+        <source>Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.</source>
+        <translation>Studio ئەو فۆڵدەرەی دروستی کرد، `%1`، و هەموو ناوەڕۆکەکەی دەسڕێتەوە. فۆڕمەکە هیچ ناهێڵێتەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="483" />
+        <source>Delete and start over</source>
+        <translation>سڕینەوە و دەستپێکردنەوە</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="525" />
+        <source>Open the project</source>
+        <translation>کردنەوەی پڕۆژەکە</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="489" />
         <source>Back</source>
         <translation>گەڕانەوە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="452" />
+        <location filename="../qml/NewProjectPage.qml" line="497" />
         <source>Next: Database</source>
         <translation>دواتر: داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="452" />
+        <location filename="../qml/NewProjectPage.qml" line="497" />
         <source>Next: First admin</source>
         <translation>دواتر: یەکەم بەڕێوەبەر</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="452" />
+        <location filename="../qml/NewProjectPage.qml" line="497" />
         <source>Next: Create</source>
         <translation>دواتر: دروستکردن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="458" />
+        <location filename="../qml/NewProjectPage.qml" line="503" />
         <source>Create the project</source>
         <translation>دروستکردنی پڕۆژەکە</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="465" />
+        <location filename="../qml/NewProjectPage.qml" line="509" />
         <source>Stop</source>
         <translation>وەستاندن</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="474" />
+        <location filename="../qml/NewProjectPage.qml" line="518" />
         <source>Try again</source>
         <translation>دووبارە هەوڵ بدەرەوە</translation>
     </message>
@@ -1901,66 +1931,91 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="122" />
+        <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
+        <translation>Studio نەیتوانی ئەو فۆڵدەرە بسڕێتەوە کە دروستی کردبوو. ئەوەی بەکاری دەهێنێت دابخە (دەستکاریکەرێک، تێرمیناڵێک)، پاشان دووبارە هەوڵ بدەرەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="123" />
+        <source>Studio could not write the project's `.env` file.</source>
+        <translation>Studio نەیتوانی فایلی `.env`ی پڕۆژەکە بنووسێت.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="125" />
+        <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
+        <translation>یەکێک لە بەهاکانی `.env` پیتێکی تێدایە کە FloCMS لەوێ ناتوانێت بیخوێنێتەوە (هێڵی نوێ).</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="126" />
+        <source>Stopped.</source>
+        <translation>وەستێنرا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="127" />
+        <source>Studio does not run this command.</source>
+        <translation>Studio ئەم فەرمانە جێبەجێ ناکات.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="128" />
         <source>There is no secure store for passwords on this computer.</source>
         <translation>هیچ شوێنێکی پارێزراو بۆ وشەی نهێنی لەم کۆمپیوتەرەدا نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="123" />
+        <location filename="../qml/Texts.qml" line="129" />
         <source>The secure store did not give the password.</source>
         <translation>شوێنە پارێزراوەکە وشەی نهێنییەکەی نەدا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="124" />
+        <location filename="../qml/Texts.qml" line="130" />
         <source>No password is saved for this database user.</source>
         <translation>هیچ وشەیەکی نهێنی بۆ ئەم بەکارهێنەری داتابەیسە پاشەکەوت نەکراوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="125" />
+        <location filename="../qml/Texts.qml" line="131" />
         <source>The secure store did not answer.</source>
         <translation>شوێنە پارێزراوەکە وەڵامی نەدایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="126" />
+        <location filename="../qml/Texts.qml" line="132" />
         <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>Composer نەدۆزرایەوە. لە «ئەم کۆمپیوتەرە» دایبگرە، یان لە ڕێکخستنەکان &gt; PHP و ئامرازەکان هەڵیبژێرە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="127" />
+        <location filename="../qml/Texts.qml" line="133" />
         <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation>فەرمانێک هێشتا لەم پڕۆژەیەدا کار دەکات. کاتێک تەواو بوو لە لیستەکە لایببە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="128" />
+        <location filename="../qml/Texts.qml" line="134" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>پڕۆژەکە فایلی `.env` ـی نییە. `.env.example` بۆ `.env` کۆپی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="129" />
+        <location filename="../qml/Texts.qml" line="135" />
         <source>The command could not run.</source>
         <translation>فەرمانەکە نەتوانرا جێبەجێ بکرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="130" />
+        <location filename="../qml/Texts.qml" line="136" />
         <source>Studio could not read what the check printed.</source>
         <translation>Studio نەیتوانی ئەوە بخوێنێتەوە کە پشکنینەکە چاپی کرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="131" />
+        <location filename="../qml/Texts.qml" line="137" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>Studio نەیتوانی داتابەیسەکە بخوێنێتەوە. ئایا سێرڤەری داتابەیس کار دەکات، و ڕێکخستنەکانی `.env` دروستن؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="132" />
+        <location filename="../qml/Texts.qml" line="138" />
         <source>Studio could not read the migrations.</source>
         <translation>Studio نەیتوانی مایگرەیشنەکان بخوێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="133" />
+        <location filename="../qml/Texts.qml" line="139" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>هێشتا `storage/logs/app.log` نییە. FloCMS لە یەکەم پەیامدا دەینووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="135" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>Something went wrong (%1).</source>
         <translation>هەڵەیەک ڕوویدا (%1).</translation>
     </message>

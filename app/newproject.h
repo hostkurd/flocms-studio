@@ -69,6 +69,9 @@ public:
     Q_INVOKABLE void retry();
     // Stops the step that runs; what was made stays (the folder).
     Q_INVOKABLE void cancel();
+    // After a failure: deletes the folder this run made, and the form
+    // starts again.
+    Q_INVOKABLE void startOver();
 
     // The demo: the form and the run from the demo file.
     void showDemo(const QVariantMap &demo);
@@ -85,17 +88,29 @@ signals:
 private:
     void runFrom(int index);
     void runStep(int index);
-    void stepDone(int index, bool ok, const QString &message);
+    // Why a step failed: a code Texts.problem knows (with its detail), or
+    // what the command itself said
+    struct StepProblem
+    {
+        QString code;
+        QString detail;
+        QString message;
+    };
+    void stepDone(int index, bool ok, const StepProblem &problem);
     void addLine(const QString &line);
-    void setStep(int index, const QString &state, const QString &message = {});
+    void setStep(int index, const QString &state, const StepProblem &problem = {});
     QStringList secrets() const;
+    void readEnvSecrets();
+    QList<FloStudio::Core::FieldProblem> currentProblems() const;
 
     const FloStudio::Core::Settings *m_settings; // Studio's; null for a demo
     FloStudio::Core::NewProject m_project;
     QString m_typedName;
     bool m_rememberPassword = true;
     QStringList m_touched;
-    QList<FloStudio::Core::WizardStep> m_plan; // fixed when the run starts
+    QList<FloStudio::Core::WizardStep> m_plan; // made when the run starts, again on retry
+    bool m_madeFolder = false;                 // the folder is this run's
+    QStringList m_envSecrets;                  // the new .env's, read after create and env
     QVariantList m_steps;
     QStringList m_lines;
     QString m_state = QStringLiteral("editing");

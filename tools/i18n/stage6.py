@@ -74,10 +74,10 @@ T = {
    ("8 أحرف على الأقل. تُرسل إلى FloCMS عبر مدخلاته، لا في سطر أوامر ولا في سجل.",
     "لانیکەم 8 پیت. لە ڕێگەی چوونەژوورەوەی خۆیەوە دەدرێتە FloCMS، هەرگیز لە هێڵی فەرمان یان لە تۆمارێکدا نا."),
  "Studio writes `.env`: name, address, languages, database": ("يكتب Studio الملف `.env`: الاسم والعنوان واللغات وقاعدة البيانات", "Studio فایلی `.env` دەنووسێت: ناو، ناونیشان، زمانەکان، داتابەیس"),
- "`%1` is ready. Start its server from the project page.": ("`%1` جاهز. شغّل خادمه من صفحة المشروع.", "`%1` ئامادەیە. سێرڤەرەکەی لە پەڕەی پڕۆژەکەوە دەستپێبکە."),
- "A step failed. Fix what it says, then try again: Studio continues from that step.":
-   ("فشلت خطوة. أصلح ما تذكره، ثم حاول مجددًا: يتابع Studio من تلك الخطوة.",
-    "هەنگاوێک سەرکەوتوو نەبوو. ئەوەی دەیڵێت چاک بکە، پاشان دووبارە هەوڵ بدەرەوە: Studio لەو هەنگاوەوە بەردەوام دەبێت."),
+ "`%1` is ready. Open it to start its server.": ("`%1` جاهز. افتحه لتشغيل خادمه.", "`%1` ئامادەیە. بیکەرەوە بۆ دەستپێکردنی سێرڤەرەکەی."),
+ "A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.":
+   ("فشلت خطوة. أصلح ما تذكره (يقودك «رجوع» إلى إعدادات قاعدة البيانات والمدير)، ثم حاول مجددًا: يتابع Studio من تلك الخطوة.",
+    "هەنگاوێک سەرکەوتوو نەبوو. ئەوەی دەیڵێت چاک بکە («گەڕانەوە» دەتباتە ڕێکخستنەکانی داتابەیس و بەڕێوەبەر)، پاشان دووبارە هەوڵ بدەرەوە: Studio لەو هەنگاوەوە بەردەوام دەبێت."),
  "Back": ("رجوع", "گەڕانەوە"),
  "Next: Database": ("التالي: قاعدة البيانات", "دواتر: داتابەیس"),
  "Next: First admin": ("التالي: المدير الأول", "دواتر: یەکەم بەڕێوەبەر"),
@@ -106,4 +106,23 @@ T = {
  "Composer was not found. Download it in This computer, or choose it in Settings > PHP and tools.":
    ("لم يُعثر على Composer. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات > PHP والأدوات.",
     "Composer نەدۆزرایەوە. لە «ئەم کۆمپیوتەرە» دایبگرە، یان لە ڕێکخستنەکان > PHP و ئامرازەکان هەڵیبژێرە."),
+ # Review fixes: a failed run
+ "The command ended with exit code %1.": ("انتهى الأمر برمز الخروج %1.", "فەرمانەکە بە کۆدی دەرچوونی %1 کۆتایی هات."),
+ "Start over": ("البدء من جديد", "دەستپێکردنەوە لە سەرەتاوە"),
+ "Start over?": ("البدء من جديد؟", "لە سەرەتاوە دەست پێبکەیتەوە؟"),
+ "Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.":
+   ("يحذف Studio المجلد الذي أنشأه، `%1`، وكل ما فيه. ولا يحتفظ النموذج بشيء.",
+    "Studio ئەو فۆڵدەرەی دروستی کرد، `%1`، و هەموو ناوەڕۆکەکەی دەسڕێتەوە. فۆڕمەکە هیچ ناهێڵێتەوە."),
+ "Delete and start over": ("حذف والبدء من جديد", "سڕینەوە و دەستپێکردنەوە"),
+ "Open the project": ("فتح المشروع", "کردنەوەی پڕۆژەکە"),
+ "Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.":
+   ("تعذّر على Studio حذف المجلد الذي أنشأه. أغلق ما يستخدمه (محررًا أو طرفية)، ثم حاول مجددًا.",
+    "Studio نەیتوانی ئەو فۆڵدەرە بسڕێتەوە کە دروستی کردبوو. ئەوەی بەکاری دەهێنێت دابخە (دەستکاریکەرێک، تێرمیناڵێک)، پاشان دووبارە هەوڵ بدەرەوە."),
+ "Studio could not write the project's `.env` file.": ("تعذّر على Studio كتابة ملف `.env` للمشروع.", "Studio نەیتوانی فایلی `.env`ی پڕۆژەکە بنووسێت."),
+ "A value for `.env` has a character FloCMS can't read there (a line break).":
+   ("في إحدى قيم `.env` حرف لا يستطيع FloCMS قراءته هناك (سطر جديد).",
+    "یەکێک لە بەهاکانی `.env` پیتێکی تێدایە کە FloCMS لەوێ ناتوانێت بیخوێنێتەوە (هێڵی نوێ)."),
+ "Stopped.": ("أُوقف.", "وەستێنرا."),
+ "Studio does not run this command.": ("لا يشغّل Studio هذا الأمر.", "Studio ئەم فەرمانە جێبەجێ ناکات."),
 }
+

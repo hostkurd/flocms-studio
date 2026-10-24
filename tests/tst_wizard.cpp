@@ -98,6 +98,23 @@ private slots:
         QCOMPARE(fields(checkNewProject(bad)), (QStringList{QStringLiteral("name=name_invalid"), QStringLiteral("languages=languages_empty"),
                                                             QStringLiteral("adminEmail=email_invalid"),
                                                             QStringLiteral("adminPassword=password_short")}));
+        // Windows device names; emails FloCMS's filter_var refuses
+        for (const QString &name : {QStringLiteral("con"), QStringLiteral("nul"), QStringLiteral("com1"), QStringLiteral("lpt9")}) {
+            bad = project;
+            bad.name = name;
+            QCOMPARE(fields(checkNewProject(bad)), QStringList{QStringLiteral("name=name_invalid")});
+        }
+        bad = project;
+        bad.name = QStringLiteral("console");
+        QVERIFY(fields(checkNewProject(bad)).isEmpty());
+        for (const QString &email : {QStringLiteral("a@localhost"), QStringLiteral("a..b@example.com"), QStringLiteral(".a@example.com"),
+                                     QStringLiteral("a@-example.com"), QStringLiteral("a@example..com"), QStringLiteral("أ@example.com")}) {
+            bad = project;
+            bad.adminEmail = email;
+            QCOMPARE(fields(checkNewProject(bad)), QStringList{QStringLiteral("adminEmail=email_invalid")});
+        }
+        bad.adminEmail = QStringLiteral("first.last+shop@mail.example.co");
+        QVERIFY(fields(checkNewProject(bad)).isEmpty());
         // FloCMS counts bytes: 4 Arabic letters are 8
         bad = project;
         bad.adminPassword = QStringLiteral("كلمة");
@@ -188,6 +205,8 @@ private slots:
         QCOMPARE(steps.at(2).request.arguments, (QStringList{QStringLiteral("setup"), QStringLiteral("--as=site-admin")}));
         QCOMPARE(steps.at(2).request.projectDir, folder);
         QCOMPARE(steps.at(3).request.arguments, (QStringList{QStringLiteral("migrate"), QStringLiteral("--force")}));
+        // What is shown is what runs, with nothing secret
+        QCOMPARE(steps.at(3).shown, QStringLiteral("php flo migrate --force"));
         // The password: only on the input, never in an argument or what is shown
         const WizardStep &admin = steps.at(4);
         QCOMPARE(admin.request.input, QByteArray("correct horse\n"));

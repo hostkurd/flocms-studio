@@ -145,6 +145,8 @@ public:
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
     Q_INVOKABLE void showProjects();
     Q_INVOKABLE void showNewProject();
+    // The wizard made its project: open it, and the wizard starts again
+    Q_INVOKABLE void openNewProject();
     Q_INVOKABLE void refreshProjects();
     Q_INVOKABLE void refreshTools();
     Q_INVOKABLE void openInEditor(const QString &path);

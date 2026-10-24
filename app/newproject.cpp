@@ -6,9 +6,12 @@
 #include <flostudio/security/secrets.h>
 
 #include <QDir>
+#include <QFileInfo>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QUrl>
+
+#include <algorithm>
 
 using namespace FloStudio::Core;
 namespace Security = FloStudio::Security;
@@ -16,6 +19,19 @@ namespace Security = FloStudio::Security;
 namespace {
 
 constexpr int kOutputLines = 400;
+
+// Once the run started, the folder exists and what it was made from stays
+bool fixedAfterStart(const QString &field)
+{
+    return field == u"name" || field == u"parentDir";
+}
+
+// Fields that can still change after a step failed: they don't change
+// which steps run, only what a step does (a password, the admin's email)
+bool editableAfterFailure(const QString &field)
+{
+    return field.startsWith(u"db") || field.startsWith(u"admin") || field == u"rememberPassword";
+}
 
 } // namespace
 
@@ -62,6 +78,8 @@ void NewProjectWizard::reset()
     m_state = QStringLiteral("editing");
     m_projectPath.clear();
     m_current = -1;
+    m_madeFolder = false;
+    m_envSecrets.clear();
     emit formChanged();
     emit stepsChanged();
     emit linesChanged();
@@ -95,16 +113,24 @@ QVariantMap NewProjectWizard::form() const
 QVariantMap NewProjectWizard::problems() const
 {
     QVariantMap shown;
-    for (const FieldProblem &problem : checkNewProject(m_project)) {
+    for (const FieldProblem &problem : currentProblems()) {
         if (m_touched.contains(problem.field) || m_touched.contains(QStringLiteral("*")))
             shown.insert(problem.field, problem.code);
     }
     return shown;
 }
 
+QList<FieldProblem> NewProjectWizard::currentProblems() const
+{
+    QList<FieldProblem> problems = checkNewProject(m_project);
+    if (m_state != u"editing")
+        problems.removeIf([](const FieldProblem &problem) { return fixedAfterStart(problem.field); });
+    return problems;
+}
+
 bool NewProjectWizard::ready() const
 {
-    return checkNewProject(m_project).isEmpty();
+    return currentProblems().isEmpty();
 }
 
 QVariantList NewProjectWizard::plan() const
@@ -117,7 +143,7 @@ QVariantList NewProjectWizard::plan() const
 
 void NewProjectWizard::setName(const QString &typed)
 {
-    if (m_running || m_state == u"done")
+    if (m_state != u"editing")
         return;
     m_typedName = typed;
     const QString before = m_project.name;
@@ -137,7 +163,7 @@ void NewProjectWizard::setParentFolder(const QUrl &folder)
 
 void NewProjectWizard::set(const QString &field, const QVariant &value)
 {
-    if (m_running || m_state == u"done")
+    if (m_state == u"running" || m_state == u"done" || (m_state == u"failed" && !editableAfterFailure(field)))
         return;
     const QString text = value.toString();
     if (field == u"parentDir") {
@@ -197,23 +223,33 @@ void NewProjectWizard::fillSavedPassword()
 {
     if (!secureStore())
         return;
-    Security::readPassword(Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser), this,
-                           [this](const Result<QString> &secret) {
-                               if (!secret) {
-                                   emit problem(secret.error().code, secret.error().detail);
-                                   return;
-                               }
-                               m_project.dbPassword = secret.value();
-                               emit formChanged();
-                           });
+    const QString account = Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser);
+    Security::readPassword(account, this, [this, account](const Result<QString> &secret) {
+        // The answer can come late (the system may ask first): it only
+        // fills the form it was asked for
+        if (m_state == u"running" || m_state == u"done"
+            || account != Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser))
+            return;
+        if (!secret) {
+            emit problem(secret.error().code, secret.error().detail);
+            return;
+        }
+        m_project.dbPassword = secret.value();
+        emit formChanged();
+    });
 }
 
 QStringList NewProjectWizard::secrets() const
 {
     QStringList secrets{m_project.dbPassword, m_project.adminPassword};
     // The new project's APP_KEY, once create-project wrote it
-    secrets += Security::envSecrets(readEnvFile(newProjectFolder(m_project)));
+    secrets += m_envSecrets;
     return secrets;
+}
+
+void NewProjectWizard::readEnvSecrets()
+{
+    m_envSecrets = Security::envSecrets(readEnvFile(newProjectFolder(m_project)));
 }
 
 void NewProjectWizard::addLine(const QString &line)
@@ -224,20 +260,22 @@ void NewProjectWizard::addLine(const QString &line)
     emit linesChanged();
 }
 
-void NewProjectWizard::setStep(int index, const QString &state, const QString &message)
+void NewProjectWizard::setStep(int index, const QString &state, const StepProblem &problem)
 {
     if (index < 0 || index >= m_steps.size())
         return;
     QVariantMap step = m_steps.at(index).toMap();
     step.insert(QStringLiteral("state"), state);
-    step.insert(QStringLiteral("message"), Security::redact(message, secrets()));
+    step.insert(QStringLiteral("code"), problem.code);
+    step.insert(QStringLiteral("detail"), Security::redact(problem.detail, secrets()));
+    step.insert(QStringLiteral("message"), Security::redact(problem.message, secrets()));
     m_steps[index] = step;
     emit stepsChanged();
 }
 
 void NewProjectWizard::start()
 {
-    if (!m_settings || m_running || m_state == u"running" || m_state == u"done")
+    if (!m_settings || m_running || m_state != u"editing")
         return;
     m_touched << QStringLiteral("*");
     if (!ready()) {
@@ -249,6 +287,8 @@ void NewProjectWizard::start()
         emit problem(QStringLiteral("parent_invalid"), m_project.parentDir);
         return;
     }
+    m_madeFolder = true; // checkNewProject: it wasn't there
+    m_envSecrets.clear();
     m_plan = newProjectSteps(m_project);
     m_steps.clear();
     for (const WizardStep &step : std::as_const(m_plan))
@@ -262,9 +302,65 @@ void NewProjectWizard::start()
 
 void NewProjectWizard::retry()
 {
-    if (m_state != u"failed" || m_current < 0)
+    if (!m_settings || m_running || m_state != u"failed" || m_current < 0 || m_current >= m_plan.size())
         return;
-    runFrom(m_current);
+    m_touched << QStringLiteral("*");
+    if (!ready()) {
+        emit formChanged();
+        return;
+    }
+    // What the person fixed since: the same steps, with the new values
+    const QList<WizardStep> plan = newProjectSteps(m_project);
+    if (plan.size() != m_plan.size())
+        return; // the fields that change the steps are fixed after a start
+    m_plan = plan;
+    for (int i = 0; i < m_plan.size(); ++i) {
+        QVariantMap step = m_steps.at(i).toMap();
+        step.insert(QStringLiteral("shown"), m_plan.at(i).shown);
+        m_steps[i] = step;
+    }
+    int from = m_current;
+    const QString folder = newProjectFolder(m_project);
+    if (m_plan.at(from).id == u"create" && QFileInfo::exists(folder)) {
+        // create-project refuses a folder that isn't empty: one it finished
+        // is kept, one it left half made (stopped, no network) goes
+        if (QFileInfo::exists(folder + QStringLiteral("/composer.json"))
+            && QFileInfo::exists(folder + QStringLiteral("/vendor/autoload.php"))) {
+            setStep(from, QStringLiteral("done"));
+            ++from;
+        } else if (!m_madeFolder || !QDir(folder).removeRecursively()) {
+            setStep(from, QStringLiteral("failed"), {QStringLiteral("folder_remove"), QDir::toNativeSeparators(folder), {}});
+            emit stepsChanged();
+            return;
+        }
+    }
+    // .env was already written: it gets the database values fixed since
+    const int env = static_cast<int>(std::find_if(m_plan.cbegin(), m_plan.cend(), [](const WizardStep &step) {
+                                         return step.kind == StepKind::WriteEnv;
+                                     }) - m_plan.cbegin());
+    if (env < from) {
+        const auto written = writeEnvValues(folder, newProjectEnv(m_project));
+        if (!written) {
+            setStep(from, QStringLiteral("failed"), {written.error().code, written.error().detail, {}});
+            emit stepsChanged();
+            return;
+        }
+        readEnvSecrets();
+    }
+    runFrom(from);
+}
+
+void NewProjectWizard::startOver()
+{
+    if (m_running || m_state != u"failed")
+        return;
+    // Only the folder this run made, and nothing when it can't go
+    const QString folder = newProjectFolder(m_project);
+    if (m_madeFolder && QFileInfo::exists(folder) && !QDir(folder).removeRecursively()) {
+        emit problem(QStringLiteral("folder_remove"), QDir::toNativeSeparators(folder));
+        return;
+    }
+    reset();
 }
 
 void NewProjectWizard::cancel()
@@ -278,6 +374,7 @@ void NewProjectWizard::runFrom(int index)
     m_state = QStringLiteral("running");
     for (int i = index; i < m_steps.size(); ++i)
         setStep(i, QStringLiteral("waiting"));
+    emit formChanged(); // problems() and ready() depend on the state
     runStep(index);
 }
 
@@ -301,12 +398,12 @@ void NewProjectWizard::runStep(int index)
 
     if (step.kind == StepKind::WriteEnv) {
         const auto written = writeEnvValues(newProjectFolder(m_project), newProjectEnv(m_project));
-        stepDone(index, written.ok(), written ? QString() : written.error().code + QStringLiteral(": ") + written.error().detail);
+        stepDone(index, written.ok(), written ? StepProblem{} : StepProblem{written.error().code, written.error().detail, {}});
         return;
     }
     const auto command = prepareCommand(*m_settings, step.request);
     if (!command) {
-        stepDone(index, false, command.error().code + QStringLiteral(": ") + command.error().detail);
+        stepDone(index, false, {command.error().code, command.error().detail, {}});
         return;
     }
     m_output.clear();
@@ -322,20 +419,29 @@ void NewProjectWizard::runStep(int index)
                 m_running->deleteLater();
             m_running = nullptr;
             const bool ok = exitCode == 0 && !crashed;
+            // What the command said, else why it ended
             const QString message = errorMessage(m_output.join(u'\n'));
-            stepDone(index, ok,
-                     ok ? QString()
-                        : (message.isEmpty() ? (crashed ? QStringLiteral("stopped") : QStringLiteral("exit code %1").arg(exitCode))
-                                             : message));
+            StepProblem problem;
+            if (!ok && message.isEmpty() && crashed)
+                problem.code = QStringLiteral("step_stopped");
+            else if (!ok && message.isEmpty())
+                problem = {QStringLiteral("step_exit"), QString::number(exitCode), {}};
+            else if (!ok)
+                problem.message = message;
+            stepDone(index, ok, problem);
         });
 }
 
-void NewProjectWizard::stepDone(int index, bool ok, const QString &message)
+void NewProjectWizard::stepDone(int index, bool ok, const StepProblem &problem)
 {
-    setStep(index, ok ? QStringLiteral("done") : QStringLiteral("failed"), message);
+    // The new project's .env secrets, once there is one
+    if (index < m_plan.size() && (m_plan.at(index).id == u"create" || m_plan.at(index).kind == StepKind::WriteEnv))
+        readEnvSecrets();
+    setStep(index, ok ? QStringLiteral("done") : QStringLiteral("failed"), problem);
     if (!ok) {
         m_state = QStringLiteral("failed");
         emit stepsChanged();
+        emit formChanged();
         return;
     }
     runStep(index + 1);

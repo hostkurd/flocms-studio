@@ -75,12 +75,12 @@
       },
       {
         "id": "migrate",
-        "shown": "php flo migrate",
+        "shown": "php flo migrate --force",
         "state": "waiting"
       },
       {
         "id": "admin",
-        "shown": "php flo user:create --name=\"Khalat Jalal\" --email=admin@example.com --role=super-admin --password-stdin",
+        "shown": "php flo user:create \"--name=Khalat Jalal\" --email=admin@example.com --role=super-admin --password-stdin",
         "state": "waiting"
       }
     ],

@@ -327,6 +327,7 @@ private slots:
         QVERIFY(wizard->ready());
         QSignalSpy created(wizard, &NewProjectWizard::created);
         wizard->start();
+        QVERIFY(studio.commandRunning()); // quitting asks first
         QTRY_VERIFY_WITH_TIMEOUT(wizard->state() != u"running", 600000);
         if (wizard->state() != u"done") {
             for (const QVariant &step : wizard->steps())
@@ -335,19 +336,85 @@ private slots:
         }
         QCOMPARE(wizard->state(), QStringLiteral("done"));
         QCOMPARE(created.count(), 1);
-        // Listed and open
+        // The password went in, and was never shown
+        QVERIFY(!wizard->lines().join(u'\n').contains(QStringLiteral("wizard-pass-123")));
+        QVERIFY(wizard->lines().join(u'\n').contains(QStringLiteral("admin@example.com")));
+        // The page stays until the person opens the project, which is listed
         const QString folder = QDir(dir.path()).filePath(QStringLiteral("wizard-site"));
+        QCOMPARE(studio.page(), QStringLiteral("new"));
+        studio.openNewProject();
         QCOMPARE(studio.page(), QStringLiteral("project"));
         QCOMPARE(QDir(studio.currentPath()), QDir(folder));
+        QCOMPARE(wizard->state(), QStringLiteral("editing"));
         QCOMPARE(studio.current().value(QStringLiteral("type")).toString(), QStringLiteral("siteAdmin"));
         const auto env = parseEnv(readEnvFile(folder));
         QCOMPARE(env.value(QStringLiteral("LANGUAGES")), QStringLiteral("en,ku"));
         QCOMPARE(env.value(QStringLiteral("DB_TYPE")), QStringLiteral("sqlite"));
         QVERIFY(QFileInfo::exists(folder + QStringLiteral("/storage/database.sqlite")));
-        // The password went in, and was never shown
-        QVERIFY(!wizard->lines().join(u'\n').contains(QStringLiteral("wizard-pass-123")));
-        QVERIFY(wizard->lines().join(u'\n').contains(QStringLiteral("admin@example.com")));
         QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 120000);
+    }
+
+    // A step that fails (a Composer that leaves half a folder): what can
+    // still be fixed, trying again, starting over
+    void aWizardRunThatFails()
+    {
+#ifdef Q_OS_WIN
+        QSKIP("the fake Composer is a shell script");
+#else
+        const QTemporaryDir dir;
+        const QString composer = dir.filePath(QStringLiteral("composer"));
+        writeFile(composer, "#!/bin/sh\n"
+                            "[ \"$1\" = create-project ] || exit 0\n"
+                            "mkdir \"$3\" && echo half > \"$3/composer.json\"\n"
+                            "echo 'Could not download hostkurd/flocms' >&2\n"
+                            "exit 1\n");
+        QFile(composer).setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        const QString parent = dir.filePath(QStringLiteral("sites"));
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.setComposerPath(composer);
+        NewProjectWizard *wizard = studio.wizard();
+        wizard->set(QStringLiteral("parentDir"), parent);
+        wizard->setName(QStringLiteral("half"));
+        wizard->set(QStringLiteral("setup"), QStringLiteral("site"));
+        QVERIFY(wizard->ready());
+        wizard->start();
+        QVERIFY(studio.commandRunning());
+        QTRY_COMPARE_WITH_TIMEOUT(wizard->state(), QStringLiteral("failed"), 20000);
+        QVERIFY(!studio.commandRunning());
+        const QVariantMap failed = wizard->steps().constFirst().toMap();
+        QCOMPARE(failed.value(QStringLiteral("state")).toString(), QStringLiteral("failed"));
+        // Composer's own words are in the output; the step says how it ended
+        QCOMPARE(failed.value(QStringLiteral("code")).toString(), QStringLiteral("step_exit"));
+        QCOMPARE(failed.value(QStringLiteral("detail")).toString(), QStringLiteral("1"));
+        QVERIFY(wizard->lines().join(u'\n').contains(QStringLiteral("Could not download")));
+        const QString folder = QDir(parent).filePath(QStringLiteral("half"));
+        QVERIFY(QFileInfo::exists(folder));
+        // The folder exists now, which is no problem for this run
+        QVERIFY(wizard->problems().isEmpty());
+        QVERIFY(wizard->ready());
+        // The name and what is made stay; the database can still change
+        wizard->setName(QStringLiteral("other"));
+        wizard->set(QStringLiteral("setup"), QStringLiteral("site-admin"));
+        wizard->set(QStringLiteral("dbHost"), QStringLiteral("db.local"));
+        QCOMPARE(wizard->form().value(QStringLiteral("name")).toString(), QStringLiteral("half"));
+        QCOMPARE(wizard->form().value(QStringLiteral("setup")).toString(), QStringLiteral("site"));
+        QCOMPARE(wizard->form().value(QStringLiteral("dbHost")).toString(), QStringLiteral("db.local"));
+        // Again: the half folder goes first (or create-project would refuse it)
+        QFile::remove(folder + QStringLiteral("/composer.json"));
+        writeFile(folder + QStringLiteral("/left-over"), "x");
+        wizard->retry();
+        QCOMPARE(wizard->state(), QStringLiteral("running"));
+        QTRY_COMPARE_WITH_TIMEOUT(wizard->state(), QStringLiteral("failed"), 20000);
+        QVERIFY(!QFileInfo::exists(folder + QStringLiteral("/left-over")));
+        // Start over: the folder this run made goes, and the form is new
+        wizard->startOver();
+        QCOMPARE(wizard->state(), QStringLiteral("editing"));
+        QVERIFY(!QFileInfo::exists(folder));
+        QVERIFY(QFileInfo::exists(parent)); // only the project's folder
+        QVERIFY(wizard->steps().isEmpty());
+#endif
     }
 
     // --- Stage 5: Doctor and the database ---------------------------------

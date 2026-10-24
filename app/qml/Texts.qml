@@ -119,6 +119,12 @@ QtObject {
         case "php_unsafe": return qsTr("PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose `php.exe` in Settings > PHP and tools.")
         case "no_launcher": return qsTr("The project has no `flo` launcher yet: run `composer install` in it.")
         case "parent_invalid": return qsTr("The folder for the new project could not be made.")
+        case "folder_remove": return qsTr("Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.")
+        case "env_write": return qsTr("Studio could not write the project's `.env` file.")
+        case "env_key":
+        case "env_value": return qsTr("A value for `.env` has a character FloCMS can't read there (a line break).")
+        case "step_stopped": return qsTr("Stopped.")
+        case "not_allowed": return qsTr("Studio does not run this command.")
         case "keychain_unavailable": return qsTr("There is no secure store for passwords on this computer.")
         case "keychain_denied": return qsTr("The secure store did not give the password.")
         case "keychain_missing": return qsTr("No password is saved for this database user.")
