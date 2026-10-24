@@ -1,8 +1,16 @@
-// FloCMS Studio. Stage 1: the build check window; see README.md.
+// FloCMS Studio: starts the app shell (stage 3). See README.md.
+
+#include "language.h"
+#include "studio.h"
 
 #include <flostudio/core/buildinfo.h>
 
 #include <QCommandLineParser>
+#include <QDir>
+#include <QFont>
+#include <QFontDatabase>
+#include <QNetworkProxyFactory>
+#include <QQuickStyle>
 #include <QGuiApplication>
 #include <QImage>
 #include <QMutex>
@@ -101,8 +109,29 @@ void attachParentConsole()
 }
 #endif
 
-// The window's background colour in qml/Main.qml.
+// The window's background colour in qml/Main.qml (Theme.bg, light).
 constexpr QRgb kBackground = 0xFFF4F7F9;
+
+// The bundled fonts (D8). Each UI font falls back to the other for the
+// script it lacks: a Latin project name in a Kurdish window uses
+// Instrument Sans, Arabic letters in an English window Noto Sans Arabic,
+// never whatever the system happens to have.
+bool loadFonts()
+{
+    bool all = true;
+    const QDir fonts(QStringLiteral(":/fonts"));
+    for (const QString &file : fonts.entryList({QStringLiteral("*.ttf")})) {
+        if (QFontDatabase::addApplicationFont(fonts.filePath(file)) < 0) {
+            qWarning("Could not load the font %s", qUtf8Printable(file));
+            all = false;
+        }
+    }
+    QFont::insertSubstitution(QStringLiteral("Noto Sans Arabic"), QStringLiteral("Instrument Sans"));
+    QFont::insertSubstitution(QStringLiteral("Instrument Sans"), QStringLiteral("Noto Sans Arabic"));
+    QFont::insertSubstitution(QStringLiteral("Bricolage Grotesque"), QStringLiteral("Noto Sans Arabic"));
+    QFont::insertSubstitution(QStringLiteral("JetBrains Mono"), QStringLiteral("Noto Sans Arabic"));
+    return all;
+}
 
 } // namespace
 
@@ -119,6 +148,8 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationName(QStringLiteral("FloCMS Studio"));
     QGuiApplication::setOrganizationName(QStringLiteral("HostKurd"));
     QGuiApplication::setApplicationVersion(FloStudio::Core::currentBuildInfo().version);
+    QQuickStyle::setStyle(QStringLiteral("Basic"));
+    QNetworkProxyFactory::setUseSystemConfiguration(true); // tool downloads behind a company proxy
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("FloCMS Studio"));
@@ -131,7 +162,17 @@ int main(int argc, char *argv[])
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
                                      QStringLiteral("Save a PNG of the window and quit."),
                                      QStringLiteral("file"));
-    parser.addOptions({versionOpt, smokeOpt, shotOpt});
+    const QCommandLineOption demoOpt(QStringLiteral("demo"),
+                                     QStringLiteral("Show the state in a demo file (no tools are looked for, "
+                                                    "nothing is saved)."),
+                                     QStringLiteral("file"));
+    const QCommandLineOption languageOpt(QStringLiteral("language"),
+                                         QStringLiteral("en, ar or ckb, for this run (with --demo)."),
+                                         QStringLiteral("code"));
+    const QCommandLineOption themeOpt(QStringLiteral("theme"),
+                                      QStringLiteral("light or dark, for this run (with --demo)."),
+                                      QStringLiteral("name"));
+    parser.addOptions({versionOpt, smokeOpt, shotOpt, demoOpt, languageOpt, themeOpt});
     parser.process(app);
 
     if (parser.isSet(versionOpt)) {
@@ -140,8 +181,30 @@ int main(int argc, char *argv[])
     }
 
     const bool smoke = parser.isSet(smokeOpt);
+    if (!loadFonts() && smoke)
+        return 1;
 
+    // Before the engine, so they outlive it: it holds them as singletons
+    Language language;
+    Studio studio(&language);
     QQmlApplicationEngine engine;
+    language.setEngine(&engine);
+    qmlRegisterSingletonInstance("FloStudio.Backend", 1, 0, "Lang", &language);
+    qmlRegisterSingletonInstance("FloStudio.Backend", 1, 0, "Studio", &studio);
+
+    if (parser.isSet(demoOpt)) {
+        if (const auto demo = studio.startDemo(parser.value(demoOpt)); !demo) {
+            qCritical("Could not read the demo file: %s", qUtf8Printable(demo.error().detail));
+            return 2;
+        }
+        if (parser.isSet(languageOpt))
+            studio.setLanguage(parser.value(languageOpt));
+        if (parser.isSet(themeOpt))
+            studio.setTheme(parser.value(themeOpt));
+    } else {
+        studio.start();
+    }
+
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/FloStudio/App/Main.qml")));
     if (engine.rootObjects().isEmpty()) {
         qCritical("Could not load the main window.");
@@ -172,7 +235,9 @@ int main(int argc, char *argv[])
 
             const QImage frame = window->grabWindow();
             const bool onScreen = swapped->load() >= 1;
-            const bool background = !frame.isNull() && frame.pixel(4, 4) == kBackground;
+            // The smoke test runs light: the background is Theme.bg; a
+            // screenshot is any theme
+            const bool background = !frame.isNull() && (!smoke || frame.pixel(frame.width() - 4, frame.height() - 4) == kBackground);
             bool ok = onScreen && background;
             if (ok && !file.isEmpty())
                 ok = frame.save(file);
