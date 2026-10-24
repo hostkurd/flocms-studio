@@ -5,12 +5,17 @@
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QImage>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QStringList>
 #include <QTimer>
 
+#include <atomic>
 #include <cstdio>
+#include <cstring>
+#include <memory>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -18,19 +23,66 @@
 
 namespace {
 
+// --smoke-test: every warning counts as a failure; a missing QML module or
+// plugin shows up as a warning first. Qt can warn from its render thread,
+// so the list is guarded.
+QMutex &warningsMutex()
+{
+    static QMutex mutex; // created on first use, not before main()
+    return mutex;
+}
 QStringList g_warnings;
 QtMessageHandler g_previousHandler = nullptr;
 
-// In --smoke-test every warning counts as a failure: a missing QML module
-// or plugin in a static build shows up as a warning first.
 void countingHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
-    if (type != QtDebugMsg && type != QtInfoMsg)
-        g_warnings << (context.category && qstrcmp(context.category, "default") != 0
-                           ? QStringLiteral("%1: %2").arg(QString::fromLatin1(context.category), message)
-                           : message);
+    if (type != QtDebugMsg && type != QtInfoMsg) {
+        const QString text = context.category && qstrcmp(context.category, "default") != 0
+            ? QStringLiteral("%1: %2").arg(QString::fromLatin1(context.category), message)
+            : message;
+        const QMutexLocker lock(&warningsMutex());
+        g_warnings << text;
+    }
     if (g_previousHandler)
         g_previousHandler(type, context, message);
+}
+
+QStringList takeWarnings()
+{
+    const QMutexLocker lock(&warningsMutex());
+    return g_warnings;
+}
+
+// Installed before QGuiApplication exists (so its own warnings count too)
+// and removed before main() returns (the list dies after main).
+class SmokeHandler
+{
+public:
+    explicit SmokeHandler(bool on)
+        : m_on(on)
+    {
+        if (m_on)
+            g_previousHandler = qInstallMessageHandler(countingHandler);
+    }
+    ~SmokeHandler()
+    {
+        if (m_on)
+            qInstallMessageHandler(g_previousHandler);
+    }
+    SmokeHandler(const SmokeHandler &) = delete;
+    SmokeHandler &operator=(const SmokeHandler &) = delete;
+
+private:
+    bool m_on;
+};
+
+bool hasArgument(int argc, char *argv[], const char *name)
+{
+    for (int i = 1; i < argc; ++i) {
+        if (std::strcmp(argv[i], name) == 0)
+            return true;
+    }
+    return false;
 }
 
 #ifdef Q_OS_WIN
@@ -49,6 +101,9 @@ void attachParentConsole()
 }
 #endif
 
+// The window's background colour in qml/Main.qml.
+constexpr QRgb kBackground = 0xFFF4F7F9;
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -57,6 +112,8 @@ int main(int argc, char *argv[])
     if (argc > 1)
         attachParentConsole();
 #endif
+
+    const SmokeHandler smokeHandler(hasArgument(argc, argv, "--smoke-test"));
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("FloCMS Studio"));
@@ -69,8 +126,8 @@ int main(int argc, char *argv[])
     const QCommandLineOption versionOpt(QStringList{QStringLiteral("v"), QStringLiteral("version")},
                                         QStringLiteral("Print the version and build details."));
     const QCommandLineOption smokeOpt(QStringLiteral("smoke-test"),
-                                      QStringLiteral("Open the window, draw it once and quit; "
-                                                     "fails on any warning."));
+                                      QStringLiteral("Open the window, wait until it is on screen, "
+                                                     "check one frame and quit; fails on any warning."));
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
                                      QStringLiteral("Save a PNG of the window and quit."),
                                      QStringLiteral("file"));
@@ -83,8 +140,6 @@ int main(int argc, char *argv[])
     }
 
     const bool smoke = parser.isSet(smokeOpt);
-    if (smoke)
-        g_previousHandler = qInstallMessageHandler(countingHandler);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/FloStudio/App/Main.qml")));
@@ -95,23 +150,44 @@ int main(int argc, char *argv[])
 
     if (smoke || parser.isSet(shotOpt)) {
         auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());
+        if (!window) {
+            qCritical("The main window is not a Qt Quick window.");
+            return 1;
+        }
+        // Frames that really reached the screen (signalled from the render
+        // thread). Waiting for them shows the window was shown and drawn.
+        auto swapped = std::make_shared<std::atomic_int>(0);
+        QObject::connect(window, &QQuickWindow::frameSwapped, window,
+                         [swapped] { ++*swapped; }, Qt::DirectConnection);
+
         const QString file = parser.value(shotOpt);
-        // Give the scene graph time to lay out and draw, then grab a frame:
-        // grabbing renders the scene, so a broken renderer fails here too.
-        QTimer::singleShot(1500, &app, [window, file, smoke] {
-            const QImage frame = window ? window->grabWindow() : QImage();
-            bool ok = !frame.isNull();
+        auto *poll = new QTimer(&app); // owned by app
+        poll->setInterval(100);
+        auto waited = std::make_shared<int>(0);
+        QObject::connect(poll, &QTimer::timeout, &app, [=] {
+            *waited += poll->interval();
+            if (swapped->load() < 1 && *waited < 15000)
+                return; // keep waiting, up to 15 seconds
+            poll->stop();
+
+            const QImage frame = window->grabWindow();
+            const bool onScreen = swapped->load() >= 1;
+            const bool background = !frame.isNull() && frame.pixel(4, 4) == kBackground;
+            bool ok = onScreen && background;
             if (ok && !file.isEmpty())
                 ok = frame.save(file);
             if (smoke) {
-                for (const QString &warning : std::as_const(g_warnings))
+                const QStringList warnings = takeWarnings();
+                for (const QString &warning : warnings)
                     std::printf("warning: %s\n", qUtf8Printable(warning));
-                const int written = std::printf("smoke test: %s, %d warning(s)\n",
-                                                ok ? "window drawn" : "no frame", int(g_warnings.size()));
-                ok = ok && g_warnings.isEmpty() && written > 0;
+                const int written = std::printf(
+                    "smoke test: %d frame(s) on screen, background %s, %d warning(s)\n", swapped->load(),
+                    background ? "as expected" : "wrong or missing", int(warnings.size()));
+                ok = ok && warnings.isEmpty() && written > 0;
             }
             QCoreApplication::exit(ok ? 0 : 1);
         });
+        poll->start();
     }
 
     return QGuiApplication::exec();

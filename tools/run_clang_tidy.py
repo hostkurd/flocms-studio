@@ -22,9 +22,9 @@ def main() -> int:
     tidy = sys.argv[2] if len(sys.argv) > 2 else "clang-tidy"
     entries = json.loads((build / "compile_commands.json").read_text())
     files = sorted({
-        Path(e["file"]).resolve() for e in entries
-        if not Path(e["file"]).resolve().is_relative_to(build)
-        and Path(e["file"]).resolve().relative_to(ROOT).parts[0] in OWN
+        path for path in (Path(e["file"]).resolve() for e in entries)
+        if not path.is_relative_to(build)
+        and path.is_relative_to(ROOT) and path.relative_to(ROOT).parts[0] in OWN
     })
     if not files:
         print("no source files found in compile_commands.json")

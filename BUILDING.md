@@ -21,13 +21,18 @@ Windows, in a "x64 Native Tools Command Prompt for VS 2022":
 ```
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\Qt\6.12.0\msvc2022_64
 cmake --build build
+set PATH=C:\Qt\6.12.0\msvc2022_64\bin;%PATH%
 ctest --test-dir build --output-on-failure
 build\bin\Studio.exe
 ```
 
-Add `C:\Qt\6.12.0\msvc2022_64\bin` to `PATH` to run it from the build
-folder. To make a folder you can copy to another PC, as CI does:
+The `set PATH` line lets the tests and Studio find the Qt DLLs from the
+build folder. To make a folder you can copy to another PC, as CI does:
 `windeployqt --qmldir app\qml build\bin\Studio.exe`.
+
+`Studio.exe` is a window program, so in Command Prompt its output can show
+up after the prompt returns; `start /wait build\bin\Studio.exe --version`
+waits for it.
 
 macOS:
 

@@ -16,13 +16,11 @@ on:
     paths-ignore:
       - "prototypes/**"
       - ".github/workflows/rtl-check.yml"
-      - "**.md"
   push:
     branches: [main]
     paths-ignore:
       - "prototypes/**"
       - ".github/workflows/rtl-check.yml"
-      - "**.md"
   workflow_dispatch:
 
 permissions:
@@ -37,6 +35,7 @@ jobs:
   release:
     name: release (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -85,14 +84,14 @@ jobs:
         run: |
           set +e
           if [ "$RUNNER_OS" = "Windows" ]; then
-            extra="-DCMAKE_PREFIX_PATH=$QT_DIR"
+            extra=("-DCMAKE_PREFIX_PATH=$QT_DIR")
           else
             # The same minimum macOS as Qt itself, not the runner's SDK.
             minos=$(otool -l "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
             echo "::notice::Qt $QT_VERSION needs macOS $minos or newer"
-            extra="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=$minos"
+            extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" "-DCMAKE_OSX_DEPLOYMENT_TARGET=$minos")
           fi
-          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release $extra \
+          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "${extra[@]}" \
             && cmake --build build; } > build.log 2>&1
           status=$?
           cat build.log
@@ -133,7 +132,7 @@ jobs:
             # Our own libraries into the bundle too, under the names the
             # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
             mkdir -p "$app/Contents/Frameworks"
-            wanted=$(otool -L "$exe" | awk '/libFloStudio/{print $1}')
+            wanted=$(otool -L "$exe" | awk '/libFloStudio/{print $1}' | sort -u)
             echo "::notice::the program asks for: $(echo $wanted)"
             [ -n "$wanted" ] || fail "otool shows no FloStudio libraries in the program"
             for ref in $wanted; do
@@ -145,12 +144,18 @@ jobs:
               fi
               case "$ref" in @rpath/*) ;; *) install_name_tool -change "$ref" "@rpath/$lib" "$exe" || fail "could not relink $lib";; esac
             done
-            # Only rpaths inside the bundle: drop the build folder ones.
-            for rp in $(otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' || true); do
-              install_name_tool -delete_rpath "$rp" "$exe" || fail "could not remove rpath $rp"
+            # Only rpaths inside the bundle: drop the build folder and Qt
+            # install ones from the program and from our own libraries.
+            for bin in "$exe" "$app"/Contents/Frameworks/libFloStudio*.dylib; do
+              for rp in $(otool -l "$bin" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' || true); do
+                install_name_tool -delete_rpath "$rp" "$bin" || fail "could not remove rpath $rp from $(basename "$bin")"
+              done
             done
             otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
               || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" || fail "could not add the bundle rpath"
+            # The notices travel inside the app, even if only the app is copied.
+            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA" > /dev/null
+            cp LICENSE "$app/Contents/Resources/LICENSE.txt"
             # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
             codesign --force --deep --sign - "$app" || fail "codesign failed"
             echo "STUDIO=$app/Contents/MacOS/FloCMS Studio" >> "$GITHUB_ENV"
@@ -175,10 +180,17 @@ jobs:
             bad=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -L {} \; 2>/dev/null \
                   | awk '/^\t/{print $1}' | { grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' || true; } | sort -u)
             if [ -n "$bad" ]; then echo "::error::libraries from outside the bundle: $(echo $bad)"; exit 1; fi
+            rpaths=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -l {} \; 2>/dev/null \
+                  | awk '/cmd LC_RPATH/{getline; getline; print $2}' | { grep '^/' || true; } | sort -u)
+            if [ -n "$rpaths" ]; then echo "::error::rpaths outside the bundle: $(echo $rpaths)"; exit 1; fi
           fi
 
-      - name: Smoke test (PATH without Qt on Windows)
+      # Without the Qt install's paths: PATH on Windows, and the plugin and
+      # QML paths install-qt-action sets, so only what ships is used.
+      - name: Smoke test (without the Qt install)
+        timeout-minutes: 5
         run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; fi
           mkdir -p shots
           "$STUDIO" --smoke-test --screenshot shots/studio-$RUNNER_OS.png
@@ -191,6 +203,7 @@ jobs:
 
       - name: Windows installer dry run
         if: runner.os == 'Windows'
+        timeout-minutes: 10
         run: |
           iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
           if [ ! -f "$iscc" ]; then choco install innosetup -y --no-progress > /dev/null; fi
@@ -199,7 +212,7 @@ jobs:
           echo "::notice::installer: $setup $(( $(stat -c %s "$setup") / 1024 )) KiB"
           target="$(cygpath -w "$RUNNER_TEMP/studio-install")"
           ./"$setup" //VERYSILENT //SUPPRESSMSGBOXES //CURRENTUSER //NORESTART //DIR="$target" //LOG=install.log
-          installed="$RUNNER_TEMP/studio-install"
+          installed="$(cygpath -u "$RUNNER_TEMP")/studio-install"
           test -f "$installed/Studio.exe" || { echo "::error::the installer did not install Studio.exe"; cat install.log; exit 1; }
           (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; "$installed/Studio.exe" --smoke-test)
           "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
@@ -212,7 +225,9 @@ jobs:
 
       - name: macOS disk image dry run
         if: runner.os == 'macOS'
+        timeout-minutes: 10
         run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
           staging="$RUNNER_TEMP/dmg"
           mkdir -p "$staging"
           cp -R "$APP_DIR" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
@@ -263,6 +278,7 @@ jobs:
 
   linux:
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -297,6 +313,7 @@ jobs:
   sanitizers:
     name: sanitizers (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -356,6 +373,7 @@ jobs:
 
   clang-tidy:
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 

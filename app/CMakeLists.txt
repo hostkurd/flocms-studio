@@ -9,6 +9,12 @@ if(WIN32)
     configure_file(studio.rc.in "${CMAKE_CURRENT_BINARY_DIR}/studio.rc" @ONLY)
     target_sources(Studio PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/studio.rc")
 elseif(APPLE)
+    # The same minimum as the program itself (CI passes Qt's minimum).
+    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(FLOSTUDIO_MIN_MACOS "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    else()
+        execute_process(COMMAND xcrun --show-sdk-version OUTPUT_VARIABLE FLOSTUDIO_MIN_MACOS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
     set_target_properties(Studio PROPERTIES
         OUTPUT_NAME "FloCMS Studio"
         MACOSX_BUNDLE ON

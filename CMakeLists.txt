@@ -25,8 +25,16 @@ option(FLOSTUDIO_BUILD_TESTS "Build the Qt Test suites" ON)
 
 # CI and releases use Qt 6.12. 6.4 is accepted so the project also builds
 # with Ubuntu 24.04's own Qt packages.
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+    message(FATAL_ERROR "Build in a separate folder, for example: cmake -S . -B build")
+endif()
+
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
 qt_standard_project_setup()
+# Qt 6.8+: also write a qmldir for QML files in subfolders (the future default).
+if(QT_KNOWN_POLICY_QTP0004)
+    qt_policy(SET QTP0004 NEW)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(FloStudioTarget)
