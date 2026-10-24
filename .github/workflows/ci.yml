@@ -382,8 +382,17 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; app=build/bin/flocms-studio
           else app="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"; fi
-          ctest --test-dir build --output-on-failure
-          "$app" --smoke-test
+          # Sanitizer reports are long; repeat their key lines as annotations.
+          report() {
+            grep -E "ERROR: AddressSanitizer|runtime error:|SUMMARY:|FAIL!|warning\(s\)|^    #[0-4] " "$1" | head -25 | sed 's/^/::error::/'
+          }
+          set +e
+          ctest --test-dir build --output-on-failure > ctest.log 2>&1; tests=$?
+          cat ctest.log; [ $tests -eq 0 ] || report ctest.log
+          "$app" --smoke-test > smoke.log 2>&1; smoke=$?
+          cat smoke.log; [ $smoke -eq 0 ] || report smoke.log
+          echo "::notice::tests exit $tests, smoke test exit $smoke"
+          [ $tests -eq 0 ] && [ $smoke -eq 0 ]
 
   clang-tidy:
     runs-on: ubuntu-24.04
