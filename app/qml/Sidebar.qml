@@ -92,10 +92,8 @@ Rectangle {
                 iconPath: Icons.plus
                 Layout.fillWidth: true
                 Layout.topMargin: 8
-                enabled: false // the wizard comes in stage 6
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("The new project wizard comes in a later version.")
-                hoverEnabled: true
+                checked: Studio.page === "new"
+                onClicked: Studio.showNewProject()
             }
             AppButton {
                 text: qsTr("Open existing folder…")

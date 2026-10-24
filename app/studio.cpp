@@ -163,6 +163,17 @@ Studio::Studio(Language *language, QObject *parent)
     : QObject(parent)
     , m_language(language)
 {
+    // A new project is listed (in a project folder, or on its own) and opened
+    connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
+        const QString folderOfIt = QDir::toNativeSeparators(QFileInfo(path).absolutePath());
+        const bool inFolder = std::any_of(m_settings.projectFolders.begin(), m_settings.projectFolders.end(),
+                                          [&folderOfIt](const QString &folder) { return QDir(folder) == QDir(folderOfIt); });
+        if (!inFolder)
+            changeSettings([&path](Settings &s) { s.projects << path; });
+        refreshProjects();
+        selectProject(projectSummary(path).path);
+    });
+    connect(&m_wizard, &NewProjectWizard::problem, this, [this](const QString &code, const QString &detail) { setProblem(code, detail); });
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
         if (m_settings.theme == u"system")
@@ -244,6 +255,8 @@ Result<Done> Studio::startDemo(const QString &file)
     m_settingsSection = demo.value(QStringLiteral("settingsSection")).toString(QStringLiteral("general"));
     if (demo.contains(QStringLiteral("problem")))
         m_problem = demo.value(QStringLiteral("problem")).toObject().toVariantMap();
+    if (demo.contains(QStringLiteral("wizard")))
+        m_wizard.showDemo(demo.value(QStringLiteral("wizard")).toObject().toVariantMap());
     // The open project's Doctor and database, server and log, and which
     // others are running
     if (!m_currentPath.isEmpty())
@@ -566,6 +579,14 @@ void Studio::showSettings(const QString &section)
     emit pageChanged();
 }
 
+void Studio::showNewProject()
+{
+    if (m_wizard.state() == u"done" || m_wizard.state() == u"editing")
+        m_wizard.reset();
+    m_page = QStringLiteral("new");
+    emit pageChanged();
+}
+
 void Studio::showProjects()
 {
     m_page = m_projects.count() > 0 ? QStringLiteral("project") : QStringLiteral("welcome");
@@ -591,7 +612,7 @@ void Studio::refreshProjects()
     serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
-    if (m_page != u"settings")
+    if (m_page != u"settings" && m_page != u"new")
         m_page = m_currentPath.isEmpty() ? QStringLiteral("welcome") : QStringLiteral("project");
     loadCurrent();
     emit pageChanged();

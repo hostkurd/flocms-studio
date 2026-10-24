@@ -34,7 +34,8 @@ Item {
         }
         RowLayout {
             spacing: 10
-            AppButton { text: qsTr("Add a projects folder…"); primary: true; iconPath: Icons.folder; onClicked: projectsFolder.open() }
+            AppButton { text: qsTr("New project"); primary: true; iconPath: Icons.plus; onClicked: Studio.showNewProject() }
+            AppButton { text: qsTr("Add a projects folder…"); iconPath: Icons.folder; onClicked: projectsFolder.open() }
             AppButton { text: qsTr("Open one project…"); onClicked: oneProject.open() }
         }
 

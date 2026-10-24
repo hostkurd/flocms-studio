@@ -1,0 +1,97 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [],
+  "tools": [
+    {
+      "tool": "php",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "composer",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "mariadb",
+      "state": "optional",
+      "version": "",
+      "product": "",
+      "path": ""
+    }
+  ],
+  "page": "new",
+  "tab": "create",
+  "wizard": {
+    "form": {
+      "name": "ar-lighting-backend",
+      "parentDir": "C:\\Sites",
+      "setup": "site-admin",
+      "languages": [
+        "en",
+        "ar",
+        "ku"
+      ],
+      "defaultLanguage": "en",
+      "database": "mysql",
+      "dbHost": "127.0.0.1",
+      "dbPort": 3306,
+      "dbUser": "root",
+      "dbPassword": "",
+      "adminName": "Khalat Jalal",
+      "adminEmail": "admin@example.com",
+      "adminPassword": ""
+    },
+    "state": "running",
+    "steps": [
+      {
+        "id": "create",
+        "shown": "composer create-project hostkurd/flocms ar-lighting-backend",
+        "state": "done"
+      },
+      {
+        "id": "env",
+        "shown": ".env",
+        "state": "done"
+      },
+      {
+        "id": "setup",
+        "shown": "php flo setup --as=site-admin",
+        "state": "running"
+      },
+      {
+        "id": "db-check",
+        "shown": "php flo db:check",
+        "state": "waiting"
+      },
+      {
+        "id": "migrate",
+        "shown": "php flo migrate",
+        "state": "waiting"
+      },
+      {
+        "id": "admin",
+        "shown": "php flo user:create --name=\"Khalat Jalal\" --email=admin@example.com --role=super-admin --password-stdin",
+        "state": "waiting"
+      }
+    ],
+    "lines": [
+      "› composer create-project hostkurd/flocms ar-lighting-backend",
+      "Creating a \"hostkurd/flocms\" project at \"./ar-lighting-backend\"",
+      "› php flo setup --as=site-admin",
+      "",
+      "Website + admin panel:",
+      "    composer require hostkurd/flocms-admin:^0.39.3",
+      "    php flo admin:install"
+    ]
+  }
+}

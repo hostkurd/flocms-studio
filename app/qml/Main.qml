@@ -68,10 +68,11 @@ ApplicationWindow {
                 StackLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    currentIndex: Studio.page === "settings" ? 2 : (Studio.page === "project" ? 1 : 0)
+                    currentIndex: Studio.page === "new" ? 3 : (Studio.page === "settings" ? 2 : (Studio.page === "project" ? 1 : 0))
                     WelcomePage { onDownloadRequested: downloads.open() }
                     ProjectPage {}
                     SettingsPage { onDownloadRequested: downloads.open() }
+                    NewProjectPage {}
                 }
             }
         }

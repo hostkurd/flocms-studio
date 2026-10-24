@@ -1,0 +1,58 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [],
+  "tools": [
+    {
+      "tool": "php",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "composer",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "mariadb",
+      "state": "optional",
+      "version": "",
+      "product": "",
+      "path": ""
+    }
+  ],
+  "page": "new",
+  "tab": "admin",
+  "wizard": {
+    "form": {
+      "name": "ar-lighting-backend",
+      "parentDir": "C:\\Sites",
+      "setup": "site-admin",
+      "languages": [
+        "en",
+        "ar",
+        "ku"
+      ],
+      "defaultLanguage": "en",
+      "database": "mysql",
+      "dbHost": "127.0.0.1",
+      "dbPort": 3306,
+      "dbUser": "root",
+      "dbPassword": "",
+      "adminName": "Khalat Jalal",
+      "adminEmail": "admin@example.com",
+      "adminPassword": "short"
+    },
+    "touched": [
+      "adminPassword"
+    ]
+  }
+}

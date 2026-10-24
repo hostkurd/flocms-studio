@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logmodel.h"
+#include "newproject.h"
 #include "projectchecks.h"
 #include "projectsmodel.h"
 
@@ -57,6 +58,8 @@ class Studio : public QObject
     Q_PROPERTY(ProjectChecks *checks READ checks NOTIFY currentChanged)
     // A command that changes a database or caches still runs (quitting asks)
     Q_PROPERTY(bool commandRunning READ commandRunning NOTIFY commandRunningChanged)
+    // The new project wizard (stage 6); page "new" shows it
+    Q_PROPERTY(NewProjectWizard *wizard READ wizard CONSTANT)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -110,6 +113,7 @@ public:
     LogModel *logs() const;
     ProjectChecks *checks() const { return m_checks.value(m_currentPath); }
     bool commandRunning() const;
+    NewProjectWizard *wizard() { return &m_wizard; }
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -140,6 +144,7 @@ public:
     Q_INVOKABLE void selectProject(const QString &path);
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
     Q_INVOKABLE void showProjects();
+    Q_INVOKABLE void showNewProject();
     Q_INVOKABLE void refreshProjects();
     Q_INVOKABLE void refreshTools();
     Q_INVOKABLE void openInEditor(const QString &path);
@@ -208,4 +213,5 @@ private:
     QString m_demoToolsFolder;
     QHash<QString, ProjectServer *> m_servers; // children of this, one per project opened
     QHash<QString, ProjectChecks *> m_checks;  // children of this, one per project opened
+    NewProjectWizard m_wizard{&m_settings};
 };

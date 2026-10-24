@@ -26,6 +26,7 @@ flostudio_add_test(tst_output FloStudio::Core)
 flostudio_add_test(tst_logs FloStudio::Core)
 flostudio_add_test(tst_tools FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_server FloStudio::Core Qt6::Network)
+flostudio_add_test(tst_wizard FloStudio::Core)
 flostudio_add_test(tst_commands FloStudio::Core)
 flostudio_add_test(tst_process FloStudio::Core)
 flostudio_add_test(tst_realproject FloStudio::Core)
@@ -35,10 +36,11 @@ flostudio_add_test(tst_security FloStudio::Security)
 
 # The app's view model, built from the app's own sources
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Gui Qml Network)
-flostudio_add_test(tst_studio FloStudio::Core FloStudio::Database Qt6::Gui Qt6::Qml Qt6::Network Qt6::Concurrent)
+flostudio_add_test(tst_studio FloStudio::Core FloStudio::Database FloStudio::Security Qt6::Gui Qt6::Qml Qt6::Network Qt6::Concurrent)
 target_sources(tst_studio PRIVATE
     ../app/language.cpp ../app/language.h
     ../app/logmodel.cpp ../app/logmodel.h
+    ../app/newproject.cpp ../app/newproject.h
     ../app/projectchecks.cpp ../app/projectchecks.h
     ../app/projectserver.cpp ../app/projectserver.h
     ../app/projectsmodel.cpp ../app/projectsmodel.h

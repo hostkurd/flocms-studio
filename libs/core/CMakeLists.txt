@@ -13,6 +13,7 @@ flostudio_add_library(FloStudioCore Core
         src/server.cpp
         src/settings.cpp
         src/tools.cpp
+        src/wizard.cpp
     HEADERS
         include/flostudio/core/buildinfo.h
         include/flostudio/core/commands.h
@@ -26,6 +27,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/server.h
         include/flostudio/core/settings.h
         include/flostudio/core/tools.h
+        include/flostudio/core/wizard.h
         "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/core/version.h"
     # Network: portAnswers(), tool downloads; Concurrent: unpacking off the
     # interface thread

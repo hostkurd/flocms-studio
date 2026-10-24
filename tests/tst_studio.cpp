@@ -7,6 +7,7 @@
 
 #include "language.h"
 #include "logmodel.h"
+#include "newproject.h"
 #include "projectchecks.h"
 #include "projectserver.h"
 #include "studio.h"
@@ -244,6 +245,109 @@ private slots:
         studio.startDownloads({QStringLiteral("no-such-package")});
         QVERIFY(!studio.downloading());
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
+    // --- Stage 6: the new project wizard ----------------------------------
+
+    void theWizardForm()
+    {
+        const QTemporaryDir dir;
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProjectFolder(QUrl::fromLocalFile(dir.path()));
+        studio.showNewProject();
+        QCOMPARE(studio.page(), QStringLiteral("new"));
+        NewProjectWizard *wizard = studio.wizard();
+        // The folder from Settings' project folders
+        QCOMPARE(wizard->form().value(QStringLiteral("parentDir")).toString(), QDir::toNativeSeparators(dir.path()));
+        wizard->setName(QStringLiteral("My Shop"));
+        QCOMPARE(wizard->form().value(QStringLiteral("name")).toString(), QStringLiteral("my-shop"));
+        QCOMPARE(wizard->form().value(QStringLiteral("dbName")).toString(), QStringLiteral("my_shop"));
+        // Problems show once touched
+        QVERIFY(!wizard->ready()); // the admin isn't filled in
+        QVERIFY(wizard->problems().isEmpty());
+        wizard->touch(QStringLiteral("adminEmail"));
+        QCOMPARE(wizard->problems().value(QStringLiteral("adminEmail")).toString(), QStringLiteral("email_invalid"));
+        // A website without the admin panel needs no admin
+        wizard->set(QStringLiteral("setup"), QStringLiteral("site"));
+        QVERIFY(wizard->ready());
+        wizard->set(QStringLiteral("addApi"), true);
+        QVERIFY(wizard->form().value(QStringLiteral("addApi")).toBool());
+        wizard->set(QStringLiteral("setup"), QStringLiteral("api"));
+        QVERIFY(!wizard->form().value(QStringLiteral("addApi")).toBool()); // only with a website
+        // Languages and the default
+        wizard->set(QStringLiteral("languages"), QStringList{QStringLiteral("ar"), QStringLiteral("ku")});
+        QCOMPARE(wizard->form().value(QStringLiteral("defaultLanguage")).toString(), QStringLiteral("ar"));
+        wizard->set(QStringLiteral("defaultLanguage"), QStringLiteral("ku"));
+        QCOMPARE(wizard->form().value(QStringLiteral("defaultLanguage")).toString(), QStringLiteral("ku"));
+        wizard->set(QStringLiteral("defaultLanguage"), QStringLiteral("en")); // not chosen
+        QCOMPARE(wizard->form().value(QStringLiteral("defaultLanguage")).toString(), QStringLiteral("ku"));
+        // The plan shows no password
+        wizard->set(QStringLiteral("setup"), QStringLiteral("site-admin"));
+        wizard->set(QStringLiteral("adminPassword"), QStringLiteral("secret-for-test"));
+        for (const QVariant &step : wizard->plan())
+            QVERIFY(!step.toMap().value(QStringLiteral("shown")).toString().contains(QStringLiteral("secret-for-test")));
+        studio.showProjects();
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
+    void everyWizardDemoLoads()
+    {
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/new-create.json")).ok());
+        QCOMPARE(studio.page(), QStringLiteral("new"));
+        QCOMPARE(studio.wizard()->state(), QStringLiteral("running"));
+        QCOMPARE(studio.wizard()->steps().size(), 6);
+        studio.wizard()->start(); // a demo runs nothing
+        QCOMPARE(studio.wizard()->state(), QStringLiteral("running"));
+    }
+
+    // A real new project with Composer (FLOSTUDIO_WIZARD_TESTS=1; CI): the
+    // website + admin panel on SQLite, with its first admin
+    void makesARealProject()
+    {
+        if (qEnvironmentVariable("FLOSTUDIO_WIZARD_TESTS") != u"1")
+            QSKIP("FLOSTUDIO_WIZARD_TESTS is not set");
+        const QTemporaryDir dir;
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        studio.showNewProject();
+        NewProjectWizard *wizard = studio.wizard();
+        wizard->set(QStringLiteral("parentDir"), dir.path());
+        wizard->setName(QStringLiteral("wizard-site"));
+        wizard->set(QStringLiteral("setup"), QStringLiteral("site-admin"));
+        wizard->set(QStringLiteral("languages"), QStringList{QStringLiteral("en"), QStringLiteral("ku")});
+        wizard->set(QStringLiteral("adminName"), QStringLiteral("Studio Admin"));
+        wizard->set(QStringLiteral("adminEmail"), QStringLiteral("admin@example.com"));
+        wizard->set(QStringLiteral("adminPassword"), QStringLiteral("wizard-pass-123"));
+        QVERIFY(wizard->ready());
+        QSignalSpy created(wizard, &NewProjectWizard::created);
+        wizard->start();
+        QTRY_VERIFY_WITH_TIMEOUT(wizard->state() != u"running", 600000);
+        if (wizard->state() != u"done") {
+            for (const QVariant &step : wizard->steps())
+                qWarning() << step.toMap();
+            qWarning().noquote() << wizard->lines().join(u'\n');
+        }
+        QCOMPARE(wizard->state(), QStringLiteral("done"));
+        QCOMPARE(created.count(), 1);
+        // Listed and open
+        const QString folder = QDir(dir.path()).filePath(QStringLiteral("wizard-site"));
+        QCOMPARE(studio.page(), QStringLiteral("project"));
+        QCOMPARE(QDir(studio.currentPath()), QDir(folder));
+        QCOMPARE(studio.current().value(QStringLiteral("type")).toString(), QStringLiteral("siteAdmin"));
+        const auto env = parseEnv(readEnvFile(folder));
+        QCOMPARE(env.value(QStringLiteral("LANGUAGES")), QStringLiteral("en,ku"));
+        QCOMPARE(env.value(QStringLiteral("DB_TYPE")), QStringLiteral("sqlite"));
+        QVERIFY(QFileInfo::exists(folder + QStringLiteral("/storage/database.sqlite")));
+        // The password went in, and was never shown
+        QVERIFY(!wizard->lines().join(u'\n').contains(QStringLiteral("wizard-pass-123")));
+        QVERIFY(wizard->lines().join(u'\n').contains(QStringLiteral("admin@example.com")));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 120000);
     }
 
     // --- Stage 5: Doctor and the database ---------------------------------

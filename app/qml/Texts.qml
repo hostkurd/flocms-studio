@@ -68,6 +68,29 @@ QtObject {
         return "`" + name + "`"
     }
 
+    // What is wrong with a wizard field (Core's checkNewProject)
+    function fieldProblem(code) {
+        Lang.code
+        switch (code) {
+        case "name_invalid": return qsTr("Use letters, digits, `-` and `_` (the folder's name).")
+        case "folder_exists": return qsTr("That folder is there already. Choose another name or folder.")
+        case "parent_invalid": return qsTr("Choose a folder on this computer.")
+        case "app_name_invalid": return qsTr("One line only.")
+        case "languages_empty": return qsTr("Choose at least one language.")
+        case "default_language": return qsTr("The default must be one of the chosen languages.")
+        case "db_name_invalid": return qsTr("Letters, digits and `_` only, up to 64.")
+        case "db_user_empty": return qsTr("Enter the database user (XAMPP: `root`).")
+        case "db_port_invalid": return qsTr("A port between 1 and 65535.")
+        case "db_host_invalid": return qsTr("Enter the database server (usually `127.0.0.1`).")
+        case "db_password_invalid": return qsTr("One line only.")
+        case "admin_name_empty": return qsTr("Enter a name.")
+        case "email_invalid": return qsTr("Enter an email address.")
+        case "password_short": return qsTr("Use at least 8 characters.")
+        case "password_invalid": return qsTr("One line only.")
+        }
+        return problem(code)
+    }
+
     // The same without the backticks, for plain text
     function problemPlain(code) {
         return problem(code).replace(/`/g, "")
@@ -95,6 +118,12 @@ QtObject {
         case "php_not_found": return qsTr("PHP was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
         case "php_unsafe": return qsTr("PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose `php.exe` in Settings > PHP and tools.")
         case "no_launcher": return qsTr("The project has no `flo` launcher yet: run `composer install` in it.")
+        case "parent_invalid": return qsTr("The folder for the new project could not be made.")
+        case "keychain_unavailable": return qsTr("There is no secure store for passwords on this computer.")
+        case "keychain_denied": return qsTr("The secure store did not give the password.")
+        case "keychain_missing": return qsTr("No password is saved for this database user.")
+        case "keychain_failed": return qsTr("The secure store did not answer.")
+        case "composer_not_found": return qsTr("Composer was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
         case "project_busy": return qsTr("A command is still running in this project. Remove it from the list when it has finished.")
         case "no_env_file": return qsTr("The project has no `.env` file. Copy `.env.example` to `.env`.")
         case "command_failed": return qsTr("The command could not run.")
