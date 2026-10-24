@@ -290,7 +290,9 @@ jobs:
         run: |
           mkdir -p deploy
           cp build/bin/Studio.exe build/bin/FloStudio*.dll deploy/
-          "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations deploy/Studio.exe > deploy.log
+          "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations --no-compiler-runtime deploy/Studio.exe > deploy.log
+          # The Visual C++ runtime as DLLs next to the exe (not the 25 MB
+          # vc_redist installer windeployqt would add).
           vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
           cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll deploy/
           (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; deploy/Studio.exe --smoke-test)
