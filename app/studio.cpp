@@ -444,6 +444,9 @@ void Studio::loadCurrent()
     emit currentChanged();
 }
 
+// The analyzer misses the watcher's parent and reports it at the end of
+// the function, where a line NOLINT can't reach
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 void Studio::refreshTools()
 {
     if (m_demo || m_closing)
@@ -454,8 +457,7 @@ void Studio::refreshTools()
     }
     m_checking = true;
     emit toolsChanged();
-    // A child of this, deleted when it finishes (the analyzer misses the parent)
-    auto *watcher = new QFutureWatcher<Found>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+    auto *watcher = new QFutureWatcher<Found>(this); // a child of this, deleted when it finishes
     connect(watcher, &QFutureWatcher<Found>::finished, this, [this, watcher] {
         const Found found = watcher->result();
         watcher->deleteLater();
@@ -469,6 +471,7 @@ void Studio::refreshTools()
     });
     watcher->setFuture(QtConcurrent::run(findTools, m_settings, m_packages));
 }
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 void Studio::openInEditor(const QString &path)
 {
