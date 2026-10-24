@@ -1,0 +1,87 @@
+name: RTL check (stage 0)
+
+on:
+  pull_request:
+    paths:
+      - "prototypes/rtl-check/**"
+      - ".github/workflows/rtl-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "prototypes/rtl-check/**"
+      - ".github/workflows/rtl-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rtl-check:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, macos-14, ubuntu-24.04]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.12.0"
+          cache: true
+          aqtversion: ">=3.2"
+
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 xvfb
+
+      - name: Check the translation files
+        run: python3 prototypes/rtl-check/check_ts.py prototypes/rtl-check/i18n/*.ts
+
+      - name: Build
+        run: |
+          cmake -S prototypes/rtl-check -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+      - name: Find the program
+        run: |
+          exe=$(find build -name 'rtlcheck' -type f -perm -u+x -o -name 'rtlcheck.exe' -type f | head -1)
+          echo "Program: $exe"
+          echo "RTLCHECK=$exe" >> "$GITHUB_ENV"
+
+      - name: Self-test (layout order, digits, plurals, translations)
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; fi
+          "$RTLCHECK" --self-test | tee selftest.txt
+          test "${PIPESTATUS[0]}" -eq 0
+
+      - name: Screenshots
+        run: |
+          mkdir -p shots
+          run() {
+            if [ "$RUNNER_OS" = "Linux" ]; then
+              xvfb-run -a -s "-screen 0 1400x900x24" "$RTLCHECK" "$@"
+            else
+              "$RTLCHECK" "$@"
+            fi
+          }
+          for lang in en ar ckb; do
+            for page in overview doctor; do
+              run --lang "$lang" --page "$page" --screenshot "shots/$lang-$page.png"
+            done
+          done
+          run --lang ckb --page doctor --dark --screenshot shots/ckb-doctor-dark.png
+          run --lang ar --page overview --dark --screenshot shots/ar-overview-dark.png
+          cp selftest.txt shots/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rtl-check-${{ matrix.os }}
+          path: shots/
+          if-no-files-found: warn
