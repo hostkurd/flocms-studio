@@ -7,6 +7,7 @@
 
 #include "language.h"
 #include "logmodel.h"
+#include "projectchecks.h"
 #include "projectserver.h"
 #include "studio.h"
 
@@ -50,6 +51,21 @@ void makeSite(const QString &dir)
     writeFile(dir + QStringLiteral("/.env"), "APP_NAME=\"Test Site\"\nAPP_ENV=local\nDB_TYPE=sqlite\nDB_NAME=storage/database.sqlite\n");
 }
 
+// Doctor and the database are read when a project opens (stage 5): wait
+// for them, so nothing still runs in a folder a test deletes (Windows
+// can't delete the folder a program runs in)
+bool checksDone(const Studio &studio)
+{
+    const ProjectChecks *checks = const_cast<Studio &>(studio).checks();
+    if (!checks)
+        return true;
+    for (const QVariantMap &report : {checks->doctor(), checks->database(), checks->migrations()}) {
+        if (report.value(QStringLiteral("state")).toString() == u"running")
+            return false;
+    }
+    return !checks->busy();
+}
+
 } // namespace
 
 class TestStudio : public QObject
@@ -73,7 +89,7 @@ private slots:
         QCOMPARE(studio.page(), QStringLiteral("welcome"));
         QCOMPARE(studio.projects()->count(), 0);
         QVERIFY(studio.checkingTools());
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
         QCOMPARE(studio.tools().size(), 3); // PHP, Composer, MariaDB, found or not
         QVERIFY(studio.problem().isEmpty());
     }
@@ -101,7 +117,7 @@ private slots:
         Studio again(&language);
         again.start();
         QCOMPARE(again.projects()->count(), 1);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && !again.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && !again.checkingTools() && checksDone(studio) && checksDone(again), 60000);
     }
 
     void refusesAFolderThatIsNotFloCms()
@@ -117,7 +133,7 @@ private slots:
         QCOMPARE(studio.projects()->count(), 0);
         studio.dismissProblem();
         QVERIFY(studio.problem().isEmpty());
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void aProjectThatIsGoneStaysListed()
@@ -130,14 +146,15 @@ private slots:
         studio.start();
         studio.addProject(QUrl::fromLocalFile(site));
         QCOMPARE(studio.projects()->count(), 1);
-        QDir(site).removeRecursively();
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+        QVERIFY(QDir(site).removeRecursively());
         studio.refreshProjects();
         QCOMPARE(studio.projects()->data(studio.projects()->index(0), ProjectsModel::MissingRole).toBool(), true);
         QCOMPARE(studio.current().value(QStringLiteral("error")).toString(), QStringLiteral("project_missing"));
         studio.removeProject(studio.currentPath());
         QCOMPARE(studio.projects()->count(), 0);
         QCOMPARE(studio.page(), QStringLiteral("welcome"));
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void settingsAreSavedAsTheyChange()
@@ -161,7 +178,7 @@ private slots:
         QVERIFY(saved.serverNetwork);
         studio.setServerPort(0); // not a port: normalized() puts back 8000
         QCOMPARE(loadSettings(settingsFolder()).value().serverPort, 8000);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void neverSavesOverUnreadableSettings()
@@ -183,7 +200,7 @@ private slots:
         studio.setTheme(QStringLiteral("dark"));
         QFile(file).setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
         QCOMPARE(loadSettings(settingsFolder()).value().language, QStringLiteral("ar")); // untouched
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void demosFillEverythingAndSaveNothing()
@@ -229,7 +246,85 @@ private slots:
         QCOMPARE(php, 2); // the two newest PHP versions (Q9)
         studio.startDownloads({QStringLiteral("no-such-package")});
         QVERIFY(!studio.downloading());
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
+    // --- Stage 5: Doctor and the database ---------------------------------
+
+    void theDoctorDemoReadsTheRealOutput()
+    {
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/doctor.json")).ok());
+        ProjectChecks *checks = studio.checks();
+        QVERIFY(checks);
+        const QVariantMap doctor = checks->doctor();
+        QCOMPARE(doctor.value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QCOMPARE(doctor.value(QStringLiteral("warnings")).toInt(), 2); // storage/cache/ and the migrations
+        QVERIFY(doctor.value(QStringLiteral("ok")).toInt() > 15);
+        QVERIFY(!doctor.value(QStringLiteral("checkedAt")).toString().isEmpty());
+        const QVariantMap admin = checks->adminDoctor();
+        QCOMPARE(admin.value(QStringLiteral("problems")).toInt(), 1);
+        QVERIFY(admin.value(QStringLiteral("heading")).toString().startsWith(QStringLiteral("flocms-admin")));
+        const QVariantMap database = checks->database();
+        QCOMPARE(database.value(QStringLiteral("database")).toString(), QStringLiteral("fectum"));
+        // admin:list links the tables it manages
+        bool linked = false;
+        for (const QVariant &row : database.value(QStringLiteral("tables")).toList())
+            linked |= row.toMap().value(QStringLiteral("adminUrl")).toString() == u"/admin/media";
+        QVERIFY(linked);
+        QCOMPARE(checks->migrations().value(QStringLiteral("pending")).toInt(), 2);
+        // Newest first: what waits is on top
+        QCOMPARE(checks->migrations().value(QStringLiteral("rows")).toList().first().toMap().value(QStringLiteral("state")).toString(),
+                 QStringLiteral("pending"));
+        // A demo runs nothing
+        checks->runAction(QStringLiteral("migrate"));
+        checks->runQuick(QStringLiteral("cache:clear"));
+        QVERIFY(!checks->busy());
+        QCOMPARE(checks->plan(QStringLiteral("fresh")).value(QStringLiteral("confirm")).toString(), QStringLiteral("typeDatabase"));
+        QVERIFY(checks->plan(QStringLiteral("drop")).isEmpty());
+    }
+
+    void readsARealProjectsDoctorAndDatabase()
+    {
+        const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
+        if (project.isEmpty())
+            QSKIP("FLOSTUDIO_REAL_PROJECT is not set");
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProject(QUrl::fromLocalFile(project));
+        ProjectChecks *checks = studio.checks();
+        QVERIFY(checks);
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+        const QVariantMap doctor = checks->doctor();
+        QCOMPARE(doctor.value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QVERIFY(doctor.value(QStringLiteral("checks")).toList().size() > 10);
+        // The database answers in CI (SQLite, or the runner's MySQL)
+        const QVariantMap database = checks->database();
+        QVERIFY2(database.value(QStringLiteral("state")).toString() == u"done",
+                 qUtf8Printable(database.value(QStringLiteral("detail")).toString()));
+        QVERIFY(!database.value(QStringLiteral("tables")).toList().isEmpty());
+        QCOMPARE(checks->migrations().value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QCOMPARE(checks->migrations().value(QStringLiteral("pending")).toInt(), 0);
+
+        // Fresh without the name typed runs nothing
+        checks->runAction(QStringLiteral("fresh"), QStringLiteral("not the name"));
+        QVERIFY(!checks->busy());
+        // Migrate with nothing to run, then a quick command, with their output
+        QSignalSpy changed(checks, &ProjectChecks::changedData);
+        checks->runAction(QStringLiteral("migrate"));
+        QVERIFY(checks->busy());
+        QTRY_VERIFY_WITH_TIMEOUT(!checks->busy(), 60000);
+        QCOMPARE(checks->output().value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QCOMPARE(changed.count(), 1);
+        checks->runQuick(QStringLiteral("cache:clear"));
+        QTRY_VERIFY_WITH_TIMEOUT(!checks->busy(), 60000);
+        QCOMPARE(checks->output().value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QVERIFY(checks->output().value(QStringLiteral("message")).toString().contains(QStringLiteral("cache")));
+        checks->runQuick(QStringLiteral("migrate:fresh")); // not a quick command
+        QVERIFY(!checks->busy());
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio) && !studio.checkingTools(), 60000);
     }
 
     // --- Stage 4: the log and the server ----------------------------------
@@ -379,7 +474,7 @@ private slots:
         studio.stopServer();
         QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"), 10000);
         ProjectServer::setStartTimeout(20);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
 #endif
     }
 
@@ -411,7 +506,7 @@ private slots:
         QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("failed"));
         const QString error = studio.server().value(QStringLiteral("error")).toString();
         QVERIFY2(error == u"no_launcher" || error == u"php_not_found", qUtf8Printable(error));
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void theAppLogIsFollowed()
@@ -433,7 +528,7 @@ private slots:
         log.close();
         QTRY_COMPARE_WITH_TIMEOUT(logs->total(), 2, 5000);
         QCOMPARE(logs->problems(), 1);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     // A real project (FLOSTUDIO_REAL_PROJECT, as tst_realproject): php flo
@@ -475,7 +570,7 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"), 15000);
         QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000); // php -S went too
         QVERIFY(changed.count() >= 3);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void removingARunningProjectStopsIt()
@@ -494,7 +589,7 @@ private slots:
         studio.removeProject(studio.currentPath());
         QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"));
         QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
-        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
     void closingStudioStopsItsServers()
@@ -512,7 +607,7 @@ private slots:
             studio.startServer();
             QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("running"), 30000);
             port = urlPort(studio.server().value(QStringLiteral("url")).toString());
-            QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+            QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
         }
         QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
         // and nothing is left noted for the next start

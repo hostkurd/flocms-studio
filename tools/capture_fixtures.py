@@ -127,6 +127,9 @@ def main() -> int:
     c.run("user-create-again", "user:create", "--name=Studio Admin", "--email=admin@example.com",
           "--role=super-admin", "--password-stdin", stdin="Studio-test-123\n")
     c.run("admin-list", "admin:list")
+    # Quick commands (stage 5)
+    c.run("optimize", "optimize")
+    c.run("cache-clear", "cache:clear")
     c.run("unknown-command", "no-such-command")
 
     # A database Studio cannot reach: the real environment wins over .env

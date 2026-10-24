@@ -244,7 +244,10 @@ Result<Done> Studio::startDemo(const QString &file)
     m_settingsSection = demo.value(QStringLiteral("settingsSection")).toString(QStringLiteral("general"));
     if (demo.contains(QStringLiteral("problem")))
         m_problem = demo.value(QStringLiteral("problem")).toObject().toVariantMap();
-    // The open project's server and log, and which others are running
+    // The open project's Doctor and database, server and log, and which
+    // others are running
+    if (!m_currentPath.isEmpty())
+        checksFor(m_currentPath)->showDemo(demo.value(QStringLiteral("checks")).toObject().toVariantMap());
     if (!m_currentPath.isEmpty())
         serverFor(m_currentPath)->showDemo(demo.value(QStringLiteral("server")).toObject().toVariantMap(),
                                            demo.value(QStringLiteral("logs")).toArray().toVariantList());
@@ -444,6 +447,22 @@ ProjectServer *Studio::serverFor(const QString &path)
     return server;
 }
 
+ProjectChecks *Studio::checksFor(const QString &path)
+{
+    const QString type = m_current.value(QStringLiteral("type")).toString();
+    const bool hasAdmin = type == u"siteAdmin" || type == u"siteAdminApi" || type == u"admin" || type == u"apiAdmin";
+    if (ProjectChecks *checks = m_checks.value(path)) {
+        checks->setHasAdmin(hasAdmin);
+        return checks;
+    }
+    // A child of this, which outlives it, so the settings stay valid
+    auto *checks = new ProjectChecks(path, m_demo ? nullptr : &m_settings, hasAdmin, this);
+    m_checks.insert(path, checks);
+    if (!m_demo)
+        checks->refreshAll();
+    return checks;
+}
+
 void Studio::serversChanged()
 {
     if (m_demo)
@@ -495,6 +514,30 @@ void Studio::openAdmin()
         QDesktopServices::openUrl(QUrl(server->url() + QStringLiteral("/admin")));
 }
 
+void Studio::openEnvFile()
+{
+    const QString env = QDir(m_currentPath).filePath(QStringLiteral(".env"));
+    if (m_demo || !QFileInfo::exists(env)) {
+        setProblem(QStringLiteral("no_env_file"), QDir::toNativeSeparators(env));
+        return;
+    }
+    // The editor opens a file as it opens a folder; a .env has no program of its own on most systems
+    if (FloStudio::Core::openInEditor(m_settings, QDir::toNativeSeparators(env)))
+        return;
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(env)))
+        setProblem(QStringLiteral("open_failed"), QDir::toNativeSeparators(env));
+}
+
+void Studio::openUrl(const QString &url)
+{
+    const QUrl address(url);
+    // Only the running site's own addresses
+    const ProjectServer *server = m_servers.value(m_currentPath);
+    if (!server || server->url().isEmpty() || !url.startsWith(server->url() + u'/'))
+        return;
+    QDesktopServices::openUrl(address);
+}
+
 void Studio::openLogFile()
 {
     const QString log = appLogPath(m_currentPath);
@@ -529,6 +572,10 @@ void Studio::refreshProjects()
         if (m_projects.indexOf(path) < 0)
             m_servers.take(path)->deleteLater();
     }
+    for (const QString &path : m_checks.keys()) {
+        if (m_projects.indexOf(path) < 0)
+            m_checks.take(path)->deleteLater();
+    }
     serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
@@ -550,9 +597,12 @@ void Studio::loadCurrent()
             m_current = {{QStringLiteral("name"), QFileInfo(m_currentPath).fileName()},
                          {QStringLiteral("path"), m_currentPath},
                          {QStringLiteral("error"), info.error().code}};
-        // Its log is followed from now on, and the server is kept
-        if (!m_current.contains(QStringLiteral("error")))
+        // Its log is followed from now on, and the server is kept; Doctor and
+        // the database are read the first time it opens
+        if (!m_current.contains(QStringLiteral("error"))) {
             serverFor(m_currentPath);
+            checksFor(m_currentPath);
+        }
     }
     emit currentChanged();
     emit serverChanged();

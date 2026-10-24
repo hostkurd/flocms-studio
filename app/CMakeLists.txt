@@ -4,6 +4,8 @@ qt_add_executable(Studio
     language.cpp
     logmodel.h
     logmodel.cpp
+    projectchecks.h
+    projectchecks.cpp
     projectserver.h
     projectserver.cpp
     projectsmodel.h
@@ -65,9 +67,16 @@ set(STUDIO_QML
     qml/Sidebar.qml
     qml/WelcomePage.qml
     qml/ProjectPage.qml
+    qml/CheckRow.qml
+    qml/CommandOutput.qml
+    qml/ConfirmDialog.qml
+    qml/DatabaseTab.qml
+    qml/DoctorTab.qml
     qml/LogsTab.qml
     qml/OverviewTab.qml
+    qml/ProblemText.qml
     qml/ServerCard.qml
+    qml/StatusIcon.qml
     qml/LaterTab.qml
     qml/SettingsPage.qml
     qml/DownloadsDialog.qml

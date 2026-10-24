@@ -436,7 +436,9 @@ Result<Done> openInEditor(const Settings &settings, const QString &folder)
     QProcess process;
     process.setProgram(program);
     process.setArguments(parts);
-    process.setWorkingDirectory(folder);
+    // A file (the project's .env) opens from its folder
+    const QFileInfo target(folder);
+    process.setWorkingDirectory(target.isDir() ? folder : target.absolutePath());
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
     environment.insert(QStringLiteral("PATH"), toolSearchPath().join(QDir::listSeparator()));
     process.setProcessEnvironment(environment);

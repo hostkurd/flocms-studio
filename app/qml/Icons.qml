@@ -12,6 +12,7 @@ QtObject {
     readonly property string warning: "M12 3L2 20h20L12 3zM12 10v4M12 17h.01"
     readonly property string cross: "M6 6l12 12M18 6L6 18"
     readonly property string back: "M15 6l-6 6l6 6"
+    readonly property string dot: "M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4"
     readonly property string play: "M8 5v14l11-7z"
     readonly property string stop: "M6 6h12v12H6z"
     readonly property string copy: "M8 8h11v11H8zM5 16V5h11"

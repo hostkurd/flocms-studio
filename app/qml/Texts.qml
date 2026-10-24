@@ -41,6 +41,38 @@ QtObject {
 
     // The message for an error code from Core; `detail` is the path, the
     // command or the system's own message, shown under it.
+    // A `php flo doctor` check by its English name (flocms-cli's
+    // DoctorCommand): translated, with code words in backticks
+    function checkName(name) {
+        Lang.code
+        const extension = /^Extension (\S+)$/.exec(name)
+        if (extension)
+            return qsTr("Extension `%1`").arg(extension[1])
+        if (/^[\w./-]+\/$/.test(name) && name !== "public/.htaccess")
+            return qsTr("Folder `%1`").arg(name)
+        switch (name) {
+        case "PHP version": return qsTr("PHP version")
+        case "Composer dependencies": return qsTr("Composer packages installed")
+        case ".env file": return qsTr("File `.env`")
+        case ".env keys": return qsTr("Keys in `.env`")
+        case "APP_KEY": return "`APP_KEY`"
+        case "APP_URL": return "`APP_URL`"
+        case "APP_DEBUG": return qsTr("Debug mode (`APP_DEBUG`)")
+        case "HTTPS": return "HTTPS"
+        case "Database": return qsTr("Database")
+        case "Migrations": return qsTr("Migrations")
+        case "public/.htaccess": return qsTr("Rewrite rules (`public/.htaccess`)")
+        case "Document root": return qsTr("Document root")
+        case "Maintenance mode": return qsTr("Maintenance mode")
+        }
+        return "`" + name + "`"
+    }
+
+    // The same without the backticks, for plain text
+    function problemPlain(code) {
+        return problem(code).replace(/`/g, "")
+    }
+
     function problem(code) {
         Lang.code
         switch (code) {
@@ -63,6 +95,11 @@ QtObject {
         case "php_not_found": return qsTr("PHP was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
         case "php_unsafe": return qsTr("PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose `php.exe` in Settings > PHP and tools.")
         case "no_launcher": return qsTr("The project has no `flo` launcher yet: run `composer install` in it.")
+        case "no_env_file": return qsTr("The project has no `.env` file. Copy `.env.example` to `.env`.")
+        case "command_failed": return qsTr("The command could not run.")
+        case "doctor_unreadable": return qsTr("Studio could not read what the check printed.")
+        case "database_unreadable": return qsTr("Studio could not read the database. Is the database server running, and are the settings in `.env` right?")
+        case "migrations_unreadable": return qsTr("Studio could not read the migrations.")
         case "no_log_file": return qsTr("There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.")
         }
         return qsTr("Something went wrong (%1).").arg(code)

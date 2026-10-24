@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logmodel.h"
+#include "projectchecks.h"
 #include "projectsmodel.h"
 
 #include <flostudio/core/downloads.h>
@@ -52,6 +53,8 @@ class Studio : public QObject
     // stopping, failed
     Q_PROPERTY(QVariantMap server READ server NOTIFY serverChanged)
     Q_PROPERTY(LogModel *logs READ logs NOTIFY serverChanged)
+    // The open project's Doctor and Database (stage 5)
+    Q_PROPERTY(ProjectChecks *checks READ checks NOTIFY currentChanged)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -103,6 +106,7 @@ public:
     QVariantMap current() const { return m_current; }
     QVariantMap server() const;
     LogModel *logs() const;
+    ProjectChecks *checks() const { return m_checks.value(m_currentPath); }
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -144,6 +148,11 @@ public:
     Q_INVOKABLE void openSite();
     Q_INVOKABLE void openAdmin();
     Q_INVOKABLE void openLogFile();
+    // The open project's .env in the editor (Settings > Editor), else the
+    // system's program for it
+    Q_INVOKABLE void openEnvFile();
+    // An address of the running site (Open in admin)
+    Q_INVOKABLE void openUrl(const QString &url);
     // ids from downloadOffer
     Q_INVOKABLE void startDownloads(const QStringList &ids);
     Q_INVOKABLE void cancelDownloads();
@@ -167,6 +176,7 @@ private:
     void loadCurrent();
     void downloadNext();
     ProjectServer *serverFor(const QString &path);
+    ProjectChecks *checksFor(const QString &path);
     void serversChanged();
 
     Language *m_language;
@@ -193,4 +203,5 @@ private:
     QString m_demoTab;
     QString m_demoToolsFolder;
     QHash<QString, ProjectServer *> m_servers; // children of this, one per project opened
+    QHash<QString, ProjectChecks *> m_checks;  // children of this, one per project opened
 };

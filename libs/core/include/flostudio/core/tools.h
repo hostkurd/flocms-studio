@@ -142,7 +142,8 @@ FLOSTUDIOCORE_EXPORT bool portAnswers(const QString &host, int port, int timeout
 // argument. Empty when the template has no program.
 FLOSTUDIOCORE_EXPORT QStringList editorCommandLine(const QString &editorTemplate, const QString &folder);
 
-// Opens the folder in the editor (not waiting for it). Error codes:
+// Opens the folder (or a file: the project's .env) in the editor (not
+// waiting for it). Error codes:
 // editor_not_found, unsafe_argument (a .bat/.cmd editor with a folder
 // cmd.exe would misread), editor_failed.
 FLOSTUDIOCORE_EXPORT Result<Done> openInEditor(const Settings &settings, const QString &folder);

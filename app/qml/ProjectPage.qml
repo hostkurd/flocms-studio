@@ -1,16 +1,78 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QtQuick.Templates as T
 import FloStudio.Backend
 
 // A project: board 1's header and tabs. Overview reads the project's
-// files and shows its server; Logs follows it (stage 4); the other tabs
-// come with their stages.
+// files and shows its server, database, Doctor and quick commands; Logs
+// follows the server (stage 4); Database and Doctor (stage 5). The
+// questions before commands that change the database are asked here, for
+// Overview and Database alike.
 Item {
     id: page
     readonly property var info: Studio.current
     readonly property string serverState: Studio.server.state || "stopped"
     readonly property bool running: serverState === "running"
+    // Asks what plan() says, then runs it
+    function startAction(action) {
+        const plan = Studio.checks.plan(action)
+        if (plan.confirm === "none") {
+            Studio.checks.runAction(action, "")
+            return
+        }
+        const texts = {
+            migrate: {
+                title: qsTr("Run the migrations on this production site?"),
+                message: qsTr("`APP_ENV` says this is a production site. %Ln migration(s) will change its database.", "", plan.pending),
+                confirm: qsTr("Run migrations"), danger: false
+            },
+            rollback: {
+                title: qsTr("Roll back the last batch?"),
+                message: qsTr("This undoes the migrations of the last batch. Tables or columns they made, and the data in them, are dropped."),
+                confirm: qsTr("Roll back"), danger: true
+            },
+            seed: {
+                title: qsTr("Seed the database?"),
+                message: qsTr("This runs `database/seeders/DatabaseSeeder`, which adds rows to the tables."),
+                confirm: qsTr("Seed"), danger: false
+            },
+            fresh: {
+                title: qsTr("Drop every table and migrate again?"),
+                message: qsTr("`migrate:fresh` deletes every table in this database, with all its data, then runs every migration again. This can't be undone."),
+                confirm: qsTr("Drop and migrate"), danger: true
+            }
+        }[action]
+        confirm.action = action
+        confirm.ask({
+            title: texts.title,
+            message: texts.message + (plan.production && action !== "migrate" ? " " + qsTr("This is a production site.") : ""),
+            command: plan.command,
+            confirmText: texts.confirm,
+            danger: texts.danger,
+            typeName: plan.confirm === "typeDatabase" ? (plan.database || "") : ""
+        })
+    }
+
+    ConfirmDialog {
+        id: confirm
+        property string action
+        parent: T.Overlay.overlay
+        anchors.centerIn: parent
+        onAccepted: (typed) => Studio.checks.runAction(action, typed)
+    }
+
+
+    // A demo can open on one of the questions (screenshots)
+    Component.onCompleted: {
+        if (["migrate", "rollback", "seed", "fresh"].indexOf(Studio.demoDialog) >= 0)
+            Qt.callLater(page.startAction, Studio.demoDialog)
+    }
+
+    function openTab(name) {
+        page.tab = Math.max(0, ["overview", "generate", "database", "logs", "packages", "doctor"].indexOf(name))
+    }
+
     readonly property bool hasAdmin: ["siteAdmin", "siteAdminApi", "admin", "apiAdmin"].indexOf(info.type) >= 0
     property int tab: Math.max(0, ["overview", "generate", "database", "logs", "packages", "doctor"].indexOf(Studio.demoTab))
 
@@ -143,12 +205,12 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             currentIndex: page.tab
-            OverviewTab { info: page.info }
+            OverviewTab { info: page.info; startAction: page.startAction; openTab: page.openTab }
             LaterTab { stage: 7 }
-            LaterTab { stage: 5 }
+            DatabaseTab { startAction: page.startAction }
             LogsTab {}
             LaterTab { stage: 8 }
-            LaterTab { stage: 5 }
+            DoctorTab {}
         }
     }
 }
