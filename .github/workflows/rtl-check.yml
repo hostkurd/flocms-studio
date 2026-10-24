@@ -47,6 +47,12 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           python -m pip install -q "aqtinstall>=3.2"
+          base=https://download.qt.io/online/qtsdkrepository
+          echo "::warning::repository hosts: $(curl -s $base/ | grep -o 'href="[a-z_0-9]*/"' | tr '\n' ' ')"
+          for host in windows_x86 windows_x64; do
+            echo "::warning::$host qt6_612*: $(curl -s $base/$host/desktop/ | grep -o 'href="qt6_612[^"]*"' | tr '\n' ' ')"
+            echo "::warning::$host qt6_6120/: $(curl -s $base/$host/desktop/qt6_6120/ | grep -o 'href="[^"?/][^"]*"' | head -20 | tr '\n' ' ')"
+          done
           python -m aqt list-qt windows desktop --arch 6.12.0 > archs.txt 2>&1 || true
           echo "::warning::aqt archs for 6.12.0: $(tr '\n' ' ' < archs.txt)"
           set +e
