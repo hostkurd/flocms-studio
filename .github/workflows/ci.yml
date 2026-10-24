@@ -51,7 +51,9 @@ jobs:
           - os: windows-2022
             qt_prefix: D:/qs
             qt_work: D:/q
-          - os: macos-14
+          # Qt 6.12 checks the Xcode/SDK version when built from source;
+          # macos-14's Xcode is too old for it.
+          - os: macos-15
             qt_prefix: /Users/runner/qt-static
             qt_work: /Users/runner/qw
     defaults:

@@ -52,9 +52,17 @@ def notice(message: str) -> None:
 
 def fail(message: str, log: Path | None = None) -> None:
     if log and log.exists():
-        tail = log.read_text(errors="replace").splitlines()[-40:]
-        print("\n".join(tail))
-        for line in tail[-15:]:
+        lines = log.read_text(errors="replace").splitlines()
+        print("\n".join(lines[-60:]))
+        # The cause is usually a "CMake Error" or "ERROR:" block well before
+        # the end; report it with the lines after it, then the end of the log.
+        picked = []
+        for i, line in enumerate(lines):
+            if "CMake Error" in line or line.startswith("ERROR") or ": error" in line or "error:" in line:
+                picked += [l for l in lines[i:i + 6] if l.strip()]
+            if len(picked) >= 30:
+                break
+        for line in picked[:30] + lines[-10:]:
             print(f"::error::{line}" if GITHUB else line)
     sys.exit(f"::error::{message}" if GITHUB else message)
 
