@@ -7,14 +7,19 @@
 
 #include "language.h"
 #include "logmodel.h"
+#include "projectserver.h"
 #include "studio.h"
 
 #include <flostudio/core/server.h>
 #include <flostudio/core/settings.h>
 #include <flostudio/core/tools.h>
 
+#include <QAbstractItemModelTester>
+#include <QProcess>
 #include <QSignalSpy>
 #include <QStandardPaths>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
@@ -288,6 +293,95 @@ private slots:
         QCOMPARE(logs.problems(), 0);
     }
 
+    void theLogStaysConsistent()
+    {
+        // Qt's model checker over inserts, trims, filters and clears
+        LogModel logs(nullptr, 300);
+        QAbstractItemModelTester tester(&logs, QAbstractItemModelTester::FailureReportingMode::QtTest);
+        logs.setSearch(QStringLiteral("7"));
+        for (int batch = 0; batch < 12; ++batch) {
+            for (int i = 0; i < 50; ++i)
+                logs.addAppLogLine(QStringLiteral("[2026-10-24 10:00:00] %1: line %2").arg(i % 5 == 0 ? QStringLiteral("error") : QStringLiteral("info")).arg(batch * 50 + i));
+            logs.flush();
+            QVERIFY(logs.total() <= 300);
+            for (int row = 0; row < logs.rowCount(); ++row)
+                QVERIFY(logs.data(logs.index(row), LogModel::TextRole).toString().contains(u'7'));
+            if (batch == 6)
+                logs.setProblemsOnly(true);
+        }
+        logs.setSearch({});
+        logs.setProblemsOnly(false);
+        QCOMPARE(logs.shown(), logs.total());
+        logs.clear();
+        QCOMPARE(logs.rowCount(), 0);
+    }
+
+    void appLogTimesInThisComputersZone()
+    {
+        LogModel logs;
+        logs.addAppLogLine(QStringLiteral("[2026-10-24 09:53:57] info: written in UTC"));
+        logs.flush();
+        QCOMPARE(logs.data(logs.index(0), LogModel::TimeRole).toString(), QStringLiteral("09:53:57"));
+        QSignalSpy changed(&logs, &QAbstractItemModel::dataChanged);
+        logs.setAppTimeOffset(0); // PHP said UTC
+        QCOMPARE(changed.count(), 1);
+        QDateTime utc = QDateTime::fromString(QStringLiteral("2026-10-24 09:53:57"), QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+        utc.setOffsetFromUtc(0);
+        QCOMPARE(logs.data(logs.index(0), LogModel::TimeRole).toString(), utc.toLocalTime().toString(QStringLiteral("HH:mm:ss")));
+        int seconds = 0;
+        QVERIFY(ProjectServer::readUtcOffset(QStringLiteral("+03:00\n"), &seconds));
+        QCOMPARE(seconds, 3 * 3600);
+        QVERIFY(ProjectServer::readUtcOffset(QStringLiteral("-05:30"), &seconds));
+        QCOMPARE(seconds, -(5 * 3600 + 1800));
+        QVERIFY(ProjectServer::readUtcOffset(QStringLiteral("Z"), &seconds));
+        QCOMPARE(seconds, 0);
+        QVERIFY(!ProjectServer::readUtcOffset(QStringLiteral("Warning: something"), &seconds));
+    }
+
+    // A server that says it serves but never answers, then takes a second to
+    // stop (a shell script as PHP): macOS and Linux
+    void aServerThatNeverAnswers()
+    {
+#ifdef Q_OS_WIN
+        QSKIP("the fake PHP is a shell script");
+#else
+        const QTemporaryDir dir;
+        const QString site = dir.filePath(QStringLiteral("slow"));
+        makeSite(site);
+        const QString php = dir.filePath(QStringLiteral("php"));
+        writeFile(php, "#!/bin/sh\n"
+                       "[ \"$2\" = serve ] || exit 1\n" // Studio asking its version: no PHP here
+                       "echo \"[OK] Serving $PWD at http://127.0.0.1:9 (Ctrl+C to stop)\"\n"
+                       "trap 'sleep 1; exit 0' TERM\n"
+                       "while true; do sleep 0.1; done\n");
+        QFile(php).setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        ProjectServer::setStartTimeout(1);
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.setPhpPath(php);
+        studio.addProject(QUrl::fromLocalFile(site));
+        for (int round = 0; round < 3; ++round) {
+            studio.startServer();
+            QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("starting"));
+            QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("failed"), 10000);
+            QCOMPARE(studio.server().value(QStringLiteral("error")).toString(), QStringLiteral("server_no_answer"));
+            // Still stopping: a second start waits, and the end of the first
+            // is not taken for it
+            studio.startServer();
+            QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("failed"));
+            QTRY_COMPARE_WITH_TIMEOUT(studio.findChildren<QProcess *>().size(), 0, 10000); // none pile up
+            QCOMPARE(studio.server().value(QStringLiteral("error")).toString(), QStringLiteral("server_no_answer"));
+        }
+        // Stop while starting
+        studio.startServer();
+        studio.stopServer();
+        QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"), 10000);
+        ProjectServer::setStartTimeout(20);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+#endif
+    }
+
     void theLogKeepsTheNewestLines()
     {
         LogModel logs(nullptr, 1000);
@@ -383,6 +477,25 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
     }
 
+    void removingARunningProjectStopsIt()
+    {
+        const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
+        if (project.isEmpty())
+            QSKIP("FLOSTUDIO_REAL_PROJECT is not set");
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.setServerPort(18600);
+        studio.addProject(QUrl::fromLocalFile(project));
+        studio.startServer();
+        QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("running"), 30000);
+        const int port = urlPort(studio.server().value(QStringLiteral("url")).toString());
+        studio.removeProject(studio.currentPath());
+        QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"));
+        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+    }
+
     void closingStudioStopsItsServers()
     {
         const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
@@ -402,7 +515,9 @@ private slots:
         }
         QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
         // and nothing is left noted for the next start
-        QCOMPARE(stopLeftoverServers(settingsFolder()).size(), 0);
+        QFile record(serverRecordFile(settingsFolder()));
+        if (record.open(QIODevice::ReadOnly))
+            QCOMPARE(QJsonDocument::fromJson(record.readAll()).object(), QJsonObject());
     }
 };
 

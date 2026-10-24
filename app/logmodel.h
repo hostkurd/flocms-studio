@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QDateTime>
 #include <QList>
 #include <QString>
 #include <QTimer>
@@ -37,6 +38,7 @@ public:
         QString level;
         QString time;
         bool continuation = false;
+        QDateTime appStamp; // app.log: its time as written, in PHP's zone
     };
 
     explicit LogModel(QObject *parent = nullptr, int limit = 10000);
@@ -54,6 +56,11 @@ public:
     void addStudioLine(const QString &text, const QString &level = QStringLiteral("info"));
     // Shown now rather than in the next batch (tests, demos).
     void flush();
+    // core's Logger writes app.log times in PHP's time zone (date.timezone,
+    // UTC when php.ini sets none); the server and Studio use this
+    // computer's. With PHP's offset known, app.log times are shown in this
+    // computer's zone too, so one column reads the same.
+    void setAppTimeOffset(int secondsEastOfUtc);
 
     QString source() const { return m_source; }
     void setSource(const QString &source);
@@ -91,4 +98,7 @@ private:
     bool m_problemsOnly = false;
     QString m_search;
     int m_problems = 0;
+    bool m_appOffsetKnown = false;
+    int m_appOffset = 0;
+    QString shownTime(const Entry &entry) const;
 };

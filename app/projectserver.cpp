@@ -7,7 +7,11 @@
 #include <flostudio/core/process.h>
 #include <flostudio/core/server.h>
 
+#include <flostudio/core/tools.h>
+
+#include <QFutureWatcher>
 #include <QProcess>
+#include <QtConcurrent>
 #include <QRegularExpression>
 #include <QTcpSocket>
 #include <QUrl>
@@ -16,9 +20,14 @@ using namespace FloStudio::Core;
 
 namespace {
 
-constexpr int kStartSeconds = 20; // for the port to answer after "[OK] Serving"
+int startSeconds = 20; // for the port to answer after "[OK] Serving"
 
 } // namespace
+
+void ProjectServer::setStartTimeout(int seconds)
+{
+    startSeconds = seconds;
+}
 
 ProjectServer::ProjectServer(QString projectDir, QString settingsDir, QObject *parent)
     : QObject(parent)
@@ -72,7 +81,9 @@ void ProjectServer::setState(const QString &state, const QString &error, const Q
 
 void ProjectServer::start(const Settings &settings)
 {
-    if (active() || m_settingsDir.isEmpty())
+    // Also while a server that failed is still being stopped: its end
+    // must not be taken for the new one's
+    if (active() || m_process || m_settingsDir.isEmpty())
         return;
     CommandRequest request;
     request.program = Program::Flo;
@@ -92,9 +103,17 @@ void ProjectServer::start(const Settings &settings)
     m_networkHost = settings.serverNetwork;
     m_logs->addStudioLine(command->shown, QStringLiteral("command"));
     setState(QStringLiteral("starting"));
+    const int run = ++m_run;
     m_process = startStreaming(
-        command.value(), this, [this](const OutputLine &out) { line(out.text, out.error); },
-        [this](int exitCode, bool crashed) { ended(exitCode, crashed); });
+        command.value(), this,
+        [this, run](const OutputLine &out) {
+            if (run == m_run)
+                line(out.text, out.error);
+        },
+        [this, run](int exitCode, bool crashed) {
+            if (run == m_run)
+                ended(exitCode, crashed);
+        });
 }
 
 void ProjectServer::stop()
@@ -114,7 +133,7 @@ void ProjectServer::line(const QString &text, bool error)
         if (m_url.isEmpty()) {
             if (const QString url = serveUrl(text); !url.isEmpty()) {
                 m_url = localUrl(url);
-                m_probeDeadline = QDateTime::currentDateTime().addSecs(kStartSeconds);
+                m_probeDeadline = QDateTime::currentDateTime().addSecs(startSeconds);
                 probe();
                 emit changed();
             }
@@ -176,7 +195,11 @@ void ProjectServer::probe()
 
 void ProjectServer::ended(int exitCode, bool crashed)
 {
-    m_process = nullptr; // startStreaming deletes it after this
+    // The finished QProcess goes (its tracking forgot the group already),
+    // so none pile up over a session
+    if (m_process)
+        m_process->deleteLater();
+    m_process = nullptr;
     m_probeTimer.stop();
     if (m_probe) {
         m_probe->abort();
@@ -212,12 +235,14 @@ void ProjectServer::followLog()
         // Opened: the last lines that are already there
         const LogRead tail = readLogTail(path, 200);
         m_logOffset = tail.offset;
+        m_logHead = tail.head;
         for (const QString &text : tail.lines)
             m_logs->addAppLogLine(text);
         return;
     }
-    const LogRead read = readLogFrom(path, m_logOffset);
+    const LogRead read = readLogFrom(path, m_logOffset, qint64{4} * 1024 * 1024, m_logHead);
     m_logOffset = read.offset;
+    m_logHead = read.head;
     for (const QString &text : read.lines)
         m_logs->addAppLogLine(text);
 }
@@ -246,6 +271,47 @@ void ProjectServer::showDemo(const QVariantMap &server, const QVariantList &line
     m_logs->flush();
     emit changed();
 }
+
+bool ProjectServer::readUtcOffset(const QString &text, int *seconds)
+{
+    static const QRegularExpression pattern(QStringLiteral("^([+-])(\\d{2}):(\\d{2})$"));
+    const QString trimmed = text.trimmed();
+    if (trimmed == u"Z") {
+        *seconds = 0;
+        return true;
+    }
+    const auto match = pattern.match(trimmed);
+    if (!match.hasMatch())
+        return false;
+    const int value = match.captured(2).toInt() * 3600 + match.captured(3).toInt() * 60;
+    *seconds = match.captured(1) == u"-" ? -value : value;
+    return value <= 14 * 3600;
+}
+
+// The analyzer misses the watcher's parent (see Studio::refreshTools)
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+void ProjectServer::learnTimeZone(const Settings &settings)
+{
+    const auto php = phpProgram(settings);
+    // A php.bat would need the code checked for cmd.exe: then the times stay as written
+    if (!php || php->endsWith(QStringLiteral(".bat"), Qt::CaseInsensitive)
+        || php->endsWith(QStringLiteral(".cmd"), Qt::CaseInsensitive))
+        return;
+    Command command;
+    command.program = php.value();
+    command.arguments = {QStringLiteral("-r"), QStringLiteral("echo date('P');")};
+    command.workingDir = m_projectDir;
+    auto *watcher = new QFutureWatcher<Captured>(this); // a child of this, deleted when it finishes
+    connect(watcher, &QFutureWatcher<Captured>::finished, this, [this, watcher] {
+        const Captured out = watcher->result();
+        watcher->deleteLater();
+        int seconds = 0;
+        if (out.succeeded() && readUtcOffset(out.out, &seconds))
+            m_logs->setAppTimeOffset(seconds);
+    });
+    watcher->setFuture(QtConcurrent::run([command] { return runCaptured(command, 15000); }));
+}
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 void ProjectServer::noteLeftover(qint64 group)
 {

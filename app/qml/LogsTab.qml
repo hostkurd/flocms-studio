@@ -52,7 +52,12 @@ Item {
                 placeholderText: qsTr("Search")
                 Layout.preferredWidth: 220
                 Accessible.name: qsTr("Search the log")
-                onTextChanged: if (tab.logs) tab.logs.search = text
+                onTextEdited: if (tab.logs) tab.logs.search = text
+            }
+            // Each project has its own log and search: show the open one's
+            Connections {
+                target: tab
+                function onLogsChanged() { search.text = tab.logs ? tab.logs.search : "" }
             }
             Item { Layout.fillWidth: true }
             AppButton {
@@ -109,7 +114,9 @@ Item {
                     required property string level
                     required property string time
                     required property bool continuation
-                    readonly property bool translated: source === "studio"
+                    // Only Studio's own sentences are translated; what flocms-cli
+                    // printed (Serving ..., the command, its error) stays as it is
+                    readonly property bool translated: source === "studio" && ["started", "stopped", "leftover"].indexOf(level) >= 0
                     width: ListView.view.width - 10
                     implicitHeight: line.implicitHeight + 4
                     color: level === "problem" && !continuation ? Theme.terminalBadBg : "transparent"

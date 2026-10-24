@@ -55,6 +55,14 @@ public:
         : QObject(process)
     {
         setObjectName(QStringLiteral("flostudio-tracker"));
+        // When the program ends, what it left running ends too, at once:
+        // while one of them lives, its group or job is surely still ours.
+        // The id is then forgotten, so a later group with the same number,
+        // someone else's, is never signalled when the QProcess goes.
+        connect(process, &QProcess::finished, this, [this] {
+            endAll();
+            m_pid = 0;
+        });
     }
     Tracker(const Tracker &) = delete;
     Tracker &operator=(const Tracker &) = delete;

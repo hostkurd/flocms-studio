@@ -79,7 +79,7 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
     case LevelRole:
         return entry.level;
     case TimeRole:
-        return entry.time;
+        return shownTime(entry);
     case ContinuationRole:
         return entry.continuation;
     default:
@@ -138,6 +138,7 @@ LogModel::Entry LogModel::appLogEntry(const QString &line)
         return entry;
     }
     entry.time = appTime(read.time);
+    entry.appStamp = QDateTime::fromString(read.time, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
     entry.text = levelName(read.level) + QStringLiteral(": ") + read.message
                  + (read.context.isEmpty() ? QString() : u' ' + read.context);
     if (isProblem(read))
@@ -287,7 +288,8 @@ QString LogModel::text() const
     lines.reserve(m_visible.size());
     for (const qsizetype index : m_visible) {
         const Entry &entry = m_entries.at(index);
-        lines << (entry.time.isEmpty() ? entry.text : entry.time + u' ' + entry.text);
+        const QString time = shownTime(entry);
+        lines << (time.isEmpty() ? entry.text : time + u' ' + entry.text);
     }
     return lines.join(u'\n');
 }
@@ -296,6 +298,25 @@ void LogModel::copy() const
 {
     if (QClipboard *clipboard = QGuiApplication::clipboard())
         clipboard->setText(text());
+}
+
+QString LogModel::shownTime(const Entry &entry) const
+{
+    if (!m_appOffsetKnown || !entry.appStamp.isValid())
+        return entry.time;
+    QDateTime stamp = entry.appStamp;
+    stamp.setOffsetFromUtc(m_appOffset);
+    return stamp.toLocalTime().toString(QStringLiteral("HH:mm:ss"));
+}
+
+void LogModel::setAppTimeOffset(int secondsEastOfUtc)
+{
+    if (m_appOffsetKnown && m_appOffset == secondsEastOfUtc)
+        return;
+    m_appOffsetKnown = true;
+    m_appOffset = secondsEastOfUtc;
+    if (rowCount() > 0)
+        emit dataChanged(index(0), index(rowCount() - 1), {TimeRole});
 }
 
 void LogModel::clear()

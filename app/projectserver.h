@@ -30,6 +30,8 @@ public:
     ProjectServer &operator=(const ProjectServer &) = delete;
 
     void start(const FloStudio::Core::Settings &settings);
+    // How long the port may take to answer after "[OK] Serving" (tests)
+    static void setStartTimeout(int seconds);
     void stop();
 
     QString state() const { return m_state; }
@@ -44,6 +46,10 @@ public:
     void showDemo(const QVariantMap &server, const QVariantList &lines);
     // Studio stopped a server of this project left from a crash
     void noteLeftover(qint64 group);
+    // Asks PHP (on a worker thread) which time zone app.log is written in
+    void learnTimeZone(const FloStudio::Core::Settings &settings);
+    // "+03:00", "-05:30", "Z" → seconds east of UTC; false for anything else
+    static bool readUtcOffset(const QString &text, int *seconds);
 
 signals:
     void changed();
@@ -59,6 +65,7 @@ private:
     QString m_settingsDir;
     LogModel *m_logs; // a child of this
     QProcess *m_process = nullptr; // a child of this while it runs
+    int m_run = 0;                 // which start the handlers belong to
     QTcpSocket *m_probe = nullptr; // a child of this while starting
     QTimer m_probeTimer;
     QDateTime m_probeDeadline;
@@ -74,4 +81,5 @@ private:
     QStringList m_output; // what it printed before it answered, for the error
     QTimer m_follow;
     qint64 m_logOffset = -1; // -1: the log's end isn't known yet
+    QByteArray m_logHead;    // its first bytes, to see it replaced
 };

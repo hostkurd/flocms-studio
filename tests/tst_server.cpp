@@ -6,7 +6,10 @@
 #include <flostudio/core/server.h>
 #include <flostudio/core/tools.h>
 
+#include <QCoreApplication>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QFile>
 #include <QTemporaryDir>
 #include <QTest>
@@ -15,6 +18,8 @@
 #include <csignal>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include <vector>
 #endif
 
 using namespace FloStudio::Core;
@@ -140,6 +145,21 @@ private slots:
         QCOMPARE(all.size(), 1000);
         QCOMPARE(all.last(), QStringLiteral("[t] info: 999"));
 
+        // Replaced by a new log that is already longer than the old offset
+        writeFile(log, "[t] info: old one\n");
+        read = readLogFrom(log, 0);
+        const qint64 oldOffset = read.offset;
+        const QByteArray oldHead = read.head;
+        writeFile(log, "[u] info: new first\n[u] info: new second, longer than the old file\n");
+        read = readLogFrom(log, oldOffset, qint64{4} * 1024 * 1024, oldHead);
+        QVERIFY(read.restarted);
+        QCOMPARE(read.lines.first(), QStringLiteral("[u] info: new first"));
+        // The same file, grown: not restarted
+        writeFile(log, "[u] info: third\n", QIODevice::Append);
+        const LogRead grown = readLogFrom(log, read.offset, qint64{4} * 1024 * 1024, read.head);
+        QVERIFY(!grown.restarted);
+        QCOMPARE(grown.lines, QStringList{QStringLiteral("[u] info: third")});
+
         // One line longer than a read is still taken
         writeFile(log, QByteArray(3000, 'x'));
         QCOMPARE(readLogFrom(log, 0, 1024).lines.first().size(), 1024);
@@ -156,6 +176,12 @@ private slots:
         QVERIFY(!isBuiltInServer(QStringLiteral("/usr/bin/php flo serve --port=8000")));
         QVERIFY(!isBuiltInServer(QStringLiteral("vim -S session.vim")));
         QVERIFY(!isBuiltInServer(QStringLiteral("/usr/bin/phpstorm -S 1:2")));
+        // ... and the one of this project
+        const QString command = QStringLiteral("/usr/bin/php -S 127.0.0.1:8000 -t /sites/shop/public /x/router.php");
+        QVERIFY(isBuiltInServerOf(command, QStringLiteral("/sites/shop")));
+        QVERIFY(isBuiltInServerOf(command, QStringLiteral("/sites/shop/")));
+        QVERIFY(!isBuiltInServerOf(command, QStringLiteral("/sites/sho")));
+        QVERIFY(!isBuiltInServerOf(QStringLiteral("php -S 127.0.0.1:8000"), QStringLiteral("/sites/shop")));
     }
 
     void leftoverServersAreStopped()
@@ -167,43 +193,72 @@ private slots:
         if (php.isEmpty())
             QSKIP("no PHP on this computer");
         const QTemporaryDir settings;
+        const QTemporaryDir sites;
         QCOMPARE(stopLeftoverServers(settings.path()).size(), 0); // nothing noted
+        const QString shop = sites.filePath(QStringLiteral("shop"));
+        QDir().mkpath(shop + QStringLiteral("/public"));
 
-        // A server in its own group, as Studio starts it, left running; and
-        // a group that is something else now
-        const QByteArray program = php.toLocal8Bit();
+        // Starts a program in its own group, as Studio starts a server
+        const auto spawn = [](const QList<QByteArray> &argv) {
+            const pid_t pid = ::fork();
+            if (pid == 0) {
+                ::setpgid(0, 0);
+                std::vector<char *> args;
+                for (const QByteArray &arg : argv)
+                    args.push_back(const_cast<char *>(arg.constData()));
+                args.push_back(nullptr);
+                ::execvp(args.front(), args.data());
+                ::_exit(127);
+            }
+            return pid;
+        };
         const QByteArray address = QByteArray("127.0.0.1:") + QByteArray::number(18000 + (::getpid() % 1000));
-        const pid_t server = ::fork();
-        if (server == 0) {
-            ::setpgid(0, 0);
-            ::execl(program.constData(), program.constData(), "-S", address.constData(), static_cast<char *>(nullptr));
-            ::_exit(127);
-        }
-        const pid_t other = ::fork();
-        if (other == 0) {
-            ::setpgid(0, 0);
-            ::execlp("sleep", "sleep", "30", static_cast<char *>(nullptr));
-            ::_exit(127);
-        }
-        QVERIFY(server > 0 && other > 0);
-        const QString host = QStringLiteral("127.0.0.1");
+        // The shop's server, left by a Studio that is gone
+        const pid_t server = spawn({php.toLocal8Bit(), "-S", address, "-t", (shop + QStringLiteral("/public")).toLocal8Bit()});
+        // A group that is something else now
+        const pid_t other = spawn({"sleep", "30"});
+        // Some other PHP server, started by the person in a terminal
+        const QByteArray address2 = QByteArray("127.0.0.1:") + QByteArray::number(19000 + (::getpid() % 1000));
+        const pid_t theirs = spawn({php.toLocal8Bit(), "-S", address2});
+        QVERIFY(server > 0 && other > 0 && theirs > 0);
         const int port = QString::fromLatin1(address).section(u':', 1).toInt();
-        QTRY_VERIFY_WITH_TIMEOUT(portAnswers(host, port, 200), 10000);
-        recordServer(settings.path(), QStringLiteral("/sites/a"), server);
+        QTRY_VERIFY_WITH_TIMEOUT(portAnswers(QStringLiteral("127.0.0.1"), port, 200), 10000);
+
+        recordServer(settings.path(), shop, server);
         recordServer(settings.path(), QStringLiteral("/sites/b"), other);
+        recordServer(settings.path(), sites.filePath(QStringLiteral("theirs")), theirs);
         recordServer(settings.path(), QStringLiteral("/sites/c"), 999999); // long gone
         recordServer(settings.path(), QStringLiteral("/sites/c"), 0);       // forgotten again
+        // Every note names its Studio (this one, which is "gone" for the test: own pid)
+        QFile file(serverRecordFile(settings.path()));
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QJsonObject record = QJsonDocument::fromJson(file.readAll()).object();
+        file.close();
+        QCOMPARE(record.size(), 3);
+        QCOMPARE(record.value(shop).toObject().value(QStringLiteral("owner")).toInteger(), QCoreApplication::applicationPid());
+        // A note of another Studio that still runs: left alone and kept
+        const pid_t otherStudio = spawn({"sleep", "30"});
+        record.insert(QStringLiteral("/sites/d"), QJsonObject{{QStringLiteral("group"), static_cast<double>(theirs)},
+                                                             {QStringLiteral("owner"), static_cast<double>(otherStudio)}});
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QJsonDocument(record).toJson());
+        file.close();
 
         const QList<LeftoverServer> stopped = stopLeftoverServers(settings.path());
         QCOMPARE(stopped.size(), 1);
-        QCOMPARE(stopped.first().projectDir, QStringLiteral("/sites/a"));
+        QCOMPARE(stopped.first().projectDir, shop);
         int status = 0;
         QCOMPARE(::waitpid(server, &status, 0), server);
-        QVERIFY(WIFSIGNALED(status) || WIFEXITED(status));
-        QCOMPARE(::waitpid(other, &status, WNOHANG), 0); // still running: not ours
-        ::kill(other, SIGKILL);
-        ::waitpid(other, &status, 0);
-        QCOMPARE(stopLeftoverServers(settings.path()).size(), 0); // the file was emptied
+        QCOMPARE(::waitpid(other, &status, WNOHANG), 0);  // still running: not a server
+        QCOMPARE(::waitpid(theirs, &status, WNOHANG), 0); // still running: not this project's
+        // Only the other Studio's note stays
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const QJsonObject left = QJsonDocument::fromJson(file.readAll()).object();
+        QCOMPARE(left.keys(), QStringList{QStringLiteral("/sites/d")});
+        for (const pid_t pid : {other, theirs, otherStudio}) {
+            ::kill(pid, SIGKILL);
+            ::waitpid(pid, &status, 0);
+        }
 #endif
     }
 };

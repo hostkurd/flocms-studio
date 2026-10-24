@@ -2,6 +2,7 @@
 
 #include <flostudio/core/process.h>
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -77,6 +78,8 @@ QString appLogPath(const QString &projectDir)
 
 namespace {
 
+constexpr qint64 kHeadBytes = 64;
+
 QStringList splitLines(const QByteArray &bytes)
 {
     QStringList lines = QString::fromUtf8(bytes).split(u'\n');
@@ -98,6 +101,7 @@ LogRead readLogTail(const QString &path, int count)
         return read;
     }
     const qint64 size = file.size();
+    read.head = file.read(kHeadBytes);
     // Back from the end in blocks until there are enough line ends
     QByteArray buffer;
     qint64 position = size;
@@ -124,7 +128,7 @@ LogRead readLogTail(const QString &path, int count)
     return read;
 }
 
-LogRead readLogFrom(const QString &path, qint64 offset, qint64 maxBytes)
+LogRead readLogFrom(const QString &path, qint64 offset, qint64 maxBytes, const QByteArray &head)
 {
     LogRead read;
     read.offset = offset;
@@ -136,7 +140,10 @@ LogRead readLogFrom(const QString &path, qint64 offset, qint64 maxBytes)
         return read;
     }
     const qint64 size = file.size();
-    if (size < offset) {
+    read.head = file.read(kHeadBytes);
+    // Shorter, or other first bytes: not the file read before
+    const bool sameStart = head.isEmpty() || read.head.startsWith(head) || head.startsWith(read.head);
+    if (size < offset || !sameStart) {
         read.restarted = true;
         offset = 0;
     }
@@ -200,7 +207,8 @@ void recordServer(const QString &settingsDir, const QString &projectDir, qint64 
 #else
     QJsonObject record = readRecord(settingsDir);
     if (group > 0)
-        record.insert(projectDir, static_cast<double>(group));
+        record.insert(projectDir, QJsonObject{{QStringLiteral("group"), static_cast<double>(group)},
+                                              {QStringLiteral("owner"), static_cast<double>(QCoreApplication::applicationPid())}});
     else
         record.remove(projectDir);
     writeRecord(settingsDir, record);
@@ -223,6 +231,21 @@ bool isBuiltInServer(const QString &command)
     return pattern.match(command).hasMatch();
 }
 
+bool isBuiltInServerOf(const QString &command, const QString &projectDir)
+{
+    if (!isBuiltInServer(command))
+        return false;
+    // `php flo serve` serves <project>/public (-t), by the path it was given
+    // or the real one (macOS's /tmp is /private/tmp)
+    QStringList roots{QDir::cleanPath(projectDir)};
+    const QString real = QFileInfo(projectDir).canonicalFilePath();
+    if (!real.isEmpty() && !roots.contains(real))
+        roots << real;
+    return std::any_of(roots.begin(), roots.end(), [&command](const QString &root) {
+        return command.contains(QStringLiteral(" -t ") + root + QStringLiteral("/public"));
+    });
+}
+
 QList<LeftoverServer> stopLeftoverServers(const QString &settingsDir)
 {
     QList<LeftoverServer> stopped;
@@ -236,21 +259,31 @@ QList<LeftoverServer> stopLeftoverServers(const QString &settingsDir)
     ps.program = QStringLiteral("ps");
     ps.arguments = {QStringLiteral("-A"), QStringLiteral("-o"), QStringLiteral("pgid=,command=")};
     const Captured listed = runCaptured(ps, 5000);
-    if (listed.succeeded()) {
-        const QStringList lines = listed.out.split(u'\n', Qt::SkipEmptyParts);
-        for (auto it = record.begin(); it != record.end(); ++it) {
-            const auto group = static_cast<qint64>(it.value().toDouble());
-            // Only a group that still holds a PHP built-in server: a group id
-            // used again by something else is left alone
-            const bool server = group > 1 && std::any_of(lines.begin(), lines.end(), [group](const QString &line) {
-                const PsLine entry = readPsLine(line);
-                return entry.group == group && isBuiltInServer(entry.command);
-            });
-            if (server && ::kill(static_cast<pid_t>(-group), SIGTERM) == 0)
-                stopped << LeftoverServer{it.key(), group};
+    if (!listed.succeeded())
+        return stopped; // the notes stay for the next start
+    const QStringList lines = listed.out.split(u'\n', Qt::SkipEmptyParts);
+    const auto self = static_cast<qint64>(QCoreApplication::applicationPid());
+    QJsonObject kept;
+    for (auto it = record.begin(); it != record.end(); ++it) {
+        const QJsonObject entry = it.value().toObject();
+        const auto group = static_cast<qint64>(entry.value(QStringLiteral("group")).toDouble());
+        const auto owner = static_cast<qint64>(entry.value(QStringLiteral("owner")).toDouble());
+        // Another Studio that still runs owns it: its server is left alone
+        if (owner > 0 && owner != self && ::kill(static_cast<pid_t>(owner), 0) == 0) {
+            kept.insert(it.key(), entry);
+            continue;
         }
+        // Only a group that still holds this project's PHP built-in server:
+        // a group id used again by something else is left alone
+        const QString projectDir = it.key();
+        const bool server = group > 1 && std::any_of(lines.begin(), lines.end(), [group, &projectDir](const QString &line) {
+            const PsLine row = readPsLine(line);
+            return row.group == group && isBuiltInServerOf(row.command, projectDir);
+        });
+        if (server && ::kill(static_cast<pid_t>(-group), SIGTERM) == 0)
+            stopped << LeftoverServer{projectDir, group};
     }
-    writeRecord(settingsDir, {});
+    writeRecord(settingsDir, kept);
 #endif
     return stopped;
 }

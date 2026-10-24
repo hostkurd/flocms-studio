@@ -197,9 +197,18 @@ void Studio::start()
     emit darkChanged();
     refreshProjects();
     refreshTools();
-    // Servers left running by a Studio that crashed (macOS, Linux)
-    for (const LeftoverServer &left : stopLeftoverServers(settingsFolder()))
-        serverFor(left.projectDir)->noteLeftover(left.group);
+    // Servers left running by a Studio that crashed (macOS, Linux): asking
+    // `ps` takes a moment, so on a worker thread
+    auto *leftovers = new QFutureWatcher<QList<LeftoverServer>>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): a child of this
+    connect(leftovers, &QFutureWatcher<QList<LeftoverServer>>::finished, this, [this, leftovers] {
+        const QList<LeftoverServer> stopped = leftovers->result();
+        leftovers->deleteLater();
+        for (const LeftoverServer &left : stopped) {
+            if (m_projects.indexOf(left.projectDir) >= 0) // a project still listed
+                serverFor(left.projectDir)->noteLeftover(left.group);
+        }
+    });
+    leftovers->setFuture(QtConcurrent::run([folder = settingsFolder()] { return stopLeftoverServers(folder); }));
 }
 
 Result<Done> Studio::startDemo(const QString &file)
@@ -430,6 +439,8 @@ ProjectServer *Studio::serverFor(const QString &path)
             emit serverChanged();
     });
     m_servers.insert(path, server);
+    if (!m_demo)
+        server->learnTimeZone(m_settings);
     return server;
 }
 

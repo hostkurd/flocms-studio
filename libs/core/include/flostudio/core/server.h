@@ -38,8 +38,9 @@ struct LogRead
 {
     QStringList lines; // complete lines, without their line ends
     qint64 offset = 0; // where the next read starts
-    bool restarted = false; // the file got shorter (cleared, rotated): read from the start
+    bool restarted = false; // the file got shorter or was replaced: read from the start
     bool missing = false;   // no such file (yet)
+    QByteArray head;        // its first bytes, to tell the next read whether it is the same file
 };
 
 // The last `count` lines of a log, read from the end (a large log is fine),
@@ -48,15 +49,20 @@ FLOSTUDIOCORE_EXPORT LogRead readLogTail(const QString &path, int count);
 
 // The lines added since `offset`. A line still being written (no line end
 // yet) is left for the next read. At most maxBytes are read at once; the
-// rest comes with the next read.
-FLOSTUDIOCORE_EXPORT LogRead readLogFrom(const QString &path, qint64 offset, qint64 maxBytes = qint64{4} * 1024 * 1024);
+// rest comes with the next read. With the `head` of the read before, a
+// file that was replaced (rotated, cleared and written again) is read from
+// its start even when it has grown past the old offset.
+FLOSTUDIOCORE_EXPORT LogRead readLogFrom(const QString &path, qint64 offset, qint64 maxBytes = qint64{4} * 1024 * 1024,
+                                         const QByteArray &head = {});
 
 // --- Servers left from a Studio that crashed -----------------------------
 //
 // On Windows a server ends with Studio even when Studio crashes (its job
 // object). On macOS and Linux it can outlive a crash, so Studio notes each
-// server it starts (its process group) in a file and, at the next start,
-// stops the groups still running a PHP built-in server.
+// server it starts (its process group, and which Studio started it) in a
+// file and, at the next start, stops the groups still running that
+// project's PHP built-in server. A Studio that still runs keeps its
+// servers: a second Studio window never stops the first one's.
 
 // servers.json in the settings folder.
 FLOSTUDIOCORE_EXPORT QString serverRecordFile(const QString &settingsDir);
@@ -70,9 +76,10 @@ struct LeftoverServer
     qint64 group = 0;
 };
 
-// The noted servers whose process group still has a `php -S` in it, and
-// stops them (SIGTERM to the group). The file is emptied. Nothing on
-// Windows. Blocks briefly (asks `ps`).
+// The noted servers whose Studio is gone and whose process group still
+// has the project's `php -S` in it, and stops them (SIGTERM to the group).
+// Only the notes of Studios still running stay in the file. Nothing on
+// Windows. Blocks briefly (asks `ps`): use a worker thread.
 FLOSTUDIOCORE_EXPORT QList<LeftoverServer> stopLeftoverServers(const QString &settingsDir);
 
 // One line of `ps -A -o pgid=,command=` as (group, command); the group is 0
@@ -87,5 +94,7 @@ FLOSTUDIOCORE_EXPORT PsLine readPsLine(const QString &line);
 
 // A PHP built-in server's command line: php ... -S host:port ...
 FLOSTUDIOCORE_EXPORT bool isBuiltInServer(const QString &command);
+// ... and the one `php flo serve` starts for this project (-t <project>/public).
+FLOSTUDIOCORE_EXPORT bool isBuiltInServerOf(const QString &command, const QString &projectDir);
 
 } // namespace FloStudio::Core
