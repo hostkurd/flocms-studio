@@ -51,7 +51,7 @@ ApplicationWindow {
                 anchors.margins: 14
                 text: AppInfo.buildText + "\nLibraries: " + AppInfo.libraries.join(", ")
                 color: "#C9D6DF"
-                font.family: "monospace"
+                font.family: AppInfo.monoFont
                 font.pixelSize: 13
                 lineHeight: 1.3
             }

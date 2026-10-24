@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QStringList>
 #include <QTimer>
 
 #include <cstdio>
@@ -17,7 +18,7 @@
 
 namespace {
 
-int g_warnings = 0;
+QStringList g_warnings;
 QtMessageHandler g_previousHandler = nullptr;
 
 // In --smoke-test every warning counts as a failure: a missing QML module
@@ -25,7 +26,9 @@ QtMessageHandler g_previousHandler = nullptr;
 void countingHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
     if (type != QtDebugMsg && type != QtInfoMsg)
-        ++g_warnings;
+        g_warnings << (context.category && qstrcmp(context.category, "default") != 0
+                           ? QStringLiteral("%1: %2").arg(QString::fromLatin1(context.category), message)
+                           : message);
     if (g_previousHandler)
         g_previousHandler(type, context, message);
 }
@@ -101,9 +104,11 @@ int main(int argc, char *argv[])
             if (ok && !file.isEmpty())
                 ok = frame.save(file);
             if (smoke) {
+                for (const QString &warning : std::as_const(g_warnings))
+                    std::printf("warning: %s\n", qUtf8Printable(warning));
                 const int written = std::printf("smoke test: %s, %d warning(s)\n",
-                                                ok ? "window drawn" : "no frame", g_warnings);
-                ok = ok && g_warnings == 0 && written > 0;
+                                                ok ? "window drawn" : "no frame", int(g_warnings.size()));
+                ok = ok && g_warnings.isEmpty() && written > 0;
             }
             QCoreApplication::exit(ok ? 0 : 1);
         });

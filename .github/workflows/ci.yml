@@ -325,7 +325,7 @@ jobs:
           else app="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"; fi
           # Sanitizer reports are long; repeat their key lines as annotations.
           report() {
-            grep -E "ERROR: AddressSanitizer|runtime error:|SUMMARY:|FAIL!|warning\(s\)|^    #[0-4] " "$1" | head -25 | sed 's/^/::error::/'
+            grep -E "ERROR: AddressSanitizer|runtime error:|SUMMARY:|FAIL!|^warning: |warning\(s\)|^    #[0-4] " "$1" | head -25 | sed 's/^/::error::/'
           }
           set +e
           ctest --test-dir build --output-on-failure > ctest.log 2>&1; tests=$?

@@ -5,6 +5,7 @@
 #include <flostudio/security/library.h>
 
 #include <QClipboard>
+#include <QFontDatabase>
 #include <QGuiApplication>
 
 AppInfo::AppInfo(QObject *parent)
@@ -26,6 +27,11 @@ QStringList AppInfo::libraries() const
 {
     return {FloStudio::Core::libraryName(), FloStudio::Database::libraryName(),
             FloStudio::Security::libraryName()};
+}
+
+QString AppInfo::monoFont() const
+{
+    return QFontDatabase::systemFont(QFontDatabase::FixedFont).family();
 }
 
 void AppInfo::copyBuildText() const
