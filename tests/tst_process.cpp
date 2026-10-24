@@ -241,7 +241,12 @@ private slots:
         const qint64 child = file.readAll().toLongLong();
         QVERIFY(TestUtil::processAlive(child));
         owner.reset();
-        QTRY_VERIFY_WITH_TIMEOUT(!TestUtil::processAlive(child), 10000);
+        if (!QTest::qWaitFor([child] { return !TestUtil::processAlive(child); }, 10000)) {
+            // What the child still is: its state and group (Linux)
+            QFile stat(QStringLiteral("/proc/%1/stat").arg(child));
+            const QByteArray what = stat.open(QIODevice::ReadOnly) ? stat.readAll() : QByteArray("no /proc");
+            QVERIFY2(false, what.constData());
+        }
     }
 
     void stoppingWhileStarting()
