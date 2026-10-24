@@ -81,7 +81,9 @@ ScrollView {
             Layout.column: 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: 2
+            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) * 2 / 3 : tab.availableWidth
+            Layout.maximumWidth: Layout.preferredWidth
+            Layout.minimumWidth: 0
             padding: 20
             gap: 14
 
@@ -260,7 +262,9 @@ ScrollView {
             Layout.column: tab.width > 1150 ? 1 : 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: 1
+            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) / 3 : tab.availableWidth
+            Layout.maximumWidth: Layout.preferredWidth
+            Layout.minimumWidth: 0
             padding: 20
             gap: 14
             border.color: Theme.accent

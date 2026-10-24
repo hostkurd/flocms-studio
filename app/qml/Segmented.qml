@@ -25,7 +25,8 @@ RowLayout {
             readonly property bool on: group.value === modelData.value
             checkable: true
             checked: on
-            implicitHeight: 38
+            implicitHeight: 36
+            hoverEnabled: true
             leftPadding: 14
             rightPadding: 14
             text: modelData.text
@@ -35,8 +36,8 @@ RowLayout {
             Accessible.name: text
             onClicked: group.chosen(modelData.value)
             background: Rectangle {
-                color: option.on ? Theme.selectedBg : Theme.surface
-                border.color: option.visualFocus ? Theme.accent : Theme.borderStrong
+                color: option.on ? Theme.selectedBg : (option.down ? Theme.pressedBg : (option.hovered ? Theme.hoverBg : Theme.controlBg))
+                border.color: option.visualFocus || option.on ? Theme.accent : (option.hovered ? Theme.controlBorderHover : Theme.controlBorder)
                 border.width: option.visualFocus ? 2 : 1
                 radius: 8
             }

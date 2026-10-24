@@ -21,7 +21,7 @@ ItemDelegate {
 
     background: Rectangle {
         radius: 8
-        color: item.selected ? Theme.selectedBg : (item.hovered ? Theme.rule : "transparent")
+        color: item.selected ? Theme.selectedBg : (item.down ? Theme.pressedBg : (item.hovered ? Theme.hoverBg : "transparent"))
         border.color: item.visualFocus ? Theme.accent : "transparent"
         border.width: 2
     }

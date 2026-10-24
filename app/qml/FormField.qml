@@ -11,6 +11,11 @@ ColumnLayout {
     property string problem // a code from Core's checkNewProject
     default property alias content: holder.data
     spacing: 6
+    // Fields side by side get equal shares and line up at the top,
+    // whatever their hints say
+    Layout.preferredWidth: 100
+    Layout.minimumWidth: 0
+    Layout.alignment: Qt.AlignTop
 
     AppText { ui: field.label; font.weight: Font.DemiBold }
     ColumnLayout { id: holder; Layout.fillWidth: true; spacing: 0 }

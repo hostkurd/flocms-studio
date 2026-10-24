@@ -1,6 +1,7 @@
 #include "language.h"
 
 #include <QCoreApplication>
+#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlEngine>
 
@@ -17,14 +18,22 @@ Language::Language(QObject *parent)
 {
 }
 
+QString Language::systemFont()
+{
+    // The computer's own UI font (Segoe UI, San Francisco, Ubuntu, ...),
+    // as native programs use; Arabic letters fall back to Noto Sans Arabic
+    // (main.cpp's substitutions)
+    return QFontDatabase::systemFont(QFontDatabase::GeneralFont).family();
+}
+
 QString Language::uiFont() const
 {
-    return rtl() ? QStringLiteral("Noto Sans Arabic") : QStringLiteral("Instrument Sans");
+    return rtl() ? QStringLiteral("Noto Sans Arabic") : systemFont();
 }
 
 QString Language::displayFont() const
 {
-    return rtl() ? QStringLiteral("Noto Sans Arabic") : QStringLiteral("Bricolage Grotesque");
+    return uiFont();
 }
 
 QString Language::systemLanguage()
