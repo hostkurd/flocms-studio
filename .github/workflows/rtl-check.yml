@@ -35,6 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # aqtinstall (used to download Qt) and its dependencies may not yet
+      # support the runners' newest Python.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install Qt 6.12
         uses: jurplel/install-qt-action@v4
         with:
