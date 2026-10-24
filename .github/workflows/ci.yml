@@ -1,0 +1,405 @@
+name: CI
+
+# Stage 1 (design note D2, D6, D11, D12, D13):
+#  - release:     Studio with Qt and the FloStudio libraries as DLLs (until
+#                 stage 9, which builds the single static program), tests,
+#                 smoke test, Windows installer and macOS .dmg dry runs
+#  - linux:       build and tests on Ubuntu with Qt 6.12 (shared)
+#  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
+#  - clang-tidy:  static analysis of our own sources
+#
+# Results that matter are printed as ::notice:: / ::error:: annotations,
+# because job logs can't always be read from outside GitHub.
+
+on:
+  pull_request:
+    paths-ignore:
+      - "prototypes/**"
+      - ".github/workflows/rtl-check.yml"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "prototypes/**"
+      - ".github/workflows/rtl-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  QT_VERSION: "6.12.0"
+  # A Windows GUI program sends warnings to the debugger, not stderr.
+  QT_FORCE_STDERR_LOGGING: "1"
+
+jobs:
+  release:
+    name: release (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+          - os: macos-15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build tools
+        run: python -m pip install -q ninja
+
+      - name: MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # aqtinstall can't find Qt 6.12 for Windows yet (new repository
+      # layout), so a small script reads the official repository directly.
+      - name: Install Qt 6.12 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          set -o pipefail
+          python .github/scripts/install_qt_windows.py "$QT_VERSION" win64_msvc2022_64 "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log \
+            || { tail -5 qt.log | sed 's/^/::error::/'; exit 1; }
+          echo "QT_DIR=$(tail -1 qt.log | tr -d '\r')" >> "$GITHUB_ENV"
+
+      - name: Install Qt 6.12 (macOS, universal)
+        if: runner.os == 'macOS'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: clang_64
+          cache: true
+          setup-python: false
+
+      - name: Build Studio
+        run: |
+          set +e
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            extra=("-DCMAKE_PREFIX_PATH=$QT_DIR")
+          else
+            # The same minimum macOS as Qt itself, not the runner's SDK.
+            minos=$(otool -l "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
+            echo "::notice::Qt $QT_VERSION needs macOS $minos or newer"
+            extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" "-DCMAKE_OSX_DEPLOYMENT_TARGET=$minos")
+          fi
+          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "${extra[@]}" \
+            && cmake --build build; } > build.log 2>&1
+          status=$?
+          cat build.log
+          if [ $status -ne 0 ]; then
+            grep -iE "error|undefined|cannot|not found|failed" build.log | head -25 | sed 's/^/::error::/'
+          fi
+          exit $status
+
+      - name: Tests
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
+          ctest --test-dir build --output-on-failure
+
+      # Everything Studio needs goes next to it: Qt (windeployqt /
+      # macdeployqt), the FloStudio libraries, and on Windows the Visual C++
+      # runtime DLLs (not the 25 MB vc_redist installer).
+      - name: Collect Studio and its libraries
+        run: |
+          mkdir -p dist
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            app=dist/FloCMS-Studio
+            mkdir -p "$app"
+            cp build/bin/Studio.exe build/bin/FloStudio*.dll "$app/"
+            "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations --no-compiler-runtime "$app/Studio.exe" > deploy.log
+            vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
+            cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll "$app/"
+            echo "STUDIO=$app/Studio.exe" >> "$GITHUB_ENV"
+          else
+            app="dist/FloCMS Studio.app"
+            exe="$app/Contents/MacOS/FloCMS Studio"
+            fail() { echo "::error::$1"; [ -f deploy.log ] && tail -20 deploy.log | sed 's/^/::error::/'; exit 1; }
+            cp -R "build/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
+            command -v macdeployqt > /dev/null || fail "macdeployqt is not on PATH"
+            macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || fail "macdeployqt failed"
+            # No SQL yet (stage 5 adds the SQLite driver only); the PostgreSQL,
+            # ODBC and Mimer drivers would need libraries outside the bundle.
+            rm -rf "$app/Contents/PlugIns/sqldrivers"
+            # Our own libraries into the bundle too, under the names the
+            # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
+            mkdir -p "$app/Contents/Frameworks"
+            wanted=$(otool -L "$exe" | awk '/libFloStudio/{print $1}' | sort -u)
+            echo "::notice::the program asks for: $(echo $wanted)"
+            [ -n "$wanted" ] || fail "otool shows no FloStudio libraries in the program"
+            for ref in $wanted; do
+              lib=$(basename "$ref")
+              if [ ! -f "$app/Contents/Frameworks/$lib" ]; then
+                src=$(find build/libs -name "$lib" | head -1)
+                [ -n "$src" ] || fail "$lib not found in the build folder"
+                cp -L "$src" "$app/Contents/Frameworks/" || fail "could not copy $lib"
+              fi
+              case "$ref" in @rpath/*) ;; *) install_name_tool -change "$ref" "@rpath/$lib" "$exe" || fail "could not relink $lib";; esac
+            done
+            # Only rpaths inside the bundle: drop the build folder and Qt
+            # install ones from the program and from our own libraries.
+            for bin in "$exe" "$app"/Contents/Frameworks/libFloStudio*.dylib; do
+              for rp in $(otool -l "$bin" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | sort -u | grep '^/' || true); do
+                install_name_tool -delete_rpath "$rp" "$bin" || fail "could not remove rpath $rp from $(basename "$bin")"
+              done
+            done
+            otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
+              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" || fail "could not add the bundle rpath"
+            # The notices travel inside the app, even if only the app is copied.
+            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA" > /dev/null
+            cp LICENSE "$app/Contents/Resources/LICENSE.txt"
+            # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
+            codesign --force --deep --sign - "$app" || fail "codesign failed"
+            echo "STUDIO=$app/Contents/MacOS/FloCMS Studio" >> "$GITHUB_ENV"
+          fi
+          echo "APP_DIR=$app" >> "$GITHUB_ENV"
+          cat deploy.log | tail -20
+
+      - name: Check the build
+        run: |
+          echo "::notice::$("$STUDIO" --version | tr -d '\r' | tr '\n' ';')"
+          version=$("$STUDIO" --version | tr -d '\r' | head -1 | awk '{print $3}')
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          files=$(find "$APP_DIR" -type f | wc -l | tr -d ' ')
+          size=$(du -sk "$APP_DIR" | cut -f1)
+          echo "::notice::$(basename "$APP_DIR"): $files files, $size KiB"
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            archs=$(lipo -archs "$STUDIO")
+            minos=$(otool -l "$STUDIO" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
+            echo "::notice::architectures: $archs; minimum macOS: $minos"
+            case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
+            # Every library must come from inside the bundle or from macOS.
+            bad=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -L {} \; 2>/dev/null \
+                  | awk '/^\t/{print $1}' | { grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' || true; } | sort -u)
+            if [ -n "$bad" ]; then echo "::error::libraries from outside the bundle: $(echo $bad)"; exit 1; fi
+            rpaths=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -l {} \; 2>/dev/null \
+                  | awk '/cmd LC_RPATH/{getline; getline; print $2}' | { grep '^/' || true; } | sort -u)
+            if [ -n "$rpaths" ]; then echo "::error::rpaths outside the bundle: $(echo $rpaths)"; exit 1; fi
+          fi
+
+      # Without the Qt install's paths: PATH on Windows, and the plugin and
+      # QML paths install-qt-action sets, so only what ships is used.
+      - name: Smoke test (without the Qt install)
+        timeout-minutes: 5
+        run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; fi
+          mkdir -p shots
+          "$STUDIO" --smoke-test --screenshot shots/studio-$RUNNER_OS.png
+
+      - name: Notices
+        run: |
+          python tools/make_notices.py "$APP_DIR/../THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA"
+          cp LICENSE "$APP_DIR/../LICENSE.txt"
+          if [ "$RUNNER_OS" = "Windows" ]; then cp dist/THIRD-PARTY-NOTICES.txt dist/LICENSE.txt "$APP_DIR/"; fi
+
+      - name: Windows installer dry run
+        if: runner.os == 'Windows'
+        timeout-minutes: 10
+        run: |
+          iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+          if [ ! -f "$iscc" ]; then choco install innosetup -y --no-progress > /dev/null; fi
+          "$iscc" //Q //DAppVersion="$VERSION" //DSourceDir="$(cygpath -w "$PWD/$APP_DIR")" //O"$(cygpath -w "$PWD")" installer/windows/studio.iss
+          setup="FloCMS-Studio-$VERSION-setup.exe"
+          echo "::notice::installer: $setup $(( $(stat -c %s "$setup") / 1024 )) KiB"
+          target="$(cygpath -w "$RUNNER_TEMP/studio-install")"
+          ./"$setup" //VERYSILENT //SUPPRESSMSGBOXES //CURRENTUSER //NORESTART //DIR="$target" //LOG=install.log
+          installed="$(cygpath -u "$RUNNER_TEMP")/studio-install"
+          test -f "$installed/Studio.exe" || { echo "::error::the installer did not install Studio.exe"; cat install.log; exit 1; }
+          (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; "$installed/Studio.exe" --smoke-test)
+          "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
+          for i in $(seq 1 30); do [ -f "$installed/Studio.exe" ] || break; sleep 1; done
+          if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
+          # The uninstaller removes its own files a moment after it exits.
+          for i in $(seq 1 20); do [ -z "$(find "$installed" -type f 2>/dev/null)" ] && break; sleep 1; done
+          left=$( (find "$installed" -type f 2>/dev/null || true) | sed "s|$installed/||" | tr '\n' ' ')
+          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled (left behind: ${left:-nothing})"
+
+      - name: macOS disk image dry run
+        if: runner.os == 'macOS'
+        timeout-minutes: 10
+        run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
+          staging="$RUNNER_TEMP/dmg"
+          mkdir -p "$staging"
+          cp -R "$APP_DIR" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
+          ln -s /Applications "$staging/Applications"
+          dmg="FloCMS-Studio-$VERSION.dmg"
+          hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > /dev/null
+          echo "::notice::disk image: $dmg $(( $(stat -f %z "$dmg") / 1024 )) KiB"
+          # Move the build folder away, so the app can only use what is inside it.
+          mv build build-moved
+          mnt="$RUNNER_TEMP/mnt"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
+          "$mnt/FloCMS Studio.app/Contents/MacOS/FloCMS Studio" --smoke-test
+          hdiutil detach "$mnt" > /dev/null
+          mv build-moved build
+          echo "::notice::disk image: mounted, smoke test passed from the image (build folder moved away)"
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: FloCMS-Studio-windows-portable
+          path: dist/FloCMS-Studio/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: FloCMS-Studio-windows-setup
+          path: FloCMS-Studio-*-setup.exe
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
+        with:
+          name: FloCMS-Studio-macos
+          path: FloCMS-Studio-*.dmg
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-logs-${{ matrix.os }}
+          path: |
+            build.log
+            deploy.log
+            install.log
+            shots/
+          if-no-files-found: ignore
+
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_gcc_64
+          cache: true
+          setup-python: false
+
+      - name: Linux packages
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+
+      - name: Build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Tests and smoke test
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ctest --test-dir build --output-on-failure
+          build/bin/flocms-studio --version
+          build/bin/flocms-studio --smoke-test
+
+  sanitizers:
+    name: sanitizers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: linux_gcc_64
+            leaks: 1
+          - os: macos-14
+            arch: clang_64
+            leaks: 0 # LeakSanitizer is not available on macOS
+    env:
+      ASAN_OPTIONS: detect_leaks=${{ matrix.leaks }}:strict_string_checks=1:detect_stack_use_after_return=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: ${{ matrix.arch }}
+          cache: true
+          setup-python: false
+
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+
+      - name: macOS tools
+        if: runner.os == 'macOS'
+        run: python -m pip install -q ninja
+
+      - name: Build with sanitizers
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFLOSTUDIO_SANITIZE=ON
+          cmake --build build
+
+      - name: Tests and smoke test
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; app=build/bin/flocms-studio
+          else app="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"; fi
+          # Sanitizer reports are long; repeat their key lines as annotations.
+          report() {
+            grep -E "ERROR: AddressSanitizer|runtime error:|SUMMARY:|FAIL!|^warning: |warning\(s\)|^    #[0-4] " "$1" | head -25 | sed 's/^/::error::/'
+          }
+          set +e
+          ctest --test-dir build --output-on-failure > ctest.log 2>&1; tests=$?
+          cat ctest.log; [ $tests -eq 0 ] || report ctest.log
+          "$app" --smoke-test > smoke.log 2>&1; smoke=$?
+          cat smoke.log; [ $smoke -eq 0 ] || report smoke.log
+          echo "::notice::tests exit $tests, smoke test exit $smoke"
+          [ $tests -eq 0 ] && [ $smoke -eq 0 ]
+
+  clang-tidy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_gcc_64
+          cache: true
+          setup-python: false
+
+      - name: Tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang clang-tidy libgl1-mesa-dev ninja-build
+
+      - name: Build with Clang (for the generated headers and the compile database)
+        env:
+          CXX: clang++
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+
+      - name: clang-tidy
+        run: |
+          clang-tidy --version
+          python tools/run_clang_tidy.py build

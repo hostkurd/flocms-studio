@@ -3,3 +3,5 @@ build-*/
 *.user
 .DS_Store
 *.log
+dist/
+CMakeUserPresets.json

@@ -5,13 +5,13 @@ on:
     paths:
       - "prototypes/rtl-check/**"
       - ".github/workflows/rtl-check.yml"
-      - ".github/scripts/**"
+      - ".github/scripts/install_qt_windows.py"
   push:
     branches: [main]
     paths:
       - "prototypes/rtl-check/**"
       - ".github/workflows/rtl-check.yml"
-      - ".github/scripts/**"
+      - ".github/scripts/install_qt_windows.py"
   workflow_dispatch:
 
 permissions:
