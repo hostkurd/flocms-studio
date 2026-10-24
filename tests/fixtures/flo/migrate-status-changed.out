@@ -1,0 +1,18 @@
++-----------------------------------------------------------------------------+---------------------+-------+---------------------+
+| Migration                                                                   | Package             | Batch | Status              |
++-----------------------------------------------------------------------------+---------------------+-------+---------------------+
+| 2026_10_10_000000_create_api_tables                                         | hostkurd/flocms-api | 1     | Ran                 |
+| 2026_10_10_000000_create_users_table                                        | app                 | 1     | Ran                 |
+| 2026_10_17_000000_create_settings_table                                     | app                 | 1     | Ran                 |
+| 2026_10_24_095125_create_admin_user_preferences_table                       | app                 | 1     | Ran                 |
+| 2026_10_24_095126_create_media_table                                        | app                 | 1     | Ran                 |
+| 2026_10_24_095127_create_media_folders_table                                | app                 | 1     | Ran                 |
+| 2026_10_24_095128_create_admin_trash_and_admin_activity_tables              | app                 | 1     | Ran                 |
+| 2026_10_24_095129_create_admin_roles_table                                  | app                 | 1     | Ran                 |
+| 2026_10_24_095130_create_admin_imports_and_admin_import_rows_tables         | app                 | 1     | Ran                 |
+| 2026_10_24_095131_create_admin_password_resets_table                        | app                 | 1     | Ran                 |
+| 2026_10_24_095132_create_admin_mailings_and_admin_mailing_recipients_tables | app                 | 1     | Ran                 |
+| 2026_10_24_095202_create_posts_table                                        | app                 | 2     | Ran (changed since) |
+| 2026_10_24_095133_create_users_bio_column                                   | app                 | 1     | Ran (file missing)  |
++-----------------------------------------------------------------------------+---------------------+-------+---------------------+
+Everything has run.

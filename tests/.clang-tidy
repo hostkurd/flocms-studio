@@ -1,0 +1,7 @@
+# The tests use the project's checks, with one turned off:
+# bugprone-unchecked-optional-access does not know that QVERIFY(x) ends
+# the test when x is empty, so every `QVERIFY(report); report->...` would
+# count as unchecked.
+InheritParentConfig: true
+Checks: >
+  -bugprone-unchecked-optional-access

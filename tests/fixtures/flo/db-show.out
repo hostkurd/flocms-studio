@@ -1,0 +1,36 @@
+
+Connection
+----------
+  Driver    mysql
+  Host      127.0.0.1
+  Port      3306
+  Database  studio_full
+  Username  root
+  Server    10.11.14-MariaDB-0ubuntu0.24.04.1
+
+Tables (20)
+-----------
++--------------------------+------+
+| Table                    | Rows |
++--------------------------+------+
+| admin_activity           | 0    |
+| admin_import_rows        | 0    |
+| admin_imports            | 0    |
+| admin_mail_optouts       | 0    |
+| admin_mailing_recipients | 0    |
+| admin_mailings           | 0    |
+| admin_password_resets    | 0    |
+| admin_roles              | 0    |
+| admin_trash              | 0    |
+| admin_user_preferences   | 0    |
+| api_idempotency          | 0    |
+| api_keys                 | 0    |
+| api_tokens               | 0    |
+| media                    | 0    |
+| media_folders            | 0    |
+| media_usage              | 0    |
+| migrations               | 13   |
+| posts                    | 0    |
+| settings                 | 0    |
+| users                    | 0    |
++--------------------------+------+

@@ -1,0 +1,15 @@
+Dropped 20 table(s).
+  Migrating hostkurd/flocms-api:2026_10_10_000000_create_api_tables ... done
+  Migrating 2026_10_10_000000_create_users_table ... done
+  Migrating 2026_10_17_000000_create_settings_table ... done
+  Migrating 2026_10_24_095125_create_admin_user_preferences_table ... done
+  Migrating 2026_10_24_095126_create_media_table ... done
+  Migrating 2026_10_24_095127_create_media_folders_table ... done
+  Migrating 2026_10_24_095128_create_admin_trash_and_admin_activity_tables ... done
+  Migrating 2026_10_24_095129_create_admin_roles_table ... done
+  Migrating 2026_10_24_095130_create_admin_imports_and_admin_import_rows_tables ... done
+  Migrating 2026_10_24_095131_create_admin_password_resets_table ... done
+  Migrating 2026_10_24_095132_create_admin_mailings_and_admin_mailing_recipients_tables ... done
+  Migrating 2026_10_24_095133_create_users_bio_column ... done
+  Migrating 2026_10_24_095202_create_posts_table ... done
+[OK] 13 migration(s) ran.

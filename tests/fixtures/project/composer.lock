@@ -1,0 +1,544 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "49acd8596a519dfe480149b0c94bba19",
+    "packages": [
+        {
+            "name": "hostkurd/flocms-admin",
+            "version": "v0.39.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-admin",
+                "reference": "6c02d1e35c03ce4f2c5589f909374ab87de6eb2b"
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-pdo": "*",
+                "hostkurd/flocms-core": "^2.7.0",
+                "hostkurd/flocms-reactive": "^0.5.1",
+                "hostkurd/flocms-uploader": "^1.2.1",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "hostkurd/flocms-cli": "^2.0.1",
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "flocms": {
+                    "commands": [
+                        "FloCMS\\Admin\\Console\\InstallCommand",
+                        "FloCMS\\Admin\\Console\\MakeResourceCommand",
+                        "FloCMS\\Admin\\Console\\MakeWidgetCommand",
+                        "FloCMS\\Admin\\Console\\MakeAdminPageCommand",
+                        "FloCMS\\Admin\\Console\\MakeSettingsCommand",
+                        "FloCMS\\Admin\\Console\\MakeBlockCommand",
+                        "FloCMS\\Admin\\Console\\BlocksCommand",
+                        "FloCMS\\Admin\\Console\\ListCommand",
+                        "FloCMS\\Admin\\Console\\DoctorCommand",
+                        "FloCMS\\Admin\\Console\\MediaImportCommand",
+                        "FloCMS\\Admin\\Console\\MediaUsageCommand",
+                        "FloCMS\\Admin\\Console\\TrashPurgeCommand",
+                        "FloCMS\\Admin\\Console\\ActivityPurgeCommand",
+                        "FloCMS\\Admin\\Console\\RolesCommand",
+                        "FloCMS\\Admin\\Console\\RolesResetCommand",
+                        "FloCMS\\Admin\\Console\\ExportCommand",
+                        "FloCMS\\Admin\\Console\\ImportCommand",
+                        "FloCMS\\Admin\\Console\\ImportsCommand",
+                        "FloCMS\\Admin\\Console\\ImportUndoCommand",
+                        "FloCMS\\Admin\\Console\\ImportPurgeCommand",
+                        "FloCMS\\Admin\\Console\\MailingsCommand",
+                        "FloCMS\\Admin\\Console\\MailTestCommand",
+                        "FloCMS\\Admin\\Console\\TwoFactorResetCommand"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.39-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Admin\\": "src/"
+                },
+                "files": [
+                    "bootstrap.php",
+                    "src/helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Admin\\Tests\\": "tests/",
+                    "FloCMS\\Controllers\\": "tests/Fixtures/Controllers/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Admin panel builder for FloCMS: resources declared in PHP, server-rendered CRUD pages, translatable fields and RTL support.",
+            "homepage": "https://github.com/hostkurd/flocms-admin",
+            "keywords": [
+                "admin",
+                "admin-panel",
+                "crud",
+                "flocms",
+                "multilingual",
+                "rtl"
+            ],
+            "support": {
+                "issues": "https://github.com/hostkurd/flocms-admin/issues",
+                "source": "https://github.com/hostkurd/flocms-admin",
+                "docs": "https://github.com/hostkurd/flocms-admin#readme"
+            },
+            "time": "2026-10-23T13:02:25+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-api",
+            "version": "v1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-api",
+                "reference": "0774504a4ff990daaffcf8a1cc3537d22c80fd5c"
+            },
+            "require": {
+                "hostkurd/flocms-cli": "^2.0",
+                "hostkurd/flocms-core": "^2.8",
+                "php": "^8.1",
+                "psr/log": "^1.1 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "hostkurd/flocms-uploader": "1.2.0",
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "suggest": {
+                "ext-apcu": "Faster rate limiting with ApcuRateLimiter.",
+                "hostkurd/flocms-uploader": "Uploads through the API (Uploads\\HandlesUploads), 1.2+ for chunked uploads."
+            },
+            "bin": [
+                "bin/flo-api"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.3-dev"
+                },
+                "flocms": {
+                    "commands": [
+                        "FloCMS\\Api\\Console\\Commands\\ListCommand",
+                        "FloCMS\\Api\\Console\\Commands\\InstallSchemaCommand",
+                        "FloCMS\\Api\\Console\\Commands\\KeyCreateCommand",
+                        "FloCMS\\Api\\Console\\Commands\\KeyListCommand",
+                        "FloCMS\\Api\\Console\\Commands\\KeyRevokeCommand",
+                        "FloCMS\\Api\\Console\\Commands\\TokenCreateCommand",
+                        "FloCMS\\Api\\Console\\Commands\\TokenListCommand",
+                        "FloCMS\\Api\\Console\\Commands\\TokenRevokeCommand",
+                        "FloCMS\\Api\\Console\\Commands\\GcCommand",
+                        "FloCMS\\Api\\Console\\Commands\\RoutesCommand",
+                        "FloCMS\\Api\\Console\\Commands\\DocsCommand",
+                        "FloCMS\\Api\\Console\\Commands\\InstallCommand"
+                    ],
+                    "migrations": [
+                        "database/migrations"
+                    ],
+                    "route-providers": [
+                        "FloCMS\\Api\\Console\\Commands\\ApiRoutes"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Api\\": "src/"
+                },
+                "files": [
+                    "src/aliases.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Api\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "test:unit": [
+                    "phpunit --testsuite unit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Optional modern API runtime for Flo Framework: explicit routing, middleware, JSON errors, CORS, authentication contracts, and rate limiting.",
+            "time": "2026-10-23T13:04:28+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-captcha",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-captcha",
+                "reference": "189b8e6e260e8380e3c6736dc72b6ce66c66c818"
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Captcha\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Captcha\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Image captcha package for FloCMS guest form verification.",
+            "keywords": [
+                "captcha",
+                "flocms",
+                "form",
+                "security",
+                "verification"
+            ],
+            "time": "2026-10-11T17:58:48+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-cli",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-cli",
+                "reference": "19006a8a209bc1c9acf81108c2091e399606d7c7"
+            },
+            "require": {
+                "hostkurd/flocms-core": "^2.2",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "bin": [
+                "bin/flo"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\CLI\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\CLI\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Command line interface for FloCMS: one command kernel for the framework, its packages and your application.",
+            "homepage": "https://github.com/hostkurd/flocms-cli",
+            "keywords": [
+                "cli",
+                "console",
+                "flocms",
+                "framework",
+                "generator",
+                "migrations",
+                "scheduler"
+            ],
+            "support": {
+                "issues": "https://github.com/hostkurd/flocms-cli/issues",
+                "source": "https://github.com/hostkurd/flocms-cli",
+                "docs": "https://github.com/hostkurd/flocms-cli#readme"
+            },
+            "time": "2026-10-10T19:58:06+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-core",
+            "version": "v2.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-core",
+                "reference": "e4704c657eb697664a17a1693897247384bb5b4d"
+            },
+            "require": {
+                "ext-pdo": "*",
+                "php": "^8.1",
+                "psr/log": "^1.1 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "suggest": {
+                "ext-pdo_mysql": "Required by the bundled MySQL connection and module state/migration implementations.",
+                "hostkurd/flocms-api": "Adds the explicit API router, middleware pipeline, JSON exception handling, CORS, and rate limiting."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Core\\": "src/"
+                },
+                "files": [
+                    "src/Helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Core\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "test:unit": [
+                    "phpunit --testsuite unit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Core runtime for Flo Framework: application services, HTTP primitives, dependency injection, and modular architecture.",
+            "time": "2026-10-23T22:06:13+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-reactive",
+            "version": "v0.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-reactive",
+                "reference": "ed11871ea667e1e26cf6e183e2030fb89f42fb7c"
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "hostkurd/flocms-core": "^2.3.2",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Reactive\\": "src/"
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Reactive\\Tests\\": "tests/"
+                }
+            },
+            "archive": {
+                "exclude": [
+                    "/vendor",
+                    "/node_modules",
+                    "/tests",
+                    "/.github",
+                    "/.ci",
+                    "/examples",
+                    "/scripts",
+                    "/composer.local.*",
+                    "/composer.lock",
+                    "/.phpunit.cache",
+                    "/test-results",
+                    "/playwright-report",
+                    "/package.json",
+                    "/package-lock.json",
+                    "/tsconfig.json",
+                    "/vite.config.ts",
+                    "/playwright.config.ts",
+                    "/phpunit.xml.dist"
+                ]
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Optional reactive PHP components for FloCMS, with server-rendered HTML updates.",
+            "time": "2026-10-16T10:54:50+00:00"
+        },
+        {
+            "name": "hostkurd/flocms-uploader",
+            "version": "v1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hostkurd/flocms-uploader",
+                "reference": "799a6ef9c8dc19fcf8981a66b780db20f172ee19"
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5 || ^11.0"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Required only when using the S3 storage driver.",
+                "ext-gd": "Recommended for image processing support.",
+                "ext-imagick": "Recommended for higher-quality image processing support."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "FloCMS\\Uploader\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "FloCMS\\Uploader\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HostKurd"
+                }
+            ],
+            "description": "Professional file and image upload package for FloCMS with local, private and S3-ready storage drivers.",
+            "keywords": [
+                "flocms",
+                "images",
+                "s3",
+                "storage",
+                "upload",
+                "uploader"
+            ],
+            "time": "2026-10-16T12:06:25+00:00"
+        },
+        {
+            "name": "psr/log",
+            "version": "3.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2024-09-11T13:17:53+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {},
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.1"
+    },
+    "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.1.0"
+    },
+    "plugin-api-version": "2.6.0"
+}

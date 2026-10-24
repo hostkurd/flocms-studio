@@ -1,0 +1,3 @@
+
+ [ERROR] A user with the email "admin@example.com" already exists. Use user:password or user:role to change it.
+

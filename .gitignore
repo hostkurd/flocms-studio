@@ -5,3 +5,6 @@ build-*/
 *.log
 dist/
 CMakeUserPresets.json
+
+# Real FloCMS output the tests read (tools/capture_fixtures.py)
+!tests/fixtures/**/*.log

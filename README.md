@@ -2,9 +2,9 @@
 
 A desktop app that creates, runs and changes [FloCMS](https://github.com/HostKurd/FloCMS) projects. Every action runs a real `php flo` or `composer` command in the project and shows it.
 
-This repo is the native app, written in C++ with Qt 6, for Windows and macOS first and Linux later. It is being built in stages; nothing here is ready to use yet. Stage 1 sets up the build: the window you get only shows build details.
+This repo is the native app, written in C++ with Qt 6, for Windows and macOS first and Linux later. It is being built in stages; nothing here is ready to use yet. Stage 1 set up the build; stage 2 adds the Core library (settings, finding PHP, Composer and MariaDB, reading projects, running commands, reading their output). The window still only shows build details.
 
-The first version, built with Tauri, is [`hostkurd/flocms-studio-lite`](https://github.com/hostkurd/flocms-studio-lite). It is the reference for this app's behaviour.
+The first version, built with Tauri, is [`hostkurd/flocms-studio-lite`](https://github.com/hostkurd/flocms-studio-lite). This app's logic is written from FloCMS's own code and tested against real FloCMS output (`tests/fixtures/`), not ported from it.
 
 ## Layout
 
@@ -13,9 +13,9 @@ app/             Studio: the program (QML screens, C++ view models)
 libs/core/       FloStudioCore: settings, tools, projects, commands, parsers
 libs/database/   FloStudioDatabase: the Database tab's logic (uses Core)
 libs/security/   FloStudioSecurity: passwords and secrets (uses Core)
-tests/           Qt Test suites
+tests/           Qt Test suites, and real FloCMS command output (fixtures/)
 installer/       Windows installer (Inno Setup)
-tools/           clang-tidy runner, release notices
+tools/           clang-tidy runner, release notices, fixture capture
 prototypes/      stage 0 Kurdish and RTL check (throwaway)
 ```
 
