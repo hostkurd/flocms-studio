@@ -9,6 +9,8 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <memory>
+
 using namespace FloStudio::Core;
 
 namespace {
@@ -117,6 +119,14 @@ private slots:
         command.environment.insert(QStringLiteral("FLOSTUDIO_TEST"), QStringLiteral("kurdî"));
         QCOMPARE(runCaptured(command).out.trimmed(), QStringLiteral("kurdî"));
 
+        // Taken out of Studio's own environment
+        qputenv("FLOSTUDIO_TEST_INHERITED", "from Studio");
+        command = helper({QStringLiteral("env"), QStringLiteral("FLOSTUDIO_TEST_INHERITED")});
+        QCOMPARE(runCaptured(command).out.trimmed(), QStringLiteral("from Studio"));
+        command.removeEnvironment = {QStringLiteral("FLOSTUDIO_TEST_INHERITED")};
+        QCOMPARE(runCaptured(command).out.trimmed(), QString());
+        qunsetenv("FLOSTUDIO_TEST_INHERITED");
+
         // PATH is Studio's search path
         const Captured path = runCaptured(helper({QStringLiteral("env"), QStringLiteral("PATH")}));
         QCOMPARE(path.out.trimmed(), toolSearchPath().join(QDir::listSeparator()));
@@ -194,8 +204,55 @@ private slots:
 
         stopProcess(process, 2000);
         QTRY_COMPARE_WITH_TIMEOUT(run.exits, 1, 10000);
+        QCOMPARE(run.code, -1); // stopped: the same on every system
+        QVERIFY(run.crashed);
         QTRY_VERIFY_WITH_TIMEOUT(!TestUtil::processAlive(child), 10000);
         stopProcess(process); // already stopped: nothing happens
+    }
+
+    void aChildThatIgnoresTheRequestIsEndedToo()
+    {
+        // The program ends when asked, its child doesn't (SIGTERM ignored)
+        const QTemporaryDir dir;
+        const QString pidFile = dir.filePath(QStringLiteral("child.pid"));
+        QObject owner;
+        Run run;
+        QProcess *process = stream(helper({QStringLiteral("child"), pidFile, QStringLiteral("stubborn")}), &owner, run);
+        QTRY_VERIFY_WITH_TIMEOUT(run.out.contains(QStringLiteral("started")), 20000);
+        QFile file(pidFile);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const qint64 child = file.readAll().toLongLong();
+        stopProcess(process, 500);
+        QTRY_COMPARE_WITH_TIMEOUT(run.exits, 1, 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!TestUtil::processAlive(child), 10000);
+    }
+
+    void deletingTheOwnerEndsTheChildren()
+    {
+        // Closing a project or quitting Studio while `php flo serve` runs
+        const QTemporaryDir dir;
+        const QString pidFile = dir.filePath(QStringLiteral("child.pid"));
+        auto owner = std::make_unique<QObject>();
+        Run run;
+        stream(helper({QStringLiteral("child"), pidFile}), owner.get(), run);
+        QTRY_VERIFY_WITH_TIMEOUT(run.out.contains(QStringLiteral("started")), 20000);
+        QFile file(pidFile);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const qint64 child = file.readAll().toLongLong();
+        QVERIFY(TestUtil::processAlive(child));
+        owner.reset();
+        QTRY_VERIFY_WITH_TIMEOUT(!TestUtil::processAlive(child), 10000);
+    }
+
+    void stoppingWhileStarting()
+    {
+        QObject owner;
+        Run run;
+        QProcess *process = stream(helper({QStringLiteral("sleep"), QStringLiteral("20000")}), &owner, run);
+        stopProcess(process, 500); // before the program has started
+        QTRY_COMPARE_WITH_TIMEOUT(run.exits, 1, 10000);
+        QCOMPARE(run.code, -1);
+        QVERIFY(!run.out.contains(QStringLiteral("woke")));
     }
 
     void stopsAtTimeoutWithChildren()

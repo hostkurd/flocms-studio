@@ -43,8 +43,10 @@ struct CommandRequest
 // The Command to run (process.h). Error codes: not_allowed,
 // project_missing (no such folder), not_flocms and no_launcher (php flo
 // in a folder that isn't a FloCMS project, or has no flo launcher yet),
-// php_not_found, composer_not_found, unsafe_argument (Composer is a .bat
-// file and an argument has characters cmd.exe would read itself).
+// php_not_found, composer_not_found, unsafe_argument (PHP or Composer is a
+// .bat/.cmd file and an argument has characters cmd.exe would read
+// itself). `php flo` commands run without the variables the project's
+// .env sets, so the .env decides what they see.
 FLOSTUDIOCORE_EXPORT Result<Command> prepareCommand(const Settings &settings, const CommandRequest &request);
 
 } // namespace FloStudio::Core

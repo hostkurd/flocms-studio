@@ -20,9 +20,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <tlhelp32.h>
-
-#include <vector>
 #else
 #include <csignal>
 #include <sys/types.h>
@@ -36,76 +33,104 @@ namespace FloStudio::Core {
 
 namespace {
 
+// Each started program has a Tracker, a child of its QProcess: it knows
+// how to reach everything the program started, and ends what is left when
+// the QProcess goes (Studio closes a project or quits): ~QProcess only
+// ends the program itself, not `php -S` started by `php flo serve`.
+//
+//   Windows: the program runs in its own job object (KILL_ON_JOB_CLOSE).
+//     Its children join the job, so ending the job ends them all, and
+//     when Studio ends, even by a crash, Windows closes the handle and
+//     ends them too. The program joins the job when QProcess reports it
+//     started, which is right after CreateProcess: what it starts before
+//     that moment (nothing, for php) would be outside the job.
+//   macOS, Linux: the program leads its own process group (setpgid), so a
+//     signal to the group reaches its children. On Linux the program also
+//     gets SIGTERM if Studio crashes (PR_SET_PDEATHSIG); its children do
+//     not, and on macOS there is no such thing.
+class Tracker : public QObject
+{
+public:
+    explicit Tracker(QProcess *process)
+        : QObject(process)
+    {
+        setObjectName(QStringLiteral("flostudio-tracker"));
+    }
+    Tracker(const Tracker &) = delete;
+    Tracker &operator=(const Tracker &) = delete;
+    ~Tracker() override { endAll(); }
+
+    static Tracker *of(const QProcess *process)
+    {
+        return process ? dynamic_cast<Tracker *>(process->findChild<QObject *>(
+                             QStringLiteral("flostudio-tracker"), Qt::FindDirectChildrenOnly))
+                       : nullptr;
+    }
+
+    // Right after the program started.
+    void started(qint64 pid)
+    {
+        m_pid = pid;
 #ifdef Q_OS_WIN
-// A job object every started program joins: when Studio ends (also by a
-// crash) Windows closes the handle and ends the programs and their
-// children. Created once, never closed by Studio.
-HANDLE studioJob()
-{
-    static const HANDLE job = [] {
-        HANDLE handle = CreateJobObjectW(nullptr, nullptr);
-        if (handle) {
-            JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
-            limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-            if (!SetInformationJobObject(handle, JobObjectExtendedLimitInformation, &limits, sizeof(limits)))
-                qWarning("Could not set up the job object for started programs.");
-        }
-        return handle;
-    }();
-    return job;
-}
-
-void joinStudioJob(qint64 pid)
-{
-    const HANDLE job = studioJob();
-    if (!job || pid <= 0)
-        return;
-    HANDLE process = OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, FALSE, static_cast<DWORD>(pid));
-    if (!process)
-        return;
-    if (!AssignProcessToJobObject(job, process))
-        qWarning("Could not add a started program to Studio's job object.");
-    CloseHandle(process);
-}
-
-// Ends the process and every process it started, children first.
-void endTree(qint64 root)
-{
-    if (root <= 0)
-        return;
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (snapshot == INVALID_HANDLE_VALUE)
-        return;
-    std::vector<std::pair<DWORD, DWORD>> parents; // (process, parent)
-    PROCESSENTRY32W entry{};
-    entry.dwSize = sizeof(entry);
-    for (BOOL more = Process32FirstW(snapshot, &entry); more; more = Process32NextW(snapshot, &entry))
-        parents.emplace_back(entry.th32ProcessID, entry.th32ParentProcessID);
-    CloseHandle(snapshot);
-
-    std::vector<DWORD> tree{static_cast<DWORD>(root)};
-    for (std::size_t i = 0; i < tree.size(); ++i) {
-        for (const auto &[pid, parent] : parents) {
-            if (parent == tree[i] && pid != tree[i] && std::find(tree.begin(), tree.end(), pid) == tree.end())
-                tree.push_back(pid);
-        }
-    }
-    for (auto it = tree.rbegin(); it != tree.rend(); ++it) {
-        HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, *it);
-        if (process) {
-            TerminateProcess(process, 1);
+        m_job = CreateJobObjectW(nullptr, nullptr);
+        if (!m_job)
+            return;
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        HANDLE process = OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, FALSE, static_cast<DWORD>(pid));
+        if (!SetInformationJobObject(m_job, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) || !process
+            || !AssignProcessToJobObject(m_job, process))
+            qWarning("Could not put a started program into its job object.");
+        if (process)
             CloseHandle(process);
-        }
-    }
-}
-#else
-void signalGroup(qint64 pid, int signal)
-{
-    // The process leads its own group (see prepare()): -pid is the group.
-    if (pid > 0)
-        ::kill(static_cast<pid_t>(-pid), signal);
-}
 #endif
+    }
+
+    // Asks everything to end (macOS, Linux); ends it at once on Windows.
+    void stop()
+    {
+        m_stopped = true;
+#ifdef Q_OS_WIN
+        endAll();
+#else
+        signalGroup(SIGTERM);
+#endif
+    }
+
+    // Ends whatever is still running, without asking.
+    void endAll()
+    {
+#ifdef Q_OS_WIN
+        if (m_job) {
+            TerminateJobObject(m_job, 1);
+            CloseHandle(m_job);
+            m_job = nullptr;
+        }
+#else
+        // The group outlives its leader while a child is still in it.
+        if (m_pid > 0 && ::kill(static_cast<pid_t>(-m_pid), 0) == 0)
+            signalGroup(SIGKILL);
+#endif
+    }
+
+    bool stopped() const { return m_stopped; }
+    bool stopWhenStarted = false; // stopProcess() came before the program started
+
+private:
+#ifndef Q_OS_WIN
+    void signalGroup(int signal) const
+    {
+        if (m_pid > 0)
+            ::kill(static_cast<pid_t>(-m_pid), signal); // ESRCH: already gone
+    }
+#endif
+
+    qint64 m_pid = 0;
+    bool m_stopped = false;
+#ifdef Q_OS_WIN
+    HANDLE m_job = nullptr;
+#endif
+};
 
 void prepare(QProcess &process, const Command &command)
 {
@@ -115,6 +140,8 @@ void prepare(QProcess &process, const Command &command)
         process.setWorkingDirectory(command.workingDir);
 
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+    for (const QString &name : command.removeEnvironment)
+        environment.remove(name);
     environment.insert(QStringLiteral("PATH"), toolSearchPath().join(QDir::listSeparator()));
     for (auto it = command.environment.cbegin(); it != command.environment.cend(); ++it)
         environment.insert(it.key(), it.value());
@@ -122,6 +149,8 @@ void prepare(QProcess &process, const Command &command)
 
     if (command.input.isEmpty())
         process.setStandardInputFile(QProcess::nullDevice());
+
+    new Tracker(&process); // a child of the process: Qt deletes it with the process
 
 #ifdef Q_OS_WIN
     process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *arguments) {
@@ -138,33 +167,31 @@ void prepare(QProcess &process, const Command &command)
 #endif
 }
 
-// Joins the job (Windows) and writes the input, which is then cleared so a
-// password is not kept around.
-void afterStart(QProcess &process, QByteArray &input)
+// Right after the program started: its tracker learns the process id,
+// and the input (a password) is written and the channel closed.
+void afterStart(QProcess &process, const QByteArray &input)
 {
-#ifdef Q_OS_WIN
-    joinStudioJob(process.processId());
-#endif
+    Tracker *tracker = Tracker::of(&process);
+    if (tracker)
+        tracker->started(process.processId());
     if (!input.isEmpty()) {
         process.write(input);
         process.closeWriteChannel();
-        input.fill('\0');
-        input.clear();
     }
+    if (tracker && tracker->stopWhenStarted)
+        tracker->stop();
 }
 
-// Blocking stop for runCaptured().
+// Blocking stop for runCaptured(): ask, wait, then end everything.
 void stopAndWait(QProcess &process, int graceMs)
 {
-#ifdef Q_OS_WIN
-    Q_UNUSED(graceMs)
-    endTree(process.processId());
-#else
-    const qint64 pid = process.processId();
-    signalGroup(pid, SIGTERM);
-    if (!process.waitForFinished(graceMs))
-        signalGroup(pid, SIGKILL);
-#endif
+    if (Tracker *tracker = Tracker::of(&process)) {
+        tracker->stop();
+        process.waitForFinished(graceMs);
+        tracker->endAll();
+    } else {
+        process.kill();
+    }
     process.waitForFinished(5000);
 }
 
@@ -176,14 +203,16 @@ Captured runCaptured(const Command &command, int timeoutMs)
     result.shown = command.shown;
     QProcess process;
     prepare(process, command);
+    // started() comes from inside start() on Windows, from waitForStarted()
+    // elsewhere: either way before the program can do much.
+    QObject::connect(&process, &QProcess::started, &process,
+                     [&process, &command] { afterStart(process, command.input); });
     process.start();
     if (!process.waitForStarted(30000)) {
         result.err = process.errorString();
         return result;
     }
     result.started = true;
-    QByteArray input = command.input;
-    afterStart(process, input);
     if (!process.waitForFinished(timeoutMs > 0 ? timeoutMs : -1)) {
         result.timedOut = true;
         stopAndWait(process, 2000);
@@ -237,10 +266,13 @@ QProcess *startStreaming(const Command &command, QObject *owner, LineHandler onL
     QObject::connect(process, &QProcess::readyReadStandardOutput, owner, [readOut] { readOut(false); });
     QObject::connect(process, &QProcess::readyReadStandardError, owner, [readErr] { readErr(false); });
     QObject::connect(process, &QProcess::finished, owner,
-                     [readOut, readErr, end](int code, QProcess::ExitStatus status) {
+                     [process, readOut, readErr, end](int code, QProcess::ExitStatus status) {
                          readOut(true);
                          readErr(true);
-                         const bool crashed = status == QProcess::CrashExit;
+                         // Stopped by Studio: the same on every system (Windows
+                         // reports a stopped program as exit code 1)
+                         const Tracker *tracker = Tracker::of(process);
+                         const bool crashed = status == QProcess::CrashExit || (tracker && tracker->stopped());
                          end(crashed ? -1 : code, crashed);
                      });
     QObject::connect(process, &QProcess::errorOccurred, owner,
@@ -251,26 +283,23 @@ QProcess *startStreaming(const Command &command, QObject *owner, LineHandler onL
                          end(-1, true);
                      });
     QObject::connect(process, &QProcess::started, owner,
-                     [process, input = command.input]() mutable { afterStart(*process, input); });
+                     [process, input = command.input] { afterStart(*process, input); });
     process->start();
     return process;
 }
 
 void stopProcess(QProcess *process, int graceMs)
 {
-    if (!process || process->state() == QProcess::NotRunning)
+    Tracker *tracker = Tracker::of(process);
+    if (!process || !tracker || process->state() == QProcess::NotRunning)
         return;
-#ifdef Q_OS_WIN
-    Q_UNUSED(graceMs)
-    endTree(process->processId());
-#else
-    const qint64 pid = process->processId();
-    signalGroup(pid, SIGTERM);
-    QTimer::singleShot(graceMs, process, [process = QPointer<QProcess>(process), pid] {
-        if (process && process->state() != QProcess::NotRunning && process->processId() == pid)
-            signalGroup(pid, SIGKILL);
-    });
-#endif
+    if (process->state() == QProcess::Starting) {
+        tracker->stopWhenStarted = true;
+        return;
+    }
+    tracker->stop();
+    // Then end whatever is left: a child can outlive its leader.
+    QTimer::singleShot(graceMs, tracker, [tracker] { tracker->endAll(); });
 }
 
 QString cleanLine(const QString &line)

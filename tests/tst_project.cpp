@@ -205,7 +205,8 @@ private slots:
         QCOMPARE(info->skeletonVersion, QStringLiteral("2.0.0"));
         QCOMPARE(info->languages, (QStringList{QStringLiteral("en"), QStringLiteral("ar"), QStringLiteral("ku")}));
         QCOMPARE(info->defaultLanguage, QStringLiteral("en"));
-        QCOMPARE(info->database.name, QStringLiteral("again")); // the commands use the last line
+        QCOMPARE(info->database.name, QStringLiteral("studio_full")); // the first line, as the website
+        QVERIFY(!info->envByteOrderMark);
         QCOMPARE(info->duplicateEnvKeys, QStringList{QStringLiteral("DB_NAME")});
         QVERIFY(info->database.configured);
         QCOMPARE(info->packages.size(), 7);

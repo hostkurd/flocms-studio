@@ -138,6 +138,8 @@ private slots:
 #endif
         const QStringList path = toolSearchPath();
         QVERIFY(!path.isEmpty());
+        for (const QString &folder : path)
+            QVERIFY2(QDir::isAbsolutePath(folder), qUtf8Printable(folder));
         const QString first = qEnvironmentVariable("PATH").split(QDir::listSeparator(), Qt::SkipEmptyParts).value(0);
         if (!first.isEmpty())
             QCOMPARE(path.first(), QDir::toNativeSeparators(QDir::cleanPath(first)));
@@ -177,6 +179,12 @@ private slots:
         QCOMPARE(launch->program, settings.composerPath);
         QVERIFY(launch->batchFile);
         QCOMPARE(launch->setupBinary, settings.composerPath);
+
+        // A .cmd alone: setup would read it as a PHP file, so no COMPOSER_BINARY
+        settings.composerPath = writeFile(dir.filePath(QStringLiteral("f/composer.cmd")), "@echo off\r\n");
+        launch = composerLaunch(settings);
+        QVERIFY(launch->batchFile);
+        QVERIFY(launch->setupBinary.isEmpty());
 
         // Something else (a native program): run directly, no COMPOSER_BINARY
         settings.composerPath = writeFile(dir.filePath(QStringLiteral("e/composer")), "\x7f" "ELF", true);

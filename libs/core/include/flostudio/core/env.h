@@ -3,6 +3,7 @@
 #include <flostudio/core/export.h>
 #include <flostudio/core/result.h>
 
+#include <QByteArray>
 #include <QList>
 #include <QMap>
 #include <QPair>
@@ -12,32 +13,48 @@
 namespace FloStudio::Core {
 
 // A project's .env file, read the way FloCMS reads it. There are two
-// readers in FloCMS and they differ in one place:
+// readers in FloCMS:
 //
-//   - the website: flocms-core's Env::load (public/index.php)
-//   - the commands: flocms-cli's Project::dotenv (php flo ...)
+//   - flocms-core's Env::load: the website (public/index.php), and every
+//     `php flo` command that boots the project (admin:*, route:list, ...)
+//   - flocms-cli's Project::dotenv: `php flo` commands before they boot it
+//     (migrate, db:*, doctor)
 //
 // Both: one KEY=value per line, lines starting with # are comments, the
 // key and the value are trimmed, one pair of surrounding quotes (" or ')
 // is removed, nothing else (no escapes, no inline comments: `a #b` is the
 // value "a #b"). A variable already set in the real environment wins over
-// the file in both.
+// the file in both (Studio's commands run without them, see commands.h).
 //
-// The difference: when a key is written twice, the website keeps the first
-// value and the commands the last. Studio shows such keys (duplicateKeys)
-// and, when it writes one, leaves a single line.
+// They differ when a key is written twice: Env::load keeps the first
+// value, Project::dotenv the last, and a command that boots sees the first
+// one from then on. So `php flo migrate` and `php flo admin:doctor` can use
+// different databases. Studio shows the first value (what the website
+// uses), points at such keys (duplicateKeys) and, when it writes one,
+// leaves a single line.
+//
+// A UTF-8 byte order mark stays part of the first key, as in PHP: the key
+// FloCMS reads is then not APP_NAME but "\uFEFFAPP_NAME".
 
-// The values as the website sees them (first line of a key wins).
+// The values as the website sees them (first line of a key wins). Studio
+// shows these.
 FLOSTUDIOCORE_EXPORT QMap<QString, QString> parseEnv(const QString &text);
 
-// The values as `php flo` commands see them (last line of a key wins).
+// The values as Project::dotenv sees them (last line of a key wins).
 FLOSTUDIOCORE_EXPORT QMap<QString, QString> parseEnvForCommands(const QString &text);
 
 // Keys that appear on more than one line, in the order first seen.
 FLOSTUDIOCORE_EXPORT QStringList duplicateKeys(const QString &text);
 
-// Reads dir/.env as text; empty when there is no file.
+// A .env file's bytes as text, its byte order mark kept as U+FEFF.
+FLOSTUDIOCORE_EXPORT QString envText(const QByteArray &file);
+
+// Reads dir/.env with envText(); empty when there is no file.
 FLOSTUDIOCORE_EXPORT QString readEnvFile(const QString &dir);
+
+// The file starts with a byte order mark (its first key is not what it
+// looks like; see above).
+FLOSTUDIOCORE_EXPORT bool hasByteOrderMark(const QString &text);
 
 // A yes/no setting such as APP_DEBUG, read as core's ErrorHandler does
 // (PHP's FILTER_VALIDATE_BOOLEAN): 1, true, on, yes are true; 0, false,
@@ -57,12 +74,13 @@ FLOSTUDIOCORE_EXPORT const QStringList &writableEnvKeys();
 // which no .env line can hold).
 FLOSTUDIOCORE_EXPORT Result<QString> envLineValue(const QString &value);
 
-// The file with the values set: the first line of each key gets the new
-// value, later lines of the same key are removed, a missing key is added
-// at the end. Comments, other keys and the line endings (LF or CRLF) stay
-// as they were. Error codes: env_key (not in writableEnvKeys), env_value.
-FLOSTUDIOCORE_EXPORT Result<QString> setEnvValues(const QString &text,
-                                                  const QList<QPair<QString, QString>> &values);
+// The file (its bytes) with the values set: the first line of each key
+// gets the new value, later lines of the same key are removed, a missing
+// key is added at the end. Every other line stays byte for byte, line
+// ending included; added lines use CRLF when the file has any. Error
+// codes: env_key (not in writableEnvKeys), env_value.
+FLOSTUDIOCORE_EXPORT Result<QByteArray> setEnvValues(const QByteArray &file,
+                                                     const QList<QPair<QString, QString>> &values);
 
 // setEnvValues on dir/.env, written in one step. A project without .env
 // starts from its .env.example, as `composer create-project` does.

@@ -9,14 +9,18 @@
 //   sleep MS         sleeps, then prints "woke"
 //   split            UTF-8 Kurdish text written one byte at a time
 //   redraw           a progress bar redrawn with \r, then text with backspaces
-//   child PIDFILE    starts `helper sleep 60000` as its child, writes the
-//                    child's process id to PIDFILE, then sleeps
+//   child PIDFILE [stubborn]
+//                    starts `helper sleep 60000` (or `helper stubborn`) as
+//                    its child, writes the child's process id to PIDFILE,
+//                    then waits for the child
+//   stubborn         ignores SIGTERM (macOS, Linux), then sleeps a minute
 
 #include <QCoreApplication>
 #include <QFile>
 #include <QProcess>
 #include <QThread>
 
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 
@@ -83,10 +87,20 @@ int main(int argc, char *argv[])
         put(stdout, "\x1b[32m[OK]\x1b[39m done\n");
         return 0;
     }
+    if (mode == u"stubborn") {
+#ifndef Q_OS_WIN
+        if (std::signal(SIGTERM, SIG_IGN) == SIG_ERR)
+            return 95;
+#endif
+        put(stdout, "ignoring SIGTERM\n");
+        QThread::sleep(60);
+        return 0;
+    }
     if (mode == u"child") {
         QProcess child;
         child.setProgram(QCoreApplication::applicationFilePath());
-        child.setArguments({QStringLiteral("sleep"), QStringLiteral("60000")});
+        child.setArguments(args.value(2) == u"stubborn" ? QStringList{QStringLiteral("stubborn")}
+                                                         : QStringList{QStringLiteral("sleep"), QStringLiteral("60000")});
         child.start();
         if (!child.waitForStarted(10000))
             return 93;

@@ -41,10 +41,11 @@ struct Settings
 // The folder settings.json lives in (QStandardPaths::AppConfigLocation).
 FLOSTUDIOCORE_EXPORT QString settingsFolder();
 
-// Loads dir/settings.json. A missing file gives the defaults; a file that
-// isn't valid JSON is renamed to settings.json.broken (kept, not lost) and
-// the defaults are used.
-FLOSTUDIOCORE_EXPORT Settings loadSettings(const QString &dir);
+// Loads dir/settings.json. A missing file gives the defaults. A file that
+// isn't valid JSON is kept aside as settings.broken-<date-time>.json and
+// the defaults are used. A file that is there but can't be read (another
+// program holds it) gives settings_read: don't save over it then.
+FLOSTUDIOCORE_EXPORT Result<Settings> loadSettings(const QString &dir);
 
 // Writes dir/settings.json in one step (a crash leaves the old file).
 // Error codes: settings_write.

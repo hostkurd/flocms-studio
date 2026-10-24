@@ -151,36 +151,62 @@ private slots:
 
     void setReplacesAddsAndKeepsTheRest()
     {
-        const QString before = QStringLiteral(
-            "APP_NAME=FloCMS\n# Database\nDB_TYPE=mysql\nDB_NAME=\n# DB_HOST=old\nAPP_DEBUG=true\nDB_NAME=dup\n");
+        const QByteArray before =
+            "APP_NAME=FloCMS\n# Database\nDB_TYPE=mysql\nDB_NAME=\n# DB_HOST=old\nAPP_DEBUG=true\nDB_NAME=dup\n";
         const auto after = setEnvValues(before, Values{{QStringLiteral("DB_NAME"), QStringLiteral("shop")},
                                                        {QStringLiteral("DB_HOST"), QStringLiteral("127.0.0.1")},
                                                        {QStringLiteral("APP_NAME"), QStringLiteral("My Shop")}});
         QVERIFY(after.ok());
-        QCOMPARE(after.value(), QStringLiteral("APP_NAME=My Shop\n# Database\nDB_TYPE=mysql\nDB_NAME=shop\n"
-                                               "# DB_HOST=old\nAPP_DEBUG=true\nDB_HOST=127.0.0.1\n"));
+        QCOMPARE(after.value(), QByteArray("APP_NAME=My Shop\n# Database\nDB_TYPE=mysql\nDB_NAME=shop\n"
+                                           "# DB_HOST=old\nAPP_DEBUG=true\nDB_HOST=127.0.0.1\n"));
     }
 
-    void setKeepsWindowsLineEndings()
+    void setKeepsLineEndings()
     {
-        const auto after = setEnvValues(QStringLiteral("A=1\r\nDB_NAME=\r\n"),
-                                        Values{{QStringLiteral("DB_NAME"), QStringLiteral("x")}});
-        QCOMPARE(after.value(), QStringLiteral("A=1\r\nDB_NAME=x\r\n"));
+        QCOMPARE(setEnvValues("A=1\r\nDB_NAME=\r\n", Values{{QStringLiteral("DB_NAME"), QStringLiteral("x")}}).value(),
+                 QByteArray("A=1\r\nDB_NAME=x\r\n"));
+        // Mixed: each line keeps its own; an added line takes CRLF
+        QCOMPARE(setEnvValues("A=1\nB=2\r\nDB_NAME=\n", Values{{QStringLiteral("DB_NAME"), QStringLiteral("x")},
+                                                                {QStringLiteral("DB_HOST"), QStringLiteral("h")}}).value(),
+                 QByteArray("A=1\nB=2\r\nDB_NAME=x\nDB_HOST=h\r\n"));
+        // No final line break: one is added
+        QCOMPARE(setEnvValues("A=1", Values{{QStringLiteral("DB_NAME"), QStringLiteral("x")}}).value(),
+                 QByteArray("A=1\nDB_NAME=x\n"));
+    }
+
+    void setLeavesOtherBytesAlone()
+    {
+        // A line in Latin-1 (not UTF-8) and a byte order mark stay as they were
+        const QByteArray before = "\xEF\xBB\xBF" "APP_NAME=x\nSITE_NAME=Caf\xE9\nDB_NAME=\n";
+        const auto after = setEnvValues(before, Values{{QStringLiteral("DB_NAME"), QStringLiteral("shop")}});
+        QCOMPARE(after.value(), QByteArray("\xEF\xBB\xBF" "APP_NAME=x\nSITE_NAME=Caf\xE9\nDB_NAME=shop\n"));
+    }
+
+    void aByteOrderMarkIsPartOfTheFirstKey()
+    {
+        // As PHP reads it: the first key is "\uFEFFAPP_NAME", not APP_NAME
+        const QString text = envText("\xEF\xBB\xBF" "APP_NAME=Shop\nDB_NAME=x\n");
+        QVERIFY(hasByteOrderMark(text));
+        const auto env = parseEnv(text);
+        QVERIFY(!env.contains(QStringLiteral("APP_NAME")));
+        QCOMPARE(env.value(QChar(0xFEFF) + QStringLiteral("APP_NAME")), QStringLiteral("Shop"));
+        QCOMPARE(env.value(QStringLiteral("DB_NAME")), QStringLiteral("x"));
+        QVERIFY(!hasByteOrderMark(envText("A=1")));
     }
 
     void setOnTheRealExample()
     {
-        const QString example = TestUtil::fixture(QStringLiteral("project/env.example"));
+        const QByteArray example = TestUtil::fixture(QStringLiteral("project/env.example")).toUtf8();
         const auto after = setEnvValues(example, Values{{QStringLiteral("DB_NAME"), QStringLiteral("studio")},
                                                         {QStringLiteral("DB_USERNAME"), QStringLiteral("root")},
                                                         {QStringLiteral("APP_NAME"), QStringLiteral("سایتی من")}});
         QVERIFY(after.ok());
-        const auto env = parseEnv(after.value());
+        const auto env = parseEnv(envText(after.value()));
         QCOMPARE(env.value(QStringLiteral("DB_NAME")), QStringLiteral("studio"));
         QCOMPARE(env.value(QStringLiteral("APP_NAME")), QStringLiteral("سایتی من"));
         // Only the three lines changed
-        const QStringList a = example.split(u'\n');
-        const QStringList b = after.value().split(u'\n');
+        const QList<QByteArray> a = example.split('\n');
+        const QList<QByteArray> b = after.value().split('\n');
         QCOMPARE(a.size(), b.size());
         int changed = 0;
         for (qsizetype i = 0; i < a.size(); ++i)
@@ -190,9 +216,9 @@ private slots:
 
     void refusesOtherKeys()
     {
-        QCOMPARE(setEnvValues({}, Values{{QStringLiteral("APP_KEY"), QStringLiteral("x")}}).error().code,
+        QCOMPARE(setEnvValues(QByteArray(), Values{{QStringLiteral("APP_KEY"), QStringLiteral("x")}}).error().code,
                  QStringLiteral("env_key"));
-        QCOMPARE(setEnvValues({}, Values{{QStringLiteral("APP_NAME"), QStringLiteral("a\nb")}}).error().code,
+        QCOMPARE(setEnvValues(QByteArray(), Values{{QStringLiteral("APP_NAME"), QStringLiteral("a\nb")}}).error().code,
                  QStringLiteral("env_value"));
     }
 

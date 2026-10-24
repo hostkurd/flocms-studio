@@ -7,10 +7,15 @@
 //   FLOSTUDIO_REAL_PROJECT=/path/to/site ctest -R tst_realproject --output-on-failure
 
 #include <flostudio/core/commands.h>
+#include <flostudio/core/env.h>
 #include <flostudio/core/output.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/tools.h>
 
+#include <QDir>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QProcess>
 #include <QTest>
 
@@ -40,6 +45,7 @@ private slots:
         m_dir = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
         if (m_dir.isEmpty())
             QSKIP("FLOSTUDIO_REAL_PROJECT is not set");
+        m_admin = projectSummary(m_dir).hasAdmin;
     }
 
     void readsTheProject()
@@ -51,7 +57,6 @@ private slots:
         QVERIFY(info->hasLock);
         QVERIFY(std::any_of(info->packages.begin(), info->packages.end(),
                             [](const Package &p) { return p.name == QLatin1String(kCorePackage); }));
-        m_admin = info->summary.hasAdmin;
         qInfo("%s: %lld hostkurd packages, admin panel: %s, database: %s", qUtf8Printable(info->summary.folderName),
               static_cast<long long>(info->packages.size()), m_admin ? "yes" : "no", qUtf8Printable(info->database.driver));
         QVERIFY(!info->launcher.isEmpty());
@@ -81,6 +86,23 @@ private slots:
         const Captured admin = flo({QStringLiteral("admin:doctor")});
         QVERIFY(parseAdminDoctor(admin.out, admin.err));
         QVERIFY(parseAdminList(flo({QStringLiteral("admin:list")}).out));
+    }
+
+    void envWrittenAsFloCmsReadsIt()
+    {
+        // Studio writes .env; FloCMS's own `about` reads it back
+        QFile env(QDir(m_dir).filePath(QStringLiteral(".env")));
+        QVERIFY(env.open(QIODevice::ReadOnly));
+        const QByteArray original = env.readAll();
+        env.close();
+        const QString name = QStringLiteral("سایتی من \"Studio\" #1");
+        QVERIFY(writeEnvValues(m_dir, {{QStringLiteral("APP_NAME"), name}}).ok());
+        const Captured about = flo({QStringLiteral("about"), QStringLiteral("--format=json")});
+        QVERIFY(env.open(QIODevice::WriteOnly));
+        env.write(original); // the project as it was
+        env.close();
+        const QJsonObject json = QJsonDocument::fromJson(about.out.toUtf8()).object();
+        QCOMPARE(json.value(QStringLiteral("Environment")).toObject().value(QStringLiteral("Application")).toString(), name);
     }
 
     void servesAndStops()

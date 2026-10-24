@@ -6,6 +6,10 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#ifdef Q_OS_UNIX
+#include <unistd.h>
+#endif
+
 using namespace FloStudio::Core;
 
 class TestSettings : public QObject
@@ -23,7 +27,7 @@ private slots:
     void missingFileGivesDefaults()
     {
         const QTemporaryDir dir;
-        QCOMPARE(loadSettings(dir.path()), Settings{});
+        QCOMPARE(loadSettings(dir.path()).value(), Settings{});
         QCOMPARE(Settings{}.serverPort, 8000);
         QCOMPARE(Settings{}.editorCommand, QStringLiteral("code \"{folder}\""));
     }
@@ -39,7 +43,7 @@ private slots:
         settings.serverPort = 8080;
         settings.serverNetwork = true;
         QVERIFY(saveSettings(settings, dir.path()).ok());
-        QCOMPARE(loadSettings(dir.path()), settings);
+        QCOMPARE(loadSettings(dir.path()).value(), settings);
     }
 
     void savingCreatesTheFolder()
@@ -55,7 +59,7 @@ private slots:
         const QTemporaryDir dir;
         write(dir.path(), R"({"language":"fr","theme":"blue","serverPort":70000,"editorCommand":"  ",
                               "projects":["a"," a ","", 5],"serverNetwork":"yes"})");
-        const Settings settings = loadSettings(dir.path());
+        const Settings settings = loadSettings(dir.path()).value();
         QCOMPARE(settings.language, QStringLiteral("system"));
         QCOMPARE(settings.theme, QStringLiteral("system"));
         QCOMPARE(settings.serverPort, 8000);
@@ -68,7 +72,7 @@ private slots:
     {
         const QTemporaryDir dir;
         write(dir.path(), R"({"language":"ar","sidebarWidth":240,"later":{"x":[1,2]}})");
-        const Settings settings = loadSettings(dir.path());
+        const Settings settings = loadSettings(dir.path()).value();
         QCOMPARE(settings.language, QStringLiteral("ar"));
         QVERIFY(saveSettings(settings, dir.path()).ok());
         QFile file(dir.path() + QStringLiteral("/settings.json"));
@@ -82,20 +86,46 @@ private slots:
     void brokenFileIsKeptAside()
     {
         const QTemporaryDir dir;
-        write(dir.path(), "{not json");
-        QCOMPARE(loadSettings(dir.path()), Settings{});
-        QFile broken(dir.path() + QStringLiteral("/settings.json.broken"));
-        QVERIFY(broken.open(QIODevice::ReadOnly));
-        QCOMPARE(broken.readAll(), QByteArray("{not json"));
-        QVERIFY(!QFile::exists(dir.path() + QStringLiteral("/settings.json")));
+        for (const QByteArray &text : {QByteArray("{not json"), QByteArray("{again")}) {
+            write(dir.path(), text);
+            QCOMPARE(loadSettings(dir.path()).value(), Settings{});
+        }
+        // Both kept, each under its own name
+        const QStringList kept = QDir(dir.path()).entryList({QStringLiteral("settings.broken-*.json")});
+        QCOMPARE(kept.size(), 2);
+        QStringList texts;
+        for (const QString &name : kept) {
+            QFile file(dir.filePath(name));
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            texts << QString::fromUtf8(file.readAll());
+        }
+        texts.sort();
+        QCOMPARE(texts, (QStringList{QStringLiteral("{again"), QStringLiteral("{not json")}));
+        QVERIFY(!QFile::exists(dir.filePath(QStringLiteral("settings.json"))));
+    }
+
+    void anUnreadableFileIsNotReplaced()
+    {
+#ifdef Q_OS_UNIX
+        if (::geteuid() == 0)
+            QSKIP("root can read any file");
+#endif
+        const QTemporaryDir dir;
+        write(dir.path(), R"({"language":"ar"})");
+        QFile file(dir.filePath(QStringLiteral("settings.json")));
+        QVERIFY(file.setPermissions(QFileDevice::Permissions()));
+        if (file.open(QIODevice::ReadOnly))
+            QSKIP("this system lets the test read the file anyway");
+        QCOMPARE(loadSettings(dir.path()).error().code, QStringLiteral("settings_read"));
+        QVERIFY(file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner));
     }
 
     void aJsonArrayIsBrokenToo()
     {
         const QTemporaryDir dir;
         write(dir.path(), "[1,2]");
-        QCOMPARE(loadSettings(dir.path()), Settings{});
-        QVERIFY(QFile::exists(dir.path() + QStringLiteral("/settings.json.broken")));
+        QCOMPARE(loadSettings(dir.path()).value(), Settings{});
+        QCOMPARE(QDir(dir.path()).entryList({QStringLiteral("settings.broken-*.json")}).size(), 1);
     }
 
     void normalizedTrimsAndDedupes()

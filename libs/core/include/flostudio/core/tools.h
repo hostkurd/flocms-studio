@@ -18,8 +18,9 @@ namespace FloStudio::Core {
 // Where Studio looks for programs: PATH, then (macOS and Linux) the login
 // shell's PATH, then the usual install folders. Apps started from the
 // Finder or a desktop menu get a short PATH without Homebrew, Herd or
-// Composer's folder, so the shell is asked once. The same list becomes
-// the PATH of every command Studio starts.
+// Composer's folder, so the shell is asked once (up to 3 seconds: the app
+// calls this once on a worker thread at start). Relative entries are left
+// out. The same list becomes the PATH of every command Studio starts.
 FLOSTUDIOCORE_EXPORT QStringList toolSearchPath();
 
 // The usual install folders of PHP, Composer and MySQL/MariaDB on this
@@ -40,9 +41,10 @@ struct ComposerLaunch
     QString program;           // php, or the composer program
     QStringList arguments;     // [composer.phar] when it runs through PHP
     QString path;              // the Composer that was found
-    // COMPOSER_BINARY for `php flo setup`, which runs [PHP, it] or a .bat
-    // directly; empty when Composer is neither (setup then uses `composer`
-    // from PATH).
+    // COMPOSER_BINARY for `php flo setup`, which runs a .bat directly and
+    // anything else as [PHP, it]; empty when Composer is neither a .bat nor
+    // a PHP file (a .cmd, a native program): setup then uses `composer`
+    // from PATH.
     QString setupBinary;
     bool batchFile = false;    // a .bat/.cmd with no composer.phar beside it
 

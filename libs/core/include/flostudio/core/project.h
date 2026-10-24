@@ -88,6 +88,7 @@ struct ProjectInfo
     QList<Package> packages;      // hostkurd/* from composer.lock
     QList<Package> otherPackages; // everything else in composer.lock
     QStringList duplicateEnvKeys; // see env.h
+    bool envByteOrderMark = false; // .env starts with a BOM: its first key isn't what it looks like
     bool hasEnv = false;
     bool hasVendor = false;  // vendor/autoload.php: composer install has run
     bool hasLock = false;
@@ -119,8 +120,8 @@ FLOSTUDIOCORE_EXPORT QString setupChoice(ProjectType type);
 // sorted by name. Invalid JSON gives two empty lists.
 FLOSTUDIOCORE_EXPORT QPair<QList<Package>, QList<Package>> lockedPackages(const QByteArray &composerLock);
 
-// The database settings from .env values (as parseEnvForCommands gives
-// them) for the project in dir (a relative sqlite file is made absolute).
+// The database settings from .env values (parseEnv) for the project in
+// dir (a relative sqlite file is made absolute).
 FLOSTUDIOCORE_EXPORT DatabaseConfig databaseConfig(const QMap<QString, QString> &env, const QString &dir);
 
 FLOSTUDIOCORE_EXPORT ProjectSummary projectSummary(const QString &dir);

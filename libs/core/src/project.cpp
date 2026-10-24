@@ -219,9 +219,9 @@ Result<ProjectInfo> projectInfo(const QString &dir)
     ProjectInfo info;
     info.summary = projectSummary(dir);
     const QString envText = readEnvFile(dir);
-    // The Overview shows what the commands use (php flo), which is also
-    // what the website uses unless a key is written twice.
-    const QMap<QString, QString> env = parseEnvForCommands(envText);
+    // What the website and the commands that boot the project use; a key
+    // written twice is pointed at (duplicateEnvKeys, see env.h).
+    const QMap<QString, QString> env = parseEnv(envText);
     info.appName = env.value(QStringLiteral("APP_NAME"));
     info.appEnv = env.value(QStringLiteral("APP_ENV"));
     info.appUrl = env.value(QStringLiteral("APP_URL"));
@@ -236,6 +236,7 @@ Result<ProjectInfo> projectInfo(const QString &dir)
     info.defaultLanguage = env.value(QStringLiteral("DEFAULT_LANG"));
     info.database = databaseConfig(env, dir);
     info.duplicateEnvKeys = duplicateKeys(envText);
+    info.envByteOrderMark = hasByteOrderMark(envText);
     info.hasEnv = QFileInfo(project.filePath(QStringLiteral(".env"))).isFile();
     info.hasVendor = QFileInfo(project.filePath(QStringLiteral("vendor/autoload.php"))).isFile();
     QFile lock(project.filePath(QStringLiteral("composer.lock")));

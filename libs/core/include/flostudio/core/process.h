@@ -21,10 +21,12 @@ namespace FloStudio::Core {
 // Every program Studio starts:
 //   - gets PATH = toolSearchPath(), so `php flo setup` finds Composer;
 //   - opens no console window on Windows;
-//   - starts its own process group (macOS, Linux) or is tracked with its
-//     children (Windows), so stopping it also stops what it started:
-//     `php flo serve` runs `php -S` as a child;
-//   - on Windows, is ended with Studio, even if Studio crashes.
+//   - is tracked with what it starts (its own process group on macOS and
+//     Linux, its own job object on Windows), so stopping it also stops its
+//     children: `php flo serve` runs `php -S` as a child;
+//   - ends with its children when its QProcess is deleted (the owner goes,
+//     Studio quits), and on Windows also when Studio crashes. On Linux a
+//     crash ends the program itself only; on macOS neither.
 
 struct Command
 {
@@ -32,8 +34,10 @@ struct Command
     QStringList arguments;
     QString workingDir;
     QMap<QString, QString> environment; // added to (or replacing) Studio's own
+    QStringList removeEnvironment;      // names taken out of Studio's own first
     // Written to the program's input, which is then closed. Passwords go
-    // here (user:create --password-stdin), never into the arguments.
+    // here (user:create --password-stdin), never into the arguments or
+    // `shown`. Copies of it live as long as the Command and the process.
     QByteArray input;
     // The command as a person would type it, for the screen.
     QString shown;
@@ -63,8 +67,8 @@ struct OutputLine
 };
 
 using LineHandler = std::function<void(const OutputLine &)>;
-// exitCode -1 with crashed (or not started) when the program did not end
-// on its own.
+// exitCode -1 and crashed = true when the program did not end on its own:
+// it crashed, could not start, or was stopped with stopProcess().
 using ExitHandler = std::function<void(int exitCode, bool crashed)>;
 
 // Starts the command; lines arrive as they are printed, the exit once at
@@ -75,9 +79,11 @@ using ExitHandler = std::function<void(int exitCode, bool crashed)>;
 FLOSTUDIOCORE_EXPORT QProcess *startStreaming(const Command &command, QObject *owner, LineHandler onLine,
                                               ExitHandler onExit);
 
-// Stops the program and everything it started: asks first (SIGTERM on
-// macOS/Linux), ends them after graceMs. Windows has no polite way for
-// console programs without a window, so there they are ended at once.
+// Stops the program and everything it started: asks first (SIGTERM to the
+// group on macOS/Linux) and ends whatever is left after graceMs. Windows
+// has no polite way for console programs without a window, so there they
+// are ended at once. Called while the program is still starting, it stops
+// it as soon as it has started.
 FLOSTUDIOCORE_EXPORT void stopProcess(QProcess *process, int graceMs = 3000);
 
 // A line of output as a person reads it: colour and cursor codes removed

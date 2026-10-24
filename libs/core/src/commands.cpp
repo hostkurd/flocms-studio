@@ -1,4 +1,5 @@
 #include <flostudio/core/commands.h>
+#include <flostudio/core/env.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/tools.h>
 
@@ -18,6 +19,22 @@ bool showsProgress(const QString &command)
     static const QStringList commands{QStringLiteral("create-project"), QStringLiteral("require"),
                                       QStringLiteral("install"), QStringLiteral("update")};
     return commands.contains(command);
+}
+
+// A .bat/.cmd program (php.bat, composer.bat) runs through cmd.exe, which
+// reads the whole command line itself: every argument must be one it
+// leaves alone. Programs that aren't batch files get their arguments as
+// they are.
+Result<Command> checkedForBatchFile(const Command &command)
+{
+    const QString suffix = QFileInfo(command.program).suffix().toLower();
+    if (suffix != u"bat" && suffix != u"cmd")
+        return command;
+    for (const QString &argument : command.arguments) {
+        if (!safeForBatchFile(argument))
+            return Error{QStringLiteral("unsafe_argument"), argument};
+    }
+    return command;
 }
 
 bool changesFolder(const QString &argument)
@@ -114,7 +131,10 @@ Result<Command> prepareCommand(const Settings &settings, const CommandRequest &r
         // `php flo setup` runs `composer require`: the same Composer as Studio
         if (const auto composer = composerLaunch(settings); composer && !composer->setupBinary.isEmpty())
             command.environment.insert(QStringLiteral("COMPOSER_BINARY"), composer->setupBinary);
-        return command;
+        // The project's own .env decides, not a variable that happens to be
+        // set where Studio was started (Env::load never overrides one)
+        command.removeEnvironment = parseEnv(readEnvFile(request.projectDir)).keys();
+        return checkedForBatchFile(command);
     }
 
     const auto composer = composerLaunch(settings);
@@ -122,18 +142,12 @@ Result<Command> prepareCommand(const Settings &settings, const CommandRequest &r
         return composer.error();
     if (showsProgress(request.arguments.constFirst()))
         arguments << QStringLiteral("--no-progress");
-    if (composer->batchFile) {
-        for (const QString &argument : std::as_const(arguments)) {
-            if (!safeForBatchFile(argument))
-                return Error{QStringLiteral("unsafe_argument"), argument};
-        }
-    }
     // create-project runs the skeleton's scripts (key:generate, setup):
     // no time limit for them
     command.environment.insert(QStringLiteral("COMPOSER_PROCESS_TIMEOUT"), QStringLiteral("0"));
     command.program = composer->program;
     command.arguments = composer->arguments + arguments;
-    return command;
+    return checkedForBatchFile(command);
 }
 
 } // namespace FloStudio::Core

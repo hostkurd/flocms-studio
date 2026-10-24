@@ -109,12 +109,26 @@ QStringList duplicateKeys(const QString &text)
     return twice;
 }
 
+QString envText(const QByteArray &file)
+{
+    // QString::fromUtf8 drops a byte order mark; PHP keeps it as part of the
+    // first key, so it is kept here too (as U+FEFF, which trim leaves alone).
+    if (file.startsWith("\xEF\xBB\xBF"))
+        return QChar(0xFEFF) + QString::fromUtf8(file.mid(3));
+    return QString::fromUtf8(file);
+}
+
 QString readEnvFile(const QString &dir)
 {
     QFile file(QDir(dir).filePath(QStringLiteral(".env")));
     if (!file.open(QIODevice::ReadOnly))
         return {};
-    return QString::fromUtf8(file.readAll());
+    return envText(file.readAll());
+}
+
+bool hasByteOrderMark(const QString &text)
+{
+    return text.startsWith(QChar(0xFEFF));
 }
 
 bool envFlag(const QMap<QString, QString> &env, const QString &key, bool fallback)
@@ -169,16 +183,21 @@ Result<QString> envLineValue(const QString &value)
     return QStringLiteral("\"%1\"").arg(value);
 }
 
-Result<QString> setEnvValues(const QString &text, const QList<QPair<QString, QString>> &values)
+Result<QByteArray> setEnvValues(const QByteArray &file, const QList<QPair<QString, QString>> &values)
 {
-    const QString newline = text.contains(QStringLiteral("\r\n")) ? QStringLiteral("\r\n") : QStringLiteral("\n");
-    QStringList lines = text.split(u'\n');
-    for (QString &line : lines) {
-        if (line.endsWith(u'\r'))
-            line.chop(1);
-    }
+    // Line by line, as bytes: lines Studio doesn't write stay exactly as
+    // they were (whatever their encoding or line ending).
+    const bool crlf = file.contains("\r\n");
+    QList<QByteArray> lines = file.split('\n');
     if (!lines.isEmpty() && lines.back().isEmpty())
         lines.removeLast(); // the final line break
+    const auto keyOf = [](const QByteArray &line) {
+        QByteArray text = line;
+        if (text.endsWith('\r'))
+            text.chop(1);
+        const auto split = splitLine(QString::fromUtf8(text));
+        return split ? split->key : QString();
+    };
 
     for (const auto &[key, value] : values) {
         if (!writableEnvKeys().contains(key))
@@ -186,11 +205,10 @@ Result<QString> setEnvValues(const QString &text, const QList<QPair<QString, QSt
         const auto written = envLineValue(value);
         if (!written)
             return written.error();
-        const QString newLine = key + u'=' + written.value();
+        const QByteArray newLine = (key + u'=' + written.value()).toUtf8();
         bool placed = false;
         for (qsizetype i = 0; i < lines.size();) {
-            const auto line = splitLine(lines.at(i));
-            if (!line || line->key != key) {
+            if (keyOf(lines.at(i)) != key) {
                 ++i;
                 continue;
             }
@@ -198,36 +216,42 @@ Result<QString> setEnvValues(const QString &text, const QList<QPair<QString, QSt
                 lines.removeAt(i); // a later line of the same key
                 continue;
             }
-            lines[i] = newLine;
+            lines[i] = lines.at(i).endsWith('\r') ? newLine + '\r' : newLine;
             placed = true;
             ++i;
         }
         if (!placed)
-            lines << newLine;
+            lines << (crlf ? newLine + '\r' : newLine);
     }
-    return lines.join(newline) + newline;
+    // Each line carries its own \r: the last one only needs its \n (and a
+    // \r when the file uses CRLF and its last line had no break at all)
+    QByteArray out = lines.join('\n');
+    if (crlf && !out.endsWith('\r'))
+        out += '\r';
+    out += '\n';
+    return out;
 }
 
 Result<Done> writeEnvValues(const QString &dir, const QList<QPair<QString, QString>> &values)
 {
     const QDir project(dir);
-    QString text;
+    QByteArray text;
     QFile env(project.filePath(QStringLiteral(".env")));
     if (env.exists()) {
         if (!env.open(QIODevice::ReadOnly))
             return Error{QStringLiteral("env_write"), env.errorString()};
-        text = QString::fromUtf8(env.readAll());
+        text = env.readAll();
         env.close();
     } else {
         QFile example(project.filePath(QStringLiteral(".env.example")));
         if (example.open(QIODevice::ReadOnly))
-            text = QString::fromUtf8(example.readAll());
+            text = example.readAll();
     }
     const auto next = setEnvValues(text, values);
     if (!next)
         return next.error();
     QSaveFile file(env.fileName());
-    const QByteArray data = next.value().toUtf8();
+    const QByteArray &data = next.value();
     if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
         return Error{QStringLiteral("env_write"), file.errorString()};
     return Done{};

@@ -1,5 +1,6 @@
 #include <flostudio/core/settings.h>
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -121,21 +122,26 @@ Settings settingsFromJson(const QJsonObject &json)
     return normalized(settings);
 }
 
-Settings loadSettings(const QString &dir)
+Result<Settings> loadSettings(const QString &dir)
 {
     QFile file(QDir(dir).filePath(settingsFileName()));
+    if (!file.exists())
+        return Settings{};
     if (!file.open(QIODevice::ReadOnly))
-        return {};
+        return Error{QStringLiteral("settings_read"), file.errorString()};
     const QByteArray data = file.readAll();
     file.close();
     QJsonParseError error{};
     const QJsonDocument document = QJsonDocument::fromJson(data, &error);
     if (error.error != QJsonParseError::NoError || !document.isObject()) {
-        const QString broken = QDir(dir).filePath(settingsFileName() + QStringLiteral(".broken"));
-        QFile::remove(broken);
+        // Kept aside under a name of its own (an earlier one is never replaced)
+        const QString stamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"));
+        QString broken = QDir(dir).filePath(QStringLiteral("settings.broken-%1.json").arg(stamp));
+        for (int n = 2; QFile::exists(broken); ++n)
+            broken = QDir(dir).filePath(QStringLiteral("settings.broken-%1-%2.json").arg(stamp).arg(n));
         if (!QFile::rename(file.fileName(), broken))
-            qWarning("Could not keep the broken settings file aside: %s", qUtf8Printable(file.fileName()));
-        return {};
+            return Error{QStringLiteral("settings_read"), file.fileName()};
+        return Settings{};
     }
     return settingsFromJson(document.object());
 }

@@ -24,24 +24,31 @@ constexpr Qt::CaseSensitivity kPathCase = Qt::CaseInsensitive;
 constexpr Qt::CaseSensitivity kPathCase = Qt::CaseSensitive;
 #endif
 
+// Only absolute folders: a relative PATH entry (".") would mean wherever
+// Studio happens to be started.
 void addFolder(QStringList &list, const QString &folder)
 {
     const QString clean = QDir::cleanPath(folder);
-    if (!clean.isEmpty() && !list.contains(clean, kPathCase))
+    if (!clean.isEmpty() && QDir::isAbsolutePath(clean) && !list.contains(clean, kPathCase))
         list << clean;
 }
 
 #ifndef Q_OS_WIN
-// The login shell's PATH: `$SHELL -ilc` prints it between markers, so what
-// the shell's start files print (greetings, prompts) is ignored.
+// The login shell's PATH, printed between markers so what the shell's
+// start files print (greetings, prompts) is ignored. `printenv PATH` gives
+// the exported, colon-separated form in every shell, fish included. csh and
+// tcsh can't take -l with -c, so they are not asked (PATH and the usual
+// folders still apply). Up to 3 seconds: toolSearchPath() asks once.
 QStringList loginShellPath()
 {
     const QString shell = qEnvironmentVariable("SHELL");
-    if (shell.isEmpty() || !QFileInfo(shell).isExecutable())
+    const QString name = QFileInfo(shell).fileName();
+    if (shell.isEmpty() || !QFileInfo(shell).isExecutable() || name == u"csh" || name == u"tcsh")
         return {};
     QProcess process;
     process.setProgram(shell);
-    process.setArguments({QStringLiteral("-ilc"), QStringLiteral("printf '\\n<flostudio-path>%s</flostudio-path>\\n' \"$PATH\"")});
+    process.setArguments({QStringLiteral("-i"), QStringLiteral("-l"), QStringLiteral("-c"),
+                          QStringLiteral("printf '\\n<flostudio-path>'; printenv PATH; printf '</flostudio-path>\\n'")});
     process.setStandardInputFile(QProcess::nullDevice());
     process.start();
     if (!process.waitForFinished(3000)) {
@@ -49,16 +56,27 @@ QStringList loginShellPath()
         process.waitForFinished(1000);
         return {};
     }
-    static const QRegularExpression marked(QStringLiteral("<flostudio-path>(.*)</flostudio-path>"));
+    static const QRegularExpression marked(QStringLiteral("<flostudio-path>(.*?)\\s*</flostudio-path>"),
+                                           QRegularExpression::DotMatchesEverythingOption);
     const QString path = marked.match(QString::fromUtf8(process.readAllStandardOutput())).captured(1);
     return path.split(QDir::listSeparator(), Qt::SkipEmptyParts);
 }
 #endif
 
-// php.exe, composer.bat: QStandardPaths adds the Windows extensions itself.
+// php -> php.exe, composer -> composer.bat: QStandardPaths adds the Windows
+// extensions itself. A name that has an extension Windows doesn't run
+// (composer.phar) is looked for as it is.
 QString lookUp(const QString &name)
 {
-    return QStandardPaths::findExecutable(name, toolSearchPath());
+    QString found = QStandardPaths::findExecutable(name, toolSearchPath());
+    if (!found.isEmpty() || QFileInfo(name).suffix().isEmpty())
+        return found;
+    for (const QString &folder : toolSearchPath()) {
+        const QFileInfo file(QDir(folder).filePath(name));
+        if (file.isFile())
+            return file.absoluteFilePath();
+    }
+    return {};
 }
 
 bool isBatchFile(const QString &path)
@@ -211,8 +229,11 @@ Result<ComposerLaunch> composerLaunch(const Settings &settings)
     }
     launch.program = path;
     launch.batchFile = isBatchFile(path);
-    if (launch.batchFile)
-        launch.setupBinary = path; // setup runs a .bat directly
+    // The skeleton's setup runs a .bat directly and anything else as
+    // `php <file>`: a .cmd would be read as a PHP file, so setup is left
+    // to find `composer` itself.
+    if (QFileInfo(path).suffix().compare(u"bat", Qt::CaseInsensitive) == 0)
+        launch.setupBinary = path;
     return launch;
 }
 

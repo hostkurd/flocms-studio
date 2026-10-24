@@ -119,6 +119,27 @@ private slots:
                      .error().code,
                  QStringLiteral("unsafe_argument"));
         QVERIFY(prepare(Program::Composer, dir.path(), {QStringLiteral("require"), QStringLiteral("hostkurd/flocms-api")}).ok());
+
+        // PHP as a .bat (a version manager's shim): the same check for php flo
+        settings.phpPath = writeFile(dir.filePath(QStringLiteral("bin/php.bat")), "@echo off");
+        settings.composerPath = writeFile(dir.filePath(QStringLiteral("bin/composer.phar")), "<?php");
+        QCOMPARE(prepare(Program::Flo, dir.path(), {QStringLiteral("user:create"), QStringLiteral("--name=A&B")}).error().code,
+                 QStringLiteral("unsafe_argument"));
+        QCOMPARE(prepare(Program::Composer, dir.path(), {QStringLiteral("require"), QStringLiteral("x/y:^1")}).error().code,
+                 QStringLiteral("unsafe_argument")); // composer.phar through php.bat
+        QVERIFY(prepare(Program::Flo, dir.path(), {QStringLiteral("doctor")}).ok());
+    }
+
+    void theProjectsEnvDecides()
+    {
+        const QTemporaryDir dir;
+        makeEchoProject(dir.path());
+        writeFile(dir.filePath(QStringLiteral(".env")), "APP_ENV=local\nDB_NAME=shop\n");
+        Settings settings;
+        settings.phpPath = writeFile(dir.filePath(QStringLiteral("bin/php")), "");
+        const auto command = prepareCommand(settings, CommandRequest{Program::Flo, dir.path(), {QStringLiteral("doctor")}, {}, {}});
+        QVERIFY(command.ok());
+        QCOMPARE(command->removeEnvironment, (QStringList{QStringLiteral("APP_ENV"), QStringLiteral("DB_NAME")}));
     }
 
     void floCommandsShape()
