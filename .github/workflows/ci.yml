@@ -1,0 +1,416 @@
+name: CI
+
+# Stage 1 (design note D2, D6, D11, D12, D13):
+#  - release:     static Qt 6.12 (built once, cached), one Studio.exe on
+#                 Windows and a universal FloCMS Studio.app on macOS, tests,
+#                 smoke test, dependency check, installer and .dmg dry runs
+#  - dll-build:   the same app with Qt and the FloStudio libraries as DLLs,
+#                 only to compare size and file count with the static exe
+#  - linux:       build and tests on Ubuntu with Qt 6.12 (shared)
+#  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
+#  - clang-tidy:  static analysis of our own sources
+#
+# Results that matter are printed as ::notice:: / ::error:: annotations,
+# because job logs can't always be read from outside GitHub.
+
+on:
+  pull_request:
+    paths-ignore:
+      - "prototypes/**"
+      - ".github/workflows/rtl-check.yml"
+      - "**.md"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "prototypes/**"
+      - ".github/workflows/rtl-check.yml"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  QT_VERSION: "6.12.0"
+  # Bump to rebuild the cached static Qt (when its configure options in
+  # .github/scripts/build_static_qt.py change). Other edits keep the cache.
+  QT_STATIC_REV: "1"
+  # A Windows GUI program sends warnings to the debugger, not stderr.
+  QT_FORCE_STDERR_LOGGING: "1"
+
+jobs:
+  release:
+    name: release (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Short folders on Windows: Qt's build tree has deep paths.
+          - os: windows-2022
+            qt_prefix: D:/qs
+            qt_work: D:/q
+          - os: macos-14
+            qt_prefix: /Users/runner/qt-static
+            qt_work: /Users/runner/qw
+    defaults:
+      run:
+        shell: bash
+    env:
+      QT_PREFIX: ${{ matrix.qt_prefix }}
+      QT_WORK: ${{ matrix.qt_work }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build tools
+        run: python -m pip install -q ninja
+
+      - name: MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Restore static Qt
+        id: qtcache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.QT_PREFIX }}
+          key: qt-${{ env.QT_VERSION }}-static-rev${{ env.QT_STATIC_REV }}-${{ runner.os }}
+          # A run that ran out of time leaves the finished modules here.
+          restore-keys: qt-${{ env.QT_VERSION }}-static-rev${{ env.QT_STATIC_REV }}-${{ runner.os }}-partial-
+
+      - name: Build static Qt (first run only, slow)
+        id: buildqt
+        if: steps.qtcache.outputs.cache-hit != 'true'
+        timeout-minutes: 320
+        run: |
+          universal=""
+          if [ "$RUNNER_OS" = "macOS" ]; then universal="--universal"; fi
+          python .github/scripts/build_static_qt.py --version "$QT_VERSION" --prefix "$QT_PREFIX" --work "$QT_WORK" $universal
+
+      - name: Save static Qt
+        if: steps.buildqt.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.QT_PREFIX }}
+          key: ${{ steps.qtcache.outputs.cache-primary-key }}
+
+      - name: Save the finished Qt modules for the next run
+        if: always() && steps.buildqt.outcome != 'success' && steps.buildqt.outcome != 'skipped'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.QT_PREFIX }}
+          key: ${{ steps.qtcache.outputs.cache-primary-key }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Build Studio
+        run: |
+          set +e
+          archs=""
+          if [ "$RUNNER_OS" = "macOS" ]; then archs="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"; fi
+          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_TOOLCHAIN_FILE="$QT_PREFIX/lib/cmake/Qt6/qt.toolchain.cmake" $archs \
+            && cmake --build build; } > build.log 2>&1
+          status=$?
+          cat build.log
+          if [ $status -ne 0 ]; then
+            grep -iE "error|undefined|cannot|not found|failed" build.log | head -25 | sed 's/^/::error::/'
+          fi
+          exit $status
+
+      - name: Tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Find the program
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bin=build/bin/Studio.exe
+          else
+            bin="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"
+          fi
+          test -f "$bin" || { echo "::error::Studio was not built at $bin"; exit 1; }
+          echo "STUDIO=$bin" >> "$GITHUB_ENV"
+          echo "::notice::$("$bin" --version | tr '\n' ';')"
+
+      # D6: one program with nothing but system libraries next to it.
+      - name: Check what the program needs at run time
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            deps=$(dumpbin //nologo //dependents "$STUDIO" | grep -iE '^\s+\S+\.dll' | awk '{print $1}' | sort -f)
+            echo "$deps"
+            echo "::notice::Studio.exe loads only: $(echo $deps | tr ' ' ',')"
+            if echo "$deps" | grep -iqE 'qt6|vcruntime|msvcp|concrt|flostudio|api-ms-win-crt|ucrtbase'; then
+              echo "::error::Studio.exe still needs Qt, FloStudio or Visual C++ runtime DLLs"; exit 1
+            fi
+          else
+            deps=$(otool -L "$STUDIO" | tail -n +2 | awk '{print $1}')
+            echo "$deps"
+            echo "::notice::the app loads only: $(echo $deps | tr ' ' ',')"
+            if echo "$deps" | grep -qE 'Qt|FloStudio|@rpath'; then
+              echo "::error::the app still needs Qt or FloStudio libraries"; exit 1
+            fi
+            archs=$(lipo -archs "$STUDIO")
+            minos=$(otool -l "$STUDIO" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
+            echo "::notice::architectures: $archs; minimum macOS: $minos"
+            case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
+          fi
+
+      - name: Smoke test (PATH without Qt on Windows)
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; fi
+          mkdir -p shots
+          "$STUDIO" --smoke-test --screenshot shots/studio-$RUNNER_OS.png
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          python tools/make_notices.py "$QT_PREFIX" dist/THIRD-PARTY-NOTICES.txt --commit "$GITHUB_SHA"
+          cp LICENSE dist/LICENSE.txt
+          version=$("$STUDIO" --version | head -1 | awk '{print $3}')
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp "$STUDIO" dist/
+            size=$(stat -c %s dist/Studio.exe)
+            7z a -tzip -mx=9 Studio-zip-test.zip ./dist/Studio.exe > /dev/null
+            zipped=$(stat -c %s Studio-zip-test.zip)
+            echo "::notice::static build: 1 file, Studio.exe $((size / 1024)) KiB, zipped $((zipped / 1024)) KiB"
+          else
+            cp -R "build/bin/FloCMS Studio.app" dist/
+            # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
+            codesign --force --deep --sign - "dist/FloCMS Studio.app"
+            size=$(du -sk "dist/FloCMS Studio.app" | cut -f1)
+            files=$(find "dist/FloCMS Studio.app" -type f | wc -l | tr -d ' ')
+            echo "::notice::static build: FloCMS Studio.app $size KiB in $files files (universal)"
+          fi
+
+      - name: Windows installer dry run
+        if: runner.os == 'Windows'
+        run: |
+          iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+          if [ ! -f "$iscc" ]; then choco install innosetup -y --no-progress > /dev/null; fi
+          "$iscc" //Q //DAppVersion="$VERSION" //DSourceDir="$(cygpath -w "$PWD/dist")" //O"$(cygpath -w "$PWD")" installer/windows/studio.iss
+          setup="FloCMS-Studio-$VERSION-setup.exe"
+          echo "::notice::installer: $setup $(( $(stat -c %s "$setup") / 1024 )) KiB"
+          target="$(cygpath -w "$RUNNER_TEMP/studio-install")"
+          ./"$setup" //VERYSILENT //SUPPRESSMSGBOXES //CURRENTUSER //NORESTART //DIR="$target" //LOG=install.log
+          installed="$RUNNER_TEMP/studio-install"
+          ls "$installed"
+          test -f "$installed/Studio.exe" || { echo "::error::the installer did not install Studio.exe"; cat install.log; exit 1; }
+          (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; "$installed/Studio.exe" --smoke-test)
+          "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
+          for i in $(seq 1 30); do [ -f "$installed/Studio.exe" ] || break; sleep 1; done
+          if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
+          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled cleanly"
+
+      - name: macOS disk image dry run
+        if: runner.os == 'macOS'
+        run: |
+          staging="$RUNNER_TEMP/dmg"
+          mkdir -p "$staging"
+          cp -R "dist/FloCMS Studio.app" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
+          ln -s /Applications "$staging/Applications"
+          dmg="FloCMS-Studio-$VERSION.dmg"
+          hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > /dev/null
+          echo "::notice::disk image: $dmg $(( $(stat -f %z "$dmg") / 1024 )) KiB"
+          mnt="$RUNNER_TEMP/mnt"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
+          "$mnt/FloCMS Studio.app/Contents/MacOS/FloCMS Studio" --smoke-test
+          hdiutil detach "$mnt" > /dev/null
+          echo "::notice::disk image: mounted, smoke test passed from the image"
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: FloCMS-Studio-windows
+          path: |
+            dist/Studio.exe
+            dist/LICENSE.txt
+            dist/THIRD-PARTY-NOTICES.txt
+            FloCMS-Studio-*-setup.exe
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
+        with:
+          name: FloCMS-Studio-macos
+          path: FloCMS-Studio-*.dmg
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-logs-${{ matrix.os }}
+          path: |
+            build.log
+            install.log
+            shots/
+            ${{ env.QT_WORK }}/logs/
+          if-no-files-found: ignore
+
+  dll-build:
+    name: dll-build (windows, size comparison)
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build tools
+        run: python -m pip install -q ninja
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Qt 6.12 (shared)
+        run: |
+          set -o pipefail
+          python .github/scripts/install_qt_windows.py "$QT_VERSION" win64_msvc2022_64 "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log
+          echo "QT_DIR=$(tail -1 qt.log | tr -d '\r')" >> "$GITHUB_ENV"
+
+      - name: Build with Qt and the FloStudio libraries as DLLs
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DFLOSTUDIO_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH="$QT_DIR"
+          cmake --build build
+          PATH="$QT_DIR/bin:$PATH" ctest --test-dir build --output-on-failure
+
+      - name: Deploy and measure
+        run: |
+          mkdir -p deploy
+          cp build/bin/Studio.exe build/bin/FloStudio*.dll deploy/
+          "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations deploy/Studio.exe > deploy.log
+          vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
+          cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll deploy/
+          (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; deploy/Studio.exe --smoke-test)
+          files=$(find deploy -type f | wc -l)
+          size=$(du -sk deploy | cut -f1)
+          7z a -tzip -mx=9 deploy.zip ./deploy/* > /dev/null
+          zipped=$(stat -c %s deploy.zip)
+          echo "::notice::DLL build: $files files, $size KiB, zipped $((zipped / 1024)) KiB (windeployqt with only the Basic style imported)"
+          echo "::notice::DLL build, largest files: $(find deploy -type f -printf '%s %P\n' | sort -rn | head -6 | awk '{printf "%s %d KiB; ", $2, $1/1024}')"
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_gcc_64
+          cache: true
+          setup-python: false
+
+      - name: Linux packages
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+
+      - name: Build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Tests and smoke test
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ctest --test-dir build --output-on-failure
+          build/bin/flocms-studio --version
+          build/bin/flocms-studio --smoke-test
+
+  sanitizers:
+    name: sanitizers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: linux_gcc_64
+            leaks: 1
+          - os: macos-14
+            arch: clang_64
+            leaks: 0 # LeakSanitizer is not available on macOS
+    env:
+      ASAN_OPTIONS: detect_leaks=${{ matrix.leaks }}:strict_string_checks=1:detect_stack_use_after_return=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: ${{ matrix.arch }}
+          cache: true
+          setup-python: false
+
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+
+      - name: macOS tools
+        if: runner.os == 'macOS'
+        run: python -m pip install -q ninja
+
+      - name: Build with sanitizers
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFLOSTUDIO_SANITIZE=ON
+          cmake --build build
+
+      - name: Tests and smoke test
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; app=build/bin/flocms-studio
+          else app="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"; fi
+          ctest --test-dir build --output-on-failure
+          "$app" --smoke-test
+
+  clang-tidy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6.12
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_gcc_64
+          cache: true
+          setup-python: false
+
+      - name: Tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang clang-tidy libgl1-mesa-dev ninja-build
+
+      - name: Build with Clang (for the generated headers and the compile database)
+        env:
+          CXX: clang++
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+
+      - name: clang-tidy
+        run: |
+          clang-tidy --version
+          python tools/run_clang_tidy.py build
