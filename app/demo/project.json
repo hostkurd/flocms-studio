@@ -117,5 +117,14 @@
       "path": "C:\\Program Files\\MariaDB 11.8\\bin\\mariadb.exe"
     }
   ],
-  "page": "project"
+  "page": "project",
+  "server": {
+    "state": "running",
+    "url": "http://127.0.0.1:8000",
+    "php": "8.4.27",
+    "startedMinutesAgo": 14
+  },
+  "running": [
+    "C:\\Sites\\fectumhellas"
+  ]
 }

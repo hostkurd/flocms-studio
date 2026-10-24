@@ -10,6 +10,7 @@ flostudio_add_library(FloStudioCore Core
         src/output.cpp
         src/process.cpp
         src/project.cpp
+        src/server.cpp
         src/settings.cpp
         src/tools.cpp
     HEADERS
@@ -22,6 +23,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/process.h
         include/flostudio/core/project.h
         include/flostudio/core/result.h
+        include/flostudio/core/server.h
         include/flostudio/core/settings.h
         include/flostudio/core/tools.h
         "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/core/version.h"

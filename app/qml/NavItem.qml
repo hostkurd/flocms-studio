@@ -43,7 +43,7 @@ ItemDelegate {
         }
         AppText {
             visible: item.trailing !== ""
-            text: item.trailing
+            ui: item.trailing
             color: item.trailingColor
             font.pixelSize: 12
         }

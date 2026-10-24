@@ -1,9 +1,11 @@
 #include "studio.h"
 
 #include "language.h"
+#include "projectserver.h"
 
 #include <flostudio/core/buildinfo.h>
 #include <flostudio/core/project.h>
+#include <flostudio/core/server.h>
 
 #include <QDesktopServices>
 #include <QDir>
@@ -195,6 +197,9 @@ void Studio::start()
     emit darkChanged();
     refreshProjects();
     refreshTools();
+    // Servers left running by a Studio that crashed (macOS, Linux)
+    for (const LeftoverServer &left : stopLeftoverServers(settingsFolder()))
+        serverFor(left.projectDir)->noteLeftover(left.group);
 }
 
 Result<Done> Studio::startDemo(const QString &file)
@@ -212,6 +217,7 @@ Result<Done> Studio::startDemo(const QString &file)
     m_language->set(m_settings.language);
     m_platform = demo.value(QStringLiteral("platform")).toString(m_platform);
     m_demoDialog = demo.value(QStringLiteral("dialog")).toString();
+    m_demoTab = demo.value(QStringLiteral("tab")).toString();
     m_demoToolsFolder = demo.value(QStringLiteral("toolsFolder")).toString();
     QFile list(QStringLiteral(":/flostudio/core/tools.json"));
     if (list.open(QIODevice::ReadOnly)) {
@@ -229,6 +235,16 @@ Result<Done> Studio::startDemo(const QString &file)
     m_settingsSection = demo.value(QStringLiteral("settingsSection")).toString(QStringLiteral("general"));
     if (demo.contains(QStringLiteral("problem")))
         m_problem = demo.value(QStringLiteral("problem")).toObject().toVariantMap();
+    // The open project's server and log, and which others are running
+    if (!m_currentPath.isEmpty())
+        serverFor(m_currentPath)->showDemo(demo.value(QStringLiteral("server")).toObject().toVariantMap(),
+                                           demo.value(QStringLiteral("logs")).toArray().toVariantList());
+    QSet<QString> running;
+    for (const auto &path : demo.value(QStringLiteral("running")).toArray())
+        running << path.toString();
+    m_projects.setRunning(running);
+    if (m_page == u"project")
+        emit serverChanged();
     emit settingsChanged();
     emit darkChanged();
     emit currentChanged();
@@ -402,6 +418,83 @@ void Studio::selectProject(const QString &path)
     emit pageChanged();
 }
 
+ProjectServer *Studio::serverFor(const QString &path)
+{
+    if (ProjectServer *server = m_servers.value(path))
+        return server;
+    // A child of this: deleting Studio stops every server
+    auto *server = new ProjectServer(path, m_demo ? QString() : settingsFolder(), this);
+    connect(server, &ProjectServer::changed, this, [this, server] {
+        serversChanged();
+        if (server->projectDir() == m_currentPath)
+            emit serverChanged();
+    });
+    m_servers.insert(path, server);
+    return server;
+}
+
+void Studio::serversChanged()
+{
+    if (m_demo)
+        return;
+    QSet<QString> running;
+    for (auto it = m_servers.cbegin(); it != m_servers.cend(); ++it) {
+        if (it.value()->active())
+            running << it.key();
+    }
+    m_projects.setRunning(running);
+}
+
+QVariantMap Studio::server() const
+{
+    const ProjectServer *server = m_servers.value(m_currentPath);
+    return server ? server->info() : QVariantMap{{QStringLiteral("state"), QStringLiteral("stopped")}};
+}
+
+LogModel *Studio::logs() const
+{
+    const ProjectServer *server = m_servers.value(m_currentPath);
+    return server ? server->logs() : nullptr;
+}
+
+void Studio::startServer()
+{
+    if (m_demo || m_currentPath.isEmpty() || m_current.contains(QStringLiteral("error")))
+        return;
+    serverFor(m_currentPath)->start(m_settings);
+}
+
+void Studio::stopServer()
+{
+    if (ProjectServer *server = m_servers.value(m_currentPath))
+        server->stop();
+}
+
+void Studio::openSite()
+{
+    const ProjectServer *server = m_servers.value(m_currentPath);
+    if (server && !server->url().isEmpty())
+        QDesktopServices::openUrl(QUrl(server->url()));
+}
+
+void Studio::openAdmin()
+{
+    const ProjectServer *server = m_servers.value(m_currentPath);
+    if (server && !server->url().isEmpty())
+        QDesktopServices::openUrl(QUrl(server->url() + QStringLiteral("/admin")));
+}
+
+void Studio::openLogFile()
+{
+    const QString log = appLogPath(m_currentPath);
+    if (!QFileInfo::exists(log)) {
+        setProblem(QStringLiteral("no_log_file"), QDir::toNativeSeparators(log));
+        return;
+    }
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(log)))
+        setProblem(QStringLiteral("open_failed"), QDir::toNativeSeparators(log));
+}
+
 void Studio::showSettings(const QString &section)
 {
     m_page = QStringLiteral("settings");
@@ -420,6 +513,12 @@ void Studio::refreshProjects()
     if (m_demo)
         return;
     m_projects.setProjects(listProjects(m_settings.projectFolders, m_settings.projects));
+    // A project no longer listed: its server stops, its log goes
+    for (const QString &path : m_servers.keys()) {
+        if (m_projects.indexOf(path) < 0)
+            m_servers.take(path)->deleteLater();
+    }
+    serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
     if (m_page != u"settings")
@@ -440,8 +539,12 @@ void Studio::loadCurrent()
             m_current = {{QStringLiteral("name"), QFileInfo(m_currentPath).fileName()},
                          {QStringLiteral("path"), m_currentPath},
                          {QStringLiteral("error"), info.error().code}};
+        // Its log is followed from now on, and the server is kept
+        if (!m_current.contains(QStringLiteral("error")))
+            serverFor(m_currentPath);
     }
     emit currentChanged();
+    emit serverChanged();
 }
 
 // The analyzer misses the watcher's parent and reports it at the end of

@@ -2,6 +2,10 @@ qt_add_executable(Studio
     main.cpp
     language.h
     language.cpp
+    logmodel.h
+    logmodel.cpp
+    projectserver.h
+    projectserver.cpp
     projectsmodel.h
     projectsmodel.cpp
     studio.h
@@ -61,7 +65,9 @@ set(STUDIO_QML
     qml/Sidebar.qml
     qml/WelcomePage.qml
     qml/ProjectPage.qml
+    qml/LogsTab.qml
     qml/OverviewTab.qml
+    qml/ServerCard.qml
     qml/LaterTab.qml
     qml/SettingsPage.qml
     qml/DownloadsDialog.qml

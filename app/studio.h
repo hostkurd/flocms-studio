@@ -1,11 +1,13 @@
 #pragma once
 
+#include "logmodel.h"
 #include "projectsmodel.h"
 
 #include <flostudio/core/downloads.h>
 #include <flostudio/core/settings.h>
 #include <flostudio/core/tools.h>
 
+#include <QHash>
 #include <QJsonObject>
 #include <QObject>
 #include <QStringList>
@@ -14,6 +16,7 @@
 #include <QVariantMap>
 
 class Language;
+class ProjectServer;
 
 // The app's state for the screens (D7): settings, the project list and the
 // open project, the tools on this computer, and tool downloads. QML only
@@ -44,6 +47,11 @@ class Studio : public QObject
     Q_PROPERTY(ProjectsModel *projects READ projects CONSTANT)
     Q_PROPERTY(QString currentPath READ currentPath NOTIFY currentChanged)
     Q_PROPERTY(QVariantMap current READ current NOTIFY currentChanged)
+    // The open project's server (stage 4): {state, url, networkUrls,
+    // startedAt, php, error, detail}; state: stopped, starting, running,
+    // stopping, failed
+    Q_PROPERTY(QVariantMap server READ server NOTIFY serverChanged)
+    Q_PROPERTY(LogModel *logs READ logs NOTIFY serverChanged)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -61,6 +69,8 @@ class Studio : public QObject
     Q_PROPERTY(bool demo READ demo CONSTANT)
     // A demo can open on a dialog ("downloads")
     Q_PROPERTY(QString demoDialog READ demoDialog CONSTANT)
+    // A demo can open a project tab: overview, generate, database, logs, packages, doctor
+    Q_PROPERTY(QString demoTab READ demoTab CONSTANT)
     Q_PROPERTY(QString version READ version CONSTANT)
 
 public:
@@ -91,6 +101,8 @@ public:
     ProjectsModel *projects() { return &m_projects; }
     QString currentPath() const { return m_currentPath; }
     QVariantMap current() const { return m_current; }
+    QVariantMap server() const;
+    LogModel *logs() const;
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -102,6 +114,7 @@ public:
     bool mariadbFromHomebrew() const;
     bool demo() const { return m_demo; }
     QString demoDialog() const { return m_demoDialog; }
+    QString demoTab() const { return m_demoTab; }
     static QString version();
 
     Q_INVOKABLE void setLanguage(const QString &code);
@@ -125,6 +138,12 @@ public:
     Q_INVOKABLE void openInEditor(const QString &path);
     Q_INVOKABLE void openFolder(const QString &path);
     Q_INVOKABLE void dismissProblem();
+    // The open project's server and log
+    Q_INVOKABLE void startServer();
+    Q_INVOKABLE void stopServer();
+    Q_INVOKABLE void openSite();
+    Q_INVOKABLE void openAdmin();
+    Q_INVOKABLE void openLogFile();
     // ids from downloadOffer
     Q_INVOKABLE void startDownloads(const QStringList &ids);
     Q_INVOKABLE void cancelDownloads();
@@ -140,12 +159,15 @@ signals:
     void currentChanged();
     void toolsChanged();
     void downloadsChanged();
+    void serverChanged();
 
 private:
     void changeSettings(const std::function<void(FloStudio::Core::Settings &)> &change);
     void setProblem(const QString &code, const QString &detail);
     void loadCurrent();
     void downloadNext();
+    ProjectServer *serverFor(const QString &path);
+    void serversChanged();
 
     Language *m_language;
     FloStudio::Core::Settings m_settings;
@@ -168,5 +190,7 @@ private:
     bool m_closing = false;
     QString m_platform = FloStudio::Core::currentPlatform();
     QString m_demoDialog;
+    QString m_demoTab;
     QString m_demoToolsFolder;
+    QHash<QString, ProjectServer *> m_servers; // children of this, one per project opened
 };

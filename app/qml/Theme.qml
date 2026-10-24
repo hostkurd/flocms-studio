@@ -40,6 +40,12 @@ QtObject {
     readonly property color terminalBg: "#0F1B24"
     readonly property color terminalText: "#C9D6DF"
     readonly property color terminalPrompt: "#7FD1EC"
+    readonly property color terminalMuted: "#8597A3"
+    readonly property color terminalOk: "#8BD9AE"
+    readonly property color terminalWarn: "#F2C46D"
+    readonly property color terminalBad: "#FF9C9C"
+    readonly property color terminalBadBg: "#2A1C22"
+    readonly property color terminalRule: "#1C2A35"
 
     readonly property string monoFont: "JetBrains Mono"
 }

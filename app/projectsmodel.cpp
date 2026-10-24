@@ -27,6 +27,8 @@ QVariant ProjectsModel::data(const QModelIndex &index, int role) const
         return project.missing;
     case TypeRole:
         return typeKey(projectType(project));
+    case RunningRole:
+        return m_running.contains(project.path);
     default:
         return {};
     }
@@ -34,7 +36,7 @@ QVariant ProjectsModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> ProjectsModel::roleNames() const
 {
-    return {{NameRole, "name"}, {PathRole, "path"}, {MissingRole, "missing"}, {TypeRole, "type"}};
+    return {{NameRole, "name"}, {PathRole, "path"}, {MissingRole, "missing"}, {TypeRole, "type"}, {RunningRole, "running"}};
 }
 
 void ProjectsModel::setProjects(const QList<ProjectSummary> &projects)
@@ -54,6 +56,15 @@ int ProjectsModel::indexOf(const QString &path) const
             return static_cast<int>(i);
     }
     return -1;
+}
+
+void ProjectsModel::setRunning(const QSet<QString> &paths)
+{
+    if (paths == m_running)
+        return;
+    m_running = paths;
+    if (!m_projects.isEmpty())
+        emit dataChanged(index(0), index(count() - 1), {RunningRole});
 }
 
 QString ProjectsModel::typeKey(ProjectType type)

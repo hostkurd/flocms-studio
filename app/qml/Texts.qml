@@ -57,6 +57,13 @@ QtObject {
         case "tool_extract": return qsTr("The download could not be unpacked.")
         case "tool_install": return qsTr("The download could not be installed.")
         case "tool_cancelled": return qsTr("Cancelled.")
+        case "server_failed": return qsTr("The server did not start.")
+        case "server_no_answer": return qsTr("The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings > Server.")
+        case "server_ended": return qsTr("The server stopped by itself.")
+        case "php_not_found": return qsTr("PHP was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
+        case "php_unsafe": return qsTr("PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose `php.exe` in Settings > PHP and tools.")
+        case "no_launcher": return qsTr("The project has no `flo` launcher yet: run `composer install` in it.")
+        case "no_log_file": return qsTr("There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.")
         }
         return qsTr("Something went wrong (%1).").arg(code)
     }

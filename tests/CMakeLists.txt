@@ -25,6 +25,7 @@ flostudio_add_test(tst_project FloStudio::Core)
 flostudio_add_test(tst_output FloStudio::Core)
 flostudio_add_test(tst_logs FloStudio::Core)
 flostudio_add_test(tst_tools FloStudio::Core Qt6::Network)
+flostudio_add_test(tst_server FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_commands FloStudio::Core)
 flostudio_add_test(tst_process FloStudio::Core)
 flostudio_add_test(tst_realproject FloStudio::Core)
@@ -37,6 +38,8 @@ find_package(Qt6 REQUIRED COMPONENTS Concurrent Gui Qml Network)
 flostudio_add_test(tst_studio FloStudio::Core Qt6::Gui Qt6::Qml Qt6::Network Qt6::Concurrent)
 target_sources(tst_studio PRIVATE
     ../app/language.cpp ../app/language.h
+    ../app/logmodel.cpp ../app/logmodel.h
+    ../app/projectserver.cpp ../app/projectserver.h
     ../app/projectsmodel.cpp ../app/projectsmodel.h
     ../app/studio.cpp ../app/studio.h)
 target_include_directories(tst_studio PRIVATE ../app)

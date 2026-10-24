@@ -29,7 +29,9 @@ CheckBox {
     contentItem: AppText {
         visible: control.text !== ""
         ui: control.text
-        leftPadding: control.indicator.width + control.spacing + 10
+        // Room for the box, on the side it is on (the right in RTL)
+        leftPadding: control.mirrored ? 0 : control.indicator.width + control.spacing + 10
+        rightPadding: control.mirrored ? control.indicator.width + control.spacing + 10 : 0
         wrapMode: Text.Wrap
     }
 }

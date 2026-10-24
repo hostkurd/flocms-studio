@@ -10,6 +10,7 @@ Button {
     property bool small: false
     property bool dashed: false
     property string iconPath: ""
+    property bool iconFilled: false // a solid shape (play, stop)
     property bool iconDirectional: false // flipped in right-to-left languages (a "back" arrow)
 
     implicitHeight: small ? 34 : 40
@@ -42,6 +43,7 @@ Button {
             path: control.iconPath
             size: control.small ? 14 : 16
             directional: control.iconDirectional
+            filled: control.iconFilled
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
         }
         RichText {

@@ -76,12 +76,13 @@ Rectangle {
                     required property string name
                     required property string path
                     required property bool missing
+                    required property bool running
                     width: ListView.view.width
                     text: name
                     selected: Studio.page === "project" && Studio.currentPath === path
-                    dot: missing ? Theme.bad : Theme.idle
-                    trailing: missing ? qsTr("Missing") : ""
-                    trailingColor: Theme.badText
+                    dot: missing ? Theme.bad : (running ? Theme.ok : Theme.idle)
+                    trailing: missing ? qsTr("Missing") : (running ? qsTr("Running") : "")
+                    trailingColor: missing ? Theme.badText : Theme.okText
                     onClicked: Studio.selectProject(path)
                 }
             }

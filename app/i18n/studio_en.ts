@@ -131,6 +131,81 @@
         <translation type="unfinished" /></message>
 </context>
 <context>
+    <name>LogsTab</name>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="19" />
+        <source>Server running at %1</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="20" />
+        <source>Server stopped</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="21" />
+        <source>Stopped a server of this project that was still running from the last time Studio closed unexpectedly.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="36" />
+        <source>Log</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="39" />
+        <source>All</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="40" />
+        <source>Server</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="41" />
+        <source>App log</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="46" />
+        <source>Problems only (%1)</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="46" />
+        <source>Problems only</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="52" />
+        <source>Search</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="54" />
+        <source>Search the log</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="60" />
+        <source>Copy</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="67" />
+        <source>Clear</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="74" />
+        <source>Open log file</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="99" />
+        <source>Log lines</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="167" />
+        <source>Nothing logged yet. Start the server to see what it prints; FloCMS's own log appears as it is written.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="168" />
+        <source>No lines match.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/LogsTab.qml" line="182" />
+        <source>Newest</source>
+        <translation type="unfinished" /></message>
+</context>
+<context>
     <name>Main</name>
     <message>
         <location filename="../qml/Main.qml" line="18" />
@@ -140,89 +215,89 @@
 <context>
     <name>OverviewTab</name>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="25" />
+        <location filename="../qml/OverviewTab.qml" line="31" />
         <source>Project</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="27" />
+        <location filename="../qml/OverviewTab.qml" line="33" />
         <source>Name</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="29" />
+        <location filename="../qml/OverviewTab.qml" line="35" />
         <source>Environment</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="30" />
+        <location filename="../qml/OverviewTab.qml" line="36" />
         <source>production (not set)</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="33" />
+        <location filename="../qml/OverviewTab.qml" line="39" />
         <source>Address</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="35" />
+        <location filename="../qml/OverviewTab.qml" line="41" />
         <source>Started from</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="36" />
+        <location filename="../qml/OverviewTab.qml" line="42" />
         <source>skeleton %1</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="41" />
+        <location filename="../qml/OverviewTab.qml" line="47" />
         <source>Languages</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="49" />
+        <location filename="../qml/OverviewTab.qml" line="55" />
         <source>%1 · default</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="62" />
-        <location filename="../qml/OverviewTab.qml" line="70" />
+        <location filename="../qml/OverviewTab.qml" line="68" />
+        <location filename="../qml/OverviewTab.qml" line="76" />
         <source>Database</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="65" />
+        <location filename="../qml/OverviewTab.qml" line="71" />
         <source>Not set up yet</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="69" />
+        <location filename="../qml/OverviewTab.qml" line="75" />
         <source>Server</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="70" />
+        <location filename="../qml/OverviewTab.qml" line="76" />
         <source>File</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="71" />
+        <location filename="../qml/OverviewTab.qml" line="77" />
         <source>Connection</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="71" />
+        <location filename="../qml/OverviewTab.qml" line="77" />
         <source>from `DB_DSN`</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="74" />
+        <location filename="../qml/OverviewTab.qml" line="80" />
         <source>Set `DB_NAME` (and `DB_USERNAME` for MySQL) in `.env`. The Database tab will do this for you.</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="81" />
+        <location filename="../qml/OverviewTab.qml" line="87" />
         <source>`.env` sets %1 twice. The website uses the first value, some `php flo` commands the last: remove one.</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="94" />
+        <location filename="../qml/OverviewTab.qml" line="100" />
         <source>Packages</source>
         <translation type="unfinished" /></message>
     <message numerus="yes">
-        <location filename="../qml/OverviewTab.qml" line="107" />
+        <location filename="../qml/OverviewTab.qml" line="113" />
         <source>and %Ln other package(s)</source>
         <translation><numerusform>and %Ln other package</numerusform><numerusform>and %Ln other packages</numerusform></translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="113" />
+        <location filename="../qml/OverviewTab.qml" line="119" />
         <source>No `composer.lock` yet: run `composer install` in the project.</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="120" />
+        <location filename="../qml/OverviewTab.qml" line="126" />
         <source>The packages are not installed (no `vendor/`): run `composer install`.</source>
         <translation type="unfinished" /></message>
 </context>
@@ -236,40 +311,108 @@
 <context>
     <name>ProjectPage</name>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="30" />
+        <location filename="../qml/ProjectPage.qml" line="35" />
+        <source>Open site</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ProjectPage.qml" line="42" />
+        <source>Open admin</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ProjectPage.qml" line="47" />
         <source>Open folder</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="35" />
+        <location filename="../qml/ProjectPage.qml" line="52" />
         <source>Open in editor</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="52" />
+        <location filename="../qml/ProjectPage.qml" line="60" />
+        <source>Stop server</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ProjectPage.qml" line="60" />
+        <source>Start server</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ProjectPage.qml" line="80" />
         <source>Remove from the list</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Overview</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Generate</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Database</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Logs</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Packages</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="70" />
+        <location filename="../qml/ProjectPage.qml" line="98" />
         <source>Doctor</source>
+        <translation type="unfinished" /></message>
+</context>
+<context>
+    <name>ServerCard</name>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="17" />
+        <source>Server</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="28" />
+        <source>Running</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="29" />
+        <source>Starting…</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="30" />
+        <source>Stopping…</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="31" />
+        <source>Not running</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="32" />
+        <source>Stopped</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="53" />
+        <source>started just now</source>
+        <translation type="unfinished" /></message>
+    <message numerus="yes">
+        <location filename="../qml/ServerCard.qml" line="53" />
+        <source>started %Ln min ago</source>
+        <translation><numerusform>started %Ln min ago</numerusform><numerusform>started %Ln min ago</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="61" />
+        <source>From other devices on your network:</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="69" />
+        <source>Runs the site with `php flo serve` on port %1.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="92" />
+        <source>Stop server</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/ServerCard.qml" line="92" />
+        <source>Start server</source>
         <translation type="unfinished" /></message>
 </context>
 <context>
@@ -447,64 +590,68 @@
         <source>Projects</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="83" />
+        <location filename="../qml/Sidebar.qml" line="84" />
         <source>Missing</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="90" />
+        <location filename="../qml/Sidebar.qml" line="84" />
+        <source>Running</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="91" />
         <source>New project</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="96" />
+        <location filename="../qml/Sidebar.qml" line="97" />
         <source>The new project wizard comes in a later version.</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="100" />
+        <location filename="../qml/Sidebar.qml" line="101" />
         <source>Open existing folder…</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="116" />
+        <location filename="../qml/Sidebar.qml" line="117" />
         <source>Back to projects</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="123" />
-        <location filename="../qml/Sidebar.qml" line="195" />
+        <location filename="../qml/Sidebar.qml" line="124" />
+        <location filename="../qml/Sidebar.qml" line="196" />
         <source>Settings</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="126" />
+        <location filename="../qml/Sidebar.qml" line="127" />
         <source>General</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="127" />
+        <location filename="../qml/Sidebar.qml" line="128" />
         <source>PHP and tools</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="128" />
+        <location filename="../qml/Sidebar.qml" line="129" />
         <source>Server</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="129" />
+        <location filename="../qml/Sidebar.qml" line="130" />
         <source>Editor</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="130" />
+        <location filename="../qml/Sidebar.qml" line="131" />
         <source>Project folders</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="142" />
+        <location filename="../qml/Sidebar.qml" line="143" />
         <source>FloCMS Studio %1</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="156" />
+        <location filename="../qml/Sidebar.qml" line="157" />
         <source>This computer</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="178" />
+        <location filename="../qml/Sidebar.qml" line="179" />
         <source>Looking for PHP, Composer and MariaDB…</source>
         <translation type="unfinished" /></message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="185" />
+        <location filename="../qml/Sidebar.qml" line="186" />
         <source>Download…</source>
         <translation type="unfinished" /></message>
 </context>
@@ -615,7 +762,35 @@
         <source>Cancelled.</source>
         <translation type="unfinished" /></message>
     <message>
+        <location filename="../qml/Texts.qml" line="60" />
+        <source>The server did not start.</source>
+        <translation type="unfinished" /></message>
+    <message>
         <location filename="../qml/Texts.qml" line="61" />
+        <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="62" />
+        <source>The server stopped by itself.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="63" />
+        <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="64" />
+        <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="65" />
+        <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="66" />
+        <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
+        <translation type="unfinished" /></message>
+    <message>
+        <location filename="../qml/Texts.qml" line="68" />
         <source>Something went wrong (%1).</source>
         <translation type="unfinished" /></message>
 </context>

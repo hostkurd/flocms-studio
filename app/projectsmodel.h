@@ -3,6 +3,7 @@
 #include <flostudio/core/project.h>
 
 #include <QAbstractListModel>
+#include <QSet>
 
 // The sidebar's project list (D7: the state lives in C++, QML lays it out).
 class ProjectsModel : public QAbstractListModel
@@ -15,7 +16,8 @@ public:
         NameRole = Qt::UserRole + 1,
         PathRole,
         MissingRole,
-        TypeRole, // site, siteAdmin, siteApi, siteAdminApi, admin, apiAdmin, api
+        TypeRole,    // site, siteAdmin, siteApi, siteAdminApi, admin, apiAdmin, api
+        RunningRole, // its server is running (stage 4)
     };
 
     explicit ProjectsModel(QObject *parent = nullptr);
@@ -28,6 +30,7 @@ public:
     void setProjects(const QList<FloStudio::Core::ProjectSummary> &projects);
     const QList<FloStudio::Core::ProjectSummary> &projects() const { return m_projects; }
     Q_INVOKABLE int indexOf(const QString &path) const;
+    void setRunning(const QSet<QString> &paths);
 
     static QString typeKey(FloStudio::Core::ProjectType type);
 
@@ -36,4 +39,5 @@ signals:
 
 private:
     QList<FloStudio::Core::ProjectSummary> m_projects;
+    QSet<QString> m_running;
 };

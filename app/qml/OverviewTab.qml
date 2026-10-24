@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import FloStudio.Backend
 
 // What the project's files say, read without PHP (Core's projectInfo).
-// The server, migrations and Doctor join it in stages 4 and 5.
+// The server (stage 4); migrations and Doctor join it in stage 5.
 ScrollView {
     id: tab
     property var info: ({})
@@ -17,6 +17,12 @@ ScrollView {
         columns: width > 900 ? 3 : 2
         columnSpacing: 14
         rowSpacing: 14
+
+        // --- The server (stage 4) ---
+        ServerCard {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
+        }
 
         // --- The project ---
         Card {

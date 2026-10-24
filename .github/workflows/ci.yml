@@ -124,7 +124,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           .github/scripts/real_project.sh "$RUNNER_TEMP/site" sqlite
-          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R tst_realproject -V
+          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R "tst_realproject|tst_studio" -V
 
       # Everything Studio needs goes next to it: Qt (windeployqt /
       # macdeployqt), the FloStudio libraries, and on Windows the Visual C++
@@ -366,7 +366,7 @@ jobs:
           sudo systemctl start mysql.service
           mysql -uroot -proot -h127.0.0.1 -e "CREATE DATABASE studio_ci"
           .github/scripts/real_project.sh "$RUNNER_TEMP/site" mysql
-          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R tst_realproject -V
+          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R "tst_realproject|tst_studio" -V
 
   sanitizers:
     name: sanitizers (${{ matrix.os }})

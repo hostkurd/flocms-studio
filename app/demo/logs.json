@@ -1,0 +1,348 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.4.27",
+      "path": "C:\\php\\8.4\\php.exe"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "C:\\ProgramData\\ComposerSetup\\bin\\composer.bat"
+    },
+    {
+      "tool": "mariadb",
+      "state": "running",
+      "version": "11.8.9",
+      "product": "MariaDB",
+      "path": "C:\\Program Files\\MariaDB 11.8\\bin\\mariadb.exe"
+    }
+  ],
+  "page": "project",
+  "server": {
+    "state": "running",
+    "url": "http://127.0.0.1:8000",
+    "php": "8.4.27",
+    "startedMinutesAgo": 14
+  },
+  "running": [
+    "C:\\Sites\\fectumhellas"
+  ],
+  "tab": "logs",
+  "logs": [
+    {
+      "source": "studio",
+      "level": "command",
+      "text": "php flo serve --port=8000 --host=127.0.0.1 --no-interaction --no-ansi"
+    },
+    {
+      "source": "studio",
+      "level": "info",
+      "text": "Serving C:\\Sites\\fectumhellas at http://127.0.0.1:8000 (Ctrl+C to stop)"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:56 2026] PHP 8.3.6 Development Server (http://127.0.0.1:8000) started"
+    },
+    {
+      "source": "studio",
+      "level": "started",
+      "text": "http://127.0.0.1:8000"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 [200]: GET /themes/default/css/style.css"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:56 2026] 127.0.0.1:47126 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47126 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47134 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47134 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 [200]: GET /themes/default/css/style.css"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47154 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] FloCMS\\Core\\HttpException: HTTP 404 in C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-core/src/App.php:92"
+    },
+    {
+      "source": "server",
+      "text": "Stack trace:"
+    },
+    {
+      "source": "server",
+      "text": "#0 C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-core/src/App.php(437): FloCMS\\Core\\App::fallback()"
+    },
+    {
+      "source": "server",
+      "text": "#1 C:\\Sites\\fectumhellas/public/index.php(47): FloCMS\\Core\\App::run()"
+    },
+    {
+      "source": "server",
+      "text": "#2 C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-cli/resources/router.php(24): require('...')"
+    },
+    {
+      "source": "server",
+      "text": "#3 {main}"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47154 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] PHP Fatal error:  Uncaught Error: Call to undefined function undefined_studio_function() in C:\\Sites\\fectumhellas/public/studio-fatal.php:2"
+    },
+    {
+      "source": "server",
+      "text": "Stack trace:"
+    },
+    {
+      "source": "server",
+      "text": "#0 {main}"
+    },
+    {
+      "source": "server",
+      "text": "  thrown in C:\\Sites\\fectumhellas/public/studio-fatal.php on line 2"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 [500]: GET /studio-fatal.php - Uncaught Error: Call to undefined function undefined_studio_function() in C:\\Sites\\fectumhellas/public/studio-fatal.php:2"
+    },
+    {
+      "source": "server",
+      "text": "Stack trace:"
+    },
+    {
+      "source": "server",
+      "text": "#0 {main}"
+    },
+    {
+      "source": "server",
+      "text": "  thrown in C:\\Sites\\fectumhellas/public/studio-fatal.php on line 2"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] PHP Warning:  Studio test warning in C:\\Sites\\fectumhellas/public/studio-warning.php on line 2"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 [200]: GET /studio-warning.php"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47184 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] FloCMS\\Core\\HttpException: HTTP 404 in C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-core/src/App.php:92"
+    },
+    {
+      "source": "server",
+      "text": "Stack trace:"
+    },
+    {
+      "source": "server",
+      "text": "#0 C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-core/src/App.php(429): FloCMS\\Core\\App::fallback()"
+    },
+    {
+      "source": "server",
+      "text": "#1 C:\\Sites\\fectumhellas/public/index.php(47): FloCMS\\Core\\App::run()"
+    },
+    {
+      "source": "server",
+      "text": "#2 C:\\Sites\\fectumhellas/vendor/hostkurd/flocms-cli/resources/router.php(24): require('...')"
+    },
+    {
+      "source": "server",
+      "text": "#3 {main}"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47184 Closing"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47186 Accepted"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:53:57 2026] 127.0.0.1:47186 Closing"
+    },
+    {
+      "source": "app",
+      "text": "[2026-10-24 09:53:57] error: HTTP 404 {\"type\":\"FloCMS\\\\Core\\\\HttpException\",\"file\":\"C:/Sites/fectumhellas/vendor/hostkurd/flocms-core/src/App.php\",\"line\":92}"
+    },
+    {
+      "source": "app",
+      "text": "[2026-10-24 09:53:57] error: HTTP 404 {\"type\":\"FloCMS\\\\Core\\\\HttpException\",\"file\":\"C:/Sites/fectumhellas/vendor/hostkurd/flocms-core/src/App.php\",\"line\":92}"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:58:02 2026] PHP Warning:  Undefined array key \"title\" in C:\\Sites\\fectumhellas\\app\\Views\\pages\\index.php on line 14"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:58:02 2026] 127.0.0.1:47210 [200]: GET /themes/default/css/style.css"
+    },
+    {
+      "source": "app",
+      "text": "[2026-10-24 09:58:05] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fectum.listings' doesn't exist {\"type\":\"PDOException\",\"file\":\"C:/Sites/fectumhellas/app/Models/Listing.php\",\"line\":31}"
+    },
+    {
+      "source": "server",
+      "text": "[Sat Oct 24 12:58:05 2026] 127.0.0.1:47214 [500]: GET /listings - Uncaught PDOException"
+    },
+    {
+      "source": "app",
+      "text": "[2026-10-24 09:58:40] info: User #1 signed in {\"ip\":\"127.0.0.1\"}"
+    }
+  ]
+}
