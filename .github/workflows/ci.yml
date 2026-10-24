@@ -119,23 +119,34 @@ jobs:
             echo "STUDIO=$app/Studio.exe" >> "$GITHUB_ENV"
           else
             app="dist/FloCMS Studio.app"
-            cp -R "build/bin/FloCMS Studio.app" dist/
-            macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || { cat deploy.log; exit 1; }
+            exe="$app/Contents/MacOS/FloCMS Studio"
+            fail() { echo "::error::$1"; [ -f deploy.log ] && tail -20 deploy.log | sed 's/^/::error::/'; exit 1; }
+            cp -R "build/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
+            command -v macdeployqt > /dev/null || fail "macdeployqt is not on PATH"
+            macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || fail "macdeployqt failed"
             # Our own libraries into the bundle too, under the names the
             # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
-            exe="$app/Contents/MacOS/FloCMS Studio"
-            for lib in $(otool -L "$exe" | awk '/@rpath\/libFloStudio/{print $1}' | sed 's|@rpath/||'); do
-              [ -f "$app/Contents/Frameworks/$lib" ] || cp -L "$(find build/libs -name "$lib" | head -1)" "$app/Contents/Frameworks/"
+            mkdir -p "$app/Contents/Frameworks"
+            wanted=$(otool -L "$exe" | awk '/libFloStudio/{print $1}')
+            echo "::notice::the program asks for: $(echo $wanted)"
+            [ -n "$wanted" ] || fail "otool shows no FloStudio libraries in the program"
+            for ref in $wanted; do
+              lib=$(basename "$ref")
+              if [ ! -f "$app/Contents/Frameworks/$lib" ]; then
+                src=$(find build/libs -name "$lib" | head -1)
+                [ -n "$src" ] || fail "$lib not found in the build folder"
+                cp -L "$src" "$app/Contents/Frameworks/" || fail "could not copy $lib"
+              fi
+              case "$ref" in @rpath/*) ;; *) install_name_tool -change "$ref" "@rpath/$lib" "$exe" || fail "could not relink $lib";; esac
             done
             # Only rpaths inside the bundle: drop the build folder ones.
-            otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' | while read -r rp; do
-              install_name_tool -delete_rpath "$rp" "$exe"
+            for rp in $(otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' || true); do
+              install_name_tool -delete_rpath "$rp" "$exe" || fail "could not remove rpath $rp"
             done
             otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
-              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe"
-            ls "$app/Contents/Frameworks" | grep -i flostudio
+              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" || fail "could not add the bundle rpath"
             # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
-            codesign --force --deep --sign - "$app"
+            codesign --force --deep --sign - "$app" || fail "codesign failed"
             echo "STUDIO=$app/Contents/MacOS/FloCMS Studio" >> "$GITHUB_ENV"
           fi
           echo "APP_DIR=$app" >> "$GITHUB_ENV"
