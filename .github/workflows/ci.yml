@@ -147,7 +147,7 @@ jobs:
             # Only rpaths inside the bundle: drop the build folder and Qt
             # install ones from the program and from our own libraries.
             for bin in "$exe" "$app"/Contents/Frameworks/libFloStudio*.dylib; do
-              for rp in $(otool -l "$bin" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' || true); do
+              for rp in $(otool -l "$bin" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | sort -u | grep '^/' || true); do
                 install_name_tool -delete_rpath "$rp" "$bin" || fail "could not remove rpath $rp from $(basename "$bin")"
               done
             done
