@@ -98,6 +98,7 @@ QtObject {
         case "resource_name": return qsTr("A resource's class name, e.g. `Post`.")
         case "resource_needed": return qsTr("Enter the resource it lists, e.g. `Post`.")
         case "group_invalid": return qsTr("One line only.")
+        case "block_name_long": return qsTr("Too long: its template name would be over 41 characters.")
         }
         return problem(code)
     }

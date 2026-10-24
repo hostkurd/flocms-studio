@@ -434,391 +434,422 @@
 <context>
     <name>GenerateTab</name>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="44" />
+        <location filename="../qml/GenerateTab.qml" line="46" />
         <source>Generator</source>
         <translation>دروستکەر</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="48" />
+        <location filename="../qml/GenerateTab.qml" line="50" />
         <source>Admin resource</source>
         <translation>سەرچاوەی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="49" />
+        <location filename="../qml/GenerateTab.qml" line="51" />
         <source>Admin page</source>
         <translation>پەڕەی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="50" />
+        <location filename="../qml/GenerateTab.qml" line="52" />
         <source>Block</source>
         <translation>بلۆک</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="51" />
-        <location filename="../qml/GenerateTab.qml" line="202" />
-        <location filename="../qml/GenerateTab.qml" line="205" />
+        <location filename="../qml/GenerateTab.qml" line="53" />
+        <location filename="../qml/GenerateTab.qml" line="204" />
+        <location filename="../qml/GenerateTab.qml" line="207" />
         <source>Widget</source>
         <translation>ویجێت</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="52" />
+        <location filename="../qml/GenerateTab.qml" line="54" />
         <source>Controller</source>
         <translation>کۆنترۆڵەر</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="53" />
-        <location filename="../qml/GenerateTab.qml" line="245" />
-        <location filename="../qml/GenerateTab.qml" line="248" />
+        <location filename="../qml/GenerateTab.qml" line="55" />
+        <location filename="../qml/GenerateTab.qml" line="253" />
+        <location filename="../qml/GenerateTab.qml" line="256" />
         <source>Migration</source>
         <translation>مایگرەیشن</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="59" />
+        <location filename="../qml/GenerateTab.qml" line="61" />
         <source>The admin resource, page, block and widget need the admin panel (`hostkurd/flocms-admin`).</source>
         <translation>سەرچاوە، پەڕە، بلۆک و ویجێتی بەڕێوەبردن پێویستیان بە پانێڵی بەڕێوەبردنە (`hostkurd/flocms-admin`).</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="83" />
+        <location filename="../qml/GenerateTab.qml" line="85" />
         <source>New admin resource</source>
         <translation>سەرچاوەی بەڕێوەبردنی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="83" />
+        <location filename="../qml/GenerateTab.qml" line="85" />
         <source>New admin page</source>
         <translation>پەڕەی بەڕێوەبردنی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="84" />
+        <location filename="../qml/GenerateTab.qml" line="86" />
         <source>New block</source>
         <translation>بلۆکی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="84" />
+        <location filename="../qml/GenerateTab.qml" line="86" />
         <source>New dashboard widget</source>
         <translation>ویجێتی نوێی داشبۆرد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="87" />
         <source>New controller</source>
         <translation>کۆنترۆڵەری نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="87" />
         <source>New migration</source>
         <translation>مایگرەیشنی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="99" />
+        <location filename="../qml/GenerateTab.qml" line="101" />
         <source>What it does</source>
         <translation>چی دەکات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="99" />
-        <location filename="../qml/GenerateTab.qml" line="112" />
+        <location filename="../qml/GenerateTab.qml" line="101" />
+        <location filename="../qml/GenerateTab.qml" line="114" />
         <source>Name</source>
         <translation>ناو</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="100" />
+        <location filename="../qml/GenerateTab.qml" line="102" />
         <source>A class name, e.g. `Property` or `BlogPost`.</source>
         <translation>ناوی کلاسێک، بۆ نموونە `Property` یان `BlogPost`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="101" />
+        <location filename="../qml/GenerateTab.qml" line="103" />
         <source>A class name, e.g. `SalesReport`.</source>
         <translation>ناوی کلاسێک، بۆ نموونە `SalesReport`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="102" />
+        <location filename="../qml/GenerateTab.qml" line="104" />
         <source>A class name, e.g. `LatestProjects`.</source>
         <translation>ناوی کلاسێک، بۆ نموونە `LatestProjects`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="103" />
+        <location filename="../qml/GenerateTab.qml" line="105" />
         <source>A class name, e.g. `PostStats` or `RecentPosts`.</source>
         <translation>ناوی کلاسێک، بۆ نموونە `PostStats` یان `RecentPosts`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="104" />
+        <location filename="../qml/GenerateTab.qml" line="106" />
         <source>E.g. `Blog` or `BlogPost`.</source>
         <translation>بۆ نموونە `Blog` یان `BlogPost`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="105" />
+        <location filename="../qml/GenerateTab.qml" line="107" />
         <source>E.g. `create_posts_table` or `add_slug_to_posts`.</source>
         <translation>بۆ نموونە `create_posts_table` یان `add_slug_to_posts`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="121" />
-        <location filename="../qml/GenerateTab.qml" line="125" />
-        <location filename="../qml/GenerateTab.qml" line="272" />
-        <location filename="../qml/GenerateTab.qml" line="275" />
+        <location filename="../qml/GenerateTab.qml" line="123" />
+        <location filename="../qml/GenerateTab.qml" line="127" />
+        <location filename="../qml/GenerateTab.qml" line="280" />
+        <location filename="../qml/GenerateTab.qml" line="283" />
         <source>Table</source>
         <translation>خشتە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="122" />
+        <location filename="../qml/GenerateTab.qml" line="124" />
         <source>Empty: the plural of the name.</source>
         <translation>بەتاڵ: کۆی ناوەکە.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="129" />
-        <location filename="../qml/GenerateTab.qml" line="133" />
+        <location filename="../qml/GenerateTab.qml" line="131" />
+        <location filename="../qml/GenerateTab.qml" line="135" />
         <source>URL</source>
         <translation>بەستەر</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="133" />
+        <location filename="../qml/GenerateTab.qml" line="135" />
         <source>the table</source>
         <translation>خشتەکە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="139" />
-        <location filename="../qml/GenerateTab.qml" line="143" />
+        <location filename="../qml/GenerateTab.qml" line="141" />
+        <location filename="../qml/GenerateTab.qml" line="145" />
         <source>Sidebar group</source>
         <translation>گرووپی لاتەنیشت</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="140" />
+        <location filename="../qml/GenerateTab.qml" line="142" />
         <source>E.g. Reports. Empty: no group.</source>
         <translation>بۆ نموونە Reports. بەتاڵ: بێ گرووپ.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="150" />
-        <location filename="../qml/GenerateTab.qml" line="153" />
+        <location filename="../qml/GenerateTab.qml" line="152" />
+        <location filename="../qml/GenerateTab.qml" line="155" />
         <source>Create and Edit open as</source>
         <translation>دروستکردن و دەستکاریکردن دەکرێنەوە وەک</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="157" />
+        <location filename="../qml/GenerateTab.qml" line="159" />
         <source>A full page</source>
         <translation>پەڕەیەکی تەواو</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="158" />
+        <location filename="../qml/GenerateTab.qml" line="160" />
         <source>A dialog</source>
         <translation>پەنجەرەیەکی گفتوگۆ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="159" />
+        <location filename="../qml/GenerateTab.qml" line="161" />
         <source>A slide-over panel</source>
         <translation>پانێڵێکی خلیسکاو</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="168" />
+        <location filename="../qml/GenerateTab.qml" line="170" />
         <source>Also create a migration for the table</source>
         <translation>هەروەها مایگرەیشنێک بۆ خشتەکە دروست بکە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="169" />
+        <location filename="../qml/GenerateTab.qml" line="171" />
         <source>Editors can drag records into order (a `sort` column)</source>
         <translation>دەستکاریکەران دەتوانن تۆمارەکان ڕابکێشن بۆ ڕیزکردن (ستوونی `sort`)</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="173" />
+        <location filename="../qml/GenerateTab.qml" line="175" />
         <source>The resource starts with a title field. Add the other fields in the file.</source>
         <translation>سەرچاوەکە بە خانەی ناونیشانێک دەست پێدەکات. خانەکانی تر لە فایلەکەدا زیاد بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="183" />
-        <location filename="../qml/GenerateTab.qml" line="186" />
+        <location filename="../qml/GenerateTab.qml" line="185" />
+        <location filename="../qml/GenerateTab.qml" line="188" />
         <source>The page shows</source>
         <translation>پەڕەکە پیشان دەدات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="190" />
+        <location filename="../qml/GenerateTab.qml" line="192" />
         <source>Content of its own</source>
         <translation>ناوەڕۆکی خۆی</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="191" />
+        <location filename="../qml/GenerateTab.qml" line="193" />
         <source>A form with Save</source>
         <translation>فۆڕمێک لەگەڵ پاشەکەوت</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="192" />
+        <location filename="../qml/GenerateTab.qml" line="194" />
         <source>A database table</source>
         <translation>خشتەیەکی داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="193" />
+        <location filename="../qml/GenerateTab.qml" line="195" />
         <source>A resource's records</source>
         <translation>تۆمارەکانی سەرچاوەیەک</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="209" />
+        <location filename="../qml/GenerateTab.qml" line="211" />
         <source>Numbers</source>
         <translation>ژمارەکان</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="210" />
+        <location filename="../qml/GenerateTab.qml" line="212" />
         <source>Latest records</source>
         <translation>نوێترین تۆمارەکان</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="211" />
+        <location filename="../qml/GenerateTab.qml" line="213" />
         <source>A chart</source>
         <translation>هێڵکاری</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="220" />
-        <location filename="../qml/GenerateTab.qml" line="223" />
+        <location filename="../qml/GenerateTab.qml" line="222" />
+        <location filename="../qml/GenerateTab.qml" line="225" />
         <source>Actions</source>
         <translation>کردارەکان</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="227" />
+        <location filename="../qml/GenerateTab.qml" line="229" />
         <source>A page</source>
         <translation>پەڕەیەک</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="228" />
+        <location filename="../qml/GenerateTab.qml" line="230" />
         <source>Pages and admin actions (CRUD)</source>
         <translation>پەڕەکان و کردارەکانی بەڕێوەبردن (CRUD)</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="229" />
+        <location filename="../qml/GenerateTab.qml" line="231" />
         <source>Admin actions</source>
         <translation>کردارەکانی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="230" />
+        <location filename="../qml/GenerateTab.qml" line="232" />
         <source>JSON API</source>
         <translation>JSON API</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="237" />
+        <location filename="../qml/GenerateTab.qml" line="239" />
+        <source>With the resource actions: list, show, add, change, delete</source>
+        <translation>لەگەڵ کردارەکانی سەرچاوە: لیست، پیشاندان، زیادکردن، گۆڕین، سڕینەوە</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="245" />
         <source>Also create its model</source>
         <translation>هەروەها مۆدێلەکەی دروست بکە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="252" />
+        <location filename="../qml/GenerateTab.qml" line="260" />
         <source>Empty</source>
         <translation>بەتاڵ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="253" />
+        <location filename="../qml/GenerateTab.qml" line="261" />
         <source>Create a table</source>
         <translation>دروستکردنی خشتە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="254" />
+        <location filename="../qml/GenerateTab.qml" line="262" />
         <source>Change a table</source>
         <translation>گۆڕینی خشتە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="261" />
+        <location filename="../qml/GenerateTab.qml" line="269" />
         <source>A name like `create_posts_table` creates the `posts` table.</source>
         <translation>ناوێکی وەک `create_posts_table` خشتەی `posts` دروست دەکات.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="296" />
-        <location filename="../qml/GenerateTab.qml" line="300" />
+        <location filename="../qml/GenerateTab.qml" line="304" />
+        <location filename="../qml/GenerateTab.qml" line="308" />
         <source>Resource</source>
         <translation>سەرچاوە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="297" />
+        <location filename="../qml/GenerateTab.qml" line="305" />
         <source>Optional: the resource it counts.</source>
         <translation>ئارەزوومەندانە: ئەو سەرچاوەیەی دەیژمێرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="320" />
+        <location filename="../qml/GenerateTab.qml" line="328" />
         <source>Also write its view, with the panel's parts</source>
         <translation>هەروەها ڤیوەکەی بە بەشەکانی پانێڵەکە بنووسە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="325" />
+        <location filename="../qml/GenerateTab.qml" line="333" />
         <source>Overwrite files that are there</source>
         <translation>فایلە هەبووەکان بگۆڕەوە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="353" />
+        <location filename="../qml/GenerateTab.qml" line="361" />
         <source>Preview</source>
         <translation>پێشبینین</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="359" />
+        <location filename="../qml/GenerateTab.qml" line="367" />
         <source>Create resource</source>
         <translation>دروستکردنی سەرچاوە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="359" />
+        <location filename="../qml/GenerateTab.qml" line="367" />
         <source>Create page</source>
         <translation>دروستکردنی پەڕە</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="360" />
+        <location filename="../qml/GenerateTab.qml" line="368" />
         <source>Create block</source>
         <translation>دروستکردنی بلۆک</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="360" />
+        <location filename="../qml/GenerateTab.qml" line="368" />
         <source>Create widget</source>
         <translation>دروستکردنی ویجێت</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="361" />
+        <location filename="../qml/GenerateTab.qml" line="369" />
         <source>Create controller</source>
         <translation>دروستکردنی کۆنترۆڵەر</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="361" />
+        <location filename="../qml/GenerateTab.qml" line="369" />
         <source>Create migration</source>
         <translation>دروستکردنی مایگرەیشن</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="384" />
+        <location filename="../qml/GenerateTab.qml" line="392" />
         <source>Preview: what it will write</source>
         <translation>پێشبینین: ئەوەی دەینووسێت</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="387" />
+        <location filename="../qml/GenerateTab.qml" line="395" />
         <source>%Ln file(s)</source>
-        <translation><numerusform>%Ln فایل</numerusform><numerusform>%Ln فایل</numerusform></translation>
+        <translation>
+            <numerusform>%Ln فایل</numerusform>
+            <numerusform>%Ln فایل</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="395" />
+        <location filename="../qml/GenerateTab.qml" line="403" />
         <source>Preview runs the generator in a temporary copy of the project and shows the files it writes. Your project changes only with Create.</source>
         <translation>پێشبینین دروستکەرەکە لە کۆپییەکی کاتیی پڕۆژەکەدا جێبەجێ دەکات و ئەو فایلانە پیشان دەدات کە دەینووسێت. پڕۆژەکەت تەنها بە دروستکردن دەگۆڕێت.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="405" />
+        <location filename="../qml/GenerateTab.qml" line="413" />
         <source>Copying the project…</source>
         <translation>پڕۆژەکە کۆپی دەکرێت…</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="405" />
+        <location filename="../qml/GenerateTab.qml" line="413" />
         <source>Running the generator in the copy…</source>
         <translation>دروستکەرەکە لە کۆپییەکەدا کار دەکات…</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="412" />
+        <location filename="../qml/GenerateTab.qml" line="420" />
         <source>The command ended with exit code %1.</source>
         <translation>فەرمانەکە بە کۆدی دەرچوونی %1 کۆتایی هات.</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/GenerateTab.qml" line="421" />
+        <source>The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?</source>
+        <translation><numerusform>دروستکەرەکە لە %Ln چرکەدا تەواو نەبوو، بۆیە پێشبینین وەستاندی. ئایا داتابەیسەکە وەڵام دەداتەوە؟</numerusform><numerusform>دروستکەرەکە لە %Ln چرکەدا تەواو نەبوو، بۆیە پێشبینین وەستاندی. ئایا داتابەیسەکە وەڵام دەداتەوە؟</numerusform></translation>
+    </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="427" />
+        <location filename="../qml/GenerateTab.qml" line="422" />
+        <source>`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.</source>
+        <translation>`%1` لە `config/admin.php` ڕێڕەوێکی ڕەهایە، بۆیە دروستکەرەکە لەوێ دەنووسێت نەک لە کۆپییەکەدا. ئەم پڕۆژەیە پێشبینینی نییە؛ دروستکردن کار دەکات.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="437" />
         <source>The form changed since this preview. Preview again to see what it writes now.</source>
         <translation>فۆڕمەکە دوای ئەم پێشبینینە گۆڕا. دووبارە پێشبینی بکە بۆ بینینی ئەوەی ئێستا دەینووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="434" />
+        <location filename="../qml/GenerateTab.qml" line="446" />
+        <source>The project itself changed while the preview ran: %1. Check these files: the generator may have written there.</source>
+        <translation>خودی پڕۆژەکە لە کاتی پێشبینیندا گۆڕا: %1. ئەم فایلانە بپشکنە: لەوانەیە دروستکەرەکە لەوێ نووسیبێتی.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="461" />
         <source>It writes no files.</source>
         <translation>هیچ فایلێک نانووسێت.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="492" />
+        <location filename="../qml/GenerateTab.qml" line="535" />
+        <source>%Ln more line(s), not shown</source>
+        <translation><numerusform>%Ln هێڵی تر، پیشان نادرێن</numerusform><numerusform>%Ln هێڵی تر، پیشان نادرێن</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/GenerateTab.qml" line="536" />
         <source>%Ln unchanged line(s)</source>
-        <translation><numerusform>%Ln هێڵی نەگۆڕاو</numerusform><numerusform>%Ln هێڵی نەگۆڕاو</numerusform></translation>
+        <translation>
+            <numerusform>%Ln هێڵی نەگۆڕاو</numerusform>
+            <numerusform>%Ln هێڵی نەگۆڕاو</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="505" />
+        <location filename="../qml/GenerateTab.qml" line="548" />
         <source>Not a text file.</source>
         <translation>فایلی دەق نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="505" />
+        <location filename="../qml/GenerateTab.qml" line="548" />
         <source>Too large to show here.</source>
         <translation>گەورەترە لەوەی لێرە پیشان بدرێت.</translation>
     </message>
@@ -2258,217 +2289,222 @@
         <translation>ئەو سەرچاوەیە بنووسە کە لیستی دەکات، بۆ نموونە `Post`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="113" />
+        <location filename="../qml/Texts.qml" line="101" />
+        <source>Too long: its template name would be over 41 characters.</source>
+        <translation>زۆر درێژە: ناوی قاڵبەکەی لە 41 پیت زیاتر دەبێت.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="114" />
         <source>This folder is not a FloCMS project: its `composer.json` neither is the FloCMS skeleton nor requires `hostkurd/flocms-core`.</source>
         <translation>ئەم فۆڵدەرە پڕۆژەیەکی FloCMS نییە: `composer.json` ـەکەی نە پێکهاتەی بنەڕەتی FloCMS ـە و نە `hostkurd/flocms-core` ی پێویستە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="114" />
+        <location filename="../qml/Texts.qml" line="115" />
         <source>The project folder is gone.</source>
         <translation>فۆڵدەری پڕۆژەکە نەماوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="115" />
+        <location filename="../qml/Texts.qml" line="116" />
         <source>Studio could not read its settings file, so it runs with the defaults and won't save over it. Close the program that holds the file, then start Studio again.</source>
         <translation>Studio نەیتوانی فایلی ڕێکخستنەکانی بخوێنێتەوە، بۆیە بە بنەڕەتەکان کار دەکات و بەسەریدا پاشەکەوت ناکات. ئەو بەرنامەیەی فایلەکەی گرتووە دابخە، پاشان Studio دووبارە بکەرەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="116" />
+        <location filename="../qml/Texts.qml" line="117" />
         <source>Studio could not save its settings.</source>
         <translation>Studio نەیتوانی ڕێکخستنەکانی پاشەکەوت بکات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="117" />
+        <location filename="../qml/Texts.qml" line="118" />
         <source>The editor in Settings &gt; Editor was not found.</source>
         <translation>ئەو دەستکاریکەرەی لە ڕێکخستنەکان &gt; دەستکاریکەر دانراوە نەدۆزرایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="118" />
+        <location filename="../qml/Texts.qml" line="119" />
         <source>The editor did not start.</source>
         <translation>دەستکاریکەرەکە دەستی پێنەکرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="119" />
+        <location filename="../qml/Texts.qml" line="120" />
         <source>The editor is a `.cmd` file, and the folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose the editor's `.exe` in Settings &gt; Editor.</source>
         <translation>دەستکاریکەرەکە فایلێکی `.cmd` ـە و ناوی فۆڵدەرەکە پیتی تێدایە کە `cmd.exe` خۆی دەیانخوێنێتەوە ( ) &amp; ! %. فایلی `.exe` ـی دەستکاریکەرەکە لە ڕێکخستنەکان &gt; دەستکاریکەر هەڵبژێرە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="120" />
+        <location filename="../qml/Texts.qml" line="121" />
         <source>The folder could not be opened.</source>
         <translation>فۆڵدەرەکە نەکرایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="121" />
+        <location filename="../qml/Texts.qml" line="122" />
         <source>The download failed.</source>
         <translation>داگرتنەکە سەرکەوتوو نەبوو.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="122" />
+        <location filename="../qml/Texts.qml" line="123" />
         <source>The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.</source>
         <translation>فایلە داگیراوەکە ئەوە نییە کە Studio چاوەڕێی دەکات (SHA-256 ـەکەی جیاوازە)، بۆیە سڕایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="123" />
+        <location filename="../qml/Texts.qml" line="124" />
         <source>The download could not be unpacked.</source>
         <translation>داگیراوەکە نەکرایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="124" />
+        <location filename="../qml/Texts.qml" line="125" />
         <source>The download could not be installed.</source>
         <translation>داگیراوەکە دانەنرا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="125" />
+        <location filename="../qml/Texts.qml" line="126" />
         <source>Cancelled.</source>
         <translation>هەڵوەشێنرایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="126" />
+        <location filename="../qml/Texts.qml" line="127" />
         <source>The server did not start.</source>
         <translation>سێرڤەر دەستی پێنەکرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="127" />
+        <location filename="../qml/Texts.qml" line="128" />
         <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
         <translation>سێرڤەر گوتی دەستیپێکرد، بەڵام هیچ شتێک لە ناونیشانەکەیدا وەڵام ناداتەوە. لەوانەیە بەرنامەیەکی تر پۆرتەکەی گرتبێت: پۆرتێکی تر لە ڕێکخستنەکان &gt; سێرڤەر تاقی بکەرەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="128" />
+        <location filename="../qml/Texts.qml" line="129" />
         <source>The server stopped by itself.</source>
         <translation>سێرڤەر خۆی وەستا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="129" />
+        <location filename="../qml/Texts.qml" line="130" />
         <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>PHP نەدۆزرایەوە. لە «ئەم کۆمپیوتەرە» دایبگرە، یان لە ڕێکخستنەکان &gt; PHP و ئامرازەکان هەڵیبژێرە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="130" />
+        <location filename="../qml/Texts.qml" line="131" />
         <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
         <translation>PHP فایلێکی `.bat` یان `.cmd` ـە و ناوی فۆڵدەری پڕۆژەکە پیتی تێدایە کە `cmd.exe` خۆی دەیانخوێنێتەوە ( ) &amp; ! %. `php.exe` لە ڕێکخستنەکان &gt; PHP و ئامرازەکان هەڵبژێرە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="131" />
+        <location filename="../qml/Texts.qml" line="132" />
         <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
         <translation>پڕۆژەکە هێشتا دەستپێکەری `flo` ـی نییە: `composer install` تێیدا جێبەجێ بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="132" />
+        <location filename="../qml/Texts.qml" line="133" />
         <source>The folder for the new project could not be made.</source>
         <translation>فۆڵدەری پڕۆژە نوێیەکە نەتوانرا دروست بکرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="133" />
+        <location filename="../qml/Texts.qml" line="134" />
         <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
         <translation>Studio نەیتوانی ئەو فۆڵدەرە بسڕێتەوە کە دروستی کردبوو. ئەوەی بەکاری دەهێنێت دابخە (دەستکاریکەرێک، تێرمیناڵێک)، پاشان دووبارە هەوڵ بدەرەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="134" />
+        <location filename="../qml/Texts.qml" line="135" />
         <source>Studio could not write the project's `.env` file.</source>
         <translation>Studio نەیتوانی فایلی `.env`ی پڕۆژەکە بنووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="136" />
+        <location filename="../qml/Texts.qml" line="137" />
         <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
         <translation>یەکێک لە بەهاکانی `.env` پیتێکی تێدایە کە FloCMS لەوێ ناتوانێت بیخوێنێتەوە (هێڵی نوێ).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="137" />
+        <location filename="../qml/Texts.qml" line="138" />
         <source>Stopped.</source>
         <translation>وەستێنرا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="138" />
+        <location filename="../qml/Texts.qml" line="139" />
         <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation>پڕۆژەکە هێشتا فۆڵدەری `vendor/` ـی نییە: `composer install` تێیدا جێبەجێ بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="139" />
+        <location filename="../qml/Texts.qml" line="140" />
         <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation>پڕۆژەکە گەورەترە لەوەی بۆ پێشبینین کۆپی بکرێت (زیاتر لە 400 MB یان 40,000 فایل، بەبێ بارکراوەکان و تۆمارەکان). دروستکردن بەبێ پێشبینین کار دەکات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="140" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>Studio could not copy the project for the preview.</source>
         <translation>Studio نەیتوانی پڕۆژەکە بۆ پێشبینین کۆپی بکات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="141" />
+        <location filename="../qml/Texts.qml" line="142" />
         <source>The preview was stopped.</source>
         <translation>پێشبینینەکە وەستێنرا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="142" />
+        <location filename="../qml/Texts.qml" line="143" />
         <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation>Studio نەیتوانی کۆپیی پێشبینینەکە بسڕێتەوە. لە دەستپێکردنی داهاتوودا دووبارە هەوڵ دەداتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="143" />
+        <location filename="../qml/Texts.qml" line="144" />
         <source>Studio does not run this command.</source>
         <translation>Studio ئەم فەرمانە جێبەجێ ناکات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="144" />
+        <location filename="../qml/Texts.qml" line="145" />
         <source>There is no secure store for passwords on this computer.</source>
         <translation>هیچ شوێنێکی پارێزراو بۆ وشەی نهێنی لەم کۆمپیوتەرەدا نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="145" />
+        <location filename="../qml/Texts.qml" line="146" />
         <source>The secure store did not give the password.</source>
         <translation>شوێنە پارێزراوەکە وشەی نهێنییەکەی نەدا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="146" />
+        <location filename="../qml/Texts.qml" line="147" />
         <source>No password is saved for this database user.</source>
         <translation>هیچ وشەیەکی نهێنی بۆ ئەم بەکارهێنەری داتابەیسە پاشەکەوت نەکراوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="147" />
+        <location filename="../qml/Texts.qml" line="148" />
         <source>The secure store did not answer.</source>
         <translation>شوێنە پارێزراوەکە وەڵامی نەدایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="148" />
+        <location filename="../qml/Texts.qml" line="149" />
         <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>Composer نەدۆزرایەوە. لە «ئەم کۆمپیوتەرە» دایبگرە، یان لە ڕێکخستنەکان &gt; PHP و ئامرازەکان هەڵیبژێرە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="149" />
+        <location filename="../qml/Texts.qml" line="150" />
         <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation>فەرمانێک هێشتا لەم پڕۆژەیەدا کار دەکات. کاتێک تەواو بوو لە لیستەکە لایببە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="150" />
+        <location filename="../qml/Texts.qml" line="151" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>پڕۆژەکە فایلی `.env` ـی نییە. `.env.example` بۆ `.env` کۆپی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="151" />
+        <location filename="../qml/Texts.qml" line="152" />
         <source>The command could not run.</source>
         <translation>فەرمانەکە نەتوانرا جێبەجێ بکرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="152" />
+        <location filename="../qml/Texts.qml" line="153" />
         <source>Studio could not read what the check printed.</source>
         <translation>Studio نەیتوانی ئەوە بخوێنێتەوە کە پشکنینەکە چاپی کرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="153" />
+        <location filename="../qml/Texts.qml" line="154" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>Studio نەیتوانی داتابەیسەکە بخوێنێتەوە. ئایا سێرڤەری داتابەیس کار دەکات، و ڕێکخستنەکانی `.env` دروستن؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="154" />
+        <location filename="../qml/Texts.qml" line="155" />
         <source>Studio could not read the migrations.</source>
         <translation>Studio نەیتوانی مایگرەیشنەکان بخوێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="155" />
+        <location filename="../qml/Texts.qml" line="156" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>هێشتا `storage/logs/app.log` نییە. FloCMS لە یەکەم پەیامدا دەینووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="157" />
+        <location filename="../qml/Texts.qml" line="158" />
         <source>Something went wrong (%1).</source>
         <translation>هەڵەیەک ڕوویدا (%1).</translation>
     </message>

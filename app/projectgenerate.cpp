@@ -20,9 +20,13 @@ constexpr int kOutputLines = 400;
 constexpr int kFileLines = 2000; // a file's lines shown in the preview
 int g_timeoutSeconds = 60;
 
+constexpr int kCreateSeconds = 600; // Create: only for one that never ends
+
 struct Copied
 {
     QString copy;
+    QStringList copied;  // the copy as it was made
+    QStringList project; // the project then
     QString error;
     QString detail;
 };
@@ -30,8 +34,15 @@ struct Copied
 struct Compared
 {
     QList<FileChange> changes;
+    QStringList outside; // what changed in the project while the generator ran
     bool removed = true;
 };
+
+// A SQLite file (and its journal) changes when anything reads the database
+bool isDatabaseFile(const QString &path)
+{
+    return path.contains(QStringLiteral(".sqlite")) || path.endsWith(QStringLiteral(".db"));
+}
 
 QVariantList fileLines(const FileChange &change)
 {
@@ -56,7 +67,7 @@ QVariantList fileLines(const FileChange &change)
     if (lines.size() > kFileLines) {
         const qsizetype left = lines.size() - kFileLines;
         lines.resize(kFileLines);
-        add('~', QString::number(left));
+        add('>', QString::number(left)); // more lines, not shown
     }
     return lines;
 }
@@ -130,6 +141,7 @@ QVariantMap ProjectGenerate::form() const
             {QStringLiteral("widgetType"), m_form.widgetType},
             {QStringLiteral("controllerKind"), m_form.controllerKind},
             {QStringLiteral("model"), m_form.model},
+            {QStringLiteral("apiResource"), m_form.apiResource},
             {QStringLiteral("migrationKind"), m_form.migrationKind},
             {QStringLiteral("force"), m_form.force}};
 }
@@ -213,6 +225,8 @@ void ProjectGenerate::set(const QString &field, const QVariant &value)
         m_form.controllerKind = text;
     else if (field == u"model")
         m_form.model = value.toBool();
+    else if (field == u"apiResource")
+        m_form.apiResource = value.toBool();
     else if (field == u"migrationKind")
         m_form.migrationKind = text;
     else if (field == u"force")
@@ -268,14 +282,29 @@ void ProjectGenerate::runPreview()
         const Copied copied = watcher->result();
         watcher->deleteLater();
         --m_copying;
+        m_copied = copied.copied;
+        m_projectBefore = copied.project;
         previewCopied(run, copied.copy, copied.error, copied.detail);
     });
     watcher->setFuture(QtConcurrent::run([project = m_projectDir, cancel = m_cancel] {
         Copied copied;
-        if (auto made = makePreviewCopy(project, previewsFolder(), cancel.get()))
-            copied.copy = made.value();
-        else
-            copied = {QString(), made.error().code, made.error().detail};
+        auto made = makePreviewCopy(project, previewsFolder(), cancel.get());
+        if (!made) {
+            copied.error = made.error().code;
+            copied.detail = made.error().detail;
+            return copied;
+        }
+        // A generator set to write somewhere absolute would write outside
+        // the copy: no preview then
+        if (const QString setting = absoluteConfigPath(made.value()); !setting.isEmpty()) {
+            removePreviewCopy(made.value());
+            copied.error = QStringLiteral("preview_absolute_path");
+            copied.detail = setting;
+            return copied;
+        }
+        copied.copy = made.value();
+        copied.copied = fileSnapshot(copied.copy);
+        copied.project = fileSnapshot(project);
         return copied;
     }));
 }
@@ -303,6 +332,7 @@ void ProjectGenerate::previewCopied(int run, const QString &copy, const QString 
         return;
     }
     m_copy = copy;
+    m_previewTimedOut = false;
     m_preview.insert(QStringLiteral("state"), QStringLiteral("running"));
     emit previewChanged();
     m_previewProcess = startStreaming(
@@ -315,9 +345,12 @@ void ProjectGenerate::previewCopied(int run, const QString &copy, const QString 
             emit previewChanged();
         },
         [this, run, copy](int exitCode, bool crashed) { previewRan(run, copy, exitCode, crashed); });
-    // A generator that waits on something (a question it should not ask)
-    // Cancelled with the process (it is the timer's context)
-    QTimer::singleShot(g_timeoutSeconds * 1000, m_previewProcess, [process = m_previewProcess] { stopProcess(process); });
+    // A generator that waits on something (a database that doesn't
+    // answer); cancelled with the process (it is the timer's context)
+    QTimer::singleShot(g_timeoutSeconds * 1000, m_previewProcess, [this, process = m_previewProcess] {
+        m_previewTimedOut = true;
+        stopProcess(process);
+    });
 }
 
 void ProjectGenerate::previewRan(int run, const QString &copy, int exitCode, bool crashed)
@@ -326,20 +359,27 @@ void ProjectGenerate::previewRan(int run, const QString &copy, int exitCode, boo
         m_previewProcess->deleteLater();
     m_previewProcess = nullptr;
     const bool ok = exitCode == 0 && !crashed;
+    const bool timedOut = m_previewTimedOut;
+    // The worker removes the copy from here on
+    m_copy.clear();
     // What it wrote, then the copy goes, on a worker (a copy is many files)
     ++m_copying;
     auto *watcher = new QFutureWatcher<Compared>(this); // a child of this, deleted when it finishes
-    connect(watcher, &QFutureWatcher<Compared>::finished, this, [this, watcher, run, ok, exitCode, crashed] {
+    connect(watcher, &QFutureWatcher<Compared>::finished, this, [this, watcher, run, ok, exitCode, crashed, timedOut] {
         const Compared compared = watcher->result();
         watcher->deleteLater();
         --m_copying;
         if (run != m_previewRun)
             return;
-        m_copy.clear();
+        // Things it can't help: shown with the result
+        m_preview.insert(QStringLiteral("outside"), compared.outside);
+        m_preview.insert(QStringLiteral("notRemoved"), !compared.removed);
         if (!ok) {
             const QString message = errorMessage(m_previewErr.join(u'\n'));
             m_preview.insert(QStringLiteral("message"), message);
-            previewFailed(crashed ? QStringLiteral("step_stopped") : QStringLiteral("step_exit"), QString::number(exitCode));
+            previewFailed(timedOut ? QStringLiteral("preview_timeout")
+                                   : (crashed ? QStringLiteral("step_stopped") : QStringLiteral("step_exit")),
+                          timedOut ? QString::number(g_timeoutSeconds) : QString::number(exitCode));
             return;
         }
         QVariantList files;
@@ -354,11 +394,17 @@ void ProjectGenerate::previewRan(int run, const QString &copy, int exitCode, boo
         emit previewChanged();
         emit busyChanged();
     });
-    watcher->setFuture(QtConcurrent::run([project = m_projectDir, copy, ok] {
+    watcher->setFuture(QtConcurrent::run([project = m_projectDir, copy, ok, copied = m_copied, before = m_projectBefore] {
         Compared compared;
         if (ok)
-            compared.changes = previewChanges(project, copy);
+            compared.changes = previewChanges(project, copy, copied);
         compared.removed = removePreviewCopy(copy).ok();
+        // Written outside the copy (a path FloCMS was given as absolute)?
+        // A database file changes whenever something reads it: not counted
+        for (const QString &path : changedSince(before, fileSnapshot(project))) {
+            if (!isDatabaseFile(path))
+                compared.outside << path;
+        }
         return compared;
     }));
 }
@@ -418,8 +464,9 @@ void ProjectGenerate::create()
             emit previewChanged();
             emit changedProject();
         });
-    // Cancelled with the process (it is the timer's context)
-    QTimer::singleShot(g_timeoutSeconds * 1000, m_createProcess, [process = m_createProcess] { stopProcess(process); });
+    // Only one that never ends (it writes into the project: not stopped
+    // half way for being slow); cancelled with the process
+    QTimer::singleShot(kCreateSeconds * 1000, m_createProcess, [process = m_createProcess] { stopProcess(process); });
     emit createdChanged();
     emit busyChanged();
 }

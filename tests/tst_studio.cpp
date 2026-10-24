@@ -518,6 +518,8 @@ private slots:
                  qUtf8Printable(path));
         QCOMPARE(files.at(0).toMap().value(QStringLiteral("kind")).toString(), QStringLiteral("added"));
         QCOMPARE(migrations.entryList(QDir::Files), before); // only the copy
+        QVERIFY(preview.value(QStringLiteral("outside")).toStringList().isEmpty());
+        QVERIFY(!preview.value(QStringLiteral("notRemoved")).toBool());
         // The copy is gone
         QVERIFY(QDir(previewsFolder()).entryList(QDir::Dirs | QDir::NoDotAndDotDot).isEmpty());
 

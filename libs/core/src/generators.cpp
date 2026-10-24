@@ -2,6 +2,7 @@
 
 #include <QRegularExpression>
 
+#include <algorithm>
 #include <array>
 #include <utility>
 
@@ -125,7 +126,13 @@ QList<FieldProblem> checkGenerator(Generator generator, const GeneratorForm &for
         if (form.migrationKind != u"plain" && !matches(kTable, table))
             add("table", table.isEmpty() ? "table_needed" : "table_name");
         break;
-    case Generator::Block:
+    case Generator::Block: {
+        // MakeBlockCommand: the snake case type is at most 41 characters
+        const auto capitals = std::count_if(name.begin() + (name.isEmpty() ? 0 : 1), name.end(), [](QChar c) { return c.isUpper(); });
+        if (problems.isEmpty() && name.size() + capitals > 41)
+            add("name", "block_name_long");
+        break;
+    }
     case Generator::Controller:
         break;
     }
@@ -176,6 +183,8 @@ QStringList generatorArguments(Generator generator, const GeneratorForm &form)
             arguments << QStringLiteral("--admin");
         else if (form.controllerKind == u"api")
             arguments << QStringLiteral("--api");
+        if (form.controllerKind == u"api" && form.apiResource)
+            arguments << QStringLiteral("--resource");
         // An API controller has no model of its own (make:api-controller)
         if (form.model && form.controllerKind != u"api")
             arguments << QStringLiteral("--model");

@@ -2,7 +2,6 @@
 #include <flostudio/core/tools.h>
 
 #include <QDir>
-#include <QPointer>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QStringDecoder>
@@ -283,13 +282,17 @@ QProcess *startStreaming(const Command &command, QObject *owner, LineHandler onL
                          const bool crashed = status == QProcess::CrashExit || (tracker && tracker->stopped());
                          end(crashed ? -1 : code, crashed);
                      });
-    QObject::connect(process, &QProcess::errorOccurred, owner,
-                     [process, deliver, end](QProcess::ProcessError error) {
-                         if (error != QProcess::FailedToStart)
-                             return; // the others end in finished()
-                         deliver(true, {process->errorString()});
-                         end(-1, true);
-                     });
+    // A program that can't start is reported inside start() on Windows,
+    // before the caller has the QProcess startStreaming returns: the end
+    // comes from the event loop then, like every other end
+    QObject::connect(process, &QProcess::errorOccurred, owner, [process, owner, deliver, end](QProcess::ProcessError error) {
+        if (error != QProcess::FailedToStart)
+            return; // the others end in finished()
+        QTimer::singleShot(0, owner, [why = process->errorString(), deliver, end] {
+            deliver(true, {why});
+            end(-1, true);
+        });
+    });
     QObject::connect(process, &QProcess::started, owner,
                      [process, input = command.input] { afterStart(*process, input); });
     process->start();

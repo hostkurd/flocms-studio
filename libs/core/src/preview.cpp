@@ -2,7 +2,10 @@
 
 #include <QDir>
 #include <QFile>
+#include <QCoreApplication>
+#include <QDateTime>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QMap>
 #include <QStandardPaths>
 #include <QStringList>
@@ -19,6 +22,9 @@
 #endif
 #include <windows.h>
 #include <winioctl.h>
+#else
+#include <cerrno>
+#include <csignal>
 #endif
 
 namespace FloStudio::Core {
@@ -112,7 +118,7 @@ bool makeJunction(const QString &link, const QString &target)
     const auto printBytes = static_cast<WORD>(print.size() * sizeof(wchar_t));
     // The four name fields, then both names with their terminating nulls
     const auto dataLength = static_cast<WORD>(4 * sizeof(WORD) + substituteBytes + sizeof(wchar_t) + printBytes + sizeof(wchar_t));
-    const DWORD total = sizeof(DWORD) + 2 * sizeof(WORD) + dataLength;
+    const auto total = static_cast<DWORD>(sizeof(DWORD) + 2 * sizeof(WORD) + dataLength);
     std::vector<BYTE> buffer(total, 0);
     BYTE *at = buffer.data();
     const auto put = [&at](const void *data, size_t size) {
@@ -193,6 +199,8 @@ Result<Done> makeVendor(const QString &projectDir, const QString &copyDir, Copyi
         if (!QDir().mkpath(target))
             return Error{QStringLiteral("preview_copy"), QDir::toNativeSeparators(target)};
         for (const QFileInfo &package : entries(info.filePath())) {
+            if (copying->cancelled && copying->cancelled->load())
+                return Error{QStringLiteral("preview_cancelled"), {}};
             const QString link = target + u'/' + package.fileName();
             const QString real = package.canonicalFilePath();
             if (real.isEmpty())
@@ -223,7 +231,8 @@ QByteArray readAll(const QString &path)
 }
 
 // Every file under dir that is compared, relative, with its size
-void listFiles(const QString &dir, const QString &relative, QMap<QString, qint64> *files)
+// Every file under dir that is compared, relative, with its size and time
+void listFiles(const QString &dir, const QString &relative, QStringList *files)
 {
     for (const QFileInfo &info : entries(relative.isEmpty() ? dir : dir + u'/' + relative)) {
         const QString path = relative.isEmpty() ? info.fileName() : relative + u'/' + info.fileName();
@@ -232,8 +241,69 @@ void listFiles(const QString &dir, const QString &relative, QMap<QString, qint64
         if (info.isDir())
             listFiles(dir, path, files);
         else
-            files->insert(path, info.size());
+            *files << path + u'\t' + QString::number(info.size()) + u'\t'
+                          + QString::number(info.lastModified().toMSecsSinceEpoch());
     }
+}
+
+// "path\tsize\ttime" → path: "size\ttime"
+QMap<QString, QString> byPath(const QStringList &snapshot)
+{
+    QMap<QString, QString> map;
+    for (const QString &line : snapshot) {
+        const qsizetype tab = line.indexOf(u'\t');
+        map.insert(line.left(tab), line.mid(tab + 1));
+    }
+    return map;
+}
+
+qint64 sizeOf(const QString &state)
+{
+    return state.section(u'\t', 0, 0).toLongLong();
+}
+
+// Removes dir and what is in it, never following a link or a junction:
+// those are removed themselves (Qt's removeRecursively only stops at
+// symbolic links, and walks into junctions)
+bool removeTree(const QString &dir)
+{
+    bool removed = true;
+    for (const QFileInfo &info : entries(dir)) {
+        if (isLink(info)) {
+            removed = removeLink(info.filePath()) && removed;
+        } else if (info.isDir()) {
+            removed = removeTree(info.filePath()) && removed;
+        } else {
+            QFile file(info.filePath());
+            file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
+            removed = file.remove() && removed;
+        }
+    }
+    return removed && QDir().rmdir(dir);
+}
+
+// The mark: the Studio that made the copy, then the project
+bool ownerRuns(const QString &markPath)
+{
+    QFile mark(markPath);
+    if (!mark.open(QIODevice::ReadOnly))
+        return false;
+    const qint64 pid = QString::fromUtf8(mark.readLine()).trimmed().toLongLong();
+    if (pid <= 0)
+        return false;
+    if (pid == QCoreApplication::applicationPid())
+        return true; // this Studio's own: it removes them itself
+#ifdef Q_OS_WIN
+    HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, static_cast<DWORD>(pid));
+    if (!process)
+        return false;
+    DWORD code = 0;
+    const bool running = GetExitCodeProcess(process, &code) && code == STILL_ACTIVE;
+    CloseHandle(process);
+    return running;
+#else
+    return ::kill(static_cast<pid_t>(pid), 0) == 0 || errno == EPERM;
+#endif
 }
 
 } // namespace
@@ -251,7 +321,8 @@ Result<QString> makePreviewCopy(const QString &projectDir, const QString &previe
         return Error{QStringLiteral("preview_copy"), QDir::toNativeSeparators(root)};
     // The mark first, so a copy that stops half way is still removed
     QFile mark(root + u'/' + QLatin1String(kMark));
-    if (!mark.open(QIODevice::WriteOnly) || mark.write(project.toUtf8()) < 0) {
+    const QByteArray marked = QByteArray::number(QCoreApplication::applicationPid()) + '\n' + project.toUtf8();
+    if (!mark.open(QIODevice::WriteOnly) || mark.write(marked) < 0) {
         QDir().rmdir(root);
         return Error{QStringLiteral("preview_copy"), QDir::toNativeSeparators(root)};
     }
@@ -294,7 +365,7 @@ Result<Done> removePreviewCopy(const QString &copyDir)
         if (std::any_of(left.begin(), left.end(), [](const QFileInfo &info) { return isLink(info); }))
             return Error{QStringLiteral("preview_remove"), QDir::toNativeSeparators(folder.filePath())};
     }
-    if (removed && QDir(copyDir).removeRecursively())
+    if (removed && removeTree(copyDir))
         removed = QFile::remove(root + u'/' + QLatin1String(kMark)) && QDir().rmdir(root);
     else
         removed = false;
@@ -306,7 +377,9 @@ Result<Done> removePreviewCopy(const QString &copyDir)
 void removeLeftoverPreviews(const QString &previewsDir)
 {
     for (const QFileInfo &root : entries(previewsDir)) {
-        if (!root.isDir() || isLink(root) || !QFileInfo::exists(root.filePath() + u'/' + QLatin1String(kMark)))
+        const QString mark = root.filePath() + u'/' + QLatin1String(kMark);
+        // A copy whose Studio still runs is that Studio's (it may be making it)
+        if (!root.isDir() || isLink(root) || !QFileInfo::exists(mark) || ownerRuns(mark))
             continue;
         bool any = false;
         for (const QFileInfo &copy : entries(root.filePath())) {
@@ -323,32 +396,53 @@ void removeLeftoverPreviews(const QString &previewsDir)
     }
 }
 
-QList<FileChange> previewChanges(const QString &projectDir, const QString &copyDir, qint64 maxBytes)
+QStringList fileSnapshot(const QString &dir)
 {
-    QMap<QString, qint64> before;
-    QMap<QString, qint64> after;
-    listFiles(projectDir, {}, &before);
-    listFiles(copyDir, {}, &after);
-    QStringList paths = before.keys() + after.keys();
-    std::sort(paths.begin(), paths.end());
-    paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+    QStringList files;
+    listFiles(dir, {}, &files);
+    return files;
+}
 
+QStringList changedSince(const QStringList &before, const QStringList &after)
+{
+    const QMap<QString, QString> was = byPath(before);
+    const QMap<QString, QString> now = byPath(after);
+    QStringList paths;
+    for (auto it = now.begin(); it != now.end(); ++it) {
+        if (was.value(it.key()) != it.value())
+            paths << it.key();
+    }
+    for (auto it = was.begin(); it != was.end(); ++it) {
+        if (!now.contains(it.key()))
+            paths << it.key();
+    }
+    std::sort(paths.begin(), paths.end());
+    return paths;
+}
+
+QList<FileChange> previewChanges(const QString &projectDir, const QString &copyDir, const QStringList &copied, qint64 maxBytes)
+{
+    // The copy as it was made against the copy now: what the generator
+    // did, not what changed in the project meanwhile
+    const QMap<QString, QString> was = byPath(copied);
+    const QMap<QString, QString> now = byPath(fileSnapshot(copyDir));
     QList<FileChange> changes;
-    for (const QString &path : std::as_const(paths)) {
-        const bool inProject = before.contains(path);
-        const bool inCopy = after.contains(path);
+    for (const QString &path : changedSince(copied, fileSnapshot(copyDir))) {
+        const bool before = was.contains(path);
+        const bool after = now.contains(path);
         FileChange change;
         change.path = path;
-        change.kind = !inProject ? QStringLiteral("added") : (!inCopy ? QStringLiteral("removed") : QStringLiteral("changed"));
-        // The same size: the same bytes?
-        if (inProject && inCopy && before.value(path) == after.value(path)
-            && readAll(projectDir + u'/' + path) == readAll(copyDir + u'/' + path))
+        change.kind = !before ? QStringLiteral("added") : (!after ? QStringLiteral("removed") : QStringLiteral("changed"));
+        // Written again with the same bytes: no change
+        const QString original = projectDir + u'/' + path;
+        if (before && after && sizeOf(was.value(path)) == sizeOf(now.value(path))
+            && readAll(original) == readAll(copyDir + u'/' + path))
             continue;
-        change.tooBig = (inProject && before.value(path) > maxBytes) || (inCopy && after.value(path) > maxBytes);
+        change.tooBig = (before && sizeOf(was.value(path)) > maxBytes) || (after && sizeOf(now.value(path)) > maxBytes);
         if (!change.tooBig) {
-            if (inProject)
-                change.before = readAll(projectDir + u'/' + path);
-            if (inCopy)
+            if (before)
+                change.before = readAll(original);
+            if (after)
                 change.after = readAll(copyDir + u'/' + path);
             change.binary = !isText(change.before) || !isText(change.after);
             if (change.binary) {
@@ -359,6 +453,25 @@ QList<FileChange> previewChanges(const QString &projectDir, const QString &copyD
         changes << change;
     }
     return changes;
+}
+
+QString absoluteConfigPath(const QString &copyDir)
+{
+    // flocms-admin's *_path settings (admin_pages_path, widgets_path, ...)
+    // are used as they are when absolute: a generator would write there
+    static const QRegularExpression setting(
+        QStringLiteral(R"(['"](\w+_path)['"]\s*=>\s*['"](/|\\\\|[A-Za-z]:[\\/]))"));
+    QFile file(copyDir + QStringLiteral("/config/admin.php"));
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    const QString text = QString::fromUtf8(file.readAll());
+    for (const QString &line : text.split(u'\n')) {
+        if (line.trimmed().startsWith(QStringLiteral("//")))
+            continue;
+        if (const auto match = setting.match(line); match.hasMatch())
+            return match.captured(1);
+    }
+    return {};
 }
 
 QList<DiffLine> diffLines(const QString &before, const QString &after, int context)

@@ -235,6 +235,12 @@ ScrollView {
                     }
                 }
                 AppCheck {
+                    visible: tab.which === "controller" && tab.form.controllerKind === "api"
+                    text: qsTr("With the resource actions: list, show, add, change, delete")
+                    checked: !!tab.form.apiResource
+                    onToggled: tab.gen.set("apiResource", checked)
+                }
+                AppCheck {
                     visible: tab.which === "controller" && tab.form.controllerKind !== "api"
                     text: qsTr("Also create its model")
                     checked: !!tab.form.model
@@ -412,13 +418,15 @@ ScrollView {
                 RichText {
                     visible: tab.preview.state === "failed" && !tab.preview.message
                     raw: tab.preview.error === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(tab.preview.detail))
-                                                           : (tab.preview.error ? Texts.problem(tab.preview.error) : "")
+                         : tab.preview.error === "preview_timeout" ? qsTr("The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?", "", parseInt(tab.preview.detail))
+                         : tab.preview.error === "preview_absolute_path" ? qsTr("`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.").arg(tab.preview.detail)
+                         : (tab.preview.error ? Texts.problem(tab.preview.error) : "")
                     color: Theme.badText
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
                 Mono {
-                    visible: tab.preview.state === "failed" && !!(tab.preview.message || (tab.preview.detail && tab.preview.error !== "step_exit"))
+                    visible: tab.preview.state === "failed" && !!(tab.preview.message || (tab.preview.detail && ["step_exit", "preview_timeout", "preview_absolute_path"].indexOf(tab.preview.error) < 0))
                     text: tab.preview.message || tab.preview.detail || ""
                     color: Theme.badText
                     wrapMode: Text.WrapAnywhere
@@ -427,6 +435,23 @@ ScrollView {
                 RichText {
                     visible: tab.preview.state === "done" && !tab.preview.current
                     raw: qsTr("The form changed since this preview. Preview again to see what it writes now.")
+                    color: Theme.warnText
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                }
+                // The project changed while the generator ran: maybe written
+                // there (a path set as absolute), maybe something else
+                RichText {
+                    visible: (tab.preview.outside || []).length > 0
+                    raw: qsTr("The project itself changed while the preview ran: %1. Check these files: the generator may have written there.")
+                         .arg((tab.preview.outside || []).slice(0, 5).map(p => "`" + p + "`").join(", "))
+                    color: Theme.badText
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                }
+                RichText {
+                    visible: !!tab.preview.notRemoved
+                    raw: Texts.problem("preview_remove")
                     color: Theme.warnText
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
@@ -492,7 +517,7 @@ ScrollView {
                                 delegate: Item {
                                     id: lineItem
                                     required property var modelData
-                                    readonly property bool skipped: modelData.kind === "~"
+                                    readonly property bool skipped: modelData.kind === "~" || modelData.kind === ">"
                                     implicitWidth: skipped ? skippedText.implicitWidth : codeText.implicitWidth
                                     implicitHeight: skipped ? skippedText.implicitHeight : codeText.implicitHeight
                                     Mono {
@@ -506,7 +531,9 @@ ScrollView {
                                     AppText {
                                         id: skippedText
                                         visible: lineItem.skipped
-                                        ui: lineItem.skipped ? "⋯ " + qsTr("%Ln unchanged line(s)", "", parseInt(lineItem.modelData.text)) : ""
+                                        ui: !lineItem.skipped ? ""
+                                            : "⋯ " + (lineItem.modelData.kind === ">" ? qsTr("%Ln more line(s), not shown", "", parseInt(lineItem.modelData.text))
+                                                                                      : qsTr("%Ln unchanged line(s)", "", parseInt(lineItem.modelData.text)))
                                         color: Theme.terminalMuted
                                         font.pixelSize: 12
                                     }

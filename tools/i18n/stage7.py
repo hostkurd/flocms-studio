@@ -104,6 +104,16 @@ T = {
  "The preview was stopped.": ("أُوقفت المعاينة.", "پێشبینینەکە وەستێنرا."),
  "Studio could not remove the preview's copy. It tries again when it next starts.":
    ("تعذّر على Studio حذف نسخة المعاينة. سيحاول مجددًا عند تشغيله التالي.", "Studio نەیتوانی کۆپیی پێشبینینەکە بسڕێتەوە. لە دەستپێکردنی داهاتوودا دووبارە هەوڵ دەداتەوە."),
+ # Review fixes
+ "With the resource actions: list, show, add, change, delete":
+   ("مع إجراءات المورد: العرض، والإظهار، والإضافة، والتعديل، والحذف", "لەگەڵ کردارەکانی سەرچاوە: لیست، پیشاندان، زیادکردن، گۆڕین، سڕینەوە"),
+ "`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.":
+   ("`%1` في `config/admin.php` مسار مطلق، فسيكتب المولّد هناك لا في النسخة. لا معاينة لهذا المشروع؛ الإنشاء يعمل.",
+    "`%1` لە `config/admin.php` ڕێڕەوێکی ڕەهایە، بۆیە دروستکەرەکە لەوێ دەنووسێت نەک لە کۆپییەکەدا. ئەم پڕۆژەیە پێشبینینی نییە؛ دروستکردن کار دەکات."),
+ "The project itself changed while the preview ran: %1. Check these files: the generator may have written there.":
+   ("تغيّر المشروع نفسه أثناء المعاينة: %1. افحص هذه الملفات: ربما كتب المولّد فيها.",
+    "خودی پڕۆژەکە لە کاتی پێشبینیندا گۆڕا: %1. ئەم فایلانە بپشکنە: لەوانەیە دروستکەرەکە لەوێ نووسیبێتی."),
+ "Too long: its template name would be over 41 characters.": ("طويل جدًا: سيتجاوز اسم قالبه 41 حرفًا.", "زۆر درێژە: ناوی قاڵبەکەی لە 41 پیت زیاتر دەبێت."),
 }
 
 P = {
@@ -115,4 +125,20 @@ P = {
    ["%Ln unchanged line", "%Ln unchanged lines"],
    ["لا أسطر دون تغيير", "سطر واحد دون تغيير", "سطران دون تغيير", "%Ln أسطر دون تغيير", "%Ln سطرًا دون تغيير", "%Ln سطر دون تغيير"],
    ["%Ln هێڵی نەگۆڕاو", "%Ln هێڵی نەگۆڕاو"]),
+ "%Ln more line(s), not shown": (
+   ["%Ln more line, not shown", "%Ln more lines, not shown"],
+   ["لا أسطر أخرى", "سطر آخر لا يُعرض", "سطران آخران لا يُعرضان", "%Ln أسطر أخرى لا تُعرض", "%Ln سطرًا آخر لا يُعرض", "%Ln سطر آخر لا يُعرض"],
+   ["%Ln هێڵی تر، پیشان نادرێن", "%Ln هێڵی تر، پیشان نادرێن"]),
+ "The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?": (
+   ["The generator did not finish in %Ln second, so the preview stopped it. Is the database answering?",
+    "The generator did not finish in %Ln seconds, so the preview stopped it. Is the database answering?"],
+   ["لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟",
+    "لم ينتهِ المولّد في ثانية واحدة، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟",
+    "لم ينتهِ المولّد في ثانيتين، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟",
+    "لم ينتهِ المولّد في %Ln ثوانٍ، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟",
+    "لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟",
+    "لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟"],
+   ["دروستکەرەکە لە %Ln چرکەدا تەواو نەبوو، بۆیە پێشبینین وەستاندی. ئایا داتابەیسەکە وەڵام دەداتەوە؟",
+    "دروستکەرەکە لە %Ln چرکەدا تەواو نەبوو، بۆیە پێشبینین وەستاندی. ئایا داتابەیسەکە وەڵام دەداتەوە؟"]),
 }
+

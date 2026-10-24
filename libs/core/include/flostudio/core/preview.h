@@ -6,6 +6,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 #include <atomic>
 
@@ -21,9 +22,10 @@
 //   the project's (a junction on Windows). Composer's autoloader works
 //   from __DIR__, and PHP resolves links there, so a linked vendor/ would
 //   load the project's own classes and write into the project.
-// - <previews>/<id>/.flostudio-preview marks it as Studio's: only such a
-//   folder is ever removed, and its links are removed one by one first so
-//   nothing is followed into the project's packages.
+// - <previews>/<id>/.flostudio-preview marks it as Studio's and names the
+//   Studio that made it: only such a folder is ever removed, never while
+//   that Studio runs (but by itself), and removing never follows a link
+//   or a junction, so nothing is followed into the project's packages.
 namespace FloStudio::Core {
 
 // Where the copies go: Studio's cache folder, previews/.
@@ -55,9 +57,22 @@ struct FileChange
     bool operator==(const FileChange &) const = default;
 };
 
-// The copy against the project, in path order.
+// The files under dir that are compared (not the skipped folders, no
+// links), one "path\tsize\ttime" line each.
+FLOSTUDIOCORE_EXPORT QStringList fileSnapshot(const QString &dir);
+// The paths added, removed or changed (size or time) between two snapshots.
+FLOSTUDIOCORE_EXPORT QStringList changedSince(const QStringList &before, const QStringList &after);
+
+// What the generator did in the copy: the copy now against `copied`, its
+// snapshot right after it was made (so changes in the project meanwhile
+// don't count). `before` comes from the project. In path order.
 FLOSTUDIOCORE_EXPORT QList<FileChange> previewChanges(const QString &projectDir, const QString &copyDir,
-                                                      qint64 maxBytes = 256LL * 1024);
+                                                      const QStringList &copied, qint64 maxBytes = 256LL * 1024);
+
+// A setting in the copy's config/admin.php (admin_pages_path, ...) that
+// is an absolute path: generators would write there, outside the copy.
+// Empty when there is none.
+FLOSTUDIOCORE_EXPORT QString absoluteConfigPath(const QString &copyDir);
 
 // A changed file's lines: kind ' ' (the same), '+', '-', or '~' for a run
 // of unchanged lines left out (its text says how many).

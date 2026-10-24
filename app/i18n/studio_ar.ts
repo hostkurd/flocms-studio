@@ -462,391 +462,430 @@
 <context>
     <name>GenerateTab</name>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="44" />
+        <location filename="../qml/GenerateTab.qml" line="46" />
         <source>Generator</source>
         <translation>المولّد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="48" />
+        <location filename="../qml/GenerateTab.qml" line="50" />
         <source>Admin resource</source>
         <translation>مورد إدارة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="49" />
+        <location filename="../qml/GenerateTab.qml" line="51" />
         <source>Admin page</source>
         <translation>صفحة إدارة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="50" />
+        <location filename="../qml/GenerateTab.qml" line="52" />
         <source>Block</source>
         <translation>كتلة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="51" />
-        <location filename="../qml/GenerateTab.qml" line="202" />
-        <location filename="../qml/GenerateTab.qml" line="205" />
+        <location filename="../qml/GenerateTab.qml" line="53" />
+        <location filename="../qml/GenerateTab.qml" line="204" />
+        <location filename="../qml/GenerateTab.qml" line="207" />
         <source>Widget</source>
         <translation>أداة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="52" />
+        <location filename="../qml/GenerateTab.qml" line="54" />
         <source>Controller</source>
         <translation>متحكّم</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="53" />
-        <location filename="../qml/GenerateTab.qml" line="245" />
-        <location filename="../qml/GenerateTab.qml" line="248" />
+        <location filename="../qml/GenerateTab.qml" line="55" />
+        <location filename="../qml/GenerateTab.qml" line="253" />
+        <location filename="../qml/GenerateTab.qml" line="256" />
         <source>Migration</source>
         <translation>الترحيل</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="59" />
+        <location filename="../qml/GenerateTab.qml" line="61" />
         <source>The admin resource, page, block and widget need the admin panel (`hostkurd/flocms-admin`).</source>
         <translation>يحتاج مورد الإدارة وصفحة الإدارة والكتلة والأداة إلى لوحة الإدارة (`hostkurd/flocms-admin`).</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="83" />
+        <location filename="../qml/GenerateTab.qml" line="85" />
         <source>New admin resource</source>
         <translation>مورد إدارة جديد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="83" />
+        <location filename="../qml/GenerateTab.qml" line="85" />
         <source>New admin page</source>
         <translation>صفحة إدارة جديدة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="84" />
+        <location filename="../qml/GenerateTab.qml" line="86" />
         <source>New block</source>
         <translation>كتلة جديدة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="84" />
+        <location filename="../qml/GenerateTab.qml" line="86" />
         <source>New dashboard widget</source>
         <translation>أداة جديدة للوحة المعلومات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="87" />
         <source>New controller</source>
         <translation>متحكّم جديد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="85" />
+        <location filename="../qml/GenerateTab.qml" line="87" />
         <source>New migration</source>
         <translation>ترحيل جديد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="99" />
+        <location filename="../qml/GenerateTab.qml" line="101" />
         <source>What it does</source>
         <translation>ما يفعله</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="99" />
-        <location filename="../qml/GenerateTab.qml" line="112" />
+        <location filename="../qml/GenerateTab.qml" line="101" />
+        <location filename="../qml/GenerateTab.qml" line="114" />
         <source>Name</source>
         <translation>الاسم</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="100" />
+        <location filename="../qml/GenerateTab.qml" line="102" />
         <source>A class name, e.g. `Property` or `BlogPost`.</source>
         <translation>اسم صنف، مثل `Property` أو `BlogPost`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="101" />
+        <location filename="../qml/GenerateTab.qml" line="103" />
         <source>A class name, e.g. `SalesReport`.</source>
         <translation>اسم صنف، مثل `SalesReport`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="102" />
+        <location filename="../qml/GenerateTab.qml" line="104" />
         <source>A class name, e.g. `LatestProjects`.</source>
         <translation>اسم صنف، مثل `LatestProjects`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="103" />
+        <location filename="../qml/GenerateTab.qml" line="105" />
         <source>A class name, e.g. `PostStats` or `RecentPosts`.</source>
         <translation>اسم صنف، مثل `PostStats` أو `RecentPosts`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="104" />
+        <location filename="../qml/GenerateTab.qml" line="106" />
         <source>E.g. `Blog` or `BlogPost`.</source>
         <translation>مثل `Blog` أو `BlogPost`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="105" />
+        <location filename="../qml/GenerateTab.qml" line="107" />
         <source>E.g. `create_posts_table` or `add_slug_to_posts`.</source>
         <translation>مثل `create_posts_table` أو `add_slug_to_posts`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="121" />
-        <location filename="../qml/GenerateTab.qml" line="125" />
-        <location filename="../qml/GenerateTab.qml" line="272" />
-        <location filename="../qml/GenerateTab.qml" line="275" />
+        <location filename="../qml/GenerateTab.qml" line="123" />
+        <location filename="../qml/GenerateTab.qml" line="127" />
+        <location filename="../qml/GenerateTab.qml" line="280" />
+        <location filename="../qml/GenerateTab.qml" line="283" />
         <source>Table</source>
         <translation>الجدول</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="122" />
+        <location filename="../qml/GenerateTab.qml" line="124" />
         <source>Empty: the plural of the name.</source>
         <translation>فارغ: جمع الاسم.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="129" />
-        <location filename="../qml/GenerateTab.qml" line="133" />
+        <location filename="../qml/GenerateTab.qml" line="131" />
+        <location filename="../qml/GenerateTab.qml" line="135" />
         <source>URL</source>
         <translation>الرابط</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="133" />
+        <location filename="../qml/GenerateTab.qml" line="135" />
         <source>the table</source>
         <translation>الجدول</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="139" />
-        <location filename="../qml/GenerateTab.qml" line="143" />
+        <location filename="../qml/GenerateTab.qml" line="141" />
+        <location filename="../qml/GenerateTab.qml" line="145" />
         <source>Sidebar group</source>
         <translation>مجموعة الشريط الجانبي</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="140" />
+        <location filename="../qml/GenerateTab.qml" line="142" />
         <source>E.g. Reports. Empty: no group.</source>
         <translation>مثل Reports. فارغ: بلا مجموعة.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="150" />
-        <location filename="../qml/GenerateTab.qml" line="153" />
+        <location filename="../qml/GenerateTab.qml" line="152" />
+        <location filename="../qml/GenerateTab.qml" line="155" />
         <source>Create and Edit open as</source>
         <translation>يُفتح الإنشاء والتعديل في</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="157" />
+        <location filename="../qml/GenerateTab.qml" line="159" />
         <source>A full page</source>
         <translation>صفحة كاملة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="158" />
+        <location filename="../qml/GenerateTab.qml" line="160" />
         <source>A dialog</source>
         <translation>نافذة حوار</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="159" />
+        <location filename="../qml/GenerateTab.qml" line="161" />
         <source>A slide-over panel</source>
         <translation>لوحة منزلقة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="168" />
+        <location filename="../qml/GenerateTab.qml" line="170" />
         <source>Also create a migration for the table</source>
         <translation>أنشئ أيضًا ترحيلًا للجدول</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="169" />
+        <location filename="../qml/GenerateTab.qml" line="171" />
         <source>Editors can drag records into order (a `sort` column)</source>
         <translation>يستطيع المحررون سحب السجلات لترتيبها (عمود `sort`)</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="173" />
+        <location filename="../qml/GenerateTab.qml" line="175" />
         <source>The resource starts with a title field. Add the other fields in the file.</source>
         <translation>يبدأ المورد بحقل عنوان. أضف الحقول الأخرى في الملف.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="183" />
-        <location filename="../qml/GenerateTab.qml" line="186" />
+        <location filename="../qml/GenerateTab.qml" line="185" />
+        <location filename="../qml/GenerateTab.qml" line="188" />
         <source>The page shows</source>
         <translation>تعرض الصفحة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="190" />
+        <location filename="../qml/GenerateTab.qml" line="192" />
         <source>Content of its own</source>
         <translation>محتوى خاصًّا بها</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="191" />
+        <location filename="../qml/GenerateTab.qml" line="193" />
         <source>A form with Save</source>
         <translation>نموذجًا مع زر حفظ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="192" />
+        <location filename="../qml/GenerateTab.qml" line="194" />
         <source>A database table</source>
         <translation>جدول قاعدة بيانات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="193" />
+        <location filename="../qml/GenerateTab.qml" line="195" />
         <source>A resource's records</source>
         <translation>سجلات مورد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="209" />
+        <location filename="../qml/GenerateTab.qml" line="211" />
         <source>Numbers</source>
         <translation>أرقام</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="210" />
+        <location filename="../qml/GenerateTab.qml" line="212" />
         <source>Latest records</source>
         <translation>أحدث السجلات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="211" />
+        <location filename="../qml/GenerateTab.qml" line="213" />
         <source>A chart</source>
         <translation>رسم بياني</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="220" />
-        <location filename="../qml/GenerateTab.qml" line="223" />
+        <location filename="../qml/GenerateTab.qml" line="222" />
+        <location filename="../qml/GenerateTab.qml" line="225" />
         <source>Actions</source>
         <translation>الإجراءات</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="227" />
+        <location filename="../qml/GenerateTab.qml" line="229" />
         <source>A page</source>
         <translation>صفحة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="228" />
+        <location filename="../qml/GenerateTab.qml" line="230" />
         <source>Pages and admin actions (CRUD)</source>
         <translation>صفحات وإجراءات إدارة (CRUD)</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="229" />
+        <location filename="../qml/GenerateTab.qml" line="231" />
         <source>Admin actions</source>
         <translation>إجراءات الإدارة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="230" />
+        <location filename="../qml/GenerateTab.qml" line="232" />
         <source>JSON API</source>
         <translation>واجهة JSON API</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="237" />
+        <location filename="../qml/GenerateTab.qml" line="239" />
+        <source>With the resource actions: list, show, add, change, delete</source>
+        <translation>مع إجراءات المورد: العرض، والإظهار، والإضافة، والتعديل، والحذف</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="245" />
         <source>Also create its model</source>
         <translation>أنشئ أيضًا نموذجه (model)</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="252" />
+        <location filename="../qml/GenerateTab.qml" line="260" />
         <source>Empty</source>
         <translation>فارغ</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="253" />
+        <location filename="../qml/GenerateTab.qml" line="261" />
         <source>Create a table</source>
         <translation>إنشاء جدول</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="254" />
+        <location filename="../qml/GenerateTab.qml" line="262" />
         <source>Change a table</source>
         <translation>تعديل جدول</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="261" />
+        <location filename="../qml/GenerateTab.qml" line="269" />
         <source>A name like `create_posts_table` creates the `posts` table.</source>
         <translation>اسم مثل `create_posts_table` يُنشئ الجدول `posts`.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="296" />
-        <location filename="../qml/GenerateTab.qml" line="300" />
+        <location filename="../qml/GenerateTab.qml" line="304" />
+        <location filename="../qml/GenerateTab.qml" line="308" />
         <source>Resource</source>
         <translation>المورد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="297" />
+        <location filename="../qml/GenerateTab.qml" line="305" />
         <source>Optional: the resource it counts.</source>
         <translation>اختياري: المورد الذي تعدّه.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="320" />
+        <location filename="../qml/GenerateTab.qml" line="328" />
         <source>Also write its view, with the panel's parts</source>
         <translation>اكتب أيضًا عرضها (view) بعناصر اللوحة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="325" />
+        <location filename="../qml/GenerateTab.qml" line="333" />
         <source>Overwrite files that are there</source>
         <translation>استبدل الملفات الموجودة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="353" />
+        <location filename="../qml/GenerateTab.qml" line="361" />
         <source>Preview</source>
         <translation>معاينة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="359" />
+        <location filename="../qml/GenerateTab.qml" line="367" />
         <source>Create resource</source>
         <translation>إنشاء المورد</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="359" />
+        <location filename="../qml/GenerateTab.qml" line="367" />
         <source>Create page</source>
         <translation>إنشاء الصفحة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="360" />
+        <location filename="../qml/GenerateTab.qml" line="368" />
         <source>Create block</source>
         <translation>إنشاء الكتلة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="360" />
+        <location filename="../qml/GenerateTab.qml" line="368" />
         <source>Create widget</source>
         <translation>إنشاء الأداة</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="361" />
+        <location filename="../qml/GenerateTab.qml" line="369" />
         <source>Create controller</source>
         <translation>إنشاء المتحكّم</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="361" />
+        <location filename="../qml/GenerateTab.qml" line="369" />
         <source>Create migration</source>
         <translation>إنشاء الترحيل</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="384" />
+        <location filename="../qml/GenerateTab.qml" line="392" />
         <source>Preview: what it will write</source>
         <translation>معاينة: ما سيكتبه</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="387" />
+        <location filename="../qml/GenerateTab.qml" line="395" />
         <source>%Ln file(s)</source>
-        <translation><numerusform>لا ملفات</numerusform><numerusform>ملف واحد</numerusform><numerusform>ملفان</numerusform><numerusform>%Ln ملفات</numerusform><numerusform>%Ln ملفًا</numerusform><numerusform>%Ln ملف</numerusform></translation>
+        <translation>
+            <numerusform>لا ملفات</numerusform>
+            <numerusform>ملف واحد</numerusform>
+            <numerusform>ملفان</numerusform>
+            <numerusform>%Ln ملفات</numerusform>
+            <numerusform>%Ln ملفًا</numerusform>
+            <numerusform>%Ln ملف</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="395" />
+        <location filename="../qml/GenerateTab.qml" line="403" />
         <source>Preview runs the generator in a temporary copy of the project and shows the files it writes. Your project changes only with Create.</source>
         <translation>تشغّل المعاينة المولّد في نسخة مؤقتة من المشروع وتعرض الملفات التي يكتبها. لا يتغير مشروعك إلا بزر الإنشاء.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="405" />
+        <location filename="../qml/GenerateTab.qml" line="413" />
         <source>Copying the project…</source>
         <translation>جارٍ نسخ المشروع…</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="405" />
+        <location filename="../qml/GenerateTab.qml" line="413" />
         <source>Running the generator in the copy…</source>
         <translation>جارٍ تشغيل المولّد في النسخة…</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="412" />
+        <location filename="../qml/GenerateTab.qml" line="420" />
         <source>The command ended with exit code %1.</source>
         <translation>انتهى الأمر برمز الخروج %1.</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/GenerateTab.qml" line="421" />
+        <source>The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?</source>
+        <translation><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في ثانية واحدة، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في ثانيتين، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثوانٍ، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform><numerusform>لم ينتهِ المولّد في %Ln ثانية، فأوقفته المعاينة. هل تستجيب قاعدة البيانات؟</numerusform></translation>
+    </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="427" />
+        <location filename="../qml/GenerateTab.qml" line="422" />
+        <source>`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.</source>
+        <translation>`%1` في `config/admin.php` مسار مطلق، فسيكتب المولّد هناك لا في النسخة. لا معاينة لهذا المشروع؛ الإنشاء يعمل.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="437" />
         <source>The form changed since this preview. Preview again to see what it writes now.</source>
         <translation>تغيّر النموذج بعد هذه المعاينة. عاين مجددًا لترى ما سيكتبه الآن.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="434" />
+        <location filename="../qml/GenerateTab.qml" line="446" />
+        <source>The project itself changed while the preview ran: %1. Check these files: the generator may have written there.</source>
+        <translation>تغيّر المشروع نفسه أثناء المعاينة: %1. افحص هذه الملفات: ربما كتب المولّد فيها.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GenerateTab.qml" line="461" />
         <source>It writes no files.</source>
         <translation>لا يكتب أي ملفات.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/GenerateTab.qml" line="492" />
+        <location filename="../qml/GenerateTab.qml" line="535" />
+        <source>%Ln more line(s), not shown</source>
+        <translation><numerusform>لا أسطر أخرى</numerusform><numerusform>سطر آخر لا يُعرض</numerusform><numerusform>سطران آخران لا يُعرضان</numerusform><numerusform>%Ln أسطر أخرى لا تُعرض</numerusform><numerusform>%Ln سطرًا آخر لا يُعرض</numerusform><numerusform>%Ln سطر آخر لا يُعرض</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/GenerateTab.qml" line="536" />
         <source>%Ln unchanged line(s)</source>
-        <translation><numerusform>لا أسطر دون تغيير</numerusform><numerusform>سطر واحد دون تغيير</numerusform><numerusform>سطران دون تغيير</numerusform><numerusform>%Ln أسطر دون تغيير</numerusform><numerusform>%Ln سطرًا دون تغيير</numerusform><numerusform>%Ln سطر دون تغيير</numerusform></translation>
+        <translation>
+            <numerusform>لا أسطر دون تغيير</numerusform>
+            <numerusform>سطر واحد دون تغيير</numerusform>
+            <numerusform>سطران دون تغيير</numerusform>
+            <numerusform>%Ln أسطر دون تغيير</numerusform>
+            <numerusform>%Ln سطرًا دون تغيير</numerusform>
+            <numerusform>%Ln سطر دون تغيير</numerusform>
+        </translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="505" />
+        <location filename="../qml/GenerateTab.qml" line="548" />
         <source>Not a text file.</source>
         <translation>ليس ملفًا نصيًا.</translation>
     </message>
     <message>
-        <location filename="../qml/GenerateTab.qml" line="505" />
+        <location filename="../qml/GenerateTab.qml" line="548" />
         <source>Too large to show here.</source>
         <translation>أكبر من أن يُعرض هنا.</translation>
     </message>
@@ -2306,217 +2345,222 @@
         <translation>أدخل المورد الذي تعرضه، مثل `Post`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="113" />
+        <location filename="../qml/Texts.qml" line="101" />
+        <source>Too long: its template name would be over 41 characters.</source>
+        <translation>طويل جدًا: سيتجاوز اسم قالبه 41 حرفًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="114" />
         <source>This folder is not a FloCMS project: its `composer.json` neither is the FloCMS skeleton nor requires `hostkurd/flocms-core`.</source>
         <translation>هذا المجلد ليس مشروع FloCMS: ملف `composer.json` فيه ليس هيكل FloCMS ولا يتطلب `hostkurd/flocms-core`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="114" />
+        <location filename="../qml/Texts.qml" line="115" />
         <source>The project folder is gone.</source>
         <translation>مجلد المشروع لم يعد موجوداً.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="115" />
+        <location filename="../qml/Texts.qml" line="116" />
         <source>Studio could not read its settings file, so it runs with the defaults and won't save over it. Close the program that holds the file, then start Studio again.</source>
         <translation>تعذّر على Studio قراءة ملف إعداداته، لذا يعمل بالقيم الافتراضية ولن يكتب فوقه. أغلق البرنامج الذي يستخدم الملف، ثم شغّل Studio من جديد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="116" />
+        <location filename="../qml/Texts.qml" line="117" />
         <source>Studio could not save its settings.</source>
         <translation>تعذّر على Studio حفظ إعداداته.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="117" />
+        <location filename="../qml/Texts.qml" line="118" />
         <source>The editor in Settings &gt; Editor was not found.</source>
         <translation>لم يُعثر على المحرر المحدد في الإعدادات &gt; المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="118" />
+        <location filename="../qml/Texts.qml" line="119" />
         <source>The editor did not start.</source>
         <translation>لم يبدأ المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="119" />
+        <location filename="../qml/Texts.qml" line="120" />
         <source>The editor is a `.cmd` file, and the folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose the editor's `.exe` in Settings &gt; Editor.</source>
         <translation>المحرر ملف `.cmd`، واسم المجلد فيه أحرف يقرؤها `cmd.exe` بنفسه ( ) &amp; ! %. اختر ملف `.exe` الخاص بالمحرر في الإعدادات &gt; المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="120" />
+        <location filename="../qml/Texts.qml" line="121" />
         <source>The folder could not be opened.</source>
         <translation>تعذّر فتح المجلد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="121" />
+        <location filename="../qml/Texts.qml" line="122" />
         <source>The download failed.</source>
         <translation>فشل التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="122" />
+        <location filename="../qml/Texts.qml" line="123" />
         <source>The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.</source>
         <translation>الملف المنزّل ليس الملف الذي يتوقعه Studio (بصمة SHA-256 مختلفة)، لذا حُذف.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="123" />
+        <location filename="../qml/Texts.qml" line="124" />
         <source>The download could not be unpacked.</source>
         <translation>تعذّر فك ضغط التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="124" />
+        <location filename="../qml/Texts.qml" line="125" />
         <source>The download could not be installed.</source>
         <translation>تعذّر تثبيت التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="125" />
+        <location filename="../qml/Texts.qml" line="126" />
         <source>Cancelled.</source>
         <translation>أُلغي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="126" />
+        <location filename="../qml/Texts.qml" line="127" />
         <source>The server did not start.</source>
         <translation>لم يبدأ الخادم.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="127" />
+        <location filename="../qml/Texts.qml" line="128" />
         <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
         <translation>قال الخادم إنه بدأ، لكن لا شيء يجيب على عنوانه. ربما يشغل برنامج آخر المنفذ: جرّب منفذًا آخر في الإعدادات &gt; الخادم.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="128" />
+        <location filename="../qml/Texts.qml" line="129" />
         <source>The server stopped by itself.</source>
         <translation>توقف الخادم من تلقاء نفسه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="129" />
+        <location filename="../qml/Texts.qml" line="130" />
         <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>لم يُعثر على PHP. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="130" />
+        <location filename="../qml/Texts.qml" line="131" />
         <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
         <translation>PHP ملف `.bat` أو `.cmd`، واسم مجلد المشروع فيه أحرف يقرؤها `cmd.exe` بنفسه ( ) &amp; ! %. اختر `php.exe` في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="131" />
+        <location filename="../qml/Texts.qml" line="132" />
         <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
         <translation>لا يحتوي المشروع على المشغّل `flo` بعد: شغّل `composer install` فيه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="132" />
+        <location filename="../qml/Texts.qml" line="133" />
         <source>The folder for the new project could not be made.</source>
         <translation>تعذّر إنشاء مجلد المشروع الجديد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="133" />
+        <location filename="../qml/Texts.qml" line="134" />
         <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
         <translation>تعذّر على Studio حذف المجلد الذي أنشأه. أغلق ما يستخدمه (محررًا أو طرفية)، ثم حاول مجددًا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="134" />
+        <location filename="../qml/Texts.qml" line="135" />
         <source>Studio could not write the project's `.env` file.</source>
         <translation>تعذّر على Studio كتابة ملف `.env` للمشروع.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="136" />
+        <location filename="../qml/Texts.qml" line="137" />
         <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
         <translation>في إحدى قيم `.env` حرف لا يستطيع FloCMS قراءته هناك (سطر جديد).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="137" />
+        <location filename="../qml/Texts.qml" line="138" />
         <source>Stopped.</source>
         <translation>أُوقف.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="138" />
+        <location filename="../qml/Texts.qml" line="139" />
         <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation>لا يحتوي المشروع على المجلد `vendor/` بعد: شغّل `composer install` فيه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="139" />
+        <location filename="../qml/Texts.qml" line="140" />
         <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation>المشروع أكبر من أن يُنسخ للمعاينة (أكثر من 400 ميغابايت أو 40,000 ملف، دون المرفوعات والسجلات). يعمل الإنشاء دون معاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="140" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>Studio could not copy the project for the preview.</source>
         <translation>تعذّر على Studio نسخ المشروع للمعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="141" />
+        <location filename="../qml/Texts.qml" line="142" />
         <source>The preview was stopped.</source>
         <translation>أُوقفت المعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="142" />
+        <location filename="../qml/Texts.qml" line="143" />
         <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation>تعذّر على Studio حذف نسخة المعاينة. سيحاول مجددًا عند تشغيله التالي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="143" />
+        <location filename="../qml/Texts.qml" line="144" />
         <source>Studio does not run this command.</source>
         <translation>لا يشغّل Studio هذا الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="144" />
+        <location filename="../qml/Texts.qml" line="145" />
         <source>There is no secure store for passwords on this computer.</source>
         <translation>لا يوجد مخزن آمن لكلمات المرور على هذا الحاسوب.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="145" />
+        <location filename="../qml/Texts.qml" line="146" />
         <source>The secure store did not give the password.</source>
         <translation>لم يُعطِ المخزن الآمن كلمة المرور.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="146" />
+        <location filename="../qml/Texts.qml" line="147" />
         <source>No password is saved for this database user.</source>
         <translation>لا توجد كلمة مرور محفوظة لمستخدم قاعدة البيانات هذا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="147" />
+        <location filename="../qml/Texts.qml" line="148" />
         <source>The secure store did not answer.</source>
         <translation>لم يستجب المخزن الآمن.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="148" />
+        <location filename="../qml/Texts.qml" line="149" />
         <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>لم يُعثر على Composer. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="149" />
+        <location filename="../qml/Texts.qml" line="150" />
         <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation>لا يزال أمر قيد التشغيل في هذا المشروع. أزله من القائمة حين ينتهي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="150" />
+        <location filename="../qml/Texts.qml" line="151" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>لا يحتوي المشروع على ملف `.env`. انسخ `.env.example` إلى `.env`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="151" />
+        <location filename="../qml/Texts.qml" line="152" />
         <source>The command could not run.</source>
         <translation>تعذّر تشغيل الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="152" />
+        <location filename="../qml/Texts.qml" line="153" />
         <source>Studio could not read what the check printed.</source>
         <translation>تعذّر على Studio قراءة ما طبعه الفحص.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="153" />
+        <location filename="../qml/Texts.qml" line="154" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>تعذّر على Studio قراءة قاعدة البيانات. هل خادم قاعدة البيانات يعمل، وهل إعدادات `.env` صحيحة؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="154" />
+        <location filename="../qml/Texts.qml" line="155" />
         <source>Studio could not read the migrations.</source>
         <translation>تعذّر على Studio قراءة الترحيلات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="155" />
+        <location filename="../qml/Texts.qml" line="156" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>لا يوجد `storage/logs/app.log` بعد. يكتبه FloCMS عند أول رسالة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="157" />
+        <location filename="../qml/Texts.qml" line="158" />
         <source>Something went wrong (%1).</source>
         <translation>حدث خطأ (%1).</translation>
     </message>

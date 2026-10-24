@@ -34,7 +34,8 @@ class ProjectGenerate : public QObject
     // {state (idle, copying, running, done, failed), shown, files: [{path,
     //  kind (added, changed, removed), binary, tooBig, lines: [{kind, text}]}],
     //  lines (what the generator printed), error, detail, message, current
-    //  (false once the form changed since)}
+    //  (false once the form changed since), outside (project files that
+    //  changed while it ran), notRemoved (the copy could not be removed)}
     Q_PROPERTY(QVariantMap preview READ preview NOTIFY previewChanged)
     // Create: {state (running, done, failed), shown, lines, error, detail, message}
     Q_PROPERTY(QVariantMap created READ created NOTIFY createdChanged)
@@ -102,6 +103,9 @@ private:
     int m_previewRun = 0;           // a newer preview makes an older one's results void
     std::shared_ptr<std::atomic<bool>> m_cancel = std::make_shared<std::atomic<bool>>(false);
     QString m_copy;                 // the copy while its generator runs
+    QStringList m_copied;           // its files as they were made
+    QStringList m_projectBefore;    // the project's then
+    bool m_previewTimedOut = false;
     QProcess *m_previewProcess = nullptr; // a child of this while it runs
     QStringList m_previewOut;
     QStringList m_previewErr;

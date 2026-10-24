@@ -223,6 +223,8 @@ private slots:
         QVERIFY2(made.ok(), qUtf8Printable(made ? QString() : made.error().code));
         const QString &copy = made.value();
         QCOMPARE(QFileInfo(copy).fileName(), QStringLiteral("my-shop"));
+        const QStringList copied = fileSnapshot(copy);
+        QVERIFY(!copied.isEmpty());
         // The project's files, without what generators don't need
         QCOMPARE(readFile(copy + QStringLiteral("/config/admin.php")), readFile(project + QStringLiteral("/config/admin.php")));
         QVERIFY(QFileInfo::exists(copy + QStringLiteral("/storage/database.sqlite")));
@@ -245,7 +247,9 @@ private slots:
                   "<?php\nreturn [\n    'widgets' => [\n        \\App\\Admin\\Widgets\\PostStats::class,\n    ],\n];\n");
         writeFile(copy + QStringLiteral("/storage/logs/new.log"), "not compared\n");
         QVERIFY(QFile::remove(copy + QStringLiteral("/public/index.php")));
-        const QList<FileChange> changes = previewChanges(project, copy);
+        // The project changing meanwhile is not the generator's doing
+        writeFile(project + QStringLiteral("/admin/Resources/Other.php"), "<?php // the person's\n");
+        const QList<FileChange> changes = previewChanges(project, copy, copied);
         QCOMPARE(changes.size(), 3);
         QCOMPARE(changes.at(0).path, QStringLiteral("admin/Widgets/PostStats.php"));
         QCOMPARE(changes.at(0).kind, QStringLiteral("added"));
@@ -255,12 +259,16 @@ private slots:
         QVERIFY(changes.at(1).before.contains("'widgets' => [\n    ],"));
         QCOMPARE(changes.at(2).kind, QStringLiteral("removed"));
         // Over the limit, or not text: no contents
-        const QList<FileChange> small = previewChanges(project, copy, 10);
+        const QList<FileChange> small = previewChanges(project, copy, copied, 10);
         QVERIFY(small.at(0).tooBig);
         QVERIFY(small.at(0).after.isEmpty());
 
+        // A link that appears in the copy (another Studio making one) is
+        // removed, never followed
+        QVERIFY(QFile::link(project + QStringLiteral("/admin"), copy + QStringLiteral("/admin/link")));
         // Removed, links first: the project's packages stay
         QVERIFY(removePreviewCopy(copy).ok());
+        QVERIFY(QFileInfo::exists(project + QStringLiteral("/admin/Resources/PostResource.php")));
         QVERIFY(!QFileInfo::exists(copy));
         QVERIFY(!QFileInfo::exists(QFileInfo(copy).absolutePath()));
         QCOMPARE(readFile(project + QStringLiteral("/vendor/hostkurd/flocms-cli/src/Kernel.php")), QByteArray("<?php // the cli\n"));
@@ -277,12 +285,20 @@ private slots:
         const QString project = dir.filePath(QStringLiteral("site"));
         makeProject(project);
         const QString previews = dir.filePath(QStringLiteral("previews"));
-        QVERIFY(makePreviewCopy(project, previews).ok());
-        QVERIFY(makePreviewCopy(project, previews).ok());
+        const auto ours = makePreviewCopy(project, previews);
+        const auto gone = makePreviewCopy(project, previews);
+        QVERIFY(ours.ok() && gone.ok());
+        // One a Studio that has ended made (no such process)
+        writeFile(QFileInfo(gone.value()).absolutePath() + QStringLiteral("/.flostudio-preview"), "999999999\n" + project.toUtf8());
         writeFile(previews + QStringLiteral("/not-ours/keep.txt"), "x");
         QCOMPARE(QDir(previews).entryList(QDir::Dirs | QDir::NoDotAndDotDot).size(), 3);
         removeLeftoverPreviews(previews);
-        QCOMPARE(QDir(previews).entryList(QDir::Dirs | QDir::NoDotAndDotDot), QStringList{QStringLiteral("not-ours")});
+        // This Studio's own copy stays: it removes it itself
+        QCOMPARE(QDir(previews).entryList(QDir::Dirs | QDir::NoDotAndDotDot).size(), 2);
+        QVERIFY(QFileInfo::exists(ours.value()));
+        QVERIFY(!QFileInfo::exists(gone.value()));
+        QVERIFY(QFileInfo::exists(previews + QStringLiteral("/not-ours/keep.txt")));
+        QVERIFY(removePreviewCopy(ours.value()).ok());
         QVERIFY(QFileInfo::exists(project + QStringLiteral("/vendor/hostkurd/flocms-cli/src/Kernel.php")));
     }
 
@@ -306,6 +322,36 @@ private slots:
         const std::atomic<bool> stop{true};
         const auto made = makePreviewCopy(project, dir.filePath(QStringLiteral("previews")), &stop);
         QCOMPARE(made.error().code, QStringLiteral("preview_cancelled"));
+    }
+
+    void absolutePaths()
+    {
+        const QTemporaryDir dir;
+        writeFile(dir.filePath(QStringLiteral("config/admin.php")),
+                  "<?php\nreturn [\n    // 'admin_pages_path' => '/somewhere',\n    'widgets_path' => 'admin/Widgets',\n];\n");
+        QCOMPARE(absoluteConfigPath(dir.path()), QString());
+        writeFile(dir.filePath(QStringLiteral("config/admin.php")), "<?php\nreturn ['admin_pages_path' => '/srv/shared/Pages'];\n");
+        QCOMPARE(absoluteConfigPath(dir.path()), QStringLiteral("admin_pages_path"));
+        writeFile(dir.filePath(QStringLiteral("config/admin.php")), "<?php\nreturn [\"resources_path\" => 'D:\\\\shared'];\n");
+        QCOMPARE(absoluteConfigPath(dir.path()), QStringLiteral("resources_path"));
+        // Snapshots
+        const QStringList before = fileSnapshot(dir.path());
+        writeFile(dir.filePath(QStringLiteral("new.php")), "x");
+        QCOMPARE(changedSince(before, fileSnapshot(dir.path())), QStringList{QStringLiteral("new.php")});
+    }
+
+    void moreChecks()
+    {
+        GeneratorForm form;
+        form.name = QStringLiteral("AVeryLongBlockNameThatGoesOnAndOnForEver");
+        QCOMPARE(fields(checkGenerator(Generator::Block, form)), QStringList{QStringLiteral("name=block_name_long")});
+        form.name = QStringLiteral("Posts");
+        form.controllerKind = QStringLiteral("api");
+        form.apiResource = true;
+        QCOMPARE(generatorArguments(Generator::Controller, form),
+                 (QStringList{QStringLiteral("make:controller"), QStringLiteral("Posts"), QStringLiteral("--api"), QStringLiteral("--resource")}));
+        form.controllerKind = QStringLiteral("plain"); // only with an API controller
+        QCOMPARE(generatorArguments(Generator::Controller, form).size(), 2);
     }
 
     void diffs()

@@ -15,7 +15,7 @@
 //   make:admin-page <Name> [--view] [--form | --table=<table> | --resource=<Resource>] [--group=]
 //   make:admin-block <Name>
 //   make:admin-widget <Name> [--type=stats|records|chart] [--resource=]   (records needs a resource)
-//   make:controller <Name> [--resource | --admin | --api] [--model]
+//   make:controller <Name> [--resource | --admin | --api [--resource]] [--model]
 //   make:migration <name> [--create=<table> | --table=<table>]
 //
 // and --force on each to overwrite what is there. The admin panel's four
@@ -48,6 +48,7 @@ struct GeneratorForm
     // Controller
     QString controllerKind = QStringLiteral("plain"); // plain, resource, admin, api
     bool model = false;
+    bool apiResource = false; // an API controller with index, show, store, update, destroy
 
     // Migration
     QString migrationKind = QStringLiteral("plain"); // plain, create, change
@@ -66,6 +67,7 @@ FLOSTUDIOCORE_EXPORT bool generatorNeedsAdmin(Generator generator);
 // What is wrong, field by field ({field, code}): name_empty, class_name
 // (StudlyCase: Property, BlogPost), controller_name, migration_name
 // (lower case with _), table_name, slug_name, resource_name,
+// block_name_long (its template name, snake case, over 41 characters),
 // resource_needed (a records widget, a resource page), table_needed (a
 // table page, a migration that creates or changes one), group_invalid.
 FLOSTUDIOCORE_EXPORT QList<FieldProblem> checkGenerator(Generator generator, const GeneratorForm &form);
