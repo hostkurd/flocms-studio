@@ -1,3 +1,4 @@
+#include <flostudio/core/downloads.h>
 #include <flostudio/core/process.h>
 #include <flostudio/core/tools.h>
 
@@ -159,8 +160,10 @@ QStringList commonToolFolders(const QString &home)
 
 QStringList toolSearchPath()
 {
-    // Worked out once (thread-safe static): asking the shell takes a moment.
-    static const QStringList folders = [] {
+    // The system's part is worked out once (thread-safe static): asking the
+    // shell takes a moment. Studio's downloads are read each time, so a
+    // tool downloaded a minute ago is found.
+    static const QStringList system = [] {
         QStringList list;
         for (const QString &folder : qEnvironmentVariable("PATH").split(QDir::listSeparator(), Qt::SkipEmptyParts))
             addFolder(list, folder);
@@ -170,10 +173,14 @@ QStringList toolSearchPath()
 #endif
         for (const QString &folder : commonToolFolders(QDir::homePath()))
             addFolder(list, folder);
-        for (QString &folder : list)
-            folder = QDir::toNativeSeparators(folder);
         return list;
     }();
+    QStringList folders = system;
+    // Last: what Studio downloaded itself (D15), newest first
+    for (const QString &folder : installedToolFolders())
+        addFolder(folders, QDir::fromNativeSeparators(folder));
+    for (QString &folder : folders)
+        folder = QDir::toNativeSeparators(folder);
     return folders;
 }
 
@@ -429,7 +436,9 @@ Result<Done> openInEditor(const Settings &settings, const QString &folder)
     QProcess process;
     process.setProgram(program);
     process.setArguments(parts);
-    process.setWorkingDirectory(folder);
+    // A file (the project's .env) opens from its folder
+    const QFileInfo target(folder);
+    process.setWorkingDirectory(target.isDir() ? folder : target.absolutePath());
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
     environment.insert(QStringLiteral("PATH"), toolSearchPath().join(QDir::listSeparator()));
     process.setProcessEnvironment(environment);

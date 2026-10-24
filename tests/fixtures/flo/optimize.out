@@ -1,0 +1,2 @@
+[OK] 18 template(s) compiled into views/cache.
+! For faster class loading on production, also run: composer dump-autoload --optimize --no-dev

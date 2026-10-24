@@ -1,0 +1,3 @@
+
+ [ERROR] The database is not configured. Set DB_NAME and DB_USERNAME (and DB_PASSWORD) in .env, then run "php flo db:check".
+

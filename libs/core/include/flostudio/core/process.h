@@ -25,7 +25,9 @@ namespace FloStudio::Core {
 //     Linux, its own job object on Windows), so stopping it also stops its
 //     children: `php flo serve` runs `php -S` as a child;
 //   - ends with its children when its QProcess is deleted (the owner goes,
-//     Studio quits), and on Windows also when Studio crashes. On Linux a
+//     Studio quits), and on Windows also when Studio crashes;
+//   - takes what it started with it when it ends: children still running
+//     then are ended at once. On Linux a
 //     crash ends the program itself only; on macOS neither.
 
 struct Command

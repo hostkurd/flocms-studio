@@ -5,7 +5,8 @@ name: CI
 #  - release:     Studio with Qt and the FloStudio libraries as DLLs (until
 #                 stage 9, which builds the single static program), tests,
 #                 smoke test, Windows installer and macOS .dmg dry runs
-#  - linux:       build and tests on Ubuntu with Qt 6.12 (shared)
+#  - linux:       build and tests on Ubuntu with Qt 6.12 (shared), label
+#                 checks, screenshots of every demo screen (artifact)
 #  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
 #  - clang-tidy:  static analysis of our own sources
 #
@@ -123,7 +124,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           .github/scripts/real_project.sh "$RUNNER_TEMP/site" sqlite
-          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R tst_realproject -V
+          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" FLOSTUDIO_WIZARD_TESTS=1 .github/scripts/run_tests.sh build -R "tst_realproject|tst_studio" -V
 
       # Everything Studio needs goes next to it: Qt (windeployqt /
       # macdeployqt), the FloStudio libraries, and on Windows the Visual C++
@@ -315,7 +316,7 @@ jobs:
           setup-python: false
 
       - name: Linux packages
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build
 
       - name: Build
         run: |
@@ -340,13 +341,32 @@ jobs:
           build/bin/flocms-studio --version
           build/bin/flocms-studio --smoke-test
 
+      # Translated labels go through AppText.ui (the right-to-left mark), and
+      # the translation files hold no direction marks or broken plurals
+      - name: Label and translation checks
+        run: |
+          python tools/check_qml_labels.py
+          python prototypes/rtl-check/check_ts.py app/i18n/studio_ar.ts app/i18n/studio_ckb.ts
+
+      - name: Screenshots of every screen
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: .github/scripts/screenshots.sh build/bin/flocms-studio shots
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: shots/
+          if-no-files-found: ignore
+
       # Website + admin panel on the runner's MySQL (root/root)
       - name: Real FloCMS project
         run: |
           sudo systemctl start mysql.service
           mysql -uroot -proot -h127.0.0.1 -e "CREATE DATABASE studio_ci"
           .github/scripts/real_project.sh "$RUNNER_TEMP/site" mysql
-          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" .github/scripts/run_tests.sh build -R tst_realproject -V
+          FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" FLOSTUDIO_WIZARD_TESTS=1 .github/scripts/run_tests.sh build -R "tst_realproject|tst_studio" -V
 
   sanitizers:
     name: sanitizers (${{ matrix.os }})
@@ -382,7 +402,7 @@ jobs:
 
       - name: Linux packages
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build
 
       - name: macOS tools
         if: runner.os == 'macOS'
@@ -438,7 +458,7 @@ jobs:
           setup-python: false
 
       - name: Tools
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang clang-tidy libgl1-mesa-dev ninja-build
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang clang-tidy libgl1-mesa-dev libsecret-1-dev ninja-build
 
       - name: Build with Clang (for the generated headers and the compile database)
         env:

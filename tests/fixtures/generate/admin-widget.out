@@ -1,0 +1,3 @@
+[OK] Created admin/Widgets/PostStats.php (stats widget)
+[OK] Registered PostStats in config/admin.php
+! Check it with: php flo admin:doctor

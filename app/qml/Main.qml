@@ -1,65 +1,91 @@
 import QtQuick
-import QtQuick.Layouts
-// Only the Basic style: importing QtQuick.Controls would link every style
-// into the static build (Fusion, Material, Universal, ...).
 import QtQuick.Controls.Basic
-import FloStudio.App
+import QtQuick.Layouts
+import QtQuick.Templates as T
+import FloStudio.Backend
 
-// Stage 1 placeholder: proves the build, the libraries and Qt Quick
-// Controls work in every build type. The real screens come in stage 3.
+// The window: the sidebar and the page it shows (welcome, a project,
+// Settings), the problem bar, and the downloads dialog. The whole layout
+// mirrors for Arabic and Kurdish (LayoutMirroring on the root item, D9).
 ApplicationWindow {
-    id: root
-    width: 720
-    height: 440
-    minimumWidth: 560
-    minimumHeight: 360
+    id: window
+    width: 1280
+    height: 800
+    minimumWidth: 960
+    minimumHeight: 640
     visible: true
-    title: "FloCMS Studio"
-    color: "#F4F7F9"
+    color: Theme.bg
+    title: Studio.page === "project" && Studio.current.name
+           ? qsTr("%1 – FloCMS Studio").arg(Studio.current.name) : "FloCMS Studio"
 
-    ColumnLayout {
+    // Quitting while a migration runs would stop it halfway: ask first
+    property bool quitAnyway: false
+    onClosing: (close) => {
+        if (Studio.commandRunning && !window.quitAnyway) {
+            close.accepted = false
+            quitQuestion.ask({
+                title: qsTr("A command is still running"),
+                message: qsTr("Quitting now stops it halfway, which can leave the database half migrated."),
+                confirmText: qsTr("Quit anyway"),
+                danger: true
+            })
+        }
+    }
+    ConfirmDialog {
+        id: quitQuestion
+        parent: T.Overlay.overlay
         anchors.centerIn: parent
-        width: Math.min(parent.width - 64, 560)
-        spacing: 16
+        onAccepted: { window.quitAnyway = true; window.close() }
+    }
+
+    Item {
+        id: root
+        anchors.fill: parent
+        LayoutMirroring.enabled: Lang.rtl
+        LayoutMirroring.childrenInherit: true
 
         RowLayout {
-            spacing: 12
-            Rectangle {
-                width: 40; height: 40; radius: 10
-                color: "#38BBE0"
-                Text { anchors.centerIn: parent; text: "F"; color: "#05303F"; font.pixelSize: 22; font.bold: true }
+            anchors.fill: parent
+            spacing: 0
+
+            Sidebar {
+                Layout.preferredWidth: 240
+                Layout.fillHeight: true
+                onDownloadRequested: downloads.open()
             }
-            Text { text: "FloCMS Studio " + AppInfo.version; color: "#14212B"; font.pixelSize: 24; font.bold: true }
-        }
 
-        Text {
-            Layout.fillWidth: true
-            text: "This is the stage 1 build check. The real screens come in stage 3."
-            color: "#56656F"
-            font.pixelSize: 14
-            wrapMode: Text.Wrap
-        }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: 0
 
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: details.implicitHeight + 28
-            radius: 8
-            color: "#0F1B24"
-            Text {
-                id: details
-                anchors.fill: parent
-                anchors.margins: 14
-                text: AppInfo.buildText + "\nLibraries: " + AppInfo.libraries.join(", ")
-                color: "#C9D6DF"
-                font.family: AppInfo.monoFont
-                font.pixelSize: 13
-                lineHeight: 1.3
+                ProblemBar {
+                    Layout.fillWidth: true
+                    Layout.margins: 16
+                    Layout.bottomMargin: 0
+                }
+
+                StackLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    currentIndex: Studio.page === "new" ? 3 : (Studio.page === "settings" ? 2 : (Studio.page === "project" ? 1 : 0))
+                    WelcomePage { onDownloadRequested: downloads.open() }
+                    ProjectPage {}
+                    SettingsPage { onDownloadRequested: downloads.open() }
+                    NewProjectPage {}
+                }
             }
         }
 
-        Button {
-            text: "Copy build details"
-            onClicked: AppInfo.copyBuildText()
+        DownloadsDialog {
+            id: downloads
+            anchors.centerIn: parent
         }
+    }
+
+    Component.onCompleted: {
+        // A demo can open on the downloads dialog (screenshots of board 7)
+        if (Studio.demoDialog === "downloads")
+            downloads.open()
     }
 }

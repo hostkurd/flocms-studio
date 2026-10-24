@@ -1,0 +1,33 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [],
+  "tools": [
+    {
+      "tool": "php",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "composer",
+      "state": "missing",
+      "version": "",
+      "path": ""
+    },
+    {
+      "tool": "mariadb",
+      "state": "optional",
+      "version": "",
+      "product": "",
+      "path": ""
+    }
+  ],
+  "page": "welcome"
+}

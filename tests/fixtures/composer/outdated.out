@@ -1,0 +1,18 @@
+{
+    "installed": [
+        {
+            "name": "hostkurd/flocms-core",
+            "direct-dependency": true,
+            "homepage": null,
+            "source": "https://github.com/hostkurd/flocms-core/tree/v2.8.0",
+            "version": "v2.8.0",
+            "release-age": "from this week",
+            "release-date": "2026-10-23T11:29:01+00:00",
+            "latest": "v2.9.0",
+            "latest-status": "semver-safe-update",
+            "latest-release-date": "2026-10-23T22:06:13+00:00",
+            "description": "Core runtime for Flo Framework: application services, HTTP primitives, dependency injection, and modular architecture.",
+            "abandoned": false
+        }
+    ]
+}

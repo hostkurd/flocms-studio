@@ -20,7 +20,9 @@ namespace FloStudio::Core {
 // Finder or a desktop menu get a short PATH without Homebrew, Herd or
 // Composer's folder, so the shell is asked once (up to 3 seconds: the app
 // calls this once on a worker thread at start). Relative entries are left
-// out. The same list becomes the PATH of every command Studio starts.
+// out. Last come Studio's own downloads (installedToolFolders, read on
+// every call). The same list becomes the PATH of every command Studio
+// starts.
 FLOSTUDIOCORE_EXPORT QStringList toolSearchPath();
 
 // The usual install folders of PHP, Composer and MySQL/MariaDB on this
@@ -140,7 +142,8 @@ FLOSTUDIOCORE_EXPORT bool portAnswers(const QString &host, int port, int timeout
 // argument. Empty when the template has no program.
 FLOSTUDIOCORE_EXPORT QStringList editorCommandLine(const QString &editorTemplate, const QString &folder);
 
-// Opens the folder in the editor (not waiting for it). Error codes:
+// Opens the folder (or a file: the project's .env) in the editor (not
+// waiting for it). Error codes:
 // editor_not_found, unsafe_argument (a .bat/.cmd editor with a folder
 // cmd.exe would misread), editor_failed.
 FLOSTUDIOCORE_EXPORT Result<Done> openInEditor(const Settings &settings, const QString &folder);

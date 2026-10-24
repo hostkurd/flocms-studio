@@ -1,0 +1,24 @@
+[OK] Created config/admin.php
+[OK] Created admin/Resources/
+! A migration for "settings" already exists: 2026_10_17_000000_create_settings_table.php
+[OK] Created database/migrations/2026_10_24_172608_create_admin_user_preferences_table.php
+[OK] Created database/migrations/2026_10_24_172609_create_media_table.php
+[OK] Created database/migrations/2026_10_24_172610_create_media_folders_table.php
+[OK] Created database/migrations/2026_10_24_172611_create_admin_trash_and_admin_activity_tables.php
+[OK] Created database/migrations/2026_10_24_172612_create_admin_roles_table.php
+[OK] Created database/migrations/2026_10_24_172613_create_admin_imports_and_admin_import_rows_tables.php
+[OK] Created database/migrations/2026_10_24_172614_create_admin_password_resets_table.php
+[OK] Created database/migrations/2026_10_24_172615_create_admin_mailings_and_admin_mailing_recipients_tables.php
+[OK] Created database/migrations/2026_10_24_172616_create_users_bio_column.php
+
+Next steps:
+  1. php flo migrate                              (settings, preferences, media, trash, activity, roles, import, password reset, mailing and pages tables, users.bio)
+  2. php flo make:admin-resource Post --migration
+  3. php flo make:admin-settings                  (website settings pages, optional)
+  4. Log in, then open /admin/dashboard
+
+On skeleton 1.8+, /admin opens the dashboard by itself. On older skeletons, link it
+from views/pages/admin_index.html:
+  <a href="{{ SITE_URI . '/' . ACTIVE_LANG . '/admin/dashboard' }}">Admin panel</a>
+
+Check the setup at any time with: php flo admin:doctor

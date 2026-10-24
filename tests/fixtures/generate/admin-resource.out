@@ -1,0 +1,2 @@
+[OK] Created admin/Resources/PropertyResource.php (URL: /admin/listings, table: properties)
+[OK] Created database/migrations/2026_10_24_162839_create_properties_table.php (run: php flo migrate)

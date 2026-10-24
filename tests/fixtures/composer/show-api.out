@@ -1,0 +1,60 @@
+{
+    "name": "hostkurd/flocms-api",
+    "description": "Optional modern API runtime for Flo Framework: explicit routing, middleware, JSON errors, CORS, authentication contracts, and rate limiting.",
+    "keywords": [],
+    "type": "library",
+    "homepage": null,
+    "names": [
+        "hostkurd/flocms-api"
+    ],
+    "versions": [
+        "1.3.x-dev",
+        "v1.3.0",
+        "v1.2.0",
+        "v1.1.0",
+        "v1.0.1",
+        "v1.0.0",
+        "dev-main",
+        "dev-feat/api-1.3-core-tools"
+    ],
+    "licenses": [
+        {
+            "name": "MIT License",
+            "osi": "MIT",
+            "url": "https://spdx.org/licenses/MIT.html#licenseText"
+        }
+    ],
+    "source": {
+        "type": "git",
+        "url": "https://github.com/hostkurd/flocms-api.git",
+        "reference": "0774504a4ff990daaffcf8a1cc3537d22c80fd5c"
+    },
+    "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/hostkurd/flocms-api/zipball/0774504a4ff990daaffcf8a1cc3537d22c80fd5c",
+        "reference": "0774504a4ff990daaffcf8a1cc3537d22c80fd5c"
+    },
+    "suggests": {
+        "hostkurd/flocms-uploader": "Uploads through the API (Uploads\\HandlesUploads), 1.2+ for chunked uploads.",
+        "ext-apcu": "Faster rate limiting with ApcuRateLimiter."
+    },
+    "support": {
+        "issues": "https://github.com/hostkurd/flocms-api/issues",
+        "source": "https://github.com/hostkurd/flocms-api/tree/main"
+    },
+    "autoload": {
+        "psr-4": {
+            "FloCMS\\Api\\": "src/"
+        }
+    },
+    "requires": {
+        "php": "^8.1",
+        "psr/log": "^1.1 || ^2.0 || ^3.0",
+        "hostkurd/flocms-cli": "^2.0",
+        "hostkurd/flocms-core": "^2.8"
+    },
+    "devRequires": {
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "hostkurd/flocms-uploader": "1.2.0"
+    }
+}

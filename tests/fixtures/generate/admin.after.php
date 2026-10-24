@@ -1,0 +1,141 @@
+<?php
+/*
+ * flocms-admin settings. Created by `php flo admin:install`.
+ * Deleting this file switches the admin panel off (the package does nothing).
+ */
+return [
+    // Reactive lists/dialogs and navigation; false restores full-page behavior.
+    'reactive' => true,
+    // Optional Admin login styling (requires the skeleton's auth.login_view hook).
+    'login_theme' => true,
+
+    // Resource classes to load. Leave empty to load every *Resource.php
+    // file in resources_path (namespace resources_namespace).
+    'resources' => [
+        // App\Admin\Resources\PropertyResource::class,
+    ],
+    'resources_path' => 'admin/Resources',
+    'resources_namespace' => 'App\\Admin\\Resources',
+
+    // Optional dashboard widgets, explicitly registered. Empty keeps resource-count cards.
+    'widgets' => [
+        // App\Admin\Widgets\Overview::class,
+        \App\Admin\Widgets\PostStats::class,
+    ],
+    'widgets_path' => 'admin/Widgets',
+    'widgets_namespace' => 'App\\Admin\\Widgets',
+    'widget_columns' => 2,
+
+    // Pages of your own in the panel (0.36): reports, tools, help pages.
+    // php flo make:admin-page SalesReport --view --table adds one here.
+    'admin_pages' => [
+        // App\Admin\Pages\SalesReport::class,
+    ],
+    'admin_pages_path' => 'admin/Pages',
+    'admin_pages_namespace' => 'App\\Admin\\Pages',
+    // The page /admin opens: 'dashboard', or one of admin_pages (App\Admin\Pages\SalesReport::class).
+    // 'home' => 'dashboard',
+
+    // Pages built from blocks, HTML or rich text, at /admin/site-pages (0.30); then
+    // php flo admin:install and php flo migrate. Needs flocms-core 2.6.
+    // 'pages' => true,  or ['missing' => '404'] to answer 404 for a page not translated
+    'pages' => false,
+
+    // The site's own blocks for Builder fields (0.29): php flo make:admin-block LatestProjects.
+    'blocks' => [
+        // App\Admin\Blocks\LatestProjects::class,
+    ],
+    'blocks_path' => 'admin/Blocks',
+    'blocks_namespace' => 'App\\Admin\\Blocks',
+
+    // Users management at /admin/accounts and the profile page at /admin/profile
+    // (the skeleton's users table). false switches both off.
+    'users' => true,
+
+    // "Forgot password?" on the login page (needs login_theme and the
+    // password resets table: php flo migrate). Emails are sent with the
+    // MAIL_* settings in .env (php flo admin:mail-test you@example.com).
+    // false switches it off; or set any of these:
+    'password_reset' => [
+        'expires' => 60,     // minutes a reset link works
+        'per_email' => 3,    // requests per address per hour
+        'per_ip' => 10,      // requests per IP address per hour
+    ],
+
+    // Colour theme: 'light', 'dark', or 'auto' (follows the operating system)
+    'theme' => 'light',
+
+    // Brand colour for buttons, links and highlights (#rrggbb); null keeps the default blue.
+    // Pick a colour dark enough for white text: admin:doctor checks the contrast.
+    'primary_color' => null,
+
+    // Logo image URL for the sidebar (square works best); null shows the brand's first letter
+    'logo' => null,
+
+    // Sidebar style: 'light' or 'dark'
+    'sidebar' => 'light',
+
+    // How times of day are shown in lists and view pages: 'H:i' (24-hour) or 'g:i A' (12-hour)
+    'time_format' => 'H:i',
+
+    // Page width: 'full' uses the whole window, 'boxed' centres pages at most 1280 px wide
+    'content_width' => 'full',
+
+    // The View site link in the top bar, the user menu and the login page: true (this site),
+    // false (an admin panel without a website) or an address ('https://www.example.com')
+    'site_link' => true,
+
+    // Dialogs fit their content; pixels (240) or a CSS length ('20rem') keep room in
+    // the body of every form and action dialog. One action: ->modalMinHeight(320)
+    'dialog_min_height' => null,
+
+    // Ctrl+K search: false switches it off; 'per_group' => 5 results per group,
+    // 'shortcut' => false keeps Ctrl+K for the browser, 'sources' => [your SearchSource classes]
+    'search' => true,
+
+    // Public media (the media library and rich text uploads): folder (relative to
+    // the project) and its public URL. The folder must be inside the web root and
+    // writable; admin:doctor checks it.
+    'media' => [
+        'root' => 'public/uploads/editor',
+        'url' => '/uploads/editor',
+    ],
+
+    // The media library (/admin/media): on when its table exists (php flo migrate).
+    // false switches it off; ['table' => 'site_media', 'usage_table' => 'site_media_usage',
+    // 'folders_table' => 'site_media_folders'] renames its tables before the first migration,
+    // e.g. when a "media" table already exists.
+    'media_library' => true,
+
+    // The trash (/admin/trash): deleted records wait here and can be restored.
+    // 'days' => 0 keeps them until emptied; false deletes at once. Needs php flo migrate.
+    'trash' => ['days' => 30],
+
+    // The activity log (/admin/activity, History on each record; permission activity.view).
+    // 'logins' => true also records sign-ins; false switches the log off.
+    'activity' => ['days' => 365, 'logins' => false],
+
+    // The Roles page (/admin/roles; permission roles.manage, Super Admin by default):
+    // roles and permissions edited in the panel, on top of config/config.php.
+    // false switches it off and the config roles apply again. Name your own
+    // permissions so they get a row: 'permissions' => ['reports.export' => 'Export reports'].
+    'roles' => ['permissions' => []],
+
+    // Name at the top of the sidebar
+    'brand' => \FloCMS\Core\Env::get('SITE_NAME_ADMIN', 'Admin'),
+
+    // Rows per list page (a resource can set its own with ->perPage())
+    'per_page' => 25,
+
+    // How translatable fields are edited: 'page' shows the whole form in one language
+    // with an "Editing: language" switch; 'field' gives each field a language badge.
+    // A resource can choose its own: protected static string $translationMode = 'field';
+    'translation_mode' => 'page',
+
+    // Content languages written right to left (inputs get dir="rtl")
+    'rtl_languages' => ['ar', 'ku', 'ckb', 'fa', 'he', 'ur'],
+
+    // Permission names are "<prefix>.<slug>.<view|create|update|delete>",
+    // e.g. content.properties.update. The skeleton's Editor role has content.*
+    'permission_prefix' => 'content',
+];
