@@ -15,10 +15,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # FloStudio DLLs in the shared-library build on Windows.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
-# The three libraries are built into Studio by default (design note D6).
-# ON builds them as DLLs / shared libraries, for comparing sizes and for
-# plugins later.
-option(FLOSTUDIO_SHARED_LIBS "Build FloStudioCore, FloStudioDatabase and FloStudioSecurity as shared libraries" OFF)
+# Until the final release, Studio ships with Qt and the three libraries as
+# DLLs / shared libraries (decided 24 Oct: faster CI). Stage 9 turns this OFF
+# and links everything, Qt included, into one program (design note D6).
+option(FLOSTUDIO_SHARED_LIBS "Build FloStudioCore, FloStudioDatabase and FloStudioSecurity as shared libraries" ON)
 option(FLOSTUDIO_WARNINGS_AS_ERRORS "Treat compiler warnings as errors (D11)" ON)
 option(FLOSTUDIO_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer (D11)" OFF)
 option(FLOSTUDIO_BUILD_TESTS "Build the Qt Test suites" ON)

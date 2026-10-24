@@ -1,11 +1,9 @@
 name: CI
 
 # Stage 1 (design note D2, D6, D11, D12, D13):
-#  - release:     static Qt 6.12 (built once, cached), one Studio.exe on
-#                 Windows and a universal FloCMS Studio.app on macOS, tests,
-#                 smoke test, dependency check, installer and .dmg dry runs
-#  - dll-build:   the same app with Qt and the FloStudio libraries as DLLs,
-#                 only to compare size and file count with the static exe
+#  - release:     Studio with Qt and the FloStudio libraries as DLLs (until
+#                 stage 9, which builds the single static program), tests,
+#                 smoke test, Windows installer and macOS .dmg dry runs
 #  - linux:       build and tests on Ubuntu with Qt 6.12 (shared)
 #  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
 #  - clang-tidy:  static analysis of our own sources
@@ -32,9 +30,6 @@ permissions:
 
 env:
   QT_VERSION: "6.12.0"
-  # Bump to rebuild the cached static Qt (when its configure options in
-  # .github/scripts/build_static_qt.py change). Other edits keep the cache.
-  QT_STATIC_REV: "1"
   # A Windows GUI program sends warnings to the debugger, not stderr.
   QT_FORCE_STDERR_LOGGING: "1"
 
@@ -42,26 +37,15 @@ jobs:
   release:
     name: release (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Short folders on Windows: Qt's build tree has deep paths.
           - os: windows-2022
-            qt_prefix: D:/qs
-            qt_work: D:/q
-          # Qt 6.12 checks the Xcode/SDK version when built from source;
-          # macos-14's Xcode is too old for it.
           - os: macos-15
-            qt_prefix: /Users/runner/qt-static
-            qt_work: /Users/runner/qw
     defaults:
       run:
         shell: bash
-    env:
-      QT_PREFIX: ${{ matrix.qt_prefix }}
-      QT_WORK: ${{ matrix.qt_work }}
     steps:
       - uses: actions/checkout@v4
 
@@ -78,45 +62,34 @@ jobs:
         with:
           arch: x64
 
-      - name: Restore static Qt
-        id: qtcache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.QT_PREFIX }}
-          key: qt-${{ env.QT_VERSION }}-static-rev${{ env.QT_STATIC_REV }}-${{ runner.os }}
-          # A run that ran out of time leaves the finished modules here.
-          restore-keys: qt-${{ env.QT_VERSION }}-static-rev${{ env.QT_STATIC_REV }}-${{ runner.os }}-partial-
-
-      - name: Build static Qt (first run only, slow)
-        id: buildqt
-        if: steps.qtcache.outputs.cache-hit != 'true'
-        timeout-minutes: 320
+      # aqtinstall can't find Qt 6.12 for Windows yet (new repository
+      # layout), so a small script reads the official repository directly.
+      - name: Install Qt 6.12 (Windows)
+        if: runner.os == 'Windows'
         run: |
-          universal=""
-          if [ "$RUNNER_OS" = "macOS" ]; then universal="--universal"; fi
-          python .github/scripts/build_static_qt.py --version "$QT_VERSION" --prefix "$QT_PREFIX" --work "$QT_WORK" $universal
+          set -o pipefail
+          python .github/scripts/install_qt_windows.py "$QT_VERSION" win64_msvc2022_64 "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log \
+            || { tail -5 qt.log | sed 's/^/::error::/'; exit 1; }
+          echo "QT_DIR=$(tail -1 qt.log | tr -d '\r')" >> "$GITHUB_ENV"
 
-      - name: Save static Qt
-        if: steps.buildqt.outcome == 'success'
-        uses: actions/cache/save@v4
+      - name: Install Qt 6.12 (macOS, universal)
+        if: runner.os == 'macOS'
+        uses: jurplel/install-qt-action@v4
         with:
-          path: ${{ env.QT_PREFIX }}
-          key: ${{ steps.qtcache.outputs.cache-primary-key }}
-
-      - name: Save the finished Qt modules for the next run
-        if: always() && steps.buildqt.outcome != 'success' && steps.buildqt.outcome != 'skipped'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.QT_PREFIX }}
-          key: ${{ steps.qtcache.outputs.cache-primary-key }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
+          version: ${{ env.QT_VERSION }}
+          arch: clang_64
+          cache: true
+          setup-python: false
 
       - name: Build Studio
         run: |
           set +e
-          archs=""
-          if [ "$RUNNER_OS" = "macOS" ]; then archs="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"; fi
-          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_TOOLCHAIN_FILE="$QT_PREFIX/lib/cmake/Qt6/qt.toolchain.cmake" $archs \
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            extra="-DCMAKE_PREFIX_PATH=$QT_DIR"
+          else
+            extra="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
+          fi
+          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "$extra" \
             && cmake --build build; } > build.log 2>&1
           status=$?
           cat build.log
@@ -126,40 +99,65 @@ jobs:
           exit $status
 
       - name: Tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Find the program
         run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
+          ctest --test-dir build --output-on-failure
+
+      # Everything Studio needs goes next to it: Qt (windeployqt /
+      # macdeployqt), the FloStudio libraries, and on Windows the Visual C++
+      # runtime DLLs (not the 25 MB vc_redist installer).
+      - name: Collect Studio and its libraries
+        run: |
+          mkdir -p dist
           if [ "$RUNNER_OS" = "Windows" ]; then
-            bin=build/bin/Studio.exe
+            app=dist/FloCMS-Studio
+            mkdir -p "$app"
+            cp build/bin/Studio.exe build/bin/FloStudio*.dll "$app/"
+            "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations --no-compiler-runtime "$app/Studio.exe" > deploy.log
+            vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
+            cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll "$app/"
+            echo "STUDIO=$app/Studio.exe" >> "$GITHUB_ENV"
           else
-            bin="build/bin/FloCMS Studio.app/Contents/MacOS/FloCMS Studio"
+            app="dist/FloCMS Studio.app"
+            cp -R "build/bin/FloCMS Studio.app" dist/
+            macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || { cat deploy.log; exit 1; }
+            # Our own libraries into the bundle too, under the names the
+            # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
+            exe="$app/Contents/MacOS/FloCMS Studio"
+            for lib in $(otool -L "$exe" | awk '/@rpath\/libFloStudio/{print $1}' | sed 's|@rpath/||'); do
+              [ -f "$app/Contents/Frameworks/$lib" ] || cp -L "$(find build/libs -name "$lib" | head -1)" "$app/Contents/Frameworks/"
+            done
+            # Only rpaths inside the bundle: drop the build folder ones.
+            otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep '^/' | while read -r rp; do
+              install_name_tool -delete_rpath "$rp" "$exe"
+            done
+            otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
+              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe"
+            ls "$app/Contents/Frameworks" | grep -i flostudio
+            # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
+            codesign --force --deep --sign - "$app"
+            echo "STUDIO=$app/Contents/MacOS/FloCMS Studio" >> "$GITHUB_ENV"
           fi
-          test -f "$bin" || { echo "::error::Studio was not built at $bin"; exit 1; }
-          echo "STUDIO=$bin" >> "$GITHUB_ENV"
-          echo "::notice::$("$bin" --version | tr '\n' ';')"
+          echo "APP_DIR=$app" >> "$GITHUB_ENV"
+          cat deploy.log | tail -20
 
-      # D6: one program with nothing but system libraries next to it.
-      - name: Check what the program needs at run time
+      - name: Check the build
         run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            deps=$(dumpbin //nologo //dependents "$STUDIO" | grep -iE '^\s+\S+\.dll' | awk '{print $1}' | sort -f)
-            echo "$deps"
-            echo "::notice::Studio.exe loads only: $(echo $deps | tr ' ' ',')"
-            if echo "$deps" | grep -iqE 'qt6|vcruntime|msvcp|concrt|flostudio|api-ms-win-crt|ucrtbase'; then
-              echo "::error::Studio.exe still needs Qt, FloStudio or Visual C++ runtime DLLs"; exit 1
-            fi
-          else
-            deps=$(otool -L "$STUDIO" | tail -n +2 | awk '{print $1}')
-            echo "$deps"
-            echo "::notice::the app loads only: $(echo $deps | tr ' ' ',')"
-            if echo "$deps" | grep -qE 'Qt|FloStudio|@rpath'; then
-              echo "::error::the app still needs Qt or FloStudio libraries"; exit 1
-            fi
+          echo "::notice::$("$STUDIO" --version | tr '\n' ';')"
+          version=$("$STUDIO" --version | head -1 | awk '{print $3}')
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          files=$(find "$APP_DIR" -type f | wc -l | tr -d ' ')
+          size=$(du -sk "$APP_DIR" | cut -f1)
+          echo "::notice::$(basename "$APP_DIR"): $files files, $size KiB"
+          if [ "$RUNNER_OS" = "macOS" ]; then
             archs=$(lipo -archs "$STUDIO")
             minos=$(otool -l "$STUDIO" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
             echo "::notice::architectures: $archs; minimum macOS: $minos"
             case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
+            # Every library must come from inside the bundle or from macOS.
+            bad=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -L {} \; 2>/dev/null \
+                  | awk '/^\t/{print $1}' | grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' | sort -u)
+            if [ -n "$bad" ]; then echo "::error::libraries from outside the bundle: $(echo $bad)"; exit 1; fi
           fi
 
       - name: Smoke test (PATH without Qt on Windows)
@@ -168,72 +166,62 @@ jobs:
           mkdir -p shots
           "$STUDIO" --smoke-test --screenshot shots/studio-$RUNNER_OS.png
 
-      - name: Package
+      - name: Notices
         run: |
-          mkdir -p dist
-          python tools/make_notices.py "$QT_PREFIX" dist/THIRD-PARTY-NOTICES.txt --commit "$GITHUB_SHA"
-          cp LICENSE dist/LICENSE.txt
-          version=$("$STUDIO" --version | head -1 | awk '{print $3}')
-          echo "VERSION=$version" >> "$GITHUB_ENV"
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            cp "$STUDIO" dist/
-            size=$(stat -c %s dist/Studio.exe)
-            7z a -tzip -mx=9 Studio-zip-test.zip ./dist/Studio.exe > /dev/null
-            zipped=$(stat -c %s Studio-zip-test.zip)
-            echo "::notice::static build: 1 file, Studio.exe $((size / 1024)) KiB, zipped $((zipped / 1024)) KiB"
-          else
-            cp -R "build/bin/FloCMS Studio.app" dist/
-            # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
-            codesign --force --deep --sign - "dist/FloCMS Studio.app"
-            size=$(du -sk "dist/FloCMS Studio.app" | cut -f1)
-            files=$(find "dist/FloCMS Studio.app" -type f | wc -l | tr -d ' ')
-            echo "::notice::static build: FloCMS Studio.app $size KiB in $files files (universal)"
-          fi
+          python tools/make_notices.py "$APP_DIR/../THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA"
+          cp LICENSE "$APP_DIR/../LICENSE.txt"
+          if [ "$RUNNER_OS" = "Windows" ]; then cp dist/THIRD-PARTY-NOTICES.txt dist/LICENSE.txt "$APP_DIR/"; fi
 
       - name: Windows installer dry run
         if: runner.os == 'Windows'
         run: |
           iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
           if [ ! -f "$iscc" ]; then choco install innosetup -y --no-progress > /dev/null; fi
-          "$iscc" //Q //DAppVersion="$VERSION" //DSourceDir="$(cygpath -w "$PWD/dist")" //O"$(cygpath -w "$PWD")" installer/windows/studio.iss
+          "$iscc" //Q //DAppVersion="$VERSION" //DSourceDir="$(cygpath -w "$PWD/$APP_DIR")" //O"$(cygpath -w "$PWD")" installer/windows/studio.iss
           setup="FloCMS-Studio-$VERSION-setup.exe"
           echo "::notice::installer: $setup $(( $(stat -c %s "$setup") / 1024 )) KiB"
           target="$(cygpath -w "$RUNNER_TEMP/studio-install")"
           ./"$setup" //VERYSILENT //SUPPRESSMSGBOXES //CURRENTUSER //NORESTART //DIR="$target" //LOG=install.log
           installed="$RUNNER_TEMP/studio-install"
-          ls "$installed"
           test -f "$installed/Studio.exe" || { echo "::error::the installer did not install Studio.exe"; cat install.log; exit 1; }
           (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; "$installed/Studio.exe" --smoke-test)
           "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
           for i in $(seq 1 30); do [ -f "$installed/Studio.exe" ] || break; sleep 1; done
           if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
-          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled cleanly"
+          left=$(find "$installed" -type f 2>/dev/null | wc -l)
+          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled ($left files left)"
 
       - name: macOS disk image dry run
         if: runner.os == 'macOS'
         run: |
           staging="$RUNNER_TEMP/dmg"
           mkdir -p "$staging"
-          cp -R "dist/FloCMS Studio.app" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
+          cp -R "$APP_DIR" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
           ln -s /Applications "$staging/Applications"
           dmg="FloCMS-Studio-$VERSION.dmg"
           hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > /dev/null
           echo "::notice::disk image: $dmg $(( $(stat -f %z "$dmg") / 1024 )) KiB"
+          # Move the build folder away, so the app can only use what is inside it.
+          mv build build-moved
           mnt="$RUNNER_TEMP/mnt"
           hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
           "$mnt/FloCMS Studio.app/Contents/MacOS/FloCMS Studio" --smoke-test
           hdiutil detach "$mnt" > /dev/null
-          echo "::notice::disk image: mounted, smoke test passed from the image"
+          mv build-moved build
+          echo "::notice::disk image: mounted, smoke test passed from the image (build folder moved away)"
 
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
-          name: FloCMS-Studio-windows
-          path: |
-            dist/Studio.exe
-            dist/LICENSE.txt
-            dist/THIRD-PARTY-NOTICES.txt
-            FloCMS-Studio-*-setup.exe
+          name: FloCMS-Studio-windows-portable
+          path: dist/FloCMS-Studio/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: FloCMS-Studio-windows-setup
+          path: FloCMS-Studio-*-setup.exe
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
@@ -249,59 +237,10 @@ jobs:
           name: release-logs-${{ matrix.os }}
           path: |
             build.log
+            deploy.log
             install.log
             shots/
-            ${{ env.QT_WORK }}/logs/
           if-no-files-found: ignore
-
-  dll-build:
-    name: dll-build (windows, size comparison)
-    runs-on: windows-2022
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Build tools
-        run: python -m pip install -q ninja
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Qt 6.12 (shared)
-        run: |
-          set -o pipefail
-          python .github/scripts/install_qt_windows.py "$QT_VERSION" win64_msvc2022_64 "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log
-          echo "QT_DIR=$(tail -1 qt.log | tr -d '\r')" >> "$GITHUB_ENV"
-
-      - name: Build with Qt and the FloStudio libraries as DLLs
-        run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DFLOSTUDIO_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH="$QT_DIR"
-          cmake --build build
-          PATH="$QT_DIR/bin:$PATH" ctest --test-dir build --output-on-failure
-
-      - name: Deploy and measure
-        run: |
-          mkdir -p deploy
-          cp build/bin/Studio.exe build/bin/FloStudio*.dll deploy/
-          "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations --no-compiler-runtime deploy/Studio.exe > deploy.log
-          # The Visual C++ runtime as DLLs next to the exe (not the 25 MB
-          # vc_redist installer windeployqt would add).
-          vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
-          cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll deploy/
-          (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; deploy/Studio.exe --smoke-test)
-          files=$(find deploy -type f | wc -l)
-          size=$(du -sk deploy | cut -f1)
-          7z a -tzip -mx=9 deploy.zip ./deploy/* > /dev/null
-          zipped=$(stat -c %s deploy.zip)
-          echo "::notice::DLL build: $files files, $size KiB, zipped $((zipped / 1024)) KiB (windeployqt with only the Basic style imported)"
-          echo "::notice::DLL build, largest files: $(find deploy -type f -printf '%s %P\n' | sort -rn | head -6 | awk '{printf "%s %d KiB; ", $2, $1/1024}')"
 
   linux:
     runs-on: ubuntu-24.04

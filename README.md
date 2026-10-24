@@ -19,12 +19,12 @@ tools/           clang-tidy runner, release notices
 prototypes/      stage 0 Kurdish and RTL check (throwaway)
 ```
 
-The three libraries are built into the program by default, so a release is one `Studio.exe` on Windows and one `FloCMS Studio.app` on macOS. Each library can only use the ones it depends on: Database and Security use Core, Core uses only Qt.
+Until the final release, Studio ships as a folder: `Studio.exe` with the FloStudio and Qt DLLs on Windows, a `FloCMS Studio.app` bundle on macOS. The final release links everything into one `Studio.exe`. Each library can only use the ones it depends on: Database and Security use Core, Core uses only Qt.
 
 ## Building
 
-See [BUILDING.md](BUILDING.md). CI builds every pull request on Windows, macOS and Ubuntu; the release builds (a static `Studio.exe`, its installer, and a `.dmg`) are in each CI run's artifacts.
+See [BUILDING.md](BUILDING.md). CI builds every pull request on Windows, macOS and Ubuntu; the release builds (a portable Windows folder, its installer, and a `.dmg`) are in each CI run's artifacts.
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Release builds contain Qt, used under the GNU LGPL v3; `THIRD-PARTY-NOTICES.txt` ships with them and BUILDING.md explains how to rebuild with your own Qt. The stage 0 prototype's bundled fonts are under the SIL Open Font License 1.1 (see `prototypes/rtl-check/fonts/OFL.txt`).
+MIT, see [LICENSE](LICENSE). Studio uses Qt under the GNU LGPL v3 (texts in `licenses/`); `THIRD-PARTY-NOTICES.txt` ships with every build and BUILDING.md explains how to use your own Qt. The stage 0 prototype's bundled fonts are under the SIL Open Font License 1.1 (see `prototypes/rtl-check/fonts/OFL.txt`).

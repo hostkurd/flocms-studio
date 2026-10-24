@@ -1,6 +1,6 @@
 ; Inno Setup script for FloCMS Studio on Windows (design note D12).
 ; CI builds it with:
-;   ISCC.exe /DAppVersion=0.0.1 /DSourceDir=<folder with Studio.exe> studio.iss
+;   ISCC.exe /DAppVersion=0.0.1 /DSourceDir=<deployed folder with Studio.exe> studio.iss
 ;
 ; Installs for the current user by default (no administrator rights needed);
 ; the user can choose all users in the first page.
@@ -9,7 +9,7 @@
   #define AppVersion "0.0.0"
 #endif
 #ifndef SourceDir
-  #define SourceDir "..\..\build\app"
+  #define SourceDir "..\..\dist\FloCMS-Studio"
 #endif
 
 [Setup]
@@ -46,9 +46,10 @@ Name: "en"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#SourceDir}\Studio.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourceDir}\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourceDir}\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
+; Studio.exe with the FloStudio and Qt DLLs, Qt's plugins and QML files,
+; the Visual C++ runtime DLLs, LICENSE.txt and THIRD-PARTY-NOTICES.txt.
+; (The final release, stage 9, installs one static Studio.exe instead.)
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\FloCMS Studio"; Filename: "{app}\Studio.exe"
