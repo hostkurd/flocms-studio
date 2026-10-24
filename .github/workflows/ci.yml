@@ -87,9 +87,12 @@ jobs:
           if [ "$RUNNER_OS" = "Windows" ]; then
             extra="-DCMAKE_PREFIX_PATH=$QT_DIR"
           else
-            extra="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
+            # The same minimum macOS as Qt itself, not the runner's SDK.
+            minos=$(otool -l "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
+            echo "::notice::Qt $QT_VERSION needs macOS $minos or newer"
+            extra="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=$minos"
           fi
-          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "$extra" \
+          { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release $extra \
             && cmake --build build; } > build.log 2>&1
           status=$?
           cat build.log
@@ -124,6 +127,9 @@ jobs:
             cp -R "build/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
             command -v macdeployqt > /dev/null || fail "macdeployqt is not on PATH"
             macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || fail "macdeployqt failed"
+            # No SQL yet (stage 5 adds the SQLite driver only); the PostgreSQL,
+            # ODBC and Mimer drivers would need libraries outside the bundle.
+            rm -rf "$app/Contents/PlugIns/sqldrivers"
             # Our own libraries into the bundle too, under the names the
             # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
             mkdir -p "$app/Contents/Frameworks"
@@ -201,7 +207,7 @@ jobs:
           if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
           # The uninstaller removes its own files a moment after it exits.
           for i in $(seq 1 20); do [ -z "$(find "$installed" -type f 2>/dev/null)" ] && break; sleep 1; done
-          left=$(find "$installed" -type f 2>/dev/null | sed "s|$installed/||" | tr '\n' ' ')
+          left=$( (find "$installed" -type f 2>/dev/null || true) | sed "s|$installed/||" | tr '\n' ' ')
           echo "::notice::installer: installed for the current user, smoke test passed, uninstalled (left behind: ${left:-nothing})"
 
       - name: macOS disk image dry run
