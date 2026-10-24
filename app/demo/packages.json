@@ -1,0 +1,133 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "site",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.8.0"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 0,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false,
+    "others": []
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.4.27",
+      "path": "C:\\php\\8.4\\php.exe"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "C:\\ProgramData\\ComposerSetup\\bin\\composer.bat"
+    },
+    {
+      "tool": "mariadb",
+      "state": "running",
+      "version": "11.8.9",
+      "product": "MariaDB",
+      "path": "C:\\Program Files\\MariaDB 11.8\\bin\\mariadb.exe"
+    }
+  ],
+  "page": "project",
+  "server": {
+    "state": "running",
+    "url": "http://127.0.0.1:8000",
+    "php": "8.4.27",
+    "startedMinutesAgo": 14
+  },
+  "running": [
+    "C:\\Sites\\fectumhellas"
+  ],
+  "tab": "packages",
+  "dialog": "hostkurd/flocms-core",
+  "packages": {
+    "outdated": {
+      "out": "{\n    \"installed\": [\n        {\n            \"name\": \"hostkurd/flocms-captcha\",\n            \"direct-dependency\": true,\n            \"homepage\": null,\n            \"source\": \"https://github.com/hostkurd/flocms-captcha/tree/v1.1.0\",\n            \"version\": \"v1.1.0\",\n            \"release-age\": \"from last week\",\n            \"release-date\": \"2026-10-11T17:58:48+00:00\",\n            \"latest\": \"v1.1.0\",\n            \"latest-status\": \"up-to-date\",\n            \"latest-release-date\": \"2026-10-11T17:58:48+00:00\",\n            \"description\": \"Image captcha package for FloCMS guest form verification.\",\n            \"abandoned\": false\n        },\n        {\n            \"name\": \"hostkurd/flocms-cli\",\n            \"direct-dependency\": true,\n            \"homepage\": \"https://github.com/hostkurd/flocms-cli\",\n            \"source\": \"https://github.com/hostkurd/flocms-cli\",\n            \"version\": \"v2.0.1\",\n            \"release-age\": \"from last week\",\n            \"release-date\": \"2026-10-10T19:58:06+00:00\",\n            \"latest\": \"v2.0.1\",\n            \"latest-status\": \"up-to-date\",\n            \"latest-release-date\": \"2026-10-10T19:58:06+00:00\",\n            \"description\": \"Command line interface for FloCMS: one command kernel for the framework, its packages and your application.\",\n            \"abandoned\": false\n        },\n        {\n            \"name\": \"hostkurd/flocms-core\",\n            \"direct-dependency\": true,\n            \"homepage\": null,\n            \"source\": \"https://github.com/hostkurd/flocms-core/tree/v2.8.0\",\n            \"version\": \"v2.8.0\",\n            \"release-age\": \"from this week\",\n            \"release-date\": \"2026-10-23T11:29:01+00:00\",\n            \"latest\": \"v2.9.0\",\n            \"latest-status\": \"semver-safe-update\",\n            \"latest-release-date\": \"2026-10-23T22:06:13+00:00\",\n            \"description\": \"Core runtime for Flo Framework: application services, HTTP primitives, dependency injection, and modular architecture.\",\n            \"abandoned\": false\n        },\n        {\n            \"name\": \"hostkurd/flocms-uploader\",\n            \"direct-dependency\": true,\n            \"homepage\": null,\n            \"source\": \"https://github.com/hostkurd/flocms-uploader/tree/v1.2.0\",\n            \"version\": \"v1.2.1\",\n            \"release-age\": \"2 weeks old\",\n            \"release-date\": \"2026-10-10T05:17:18+00:00\",\n            \"latest\": \"v1.2.1\",\n            \"latest-status\": \"up-to-date\",\n            \"latest-release-date\": \"2026-10-16T12:06:25+00:00\",\n            \"description\": \"Professional file and image upload package for FloCMS with local, private and S3-ready storage drivers.\",\n            \"abandoned\": false\n        },\n        {\n            \"name\": \"phpunit/phpunit\",\n            \"direct-dependency\": true,\n            \"homepage\": \"https://phpunit.de/\",\n            \"source\": \"https://github.com/sebastianbergmann/phpunit/tree/10.5.66\",\n            \"version\": \"10.5.66\",\n            \"release-age\": \"2 weeks old\",\n            \"release-date\": \"2026-10-05T05:46:26+00:00\",\n            \"latest\": \"10.5.66\",\n            \"latest-status\": \"up-to-date\",\n            \"latest-release-date\": \"2026-10-05T05:46:26+00:00\",\n            \"description\": \"The PHP Unit Testing framework.\",\n            \"abandoned\": false\n        }\n    ]\n}\n",
+      "err": "",
+      "code": 0
+    },
+    "checkedMinutesAgo": 2
+  }
+}

@@ -1,0 +1,15 @@
+./composer.json has been updated
+Running composer update hostkurd/flocms-api
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 1 install, 0 updates, 0 removals
+  - Locking hostkurd/flocms-api (v1.3.0)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Package operations: 1 install, 0 updates, 0 removals
+  - Downloading hostkurd/flocms-api (v1.3.0)
+  - Installing hostkurd/flocms-api (v1.3.0): Extracting archive
+Generating autoload files
+24 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+Using version ^1.3 for hostkurd/flocms-api

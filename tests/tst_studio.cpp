@@ -10,6 +10,7 @@
 #include "newproject.h"
 #include "projectchecks.h"
 #include "projectgenerate.h"
+#include "projectpackages.h"
 #include "projectserver.h"
 #include "studio.h"
 
@@ -560,6 +561,76 @@ private slots:
                  qUtf8Printable(preview.value(QStringLiteral("message")).toString()));
         QVERIFY(QFile::remove(migrations.filePath(made.constFirst())));
         studio.checks()->refreshDatabase();
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+    }
+
+    // --- Stage 8: the Packages tab --------------------------------------
+
+    void thePackagesDemoReadsComposer()
+    {
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/packages.json")).ok());
+        ProjectPackages *packages = studio.packagesTab();
+        QVERIFY(packages);
+        QCOMPARE(packages->check().value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QMap<QString, QString> status;
+        for (const QVariant &row : packages->packages())
+            status.insert(row.toMap().value(QStringLiteral("name")).toString(), row.toMap().value(QStringLiteral("status")).toString());
+        QCOMPARE(status.value(QStringLiteral("hostkurd/flocms-core")), QStringLiteral("update"));
+        QCOMPARE(status.value(QStringLiteral("hostkurd/flocms-cli")), QStringLiteral("current"));
+        QCOMPARE(status.value(QStringLiteral("hostkurd/flocms-api")), QStringLiteral("missing"));
+        QCOMPARE(status.value(QStringLiteral("hostkurd/flocms-admin")), QStringLiteral("missing"));
+        // Board 8's update: the commands, the changelog of that version
+        const QVariantMap plan = packages->planUpdate(QStringLiteral("hostkurd/flocms-core"));
+        QCOMPARE(plan.value(QStringLiteral("from")).toString(), QStringLiteral("2.8.0"));
+        QCOMPARE(plan.value(QStringLiteral("to")).toString(), QStringLiteral("2.9.0"));
+        QCOMPARE(plan.value(QStringLiteral("steps")).toStringList(),
+                 (QStringList{QStringLiteral("composer require hostkurd/flocms-core:^2.9.0 -W"), QStringLiteral("php flo migrate --force")}));
+        QCOMPARE(plan.value(QStringLiteral("changelog")).toString(), QStringLiteral("https://github.com/hostkurd/flocms-core/blob/v2.9.0/CHANGELOG.md"));
+        QVERIFY(packages->planUpdate(QStringLiteral("hostkurd/flocms-cli")).isEmpty() == false); // its latest is known
+        QCOMPARE(packages->planAdd(QStringLiteral("hostkurd/flocms-api")).value(QStringLiteral("steps")).toStringList().size(), 3);
+        QVERIFY(packages->planAdd(QStringLiteral("psr/log")).isEmpty());
+        // A demo runs nothing
+        packages->update(QStringLiteral("hostkurd/flocms-core"));
+        packages->checkUpdates();
+        QVERIFY(!packages->busy());
+    }
+
+    // A real project: composer outdated (Packagist, so only with the
+    // network: FLOSTUDIO_WIZARD_TESTS=1 in CI), then an update to the
+    // version it has, which runs every step and changes nothing
+    void readsARealProjectsPackages()
+    {
+        const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
+        if (project.isEmpty() || qEnvironmentVariable("FLOSTUDIO_WIZARD_TESTS") != u"1")
+            QSKIP("FLOSTUDIO_REAL_PROJECT and FLOSTUDIO_WIZARD_TESTS are not set");
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProject(QUrl::fromLocalFile(project));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio) && !studio.checkingTools(), 60000);
+        ProjectPackages *packages = studio.packagesTab();
+        QVERIFY(packages);
+        packages->checkUpdates();
+        QVERIFY(packages->busy());
+        QTRY_VERIFY_WITH_TIMEOUT(!packages->busy(), 180000);
+        QVERIFY2(packages->check().value(QStringLiteral("state")).toString() == u"done",
+                 qUtf8Printable(packages->check().value(QStringLiteral("message")).toString()));
+        QString cli;
+        for (const QVariant &row : packages->packages()) {
+            const QVariantMap map = row.toMap();
+            if (map.value(QStringLiteral("name")).toString() == u"hostkurd/flocms-cli") {
+                cli = map.value(QStringLiteral("version")).toString();
+                QVERIFY(!map.value(QStringLiteral("latest")).toString().isEmpty());
+            }
+        }
+        QVERIFY(!cli.isEmpty());
+        packages->update(QStringLiteral("hostkurd/flocms-cli"));
+        QVERIFY(studio.commandRunning());
+        QTRY_VERIFY_WITH_TIMEOUT(!packages->busy(), 300000);
+        QVERIFY2(packages->run().value(QStringLiteral("state")).toString() == u"done",
+                 qUtf8Printable(packages->run().value(QStringLiteral("lines")).toStringList().join(u'\n')));
         QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
     }
 

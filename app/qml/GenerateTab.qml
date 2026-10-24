@@ -417,7 +417,7 @@ ScrollView {
                 // Why: Studio's words (the copy could not be made), or the generator's
                 RichText {
                     visible: tab.preview.state === "failed" && !tab.preview.message
-                    raw: tab.preview.error === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(tab.preview.detail))
+                    raw: tab.preview.error === "step_exit" ? qsTr("The command ended with exit code %1.").arg(Lang.num(parseInt(tab.preview.detail) || 0))
                          : tab.preview.error === "preview_timeout" ? qsTr("The generator did not finish in %Ln second(s), so the preview stopped it. Is the database answering?", "", parseInt(tab.preview.detail))
                          : tab.preview.error === "preview_absolute_path" ? qsTr("`%1` in `config/admin.php` is an absolute path, so the generator would write there and not in the copy. No preview for this project; Create works.").arg(tab.preview.detail)
                          : (tab.preview.error ? Texts.problem(tab.preview.error) : "")

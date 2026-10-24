@@ -136,6 +136,7 @@ QtObject {
         case "env_key":
         case "env_value": return qsTr("A value for `.env` has a character FloCMS can't read there (a line break).")
         case "step_stopped": return qsTr("Stopped.")
+        case "outdated_failed": return qsTr("Composer could not say what is newer. It asks Packagist, so this needs the internet.")
         case "no_vendor": return qsTr("The project has no `vendor/` folder yet: run `composer install` in it.")
         case "preview_too_big": return qsTr("The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.")
         case "preview_copy": return qsTr("Studio could not copy the project for the preview.")

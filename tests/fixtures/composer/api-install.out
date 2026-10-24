@@ -1,0 +1,7 @@
+[OK] Created public/api.php
+[OK] Created api/routes.php
+[OK] Created api/Controllers/ContactController.php
+[OK] Created api/Controllers/UsersController.php
+[OK] Created api/Resources/UserResource.php
+
+Next: run `php flo migrate` to create the API tables, then open /api/v1/health.
