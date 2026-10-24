@@ -87,6 +87,17 @@ QtObject {
         case "email_invalid": return qsTr("Enter an email address.")
         case "password_short": return qsTr("Use at least 8 characters.")
         case "password_invalid": return qsTr("One line only.")
+        // The Generate tab
+        case "name_empty": return qsTr("Enter a name.")
+        case "class_name": return qsTr("A class name in StudlyCase: a capital first, then letters and digits (`BlogPost`).")
+        case "controller_name": return qsTr("Letters, digits, `-` and `_`, starting with a letter.")
+        case "migration_name": return qsTr("Letters, digits and `_`, starting with a letter (`add_slug_to_posts`).")
+        case "table_name": return qsTr("A table name: letters, digits and `_`, up to 64.")
+        case "table_needed": return qsTr("Enter the table.")
+        case "slug_name": return qsTr("Lower case letters and digits, with `-` between words.")
+        case "resource_name": return qsTr("A resource's class name, e.g. `Post`.")
+        case "resource_needed": return qsTr("Enter the resource it lists, e.g. `Post`.")
+        case "group_invalid": return qsTr("One line only.")
         }
         return problem(code)
     }
@@ -124,6 +135,11 @@ QtObject {
         case "env_key":
         case "env_value": return qsTr("A value for `.env` has a character FloCMS can't read there (a line break).")
         case "step_stopped": return qsTr("Stopped.")
+        case "no_vendor": return qsTr("The project has no `vendor/` folder yet: run `composer install` in it.")
+        case "preview_too_big": return qsTr("The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.")
+        case "preview_copy": return qsTr("Studio could not copy the project for the preview.")
+        case "preview_cancelled": return qsTr("The preview was stopped.")
+        case "preview_remove": return qsTr("Studio could not remove the preview's copy. It tries again when it next starts.")
         case "not_allowed": return qsTr("Studio does not run this command.")
         case "keychain_unavailable": return qsTr("There is no secure store for passwords on this computer.")
         case "keychain_denied": return qsTr("The secure store did not give the password.")

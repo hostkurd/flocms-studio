@@ -3,6 +3,7 @@
 #include "logmodel.h"
 #include "newproject.h"
 #include "projectchecks.h"
+#include "projectgenerate.h"
 #include "projectsmodel.h"
 
 #include <flostudio/core/downloads.h>
@@ -56,6 +57,8 @@ class Studio : public QObject
     Q_PROPERTY(LogModel *logs READ logs NOTIFY serverChanged)
     // The open project's Doctor and Database (stage 5)
     Q_PROPERTY(ProjectChecks *checks READ checks NOTIFY currentChanged)
+    // The open project's Generate tab (stage 7)
+    Q_PROPERTY(ProjectGenerate *generate READ generate NOTIFY currentChanged)
     // A command that changes a database or caches still runs (quitting asks)
     Q_PROPERTY(bool commandRunning READ commandRunning NOTIFY commandRunningChanged)
     // The new project wizard (stage 6); page "new" shows it
@@ -112,6 +115,7 @@ public:
     QVariantMap server() const;
     LogModel *logs() const;
     ProjectChecks *checks() const { return m_checks.value(m_currentPath); }
+    ProjectGenerate *generate() const { return m_generate.value(m_currentPath); }
     bool commandRunning() const;
     NewProjectWizard *wizard() { return &m_wizard; }
     QVariantList tools() const { return m_tools; }
@@ -188,6 +192,8 @@ private:
     void downloadNext();
     ProjectServer *serverFor(const QString &path);
     ProjectChecks *checksFor(const QString &path);
+    ProjectGenerate *generateFor(const QString &path);
+    bool currentHasAdmin() const;
     void serversChanged();
 
     Language *m_language;
@@ -215,5 +221,6 @@ private:
     QString m_demoToolsFolder;
     QHash<QString, ProjectServer *> m_servers; // children of this, one per project opened
     QHash<QString, ProjectChecks *> m_checks;  // children of this, one per project opened
+    QHash<QString, ProjectGenerate *> m_generate; // the same
     NewProjectWizard m_wizard{&m_settings};
 };

@@ -8,6 +8,8 @@ qt_add_executable(Studio
     newproject.cpp
     projectchecks.h
     projectchecks.cpp
+    projectgenerate.h
+    projectgenerate.cpp
     projectserver.h
     projectserver.cpp
     projectsmodel.h
@@ -75,6 +77,8 @@ set(STUDIO_QML
     qml/DatabaseTab.qml
     qml/DoctorTab.qml
     qml/FormField.qml
+    qml/GenerateTab.qml
+    qml/Choice.qml
     qml/LanguageChip.qml
     qml/LogsTab.qml
     qml/NewProjectPage.qml

@@ -1,0 +1,203 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.4.27",
+      "path": "C:\\php\\8.4\\php.exe"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "C:\\ProgramData\\ComposerSetup\\bin\\composer.bat"
+    },
+    {
+      "tool": "mariadb",
+      "state": "running",
+      "version": "11.8.9",
+      "product": "MariaDB",
+      "path": "C:\\Program Files\\MariaDB 11.8\\bin\\mariadb.exe"
+    }
+  ],
+  "page": "project",
+  "server": {
+    "state": "running",
+    "url": "http://127.0.0.1:8000",
+    "php": "8.4.27",
+    "startedMinutesAgo": 14
+  },
+  "running": [
+    "C:\\Sites\\fectumhellas"
+  ],
+  "checks": {
+    "doctor": {
+      "out": "{\n    \"ok\": true,\n    \"failed\": 0,\n    \"warnings\": 2,\n    \"checks\": [\n        {\n            \"status\": \"ok\",\n            \"check\": \"PHP version\",\n            \"detail\": \"8.3.6\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension pdo\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension mbstring\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension fileinfo\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension gd\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension openssl\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension curl\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension pdo_mysql\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Composer dependencies\",\n            \"detail\": \"installed\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"storage/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"storage/logs/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"warn\",\n            \"check\": \"storage/cache/\",\n            \"detail\": \"missing\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"views/cache/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \".env file\",\n            \"detail\": \"present\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \".env keys\",\n            \"detail\": \"complete\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_KEY\",\n            \"detail\": \"set\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_URL\",\n            \"detail\": \"http://localhost\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_DEBUG\",\n            \"detail\": \"true (local)\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Database\",\n            \"detail\": \"connected (mysql)\"\n        },\n        {\n            \"status\": \"warn\",\n            \"check\": \"Migrations\",\n            \"detail\": \"2 pending: run php flo migrate\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"public/.htaccess\",\n            \"detail\": \"rewrite rules present\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Document root\",\n            \"detail\": \"point the document root at public/ (the root .htaccess forwards there as a fallback)\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Maintenance mode\",\n            \"detail\": \"off\"\n        }\n    ]\n}\n",
+      "err": "",
+      "code": 0
+    },
+    "adminDoctor": {
+      "out": "\nflocms-admin 0.39.3\n===================\n\n  ✓ config/admin.php found\n  ✓ Languages: en, ar, ku (default en)\n  ✓ Admin layout: templates/default/layouts/admin.html\n  ✓ Panel pages: /admin/dashboard, /admin/settings, /admin/accounts, /admin/profile\n  ✓ Database connection works\n\nApp\\Admin\\Resources\\PostResource  (/admin/posts)\n------------------------------------------------\n  ✓ Permissions: content.posts.view, content.posts.create, content.posts.update, content.posts.delete\n  CSV: export (content.posts.export), import (content.posts.import + create)\n  Translations: one language at a time (page mode), the panel default\n  ✗ Table \"posts\" not found (run php flo migrate?)\n\nFloCMS\\Admin\\Users\\UsersResource  (/admin/accounts)\n---------------------------------------------------\n  ✓ Permissions: users.manage, users.manage, users.manage, users.manage\n  CSV: export (content.accounts.export), import (content.accounts.import + create)\n  ✓ Table \"users\" (15 columns)\n\nSettings and preferences\n------------------------\n  ✓ No website settings pages (optional: php flo make:admin-settings)\n  ✓ Admin panel settings page (settings.panel)\n  ✓ Settings uploads: C:\\Sites\\fectumhellas/public/uploads/settings (served at /uploads/settings)\n  ✓ Table \"settings\"\n  ✓ Table \"admin_user_preferences\"\n\nMedia library  (/admin/media)\n-----------------------------\n  ✓ Table \"media\"\n  ✓ Table \"media_usage\"\n  ✓ Table \"media_folders\" (folders)\n  ✓ Files in C:\\Sites\\fectumhellas/public/uploads/editor/library (served at /uploads/editor/library)\n  Permissions: content.media.view, …create, …update, …delete\n\nTrash and activity log  (/admin/trash, /admin/activity)\n-------------------------------------------------------\n  ✓ Table \"admin_trash\" (trash)\n  ✓ Table \"admin_activity\" (activity log)\n  Trash: records are kept 30 days; php flo admin:trash-purge deletes older ones (panel pages do it hourly).\n  Activity log: entries are kept 365 days. The Activity page needs the permission activity.view.\n\nRoles  (/admin/roles)\n---------------------\n  ✓ Table \"admin_roles\": no changes, the roles of config/config.php apply\n  The page needs the permission roles.manage (Super Admin has it through *). php flo admin:roles lists the roles in force; php flo admin:roles-reset undoes changes.\n\nCSV import and export  (/admin/<slug>/import, /admin/imports)\n-------------------------------------------------------------\n  Export: on, up to 50,000 rows a file\n  ✓ Table \"admin_imports\"\n  ✓ Table \"admin_import_rows\"\n  Import: up to 10,000 rows and 10 MB a file, 100 rows a request, Undo for 7 days.\n  The browser sends files in parts of 2 MB, so PHP's upload_max_filesize (2M) only limits pages without JavaScript.\n  php flo admin:import-purge removes old upload files (panel pages do it hourly).\n\nForgot password  (/admin/password/forgot)\n-----------------------------------------\n  ✓ Table \"admin_password_resets\"\n  ✓ Email: PHP mail(), from info@flocms.com. Check it with: php flo admin:mail-test you@example.com\n  Links work once, for 60 minutes; 3 requests an hour per address, 10 per IP address.\n\nLogin security  (/admin/profile/security)\n-----------------------------------------\n  Off: add 'two_factor' => true and/or 'email_verification' => true to config/admin.php.\n\nPages  (/admin/site-pages)\n--------------------------\n  Off: add 'pages' => true to config/admin.php to manage the website's pages in the panel.\n\n",
+      "err": " ERROR  1 problem(s), 0 warning(s).\n",
+      "code": 1
+    },
+    "show": {
+      "out": "{\n    \"connection\": {\n        \"driver\": \"mysql\",\n        \"host\": \"127.0.0.1\",\n        \"port\": 3306,\n        \"database\": \"fectum\",\n        \"username\": \"root\",\n        \"server\": \"10.11.14-MariaDB-0ubuntu0.24.04.1\"\n    },\n    \"tables\": [\n        {\n            \"table\": \"admin_activity\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_import_rows\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_imports\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_mail_optouts\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_mailing_recipients\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_mailings\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_password_resets\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_roles\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_trash\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"admin_user_preferences\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"api_idempotency\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"api_keys\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"api_tokens\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"media\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"media_folders\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"media_usage\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"migrations\",\n            \"rows\": 13\n        },\n        {\n            \"table\": \"posts\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"settings\",\n            \"rows\": 0\n        },\n        {\n            \"table\": \"users\",\n            \"rows\": 0\n        }\n    ]\n}\n",
+      "err": "",
+      "code": 0
+    },
+    "status": {
+      "out": "+-----------------------------------------------------------------------------+---------------------+-------+---------------------+\n| Migration                                                                   | Package             | Batch | Status              |\n+-----------------------------------------------------------------------------+---------------------+-------+---------------------+\n| 2026_10_10_000000_create_api_tables                                         | hostkurd/flocms-api | 1     | Ran                 |\n| 2026_10_10_000000_create_users_table                                        | app                 | 1     | Ran                 |\n| 2026_10_17_000000_create_settings_table                                     | app                 | 1     | Ran                 |\n| 2026_10_24_095125_create_admin_user_preferences_table                       | app                 | 1     | Ran                 |\n| 2026_10_24_095126_create_media_table                                        | app                 | 1     | Ran                 |\n| 2026_10_24_095127_create_media_folders_table                                | app                 | 1     | Ran                 |\n| 2026_10_24_095128_create_admin_trash_and_admin_activity_tables              | app                 | 1     | Ran                 |\n| 2026_10_24_095129_create_admin_roles_table                                  | app                 | 1     | Ran                 |\n| 2026_10_24_095130_create_admin_imports_and_admin_import_rows_tables         | app                 | 1     | Ran                 |\n| 2026_10_24_095131_create_admin_password_resets_table                        | app                 | 1     | Ran                 |\n| 2026_10_24_095132_create_admin_mailings_and_admin_mailing_recipients_tables | app                 | 1     | Ran                 |\n| 2026_10_24_095202_create_posts_table                                        | app                 | 2     | Ran (changed since) |\n| 2026_10_24_095133_create_users_bio_column                                   | app                 | 1     | Ran (file missing)  |\n| 2026_10_24_140500_add_featured_to_posts                                     | app                 |       | Pending             |\n| 2026_10_24_141000_create_listings_table                                     | app                 |       | Pending             |\n+-----------------------------------------------------------------------------+---------------------+-------+---------------------+\n2 pending; run \"php flo migrate\".\n",
+      "err": "",
+      "code": 0
+    },
+    "adminList": {
+      "out": "\nAdmin resources\n===============\n\n+----------+-----------------+-------+----------------------------------------------+--------------+\n| Resource | URL             | Table | Permissions                                  | Class        |\n+----------+-----------------+-------+----------------------------------------------+--------------+\n| Posts    | /admin/posts    | posts | content.posts.view (+create, update, delete) | PostResource |\n| Users    | /admin/accounts | users | users.manage (+create, update, delete)       | built in     |\n| Media    | /admin/media    | media | content.media.view (+create, update, delete) | built in     |\n+----------+-----------------+-------+----------------------------------------------+--------------+\n\nSettings pages\n--------------\n+-------------+----------------------------+---------+--------+----------------+\n| Page        | URL                        | Keys    | Fields | Permission     |\n+-------------+----------------------------+---------+--------+----------------+\n| Admin panel | /admin/settings/edit/panel | panel.* | 7      | settings.panel |\n+-------------+----------------------------+---------+--------+----------------+\n\nDashboard widgets\n-----------------\n! None: the dashboard shows resource counts. Create one with php flo make:admin-widget Overview\n\nPanel pages\n-----------\n! None: php flo make:admin-page SalesReport --view --table\n",
+      "err": "",
+      "code": 0
+    },
+    "checkedMinutesAgo": 2,
+    "output": {
+      "command": "migrate",
+      "state": "done",
+      "exitCode": 0,
+      "shown": "php flo migrate --no-interaction --no-ansi",
+      "lines": [
+        "  Migrating hostkurd/flocms-api:2026_10_10_000000_create_api_tables ... done",
+        "  Migrating 2026_10_10_000000_create_users_table ... done",
+        "  Migrating 2026_10_17_000000_create_settings_table ... done",
+        "  Migrating 2026_10_24_095125_create_admin_user_preferences_table ... done",
+        "  Migrating 2026_10_24_095126_create_media_table ... done",
+        "  Migrating 2026_10_24_095127_create_media_folders_table ... done"
+      ]
+    }
+  },
+  "tab": "generate",
+  "generate": {
+    "generator": "widget",
+    "form": {
+      "name": "PostStats",
+      "resource": "Post"
+    },
+    "preview": {
+      "state": "done",
+      "shown": "php flo make:admin-widget PostStats --resource=Post",
+      "selected": 1,
+      "lines": [
+        "[OK] Created admin/Widgets/PostStats.php (stats widget)",
+        "[OK] Registered PostStats in config/admin.php",
+        "! Check it with: php flo admin:doctor"
+      ],
+      "files": [
+        {
+          "path": "admin/Widgets/PostStats.php",
+          "kind": "added",
+          "after": "<?php\ndeclare(strict_types=1);\n\nnamespace App\\Admin\\Widgets;\n\nuse App\\Admin\\Resources\\PostResource;\nuse FloCMS\\Admin\\Widgets\\Stat;\nuse FloCMS\\Admin\\Widgets\\StatsWidget;\nuse FloCMS\\Admin\\Widgets\\WidgetContext;\n\n/**\n * Dashboard statistics: up to eight Stat cards.\n * Registered in config/admin.php under 'widgets'.\n */\nfinal class PostStats extends StatsWidget\n{\n    protected string $title = 'Poststats'; // plain text or a site language key\n\n    // Every resource read below; users without its view permission do not see the widget.\n    protected array $resources = [PostResource::class];\n\n    protected int|string $columnSpan = 'full'; // 1-4 or 'full'\n    protected int $sort = 0;\n\n    protected function stats(WidgetContext $context): array\n    {\n        $records = $context->query(PostResource::class);\n\n        return [\n            Stat::make('Total', $records->count())->resource(PostResource::class),\n            // Stat::make('Published', $records->where('status', '=', 'published')->count())->color('success'),\n        ];\n    }\n}\n"
+        },
+        {
+          "path": "config/admin.php",
+          "kind": "changed",
+          "before": "<?php\n/*\n * flocms-admin settings. Created by `php flo admin:install`.\n * Deleting this file switches the admin panel off (the package does nothing).\n */\nreturn [\n    // Reactive lists/dialogs and navigation; false restores full-page behavior.\n    'reactive' => true,\n    // Optional Admin login styling (requires the skeleton's auth.login_view hook).\n    'login_theme' => true,\n\n    // Resource classes to load. Leave empty to load every *Resource.php\n    // file in resources_path (namespace resources_namespace).\n    'resources' => [\n        // App\\Admin\\Resources\\PropertyResource::class,\n    ],\n    'resources_path' => 'admin/Resources',\n    'resources_namespace' => 'App\\\\Admin\\\\Resources',\n\n    // Optional dashboard widgets, explicitly registered. Empty keeps resource-count cards.\n    'widgets' => [\n        // App\\Admin\\Widgets\\Overview::class,\n    ],\n    'widgets_path' => 'admin/Widgets',\n    'widgets_namespace' => 'App\\\\Admin\\\\Widgets',\n    'widget_columns' => 2,\n\n    // Pages of your own in the panel (0.36): reports, tools, help pages.\n    // php flo make:admin-page SalesReport --view --table adds one here.\n    'admin_pages' => [\n        // App\\Admin\\Pages\\SalesReport::class,\n    ],\n    'admin_pages_path' => 'admin/Pages',\n    'admin_pages_namespace' => 'App\\\\Admin\\\\Pages',\n    // The page /admin opens: 'dashboard', or one of admin_pages (App\\Admin\\Pages\\SalesReport::class).\n    // 'home' => 'dashboard',\n\n    // Pages built from blocks, HTML or rich text, at /admin/site-pages (0.30); then\n    // php flo admin:install and php flo migrate. Needs flocms-core 2.6.\n    // 'pages' => true,  or ['missing' => '404'] to answer 404 for a page not translated\n    'pages' => false,\n\n    // The site's own blocks for Builder fields (0.29): php flo make:admin-block LatestProjects.\n    'blocks' => [\n        // App\\Admin\\Blocks\\LatestProjects::class,\n    ],\n    'blocks_path' => 'admin/Blocks',\n    'blocks_namespace' => 'App\\\\Admin\\\\Blocks',\n\n    // Users management at /admin/accounts and the profile page at /admin/profile\n    // (the skeleton's users table). false switches both off.\n    'users' => true,\n\n    // \"Forgot password?\" on the login page (needs login_theme and the\n    // password resets table: php flo migrate). Emails are sent with the\n    // MAIL_* settings in .env (php flo admin:mail-test you@example.com).\n    // false switches it off; or set any of these:\n    'password_reset' => [\n        'expires' => 60,     // minutes a reset link works\n        'per_email' => 3,    // requests per address per hour\n        'per_ip' => 10,      // requests per IP address per hour\n    ],\n\n    // Colour theme: 'light', 'dark', or 'auto' (follows the operating system)\n    'theme' => 'light',\n\n    // Brand colour for buttons, links and highlights (#rrggbb); null keeps the default blue.\n    // Pick a colour dark enough for white text: admin:doctor checks the contrast.\n    'primary_color' => null,\n\n    // Logo image URL for the sidebar (square works best); null shows the brand's first letter\n    'logo' => null,\n\n    // Sidebar style: 'light' or 'dark'\n    'sidebar' => 'light',\n\n    // How times of day are shown in lists and view pages: 'H:i' (24-hour) or 'g:i A' (12-hour)\n    'time_format' => 'H:i',\n\n    // Page width: 'full' uses the whole window, 'boxed' centres pages at most 1280 px wide\n    'content_width' => 'full',\n\n    // The View site link in the top bar, the user menu and the login page: true (this site),\n    // false (an admin panel without a website) or an address ('https://www.example.com')\n    'site_link' => true,\n\n    // Dialogs fit their content; pixels (240) or a CSS length ('20rem') keep room in\n    // the body of every form and action dialog. One action: ->modalMinHeight(320)\n    'dialog_min_height' => null,\n\n    // Ctrl+K search: false switches it off; 'per_group' => 5 results per group,\n    // 'shortcut' => false keeps Ctrl+K for the browser, 'sources' => [your SearchSource classes]\n    'search' => true,\n\n    // Public media (the media library and rich text uploads): folder (relative to\n    // the project) and its public URL. The folder must be inside the web root and\n    // writable; admin:doctor checks it.\n    'media' => [\n        'root' => 'public/uploads/editor',\n        'url' => '/uploads/editor',\n    ],\n\n    // The media library (/admin/media): on when its table exists (php flo migrate).\n    // false switches it off; ['table' => 'site_media', 'usage_table' => 'site_media_usage',\n    // 'folders_table' => 'site_media_folders'] renames its tables before the first migration,\n    // e.g. when a \"media\" table already exists.\n    'media_library' => true,\n\n    // The trash (/admin/trash): deleted records wait here and can be restored.\n    // 'days' => 0 keeps them until emptied; false deletes at once. Needs php flo migrate.\n    'trash' => ['days' => 30],\n\n    // The activity log (/admin/activity, History on each record; permission activity.view).\n    // 'logins' => true also records sign-ins; false switches the log off.\n    'activity' => ['days' => 365, 'logins' => false],\n\n    // The Roles page (/admin/roles; permission roles.manage, Super Admin by default):\n    // roles and permissions edited in the panel, on top of config/config.php.\n    // false switches it off and the config roles apply again. Name your own\n    // permissions so they get a row: 'permissions' => ['reports.export' => 'Export reports'].\n    'roles' => ['permissions' => []],\n\n    // Name at the top of the sidebar\n    'brand' => \\FloCMS\\Core\\Env::get('SITE_NAME_ADMIN', 'Admin'),\n\n    // Rows per list page (a resource can set its own with ->perPage())\n    'per_page' => 25,\n\n    // How translatable fields are edited: 'page' shows the whole form in one language\n    // with an \"Editing: language\" switch; 'field' gives each field a language badge.\n    // A resource can choose its own: protected static string $translationMode = 'field';\n    'translation_mode' => 'page',\n\n    // Content languages written right to left (inputs get dir=\"rtl\")\n    'rtl_languages' => ['ar', 'ku', 'ckb', 'fa', 'he', 'ur'],\n\n    // Permission names are \"<prefix>.<slug>.<view|create|update|delete>\",\n    // e.g. content.properties.update. The skeleton's Editor role has content.*\n    'permission_prefix' => 'content',\n];\n",
+          "after": "<?php\n/*\n * flocms-admin settings. Created by `php flo admin:install`.\n * Deleting this file switches the admin panel off (the package does nothing).\n */\nreturn [\n    // Reactive lists/dialogs and navigation; false restores full-page behavior.\n    'reactive' => true,\n    // Optional Admin login styling (requires the skeleton's auth.login_view hook).\n    'login_theme' => true,\n\n    // Resource classes to load. Leave empty to load every *Resource.php\n    // file in resources_path (namespace resources_namespace).\n    'resources' => [\n        // App\\Admin\\Resources\\PropertyResource::class,\n    ],\n    'resources_path' => 'admin/Resources',\n    'resources_namespace' => 'App\\\\Admin\\\\Resources',\n\n    // Optional dashboard widgets, explicitly registered. Empty keeps resource-count cards.\n    'widgets' => [\n        // App\\Admin\\Widgets\\Overview::class,\n        \\App\\Admin\\Widgets\\PostStats::class,\n    ],\n    'widgets_path' => 'admin/Widgets',\n    'widgets_namespace' => 'App\\\\Admin\\\\Widgets',\n    'widget_columns' => 2,\n\n    // Pages of your own in the panel (0.36): reports, tools, help pages.\n    // php flo make:admin-page SalesReport --view --table adds one here.\n    'admin_pages' => [\n        // App\\Admin\\Pages\\SalesReport::class,\n    ],\n    'admin_pages_path' => 'admin/Pages',\n    'admin_pages_namespace' => 'App\\\\Admin\\\\Pages',\n    // The page /admin opens: 'dashboard', or one of admin_pages (App\\Admin\\Pages\\SalesReport::class).\n    // 'home' => 'dashboard',\n\n    // Pages built from blocks, HTML or rich text, at /admin/site-pages (0.30); then\n    // php flo admin:install and php flo migrate. Needs flocms-core 2.6.\n    // 'pages' => true,  or ['missing' => '404'] to answer 404 for a page not translated\n    'pages' => false,\n\n    // The site's own blocks for Builder fields (0.29): php flo make:admin-block LatestProjects.\n    'blocks' => [\n        // App\\Admin\\Blocks\\LatestProjects::class,\n    ],\n    'blocks_path' => 'admin/Blocks',\n    'blocks_namespace' => 'App\\\\Admin\\\\Blocks',\n\n    // Users management at /admin/accounts and the profile page at /admin/profile\n    // (the skeleton's users table). false switches both off.\n    'users' => true,\n\n    // \"Forgot password?\" on the login page (needs login_theme and the\n    // password resets table: php flo migrate). Emails are sent with the\n    // MAIL_* settings in .env (php flo admin:mail-test you@example.com).\n    // false switches it off; or set any of these:\n    'password_reset' => [\n        'expires' => 60,     // minutes a reset link works\n        'per_email' => 3,    // requests per address per hour\n        'per_ip' => 10,      // requests per IP address per hour\n    ],\n\n    // Colour theme: 'light', 'dark', or 'auto' (follows the operating system)\n    'theme' => 'light',\n\n    // Brand colour for buttons, links and highlights (#rrggbb); null keeps the default blue.\n    // Pick a colour dark enough for white text: admin:doctor checks the contrast.\n    'primary_color' => null,\n\n    // Logo image URL for the sidebar (square works best); null shows the brand's first letter\n    'logo' => null,\n\n    // Sidebar style: 'light' or 'dark'\n    'sidebar' => 'light',\n\n    // How times of day are shown in lists and view pages: 'H:i' (24-hour) or 'g:i A' (12-hour)\n    'time_format' => 'H:i',\n\n    // Page width: 'full' uses the whole window, 'boxed' centres pages at most 1280 px wide\n    'content_width' => 'full',\n\n    // The View site link in the top bar, the user menu and the login page: true (this site),\n    // false (an admin panel without a website) or an address ('https://www.example.com')\n    'site_link' => true,\n\n    // Dialogs fit their content; pixels (240) or a CSS length ('20rem') keep room in\n    // the body of every form and action dialog. One action: ->modalMinHeight(320)\n    'dialog_min_height' => null,\n\n    // Ctrl+K search: false switches it off; 'per_group' => 5 results per group,\n    // 'shortcut' => false keeps Ctrl+K for the browser, 'sources' => [your SearchSource classes]\n    'search' => true,\n\n    // Public media (the media library and rich text uploads): folder (relative to\n    // the project) and its public URL. The folder must be inside the web root and\n    // writable; admin:doctor checks it.\n    'media' => [\n        'root' => 'public/uploads/editor',\n        'url' => '/uploads/editor',\n    ],\n\n    // The media library (/admin/media): on when its table exists (php flo migrate).\n    // false switches it off; ['table' => 'site_media', 'usage_table' => 'site_media_usage',\n    // 'folders_table' => 'site_media_folders'] renames its tables before the first migration,\n    // e.g. when a \"media\" table already exists.\n    'media_library' => true,\n\n    // The trash (/admin/trash): deleted records wait here and can be restored.\n    // 'days' => 0 keeps them until emptied; false deletes at once. Needs php flo migrate.\n    'trash' => ['days' => 30],\n\n    // The activity log (/admin/activity, History on each record; permission activity.view).\n    // 'logins' => true also records sign-ins; false switches the log off.\n    'activity' => ['days' => 365, 'logins' => false],\n\n    // The Roles page (/admin/roles; permission roles.manage, Super Admin by default):\n    // roles and permissions edited in the panel, on top of config/config.php.\n    // false switches it off and the config roles apply again. Name your own\n    // permissions so they get a row: 'permissions' => ['reports.export' => 'Export reports'].\n    'roles' => ['permissions' => []],\n\n    // Name at the top of the sidebar\n    'brand' => \\FloCMS\\Core\\Env::get('SITE_NAME_ADMIN', 'Admin'),\n\n    // Rows per list page (a resource can set its own with ->perPage())\n    'per_page' => 25,\n\n    // How translatable fields are edited: 'page' shows the whole form in one language\n    // with an \"Editing: language\" switch; 'field' gives each field a language badge.\n    // A resource can choose its own: protected static string $translationMode = 'field';\n    'translation_mode' => 'page',\n\n    // Content languages written right to left (inputs get dir=\"rtl\")\n    'rtl_languages' => ['ar', 'ku', 'ckb', 'fa', 'he', 'ur'],\n\n    // Permission names are \"<prefix>.<slug>.<view|create|update|delete>\",\n    // e.g. content.properties.update. The skeleton's Editor role has content.*\n    'permission_prefix' => 'content',\n];\n"
+        }
+      ]
+    }
+  }
+}

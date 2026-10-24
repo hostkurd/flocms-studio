@@ -9,12 +9,14 @@
 #include "logmodel.h"
 #include "newproject.h"
 #include "projectchecks.h"
+#include "projectgenerate.h"
 #include "projectserver.h"
 #include "studio.h"
 
 #include <flostudio/core/env.h>
 #include <flostudio/core/server.h>
 #include <flostudio/core/settings.h>
+#include <flostudio/core/preview.h>
 #include <flostudio/core/tools.h>
 
 #include <QAbstractItemModelTester>
@@ -415,6 +417,148 @@ private slots:
         QVERIFY(QFileInfo::exists(parent)); // only the project's folder
         QVERIFY(wizard->steps().isEmpty());
 #endif
+    }
+
+    // --- Stage 7: the Generate tab --------------------------------------
+
+    void theGenerateForm()
+    {
+        ProjectGenerate generate(QStringLiteral("/nowhere"), nullptr, true);
+        QCOMPARE(generate.generator(), QStringLiteral("admin-resource"));
+        QVERIFY(!generate.ready());
+        QVERIFY(generate.problems().isEmpty()); // nothing touched yet
+        generate.set(QStringLiteral("name"), QStringLiteral("Property"));
+        generate.set(QStringLiteral("slug"), QStringLiteral("listings"));
+        generate.set(QStringLiteral("migration"), true);
+        QVERIFY(generate.ready());
+        QCOMPARE(generate.command(), QStringLiteral("php flo make:admin-resource Property --slug=listings --migration"));
+        generate.set(QStringLiteral("slug"), QStringLiteral("Listings"));
+        generate.touch(QStringLiteral("slug"));
+        QCOMPARE(generate.problems().value(QStringLiteral("slug")).toString(), QStringLiteral("slug_name"));
+        // Another generator starts empty
+        generate.choose(QStringLiteral("migration"));
+        QCOMPARE(generate.form().value(QStringLiteral("name")).toString(), QString());
+        generate.set(QStringLiteral("name"), QStringLiteral("add_slug_to_posts"));
+        generate.set(QStringLiteral("migrationKind"), QStringLiteral("change"));
+        generate.set(QStringLiteral("table"), QStringLiteral("posts"));
+        QCOMPARE(generate.command(), QStringLiteral("php flo make:migration add_slug_to_posts --table=posts"));
+        // Without the admin panel: its generators can't run
+        generate.choose(QStringLiteral("block"));
+        generate.set(QStringLiteral("name"), QStringLiteral("LatestProjects"));
+        QVERIFY(generate.ready());
+        generate.setHasAdmin(false);
+        QCOMPARE(generate.generator(), QStringLiteral("controller"));
+        generate.choose(QStringLiteral("block"));
+        generate.set(QStringLiteral("name"), QStringLiteral("LatestProjects"));
+        QVERIFY(!generate.ready());
+        // A demo runs nothing
+        generate.runPreview();
+        generate.create();
+        QVERIFY(!generate.busy());
+    }
+
+    void theGenerateDemoShowsTheFiles()
+    {
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/generate-widget.json")).ok());
+        ProjectGenerate *generate = studio.generate();
+        QVERIFY(generate);
+        QCOMPARE(generate->generator(), QStringLiteral("widget"));
+        const QVariantMap preview = generate->preview();
+        QVERIFY(preview.value(QStringLiteral("current")).toBool());
+        const QVariantList files = preview.value(QStringLiteral("files")).toList();
+        QCOMPARE(files.size(), 2);
+        // config/admin.php: the one line make:admin-widget added, with context
+        const QVariantMap config = files.at(1).toMap();
+        QCOMPARE(config.value(QStringLiteral("kind")).toString(), QStringLiteral("changed"));
+        QStringList added;
+        for (const QVariant &line : config.value(QStringLiteral("lines")).toList()) {
+            if (line.toMap().value(QStringLiteral("kind")).toString() == u"+")
+                added << line.toMap().value(QStringLiteral("text")).toString();
+        }
+        QCOMPARE(added, QStringList{QStringLiteral("        \\App\\Admin\\Widgets\\PostStats::class,")});
+        // The resources from admin:list, for the widget's resource
+        QCOMPARE(studio.checks()->database().value(QStringLiteral("resources")).toStringList(), QStringList{QStringLiteral("Post")});
+        // Changing the form makes the preview old
+        generate->set(QStringLiteral("name"), QStringLiteral("Other"));
+        QVERIFY(!generate->preview().value(QStringLiteral("current")).toBool());
+    }
+
+    // A real project (FLOSTUDIO_REAL_PROJECT): the preview runs the real
+    // generator in a copy and the project stays as it was; Create writes it
+    void generatesInARealProject()
+    {
+        const QString project = qEnvironmentVariable("FLOSTUDIO_REAL_PROJECT");
+        if (project.isEmpty())
+            QSKIP("FLOSTUDIO_REAL_PROJECT is not set");
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProject(QUrl::fromLocalFile(project));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio) && !studio.checkingTools(), 60000);
+        ProjectGenerate *generate = studio.generate();
+        QVERIFY(generate);
+        const QDir migrations(project + QStringLiteral("/database/migrations"));
+        const QStringList before = migrations.entryList(QDir::Files);
+
+        generate->choose(QStringLiteral("migration"));
+        generate->set(QStringLiteral("name"), QStringLiteral("studio_generate_test"));
+        generate->runPreview();
+        QVERIFY(generate->busy());
+        QTRY_VERIFY_WITH_TIMEOUT(!generate->working(), 60000);
+        QVariantMap preview = generate->preview();
+        QVERIFY2(preview.value(QStringLiteral("state")).toString() == u"done",
+                 qUtf8Printable(preview.value(QStringLiteral("error")).toString() + u' ' + preview.value(QStringLiteral("detail")).toString()
+                                + u' ' + preview.value(QStringLiteral("message")).toString()));
+        QVariantList files = preview.value(QStringLiteral("files")).toList();
+        QCOMPARE(files.size(), 1);
+        const QString path = files.at(0).toMap().value(QStringLiteral("path")).toString();
+        QVERIFY2(path.startsWith(QStringLiteral("database/migrations/")) && path.endsWith(QStringLiteral("_studio_generate_test.php")),
+                 qUtf8Printable(path));
+        QCOMPARE(files.at(0).toMap().value(QStringLiteral("kind")).toString(), QStringLiteral("added"));
+        QCOMPARE(migrations.entryList(QDir::Files), before); // only the copy
+        // The copy is gone
+        QVERIFY(QDir(previewsFolder()).entryList(QDir::Dirs | QDir::NoDotAndDotDot).isEmpty());
+
+        // With the admin panel: a resource and its migration, nothing in the project
+        if (generate->hasAdmin()) {
+            generate->choose(QStringLiteral("admin-resource"));
+            generate->set(QStringLiteral("name"), QStringLiteral("StudioThing"));
+            generate->set(QStringLiteral("migration"), true);
+            generate->runPreview();
+            QTRY_VERIFY_WITH_TIMEOUT(!generate->working(), 60000);
+            files = generate->preview().value(QStringLiteral("files")).toList();
+            QCOMPARE(files.size(), 2);
+            QCOMPARE(files.at(0).toMap().value(QStringLiteral("path")).toString(), QStringLiteral("admin/Resources/StudioThingResource.php"));
+            QVERIFY(!QFileInfo::exists(project + QStringLiteral("/admin/Resources/StudioThingResource.php")));
+            QCOMPARE(migrations.entryList(QDir::Files), before);
+            generate->choose(QStringLiteral("migration"));
+            generate->set(QStringLiteral("name"), QStringLiteral("studio_generate_test"));
+        }
+
+        // Create: in the project, and the database is read again
+        QSignalSpy changed(generate, &ProjectGenerate::changedProject);
+        generate->create();
+        QVERIFY(studio.commandRunning());
+        QTRY_VERIFY_WITH_TIMEOUT(!generate->busy(), 60000);
+        QCOMPARE(generate->created().value(QStringLiteral("state")).toString(), QStringLiteral("done"));
+        QCOMPARE(changed.count(), 1);
+        QStringList made = migrations.entryList({QStringLiteral("*_studio_generate_test.php")}, QDir::Files);
+        QCOMPARE(made.size(), 1);
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+        QCOMPARE(studio.checks()->migrations().value(QStringLiteral("pending")).toInt(), 1);
+
+        // Again: the generator says it is there, in the preview
+        generate->runPreview();
+        QTRY_VERIFY_WITH_TIMEOUT(!generate->working(), 60000);
+        preview = generate->preview();
+        QCOMPARE(preview.value(QStringLiteral("state")).toString(), QStringLiteral("failed"));
+        QVERIFY2(preview.value(QStringLiteral("message")).toString().contains(QStringLiteral("already exists")),
+                 qUtf8Printable(preview.value(QStringLiteral("message")).toString()));
+        QVERIFY(QFile::remove(migrations.filePath(made.constFirst())));
+        studio.checks()->refreshDatabase();
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
     }
 
     // --- Stage 5: Doctor and the database ---------------------------------

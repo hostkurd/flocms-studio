@@ -1,5 +1,7 @@
 #include "studio.h"
 
+#include <flostudio/core/preview.h>
+
 #include "language.h"
 #include "projectserver.h"
 
@@ -221,6 +223,8 @@ void Studio::start()
         }
     });
     leftovers->setFuture(QtConcurrent::run([folder = settingsFolder()] { return stopLeftoverServers(folder); }));
+    // Preview copies a Studio left behind when it closed while previewing
+    (void)QtConcurrent::run([] { removeLeftoverPreviews(previewsFolder()); });
 }
 
 Result<Done> Studio::startDemo(const QString &file)
@@ -260,8 +264,10 @@ Result<Done> Studio::startDemo(const QString &file)
         m_wizard.showDemo(demo.value(QStringLiteral("wizard")).toObject().toVariantMap());
     // The open project's Doctor and database, server and log, and which
     // others are running
-    if (!m_currentPath.isEmpty())
+    if (!m_currentPath.isEmpty()) {
         checksFor(m_currentPath)->showDemo(demo.value(QStringLiteral("checks")).toObject().toVariantMap());
+        generateFor(m_currentPath)->showDemo(demo.value(QStringLiteral("generate")).toObject().toVariantMap());
+    }
     if (!m_currentPath.isEmpty())
         serverFor(m_currentPath)->showDemo(demo.value(QStringLiteral("server")).toObject().toVariantMap(),
                                            demo.value(QStringLiteral("logs")).toArray().toVariantList());
@@ -430,7 +436,8 @@ void Studio::addProject(const QUrl &folder)
 
 void Studio::removeProject(const QString &path)
 {
-    if (const ProjectChecks *checks = m_checks.value(path); checks && checks->busy()) {
+    const ProjectGenerate *generate = m_generate.value(path);
+    if (const ProjectChecks *checks = m_checks.value(path); (checks && checks->busy()) || (generate && generate->busy())) {
         setProblem(QStringLiteral("project_busy"), path);
         return;
     }
@@ -467,8 +474,7 @@ ProjectServer *Studio::serverFor(const QString &path)
 
 ProjectChecks *Studio::checksFor(const QString &path)
 {
-    const QString type = m_current.value(QStringLiteral("type")).toString();
-    const bool hasAdmin = type == u"siteAdmin" || type == u"siteAdminApi" || type == u"admin" || type == u"apiAdmin";
+    const bool hasAdmin = currentHasAdmin();
     if (ProjectChecks *checks = m_checks.value(path)) {
         checks->setHasAdmin(hasAdmin);
         return checks;
@@ -482,10 +488,38 @@ ProjectChecks *Studio::checksFor(const QString &path)
     return checks;
 }
 
+ProjectGenerate *Studio::generateFor(const QString &path)
+{
+    const bool hasAdmin = currentHasAdmin();
+    if (ProjectGenerate *generate = m_generate.value(path)) {
+        generate->setHasAdmin(hasAdmin);
+        return generate;
+    }
+    // A child of this, which outlives it, so the settings stay valid
+    auto *generate = new ProjectGenerate(path, m_demo ? nullptr : &m_settings, hasAdmin, this);
+    m_generate.insert(path, generate);
+    connect(generate, &ProjectGenerate::busyChanged, this, &Studio::commandRunningChanged);
+    // What Create wrote: a migration to run, a resource to link
+    connect(generate, &ProjectGenerate::changedProject, this, [this, path] {
+        if (ProjectChecks *checks = m_checks.value(path)) {
+            checks->refreshDatabase();
+            checks->runDoctor();
+        }
+    });
+    return generate;
+}
+
+bool Studio::currentHasAdmin() const
+{
+    const QString type = m_current.value(QStringLiteral("type")).toString();
+    return type == u"siteAdmin" || type == u"siteAdminApi" || type == u"admin" || type == u"apiAdmin";
+}
+
 bool Studio::commandRunning() const
 {
     return m_wizard.state() == u"running"
-           || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); });
+           || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); })
+           || std::any_of(m_generate.cbegin(), m_generate.cend(), [](const ProjectGenerate *generate) { return generate->busy(); });
 }
 
 void Studio::serversChanged()
@@ -620,6 +654,10 @@ void Studio::refreshProjects()
         if (m_projects.indexOf(path) < 0 && !m_checks.value(path)->busy())
             m_checks.take(path)->deleteLater();
     }
+    for (const QString &path : m_generate.keys()) {
+        if (m_projects.indexOf(path) < 0 && !m_generate.value(path)->busy())
+            m_generate.take(path)->deleteLater();
+    }
     serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
@@ -646,6 +684,7 @@ void Studio::loadCurrent()
         if (!m_current.contains(QStringLiteral("error"))) {
             serverFor(m_currentPath);
             checksFor(m_currentPath);
+            generateFor(m_currentPath);
         }
     }
     emit currentChanged();

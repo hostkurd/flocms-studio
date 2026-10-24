@@ -233,15 +233,17 @@ void ProjectChecks::refreshDatabase()
         QVariantMap migrations;
         QVariantList tables;
         QHash<QString, QString> adminUrls; // table → /admin/... (admin:list)
+        QStringList resources;             // the project's own resource classes (admin:list)
     };
     auto reads = std::make_shared<Reads>();
     auto adminUrls = std::shared_ptr<QHash<QString, QString>>(reads, &reads->adminUrls);
+    auto resources = std::shared_ptr<QStringList>(reads, &reads->resources);
     const auto done = [this, reads] {
         if (--m_databaseReads > 0)
             return;
         m_database = reads->database;
         m_migrations = reads->migrations;
-        linkTables(reads->tables, reads->adminUrls);
+        linkTables(reads->tables, reads->adminUrls, reads->resources);
         emit databaseChanged();
         if (std::exchange(m_refreshAgain, false))
             refreshDatabase();
@@ -256,8 +258,8 @@ void ProjectChecks::refreshDatabase()
         done();
     });
     if (m_hasAdmin) {
-        capture({QStringLiteral("admin:list")}, [adminUrls, done](const Captured &out) {
-            takeAdminList(out, adminUrls.get());
+        capture({QStringLiteral("admin:list")}, [adminUrls, resources, done](const Captured &out) {
+            takeAdminList(out, adminUrls.get(), resources.get());
             done();
         });
     }
@@ -309,17 +311,20 @@ QVariantMap ProjectChecks::takeStatus(const Captured &out)
             {QStringLiteral("rows"), list}};
 }
 
-void ProjectChecks::takeAdminList(const Captured &out, QHash<QString, QString> *adminUrls)
+void ProjectChecks::takeAdminList(const Captured &out, QHash<QString, QString> *adminUrls, QStringList *classes)
 {
     if (const auto resources = parseAdminList(out.out)) {
         for (const AdminResource &resource : resources.value()) {
             if (!resource.table.isEmpty() && resource.url.startsWith(u'/'))
                 adminUrls->insert(resource.table, resource.url);
+            // The Generate tab offers these for pages and widgets
+            if (resource.className.endsWith(QStringLiteral("Resource")))
+                *classes << resource.className.chopped(8);
         }
     }
 }
 
-void ProjectChecks::linkTables(const QVariantList &tables, const QHash<QString, QString> &adminUrls)
+void ProjectChecks::linkTables(const QVariantList &tables, const QHash<QString, QString> &adminUrls, const QStringList &resources)
 {
     QVariantList linked;
     for (const QVariant &row : tables) {
@@ -327,8 +332,10 @@ void ProjectChecks::linkTables(const QVariantList &tables, const QHash<QString, 
         table.insert(QStringLiteral("adminUrl"), adminUrls.value(table.value(QStringLiteral("name")).toString()));
         linked << table;
     }
-    if (m_database.value(QStringLiteral("state")).toString() == u"done")
+    if (m_database.value(QStringLiteral("state")).toString() == u"done") {
         m_database.insert(QStringLiteral("tables"), linked);
+        m_database.insert(QStringLiteral("resources"), resources);
+    }
 }
 
 QVariantMap ProjectChecks::plan(const QString &action) const
@@ -453,13 +460,14 @@ void ProjectChecks::showDemo(const QVariantMap &demo)
         takeAdminDoctor(captured(QStringLiteral("adminDoctor")));
     QVariantList tables;
     QHash<QString, QString> adminUrls;
+    QStringList resources;
     if (demo.contains(QStringLiteral("show")))
         m_database = takeShow(captured(QStringLiteral("show")), &tables);
     if (demo.contains(QStringLiteral("status")))
         m_migrations = takeStatus(captured(QStringLiteral("status")));
     if (demo.contains(QStringLiteral("adminList")))
-        takeAdminList(captured(QStringLiteral("adminList")), &adminUrls);
-    linkTables(tables, adminUrls);
+        takeAdminList(captured(QStringLiteral("adminList")), &adminUrls, &resources);
+    linkTables(tables, adminUrls, resources);
     m_output = demo.value(QStringLiteral("output")).toMap();
     // "checkedMinutesAgo": a time relative to now
     const int minutes = demo.value(QStringLiteral("checkedMinutesAgo"), -1).toInt();

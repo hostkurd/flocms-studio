@@ -219,7 +219,7 @@ Item {
             Layout.fillHeight: true
             currentIndex: page.tab
             OverviewTab { info: page.info; startAction: page.startAction; openTab: page.openTab }
-            LaterTab { stage: 7 }
+            GenerateTab {}
             DatabaseTab { startAction: page.startAction }
             LogsTab {}
             LaterTab { stage: 8 }

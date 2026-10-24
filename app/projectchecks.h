@@ -33,7 +33,7 @@ class ProjectChecks : public QObject
     //  sections: [{title, lines: [{status, text}]}], output, error, detail}
     Q_PROPERTY(QVariantMap adminDoctor READ adminDoctor NOTIFY doctorChanged)
     // {state, driver, server, host, port, database, username,
-    //  tables: [{name, rows, adminUrl}], error, detail}
+    //  tables: [{name, rows, adminUrl}], resources: [Post, ...], error, detail}
     Q_PROPERTY(QVariantMap database READ database NOTIFY databaseChanged)
     // {state, pending, rows: [{name, package, batch, state}], error, detail}
     Q_PROPERTY(QVariantMap migrations READ migrations NOTIFY databaseChanged)
@@ -97,8 +97,8 @@ private:
     void takeAdminDoctor(const FloStudio::Core::Captured &out);
     static QVariantMap takeShow(const FloStudio::Core::Captured &out, QVariantList *tables);
     static QVariantMap takeStatus(const FloStudio::Core::Captured &out);
-    static void takeAdminList(const FloStudio::Core::Captured &out, QHash<QString, QString> *adminUrls);
-    void linkTables(const QVariantList &tables, const QHash<QString, QString> &adminUrls);
+    static void takeAdminList(const FloStudio::Core::Captured &out, QHash<QString, QString> *adminUrls, QStringList *classes);
+    void linkTables(const QVariantList &tables, const QHash<QString, QString> &adminUrls, const QStringList &resources);
     bool demo() const { return m_settings == nullptr; }
 
     QString m_projectDir;

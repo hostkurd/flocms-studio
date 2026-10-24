@@ -169,8 +169,19 @@ ScrollView {
                 columns: 2
                 columnSpacing: 8
                 rowSpacing: 8
-                AppButton { text: qsTr("Admin resource…"); enabled: false; Layout.fillWidth: true; ToolTip.visible: hovered; ToolTip.text: qsTr("Comes with the Generate tab") }
-                AppButton { text: qsTr("Migration…"); enabled: false; Layout.fillWidth: true; ToolTip.visible: hovered; ToolTip.text: qsTr("Comes with the Generate tab") }
+                // To the Generate tab, with that generator
+                AppButton {
+                    text: qsTr("Admin resource…")
+                    enabled: !!Studio.generate && Studio.generate.hasAdmin
+                    Layout.fillWidth: true
+                    onClicked: { Studio.generate.choose("admin-resource"); tab.openTab("generate") }
+                }
+                AppButton {
+                    text: qsTr("Migration…")
+                    enabled: !!Studio.generate
+                    Layout.fillWidth: true
+                    onClicked: { Studio.generate.choose("migration"); tab.openTab("generate") }
+                }
                 AppButton {
                     text: qsTr("Clear cache")
                     enabled: !!Studio.checks && !Studio.checks.busy
