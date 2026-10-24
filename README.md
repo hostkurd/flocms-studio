@@ -8,4 +8,4 @@ The first version, built with Tauri, is [`hostkurd/flocms-studio-lite`](https://
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Studio uses Qt under the LGPL v3; the third-party notices will ship with the app.
+MIT, see [LICENSE](LICENSE). Studio uses Qt under the LGPL v3; the third-party notices will ship with the app. Bundled fonts are under the SIL Open Font License 1.1, not MIT (see `fonts/OFL.txt` next to them).

@@ -1,0 +1,130 @@
+name: RTL check (stage 0)
+
+on:
+  pull_request:
+    paths:
+      - "prototypes/rtl-check/**"
+      - ".github/workflows/rtl-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "prototypes/rtl-check/**"
+      - ".github/workflows/rtl-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rtl-check:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: win64_msvc2022_64
+          - os: macos-14
+            arch: clang_64
+          - os: ubuntu-24.04
+            arch: linux_gcc_64
+    env:
+      # A Windows GUI program sends warnings to the debugger, not stderr.
+      QT_FORCE_STDERR_LOGGING: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      # aqtinstall (used to download Qt) and its dependencies may not yet
+      # support the runners' newest Python.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # aqtinstall 3.3.0 can't find Qt 6.12 for Windows (new repository
+      # layout), so a small script reads the official repository directly.
+      - name: Install Qt 6.12 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          set -o pipefail
+          python .github/scripts/install_qt_windows.py 6.12.0 ${{ matrix.arch }} "$RUNNER_TEMP/Qt" 2>&1 | tee qt.log \
+            || { tail -5 qt.log | sed 's/^/::error::/'; exit 1; }
+          qtdir=$(tail -1 qt.log | tr -d '\r')
+          echo "Qt in $qtdir"
+          echo "CMAKE_PREFIX_PATH=$qtdir" >> "$GITHUB_ENV"
+          echo "$qtdir/bin" >> "$GITHUB_PATH"
+
+      - name: Install Qt 6.12
+        if: runner.os != 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.12.0"
+          arch: ${{ matrix.arch }}
+          cache: true
+          aqtversion: ">=3.2"
+          setup-python: false # use the 3.12 set up above
+
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 xvfb
+
+      - name: Check the translation files
+        run: python3 prototypes/rtl-check/check_ts.py prototypes/rtl-check/i18n/*.ts
+
+      - name: Build
+        run: |
+          # Job logs can't always be read from outside, so failures are
+          # repeated as annotations.
+          set +e
+          { cmake -S prototypes/rtl-check -B build -DCMAKE_BUILD_TYPE=Release \
+            && cmake --build build --config Release; } > build.log 2>&1
+          status=$?
+          cat build.log
+          if [ $status -ne 0 ]; then
+            grep -iE "error|undefined|cannot|not found|failed" build.log | head -25 | sed 's/^/::error::/'
+          fi
+          exit $status
+
+      - name: Find the program
+        run: |
+          exe=$(find build -name 'rtlcheck' -type f -perm -u+x -o -name 'rtlcheck.exe' -type f | head -1)
+          test -n "$exe" || { echo "::error::rtlcheck was not built"; exit 1; }
+          echo "Program: $exe"
+          echo "RTLCHECK=$exe" >> "$GITHUB_ENV"
+
+      - name: Self-test (layout order, digits, plurals, translations)
+        run: |
+          # The job's bash runs with pipefail, so a failing test fails the step.
+          if [ "$RUNNER_OS" = "Linux" ]; then export QT_QPA_PLATFORM=offscreen; fi
+          mkdir -p shots
+          "$RTLCHECK" --self-test | tee shots/selftest.txt
+
+      - name: Screenshots
+        run: |
+          mkdir -p shots
+          run() {
+            if [ "$RUNNER_OS" = "Linux" ]; then
+              xvfb-run -a -s "-screen 0 1400x900x24" "$RTLCHECK" "$@"
+            else
+              "$RTLCHECK" "$@"
+            fi
+          }
+          for lang in en ar ckb; do
+            for page in overview doctor; do
+              run --lang "$lang" --page "$page" --screenshot "shots/$lang-$page.png"
+            done
+          done
+          run --lang ckb --page doctor --dark --screenshot shots/ckb-doctor-dark.png
+          run --lang ar --page overview --dark --screenshot shots/ar-overview-dark.png
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rtl-check-${{ matrix.os }}
+          path: |
+            shots/
+            build.log
+          if-no-files-found: warn
