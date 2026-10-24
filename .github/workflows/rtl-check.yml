@@ -48,6 +48,7 @@ jobs:
           arch: ${{ matrix.arch }}
           cache: true
           aqtversion: ">=3.2"
+          setup-python: false # use the 3.12 set up above
 
       - name: Linux packages
         if: runner.os == 'Linux'
