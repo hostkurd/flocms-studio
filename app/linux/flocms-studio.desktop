@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=FloCMS Studio
+Comment=Create, run and change FloCMS projects
+Exec=flocms-studio
+Icon=flocms-studio
+Categories=Development;
+Terminal=false

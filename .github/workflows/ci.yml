@@ -360,6 +360,19 @@ jobs:
           path: shots/
           if-no-files-found: ignore
 
+      # A Linux build to try (D14: the Linux release comes after Windows
+      # and macOS): an AppImage, and the same folder as a .tar.gz
+      - name: Linux AppImage
+        env:
+          QMAKE: ${{ env.QT_ROOT_DIR }}/bin/qmake
+        run: .github/scripts/package_linux.sh build linux-dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FloCMS-Studio-linux
+          path: linux-dist/
+          if-no-files-found: error
+
       # Website + admin panel on the runner's MySQL (root/root)
       - name: Real FloCMS project
         run: |
