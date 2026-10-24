@@ -14,6 +14,8 @@ Button {
     property bool iconDirectional: false // flipped in right-to-left languages (a "back" arrow)
 
     implicitHeight: small ? 30 : 36
+    topPadding: 0
+    bottomPadding: 0
     leftPadding: small ? 10 : 14
     rightPadding: small ? 10 : 14
     font.family: Lang.uiFont
@@ -54,10 +56,21 @@ Button {
             filled: control.iconFilled
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
         }
-        RichText {
-            raw: control.text
+        // Plain text, centred on the button's middle: rich text (only for a
+        // label with a `code word`) lays its line out taller, low in the button
+        AppText {
+            visible: control.text.indexOf("`") < 0
+            ui: visible ? control.text : ""
             font: control.font
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
+            Layout.alignment: Qt.AlignVCenter
+        }
+        RichText {
+            visible: control.text.indexOf("`") >= 0
+            raw: visible ? control.text : ""
+            font: control.font
+            color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
+            Layout.alignment: Qt.AlignVCenter
         }
         Item { Layout.fillWidth: true }
     }
