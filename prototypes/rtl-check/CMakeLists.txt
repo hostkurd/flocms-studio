@@ -24,6 +24,9 @@ qt_add_qml_module(rtlcheck
     URI RtlCheck
     VERSION 1.0
     RESOURCE_PREFIX /
+    # Not the default build/RtlCheck/: on macOS's case-insensitive disk that
+    # folder clashes with the rtlcheck program and linking fails.
+    OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/RtlCheck
     QML_FILES
         Main.qml
         Theme.qml
