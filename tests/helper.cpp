@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     if (mode == u"env") {
-        put(stdout, qgetenv(args.value(1).toLocal8Bit().constData()) + '\n');
+        put(stdout, qEnvironmentVariable(args.value(1).toLatin1().constData()).toUtf8() + '\n');
         return 0;
     }
     if (mode == u"exit")

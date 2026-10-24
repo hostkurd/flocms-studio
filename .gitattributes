@@ -1,0 +1,2 @@
+# Real FloCMS output: kept byte for byte (no line ending changes on Windows)
+tests/fixtures/** -text
