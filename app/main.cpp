@@ -189,8 +189,16 @@ int main(int argc, char *argv[])
     Studio studio(&language);
     QQmlApplicationEngine engine;
     language.setEngine(&engine);
-    qmlRegisterSingletonInstance("FloStudio.Backend", 1, 0, "Lang", &language);
-    qmlRegisterSingletonInstance("FloStudio.Backend", 1, 0, "Studio", &studio);
+    // Singletons that stay C++'s (qmlRegisterSingletonInstance does the
+    // same through a QPointer that clang-analyzer misreads)
+    qmlRegisterSingletonType<Language>("FloStudio.Backend", 1, 0, "Lang", [&language](QQmlEngine *, QJSEngine *) -> QObject * {
+        QJSEngine::setObjectOwnership(&language, QJSEngine::CppOwnership);
+        return &language;
+    });
+    qmlRegisterSingletonType<Studio>("FloStudio.Backend", 1, 0, "Studio", [&studio](QQmlEngine *, QJSEngine *) -> QObject * {
+        QJSEngine::setObjectOwnership(&studio, QJSEngine::CppOwnership);
+        return &studio;
+    });
 
     if (parser.isSet(demoOpt)) {
         if (const auto demo = studio.startDemo(parser.value(demoOpt)); !demo) {

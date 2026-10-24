@@ -1,6 +1,7 @@
 #include <flostudio/core/downloads.h>
 
 #include <QCryptographicHash>
+#include <QDirIterator>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -16,11 +17,13 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QSysInfo>
+#include <QThread>
 #include <QTimer>
 #include <QVersionNumber>
 #include <QtConcurrent>
 
 #include <algorithm>
+#include <atomic>
 #include <memory>
 #include <utility>
 
@@ -77,12 +80,53 @@ QString tarProgram()
 #endif
 }
 
+// Never through a link: a package's link could point anywhere.
 void makeExecutable(const QString &path)
 {
     QFile file(path);
-    if (file.exists())
+    if (file.exists() && !QFileInfo(path).isSymLink())
         file.setPermissions(file.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeUser | QFileDevice::ExeGroup
                             | QFileDevice::ExeOther);
+}
+
+// A rename on Windows can fail for a moment while antivirus or the search
+// indexer has a file open: tried for a few seconds (worker thread only).
+bool renameWithRetry(const QString &from, const QString &to)
+{
+    for (int attempt = 0; attempt < 20; ++attempt) {
+        if (QDir().rename(from, to))
+            return true;
+#ifndef Q_OS_WIN
+        return false;
+#else
+        QThread::msleep(250);
+#endif
+    }
+    return false;
+}
+
+// Every link inside folder points inside it (D15: nothing unpacked may
+// reach out of the tools folder).
+bool linksStayInside(const QString &folder)
+{
+    const QString root = QFileInfo(folder).canonicalFilePath() + u'/';
+    QDirIterator it(folder, QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System,
+                    QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        const QFileInfo entry(it.next());
+        if (!entry.isSymLink() && !entry.isJunction())
+            continue;
+        // A link to something missing has no canonical path: also refused
+        const QString target = QFileInfo(entry.symLinkTarget()).canonicalFilePath();
+        if (target.isEmpty() || !(target + u'/').startsWith(root))
+            return false;
+    }
+    return true;
+}
+
+bool isWorkFolder(const QString &name)
+{
+    return name.endsWith(QStringLiteral(".new")) || name.endsWith(QStringLiteral(".old")) || name.startsWith(u'.');
 }
 
 // One download: the addresses are tried in order; the file is hashed as it
@@ -104,6 +148,10 @@ public:
 
     void start()
     {
+        if (*m_cancelled) {
+            finish(Error{QStringLiteral("tool_cancelled"), m_package.id});
+            return;
+        }
         if (!QDir().mkpath(QDir(m_toolsDir).filePath(QStringLiteral(".downloads")))) {
             finish(Error{QStringLiteral("tool_download"), m_toolsDir});
             return;
@@ -112,9 +160,11 @@ public:
         tryNext();
     }
 
+    // Before the download: nothing starts. During it: the reply stops.
+    // While unpacking: the worker stops before the folder is swapped in.
     void cancel()
     {
-        m_cancelled = true;
+        *m_cancelled = true;
         if (m_reply)
             m_reply->abort(); // finished() follows
     }
@@ -122,6 +172,10 @@ public:
 private:
     void tryNext()
     {
+        if (*m_cancelled) {
+            finish(Error{QStringLiteral("tool_cancelled"), m_package.id});
+            return;
+        }
         if (m_next >= m_package.urls.size()) {
             finish(Error{QStringLiteral("tool_download"), m_errors.join(QStringLiteral("; "))});
             return;
@@ -148,9 +202,17 @@ private:
 
     void take()
     {
+        if (!m_reply->isOpen()) // aborted
+            return;
         const QByteArray data = m_reply->readAll();
         m_hash.addData(data);
         m_received += data.size();
+        // More than the list says: a wrong file, stopped before it fills the disk
+        if (m_received > m_package.size) {
+            m_tooBig = true;
+            m_reply->abort();
+            return;
+        }
         if (m_file.write(data) != data.size())
             m_reply->abort();
     }
@@ -164,9 +226,15 @@ private:
         const bool https = m_reply->url().scheme() == u"https";
         m_reply->deleteLater();
         m_reply = nullptr;
-        if (m_cancelled) {
+        if (*m_cancelled) {
             m_file.remove();
             finish(Error{QStringLiteral("tool_cancelled"), m_package.id});
+            return;
+        }
+        if (std::exchange(m_tooBig, false)) {
+            m_errors << QStringLiteral("%1: larger than %2 bytes").arg(m_package.urls.at(m_next - 1)).arg(m_package.size);
+            m_file.remove();
+            tryNext();
             return;
         }
         if (error != QNetworkReply::NoError || !https) {
@@ -176,7 +244,7 @@ private:
             return;
         }
         const QString hash = QString::fromLatin1(m_hash.result().toHex());
-        if (hash != m_package.sha256 || (m_package.size > 0 && m_received != m_package.size)) {
+        if (hash != m_package.sha256 || m_received != m_package.size) {
             m_file.remove();
             finish(Error{QStringLiteral("tool_hash"), QStringLiteral("%1: %2").arg(m_package.urls.at(m_next - 1), hash)});
             return;
@@ -188,17 +256,25 @@ private:
             QFile::remove(m_file.fileName());
             finish(result);
         });
-        watcher->setFuture(QtConcurrent::run(
-            [package = m_package, file = m_file.fileName(), dir = m_toolsDir] { return installDownloaded(package, file, dir); }));
+        watcher->setFuture(QtConcurrent::run([package = m_package, file = m_file.fileName(), dir = m_toolsDir,
+                                              cancelled = m_cancelled] {
+            return installDownloaded(package, file, dir, cancelled.get());
+        }));
     }
 
+    // Always from the event loop, never from inside cancel(): the owner may
+    // be cancelling from its destructor. A queued call to a deleted Install
+    // is dropped.
     void finish(const Result<QString> &result)
     {
         if (m_finished)
             return;
         m_finished = true;
-        if (m_onDone)
-            m_onDone(result);
+        m_result = result;
+        QTimer::singleShot(0, this, [this] {
+            if (m_onDone)
+                m_onDone(m_result);
+        });
     }
 
     ToolPackage m_package;
@@ -212,7 +288,10 @@ private:
     qint64 m_received = 0;
     qsizetype m_next = 0;
     QStringList m_errors;
-    bool m_cancelled = false;
+    // Shared with the worker, which may outlive this object
+    std::shared_ptr<std::atomic<bool>> m_cancelled = std::make_shared<std::atomic<bool>>(false);
+    bool m_tooBig = false;
+    Result<QString> m_result = Error{};
     bool m_finished = false;
 };
 
@@ -256,7 +335,7 @@ Result<QList<ToolPackage>> toolPackages(const QByteArray &json, const QString &p
             return url.startsWith(QStringLiteral("https://"));
         });
         static const QStringList archives{QStringLiteral("zip"), QStringLiteral("tar.gz"), QStringLiteral("phar")};
-        if (!https || !hex.match(package.sha256).hasMatch() || !archives.contains(package.archive) || package.id.isEmpty()
+        if (!https || package.size <= 0 || !hex.match(package.sha256).hasMatch() || !archives.contains(package.archive) || package.id.isEmpty()
             || package.id.contains(u'/') || package.id.contains(u'\\') || package.id.startsWith(u'.'))
             continue;
         if (package.platform == platform || package.platform == u"any")
@@ -302,9 +381,21 @@ QString installedProgram(const ToolPackage &package, const QString &toolsDir)
 QStringList installedToolFolders(const QString &toolsDir)
 {
     QStringList folders;
-    const QFileInfoList entries = QDir(toolsDir).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
-    for (const QFileInfo &entry : entries) {
-        if (readMarker(entry.filePath()).isEmpty())
+    QFileInfoList entries = QDir(toolsDir).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    // By tool, newest first (php-8.10, php-8.5, php-8.4), so a plain `php`
+    // is the newest
+    const auto split = [](const QString &name) {
+        const qsizetype dash = name.lastIndexOf(u'-');
+        return dash < 0 ? std::pair{name, QVersionNumber()}
+                        : std::pair{name.left(dash), QVersionNumber::fromString(name.mid(dash + 1))};
+    };
+    std::sort(entries.begin(), entries.end(), [&split](const QFileInfo &a, const QFileInfo &b) {
+        const auto [toolA, versionA] = split(a.fileName());
+        const auto [toolB, versionB] = split(b.fileName());
+        return toolA != toolB ? toolA < toolB : versionA > versionB;
+    });
+    for (const QFileInfo &entry : std::as_const(entries)) {
+        if (isWorkFolder(entry.fileName()) || readMarker(entry.filePath()).isEmpty())
             continue;
         const QString bin = QDir(entry.filePath()).filePath(QStringLiteral("bin"));
         folders << QDir::toNativeSeparators(entry.fileName().startsWith(QStringLiteral("mariadb")) ? bin : entry.filePath());
@@ -354,6 +445,8 @@ Result<Done> extractArchive(const QString &archive, const QString &type, const Q
         return Error{QStringLiteral("tool_extract"),
                      QStringLiteral("%1 (%2): %3").arg(QFileInfo(archive).fileName(), type,
                                                        QString::fromLocal8Bit(tar.readAllStandardError()).trimmed())};
+    if (!linksStayInside(folder))
+        return Error{QStringLiteral("tool_extract"), QStringLiteral("%1: a link points outside the package").arg(QFileInfo(archive).fileName())};
     // One top folder only (mariadb-11.8.5-winx64/...): its contents move up
     const QDir dir(folder);
     const QFileInfoList top = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
@@ -368,24 +461,30 @@ Result<Done> extractArchive(const QString &archive, const QString &type, const Q
     return Done{};
 }
 
-Result<QString> installDownloaded(const ToolPackage &package, const QString &file, const QString &toolsDir)
+Result<QString> installDownloaded(const ToolPackage &package, const QString &file, const QString &toolsDir,
+                                  const std::atomic<bool> *cancelled)
 {
     const QString target = installFolder(package, toolsDir);
     const QString staging = target + QStringLiteral(".new");
+    const QString old = target + QStringLiteral(".old");
+    // Any failure from here on leaves only what was installed before
+    const auto fail = [&staging](const Error &error) -> Result<QString> {
+        QDir(staging).removeRecursively();
+        return error;
+    };
     QDir(staging).removeRecursively();
     if (package.archive == u"phar") {
         if (!QDir().mkpath(staging) || !QFile::copy(file, QDir(staging).filePath(QStringLiteral("composer.phar"))))
-            return Error{QStringLiteral("tool_install"), staging};
+            return fail(Error{QStringLiteral("tool_install"), staging});
     } else if (const auto extracted = extractArchive(file, package.archive, staging); !extracted) {
-        QDir(staging).removeRecursively();
-        return extracted.error();
+        return fail(extracted.error());
     }
 
     if (package.tool == u"php" && isWindowsPlatform(package.platform)) {
         QSaveFile ini(QDir(staging).filePath(QStringLiteral("php.ini")));
         const QByteArray text = windowsPhpIni(QDir(target).filePath(QStringLiteral("ext"))).toUtf8();
         if (!ini.open(QIODevice::WriteOnly) || ini.write(text) != text.size() || !ini.commit())
-            return Error{QStringLiteral("tool_install"), ini.errorString()};
+            return fail(Error{QStringLiteral("tool_install"), ini.errorString()});
     }
     if (!isWindowsPlatform(package.platform)) {
         makeExecutable(programIn(package, staging));
@@ -395,18 +494,28 @@ Result<QString> installDownloaded(const ToolPackage &package, const QString &fil
                 makeExecutable(bin.filePath(name));
         }
     }
-    if (!QFileInfo(programIn(package, staging)).isFile()) {
-        QDir(staging).removeRecursively();
-        return Error{QStringLiteral("tool_install"), QStringLiteral("no %1 in the package").arg(package.tool)};
-    }
-
+    if (!QFileInfo(programIn(package, staging)).isFile())
+        return fail(Error{QStringLiteral("tool_install"), QStringLiteral("no %1 in the package").arg(package.tool)});
+    // Last: the marker says the folder is complete
     QFile marker(QDir(staging).filePath(markerName()));
     if (!marker.open(QIODevice::WriteOnly) || marker.write(package.sha256.toLatin1()) != package.sha256.size())
-        return Error{QStringLiteral("tool_install"), marker.errorString()};
+        return fail(Error{QStringLiteral("tool_install"), marker.errorString()});
     marker.close();
-    QDir(target).removeRecursively();
-    if (!QDir().rename(staging, target))
-        return Error{QStringLiteral("tool_install"), target};
+    if (cancelled && *cancelled)
+        return fail(Error{QStringLiteral("tool_cancelled"), package.id});
+
+    // The swap: the old folder moves aside first and comes back if the new
+    // one can't move in, so there is always a working install
+    QDir(old).removeRecursively();
+    const bool hadOld = QFileInfo::exists(target);
+    if (hadOld && !renameWithRetry(target, old))
+        return fail(Error{QStringLiteral("tool_install"), QStringLiteral("%1 is in use").arg(QDir::toNativeSeparators(target))});
+    if (!renameWithRetry(staging, target)) {
+        if (hadOld)
+            renameWithRetry(old, target);
+        return fail(Error{QStringLiteral("tool_install"), QDir::toNativeSeparators(target)});
+    }
+    QDir(old).removeRecursively();
     return QDir::toNativeSeparators(programIn(package, target));
 }
 

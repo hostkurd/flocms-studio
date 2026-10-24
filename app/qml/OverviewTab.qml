@@ -104,7 +104,7 @@ ScrollView {
             }
             AppText {
                 visible: (tab.info.otherPackages || 0) > 0
-                ui: qsTr("and %n other package(s)", "", tab.info.otherPackages || 0)
+                ui: qsTr("and %Ln other package(s)", "", tab.info.otherPackages || 0)
                 color: Theme.muted
                 font.pixelSize: 13
             }

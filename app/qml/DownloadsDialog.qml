@@ -11,6 +11,7 @@ Popup {
     modal: true
     focus: true
     width: Math.min(560, parent ? parent.width - 48 : 560)
+    height: Math.min(implicitHeight, parent ? parent.height - 48 : implicitHeight)
     padding: 24
     closePolicy: Studio.downloading ? Popup.NoAutoClose : (Popup.CloseOnEscape | Popup.CloseOnPressOutside)
 
@@ -54,109 +55,131 @@ Popup {
             Accessible.role: Accessible.Heading
         }
 
-        // --- Choose ---
-        ColumnLayout {
-            visible: dialog.choosing
-            spacing: 12
+        // Scrolls when the window is short (Arabic text is taller); the
+        // buttons below always stay in view
+        ScrollView {
+            id: body
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredHeight: inner.implicitHeight
+            contentWidth: availableWidth
+            clip: true
 
-            AppText {
-                ui: qsTr("They go into Studio's own folder for your user. Nothing else on the computer changes, and no administrator rights are needed.")
-                color: Theme.muted
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
+            ColumnLayout {
+                id: inner
+                width: body.availableWidth
+                spacing: 14
 
-            SectionLabel { text: "PHP" }
-            ButtonGroup { id: phpGroup }
-            Repeater {
-                model: dialog.phps
-                delegate: OptionRow {
-                    required property var modelData
-                    required property int index
+                // --- Choose ---
+                ColumnLayout {
+                    visible: dialog.choosing
+                    spacing: 12
                     Layout.fillWidth: true
-                    radio: true
-                    group: phpGroup
-                    checked: dialog.phpChoice === modelData.id
-                    title: "PHP " + modelData.version
-                    note: (index === 0 ? qsTr("Newest · from %1").arg(modelData.source) : qsTr("from %1").arg(modelData.source))
-                          + (modelData.installed ? " · " + qsTr("already downloaded") : "")
-                    size: modelData.size
-                    onToggled: (on) => { if (on) dialog.phpChoice = modelData.id }
+
+                    AppText {
+                        ui: qsTr("They go into Studio's own folder for your user. Nothing else on the computer changes, and no administrator rights are needed.")
+                        color: Theme.muted
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
+
+                    SectionLabel { text: "PHP" }
+                    ButtonGroup { id: phpGroup }
+                    Repeater {
+                        model: dialog.phps
+                        delegate: OptionRow {
+                            required property var modelData
+                            required property int index
+                            Layout.fillWidth: true
+                            radio: true
+                            group: phpGroup
+                            checked: dialog.phpChoice === modelData.id
+                            title: "PHP " + modelData.version
+                            note: (index === 0 ? qsTr("Newest · from %1").arg(modelData.source) : qsTr("from %1").arg(modelData.source))
+                                  + (modelData.installed ? " · " + qsTr("already downloaded") : "")
+                            size: modelData.size
+                            onToggled: (on) => { if (on) dialog.phpChoice = modelData.id }
+                        }
+                    }
+                    OptionRow {
+                        Layout.fillWidth: true
+                        radio: true
+                        group: phpGroup
+                        checked: dialog.phpChoice === ""
+                        title: qsTr("No PHP")
+                        note: qsTr("Keep the PHP this computer has")
+                        onToggled: (on) => { if (on) dialog.phpChoice = "" }
+                    }
+
+                    SectionLabel { ui: qsTr("Also download"); Layout.topMargin: 4 }
+                    OptionRow {
+                        visible: !!dialog.composer
+                        Layout.fillWidth: true
+                        checked: dialog.wantComposer
+                        title: "Composer"
+                        note: qsTr("Needed to create projects · from %1").arg(dialog.composer ? dialog.composer.source : "")
+                              + (dialog.composer && dialog.composer.installed ? " · " + qsTr("already downloaded") : "")
+                        size: dialog.composer ? dialog.composer.size : 0
+                        onToggled: (on) => dialog.wantComposer = on
+                    }
+                    OptionRow {
+                        visible: !!dialog.mariadb
+                        Layout.fillWidth: true
+                        checked: dialog.wantMariadb
+                        title: dialog.mariadb ? "MariaDB " + dialog.mariadb.version : ""
+                        note: qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb ? dialog.mariadb.source : "")
+                        size: dialog.mariadb ? dialog.mariadb.size : 0
+                        onToggled: (on) => dialog.wantMariadb = on
+                    }
+                    RichText {
+                        visible: !dialog.mariadb && Studio.mariadbFromHomebrew
+                        raw: qsTr("MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.")
+                        color: Theme.muted
+                        font.pixelSize: 13
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
+
+                    RowLayout {
+                        spacing: 8
+                        Layout.fillWidth: true
+                        Icon { path: Icons.shield; color: Theme.ok; size: 16 }
+                        RichText {
+                            raw: qsTr("Every file is checked against its `SHA-256` before Studio uses it.")
+                            font.pixelSize: 13
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                    }
+                    RowLayout {
+                        spacing: 6
+                        Layout.fillWidth: true
+                        AppText { ui: qsTr("Into:"); color: Theme.muted }
+                        Mono { text: Studio.toolsFolder; color: Theme.muted; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                    }
                 }
-            }
-            OptionRow {
-                Layout.fillWidth: true
-                radio: true
-                group: phpGroup
-                checked: dialog.phpChoice === ""
-                title: qsTr("No PHP")
-                note: qsTr("Keep the PHP this computer has")
-                onToggled: (on) => { if (on) dialog.phpChoice = "" }
-            }
 
-            SectionLabel { ui: qsTr("Also download"); Layout.topMargin: 4 }
-            OptionRow {
-                visible: !!dialog.composer
-                Layout.fillWidth: true
-                checked: dialog.wantComposer
-                title: "Composer"
-                note: qsTr("Needed to create projects · from %1").arg(dialog.composer ? dialog.composer.source : "")
-                      + (dialog.composer && dialog.composer.installed ? " · " + qsTr("already downloaded") : "")
-                size: dialog.composer ? dialog.composer.size : 0
-                onToggled: (on) => dialog.wantComposer = on
-            }
-            OptionRow {
-                visible: !!dialog.mariadb
-                Layout.fillWidth: true
-                checked: dialog.wantMariadb
-                title: dialog.mariadb ? "MariaDB " + dialog.mariadb.version : ""
-                note: qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb ? dialog.mariadb.source : "")
-                size: dialog.mariadb ? dialog.mariadb.size : 0
-                onToggled: (on) => dialog.wantMariadb = on
-            }
-            RichText {
-                visible: !dialog.mariadb && Studio.mariadbFromHomebrew
-                raw: qsTr("MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.")
-                color: Theme.muted
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-
-            RowLayout {
-                spacing: 8
-                Layout.fillWidth: true
-                Icon { path: Icons.shield; color: Theme.ok; size: 16 }
-                RichText {
-                    raw: qsTr("Every file is checked against its `SHA-256` before Studio uses it.")
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
+                // --- Downloading ---
+                Repeater {
+                    model: dialog.choosing ? [] : Studio.downloads
+                    delegate: DownloadRow {
+                        required property var modelData
+                        entry: modelData
+                        Layout.fillWidth: true
+                    }
+                }
+                RowLayout {
+                    visible: !dialog.choosing
+                    spacing: 8
                     Layout.fillWidth: true
+                    Icon { path: Icons.shield; color: Theme.ok; size: 16 }
+                    RichText {
+                        raw: qsTr("Each file is used only after its `SHA-256` check.")
+                        font.pixelSize: 13
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            Mono { text: qsTr("Into: %1").arg(Studio.toolsFolder); color: Theme.muted; elide: Text.ElideMiddle; Layout.fillWidth: true }
-        }
-
-        // --- Downloading ---
-        Repeater {
-            model: dialog.choosing ? [] : Studio.downloads
-            delegate: DownloadRow {
-                required property var modelData
-                entry: modelData
-                Layout.fillWidth: true
-            }
-        }
-        RowLayout {
-            visible: !dialog.choosing
-            spacing: 8
-            Layout.fillWidth: true
-            Icon { path: Icons.shield; color: Theme.ok; size: 16 }
-            RichText {
-                raw: qsTr("Each file is used only after its `SHA-256` check.")
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
             }
         }
 

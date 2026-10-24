@@ -63,6 +63,8 @@ def measure(url: str) -> tuple[str, int]:
     digest = hashlib.sha256()
     size = 0
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as response:
+        if not response.geturl().startswith("https://"):
+            raise RuntimeError(f"{url} redirected to {response.geturl()}")
         while chunk := response.read(1 << 20):
             digest.update(chunk)
             size += len(chunk)

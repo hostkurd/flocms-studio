@@ -53,7 +53,14 @@ Found findTools(const Settings &settings, const QList<ToolPackage> &packages)
                                         {QStringLiteral("version"), php.info.version},
                                         {QStringLiteral("origin"), origin}};
     };
-    add(findTool(QStringLiteral("php")), QStringLiteral("system"));
+    // A plain `php` may be one Studio downloaded (its folders are last on
+    // the search path): then it is shown as Studio's
+    const QString onPath = findTool(QStringLiteral("php"));
+    const bool fromStudio = !onPath.isEmpty()
+                            && QDir::cleanPath(QDir::fromNativeSeparators(onPath))
+                                   .startsWith(QDir::cleanPath(toolsFolder()) + u'/');
+    if (!fromStudio)
+        add(onPath, QStringLiteral("system"));
     for (const ToolPackage &package : packages) {
         if (package.tool == u"php")
             add(installedProgram(package), QStringLiteral("studio"));
@@ -164,6 +171,10 @@ Studio::Studio(Language *language, QObject *parent)
 
 Studio::~Studio()
 {
+    // Nothing more starts; the install (a child) is deleted with this, and
+    // its result, which would come from the event loop, never arrives
+    m_closing = true;
+    m_queue.clear();
     if (m_install)
         cancelToolInstall(m_install);
 }
@@ -435,7 +446,7 @@ void Studio::loadCurrent()
 
 void Studio::refreshTools()
 {
-    if (m_demo)
+    if (m_demo || m_closing)
         return;
     if (m_checking) {
         m_recheck = true; // once this run ends
@@ -443,7 +454,8 @@ void Studio::refreshTools()
     }
     m_checking = true;
     emit toolsChanged();
-    auto *watcher = new QFutureWatcher<Found>(this); // deleted when it finishes
+    // A child of this, deleted when it finishes (the analyzer misses the parent)
+    auto *watcher = new QFutureWatcher<Found>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
     connect(watcher, &QFutureWatcher<Found>::finished, this, [this, watcher] {
         const Found found = watcher->result();
         watcher->deleteLater();

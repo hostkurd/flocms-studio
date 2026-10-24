@@ -3,7 +3,8 @@ import QtQuick.Shapes
 import FloStudio.Backend
 
 // A 24x24 stroke icon from an SVG path. Icons that point a way (back,
-// forward) set `directional` and are flipped in right-to-left languages.
+// forward) set `directional` and are drawn flipped in right-to-left
+// languages (Icons.mirrored).
 Item {
     id: icon
     property string path
@@ -23,17 +24,13 @@ Item {
         anchors.centerIn: parent
         layer.enabled: true
         layer.samples: 4
-        transform: Scale {
-            origin.x: 12
-            xScale: icon.directional && Lang.rtl ? -1 : 1
-        }
         ShapePath {
             strokeColor: icon.filled ? "transparent" : icon.color
             fillColor: icon.filled ? icon.color : "transparent"
             strokeWidth: icon.stroke
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            PathSvg { path: icon.path }
+            PathSvg { path: icon.directional && Lang.rtl ? Icons.mirrored(icon.path) : icon.path }
         }
     }
 }

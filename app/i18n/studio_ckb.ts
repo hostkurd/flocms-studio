@@ -56,98 +56,98 @@
 <context>
     <name>DownloadsDialog</name>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="51" />
+        <location filename="../qml/DownloadsDialog.qml" line="53" />
         <source>Download the tools Studio needs</source>
         <translation>داگرتنی ئامرازەکانی پێویستی Studio</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="51" />
+        <location filename="../qml/DownloadsDialog.qml" line="53" />
         <source>Downloading the tools</source>
         <translation>داگرتنی ئامرازەکان</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="63" />
+        <location filename="../qml/DownloadsDialog.qml" line="80" />
         <source>They go into Studio's own folder for your user. Nothing else on the computer changes, and no administrator rights are needed.</source>
         <translation>دەچنە ناو فۆڵدەری تایبەتی Studio بۆ بەکارهێنەرەکەت. هیچی تر لە کۆمپیوتەرەکەدا ناگۆڕێت و مافی بەڕێوەبەر پێویست نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="81" />
+        <location filename="../qml/DownloadsDialog.qml" line="98" />
         <source>Newest · from %1</source>
         <translation>نوێترین · لە %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="81" />
+        <location filename="../qml/DownloadsDialog.qml" line="98" />
         <source>from %1</source>
         <translation>لە %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="82" />
-        <location filename="../qml/DownloadsDialog.qml" line="104" />
+        <location filename="../qml/DownloadsDialog.qml" line="99" />
+        <location filename="../qml/DownloadsDialog.qml" line="121" />
         <source>already downloaded</source>
         <translation>پێشتر داگیراوە</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="92" />
+        <location filename="../qml/DownloadsDialog.qml" line="109" />
         <source>No PHP</source>
         <translation>بێ PHP</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="93" />
+        <location filename="../qml/DownloadsDialog.qml" line="110" />
         <source>Keep the PHP this computer has</source>
         <translation>هێشتنەوەی ئەو PHP ـەی لەم کۆمپیوتەرەدا هەیە</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="97" />
+        <location filename="../qml/DownloadsDialog.qml" line="114" />
         <source>Also download</source>
         <translation>هەروەها دابگرە</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="103" />
+        <location filename="../qml/DownloadsDialog.qml" line="120" />
         <source>Needed to create projects · from %1</source>
         <translation>بۆ دروستکردنی پڕۆژە پێویستە · لە %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="113" />
+        <location filename="../qml/DownloadsDialog.qml" line="130" />
         <source>Only for projects that use MySQL; SQLite needs nothing · from %1</source>
         <translation>تەنها بۆ ئەو پڕۆژانەی MySQL بەکاردەهێنن؛ SQLite هیچی پێویست نییە · لە %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="119" />
+        <location filename="../qml/DownloadsDialog.qml" line="136" />
         <source>MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.</source>
         <translation>MariaDB (تەنها بۆ ئەو پڕۆژانەی MySQL بەکاردەهێنن): MariaDB هیچ وەشانێک بۆ macOS دەرناکات. بە Homebrew دایبنێ: `brew install mariadb`.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="131" />
+        <location filename="../qml/DownloadsDialog.qml" line="148" />
         <source>Every file is checked against its `SHA-256` before Studio uses it.</source>
         <translation>هەر فایلێک پێش ئەوەی Studio بەکاری بهێنێت بە `SHA-256` ـەکەی دەپشکنرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="137" />
-        <source>Into: %1</source>
-        <translation>بۆ: %1</translation>
+        <location filename="../qml/DownloadsDialog.qml" line="157" />
+        <source>Into:</source>
+        <translation>بۆ:</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="155" />
+        <location filename="../qml/DownloadsDialog.qml" line="177" />
         <source>Each file is used only after its `SHA-256` check.</source>
         <translation>هەر فایلێک تەنها دوای پشکنینی `SHA-256` بەکاردەهێنرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="169" />
+        <location filename="../qml/DownloadsDialog.qml" line="193" />
         <source>Choose my own PHP…</source>
         <translation>PHP ـی خۆم هەڵدەبژێرم…</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="175" />
+        <location filename="../qml/DownloadsDialog.qml" line="199" />
         <source>Cancel</source>
         <translation>هەڵوەشاندنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="181" />
+        <location filename="../qml/DownloadsDialog.qml" line="205" />
         <source>Download</source>
         <translation>داگرتن</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="195" />
+        <location filename="../qml/DownloadsDialog.qml" line="219" />
         <source>Close</source>
         <translation>داخستن</translation>
     </message>
@@ -263,8 +263,8 @@
     </message>
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="107" />
-        <source>and %n other package(s)</source>
-        <translation><numerusform>و %n پاکێجی تر</numerusform><numerusform>و %n پاکێجی تر</numerusform></translation>
+        <source>and %Ln other package(s)</source>
+        <translation><numerusform>و %Ln پاکێجی تر</numerusform><numerusform>و %Ln پاکێجی تر</numerusform></translation>
     </message>
     <message>
         <location filename="../qml/OverviewTab.qml" line="113" />
@@ -459,78 +459,78 @@
         <translation>Composer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="149" />
+        <location filename="../qml/SettingsPage.qml" line="150" />
         <source>Not found</source>
         <translation>نەدۆزرایەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="153" />
+        <location filename="../qml/SettingsPage.qml" line="154" />
         <source>Choose…</source>
         <translation>هەڵبژاردن…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="154" />
+        <location filename="../qml/SettingsPage.qml" line="155" />
         <source>Use the one found</source>
         <translation>ئەوەی دۆزرایەوە بەکاربهێنە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="157" />
+        <location filename="../qml/SettingsPage.qml" line="158" />
         <source>Downloads go into `%1`, for your user only. No administrator rights are needed.</source>
         <translation>داگیراوەکان دەچنە `%1`، تەنها بۆ بەکارهێنەرەکەت. مافی بەڕێوەبەر پێویست نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="171" />
+        <location filename="../qml/SettingsPage.qml" line="172" />
         <source>Server</source>
         <translation>سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="174" />
+        <location filename="../qml/SettingsPage.qml" line="175" />
         <location filename="../qml/SettingsPage.qml" line="183" />
         <source>First port to try</source>
         <translation>یەکەم پۆرت بۆ تاقیکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="191" />
+        <location filename="../qml/SettingsPage.qml" line="189" />
         <source>Let other devices on the network open the site (phones for testing)</source>
         <translation>ڕێگە بدە ئامێرەکانی تری سەر تۆڕەکە ماڵپەڕەکە بکەنەوە (مۆبایل بۆ تاقیکردنەوە)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="201" />
+        <location filename="../qml/SettingsPage.qml" line="194" />
         <source>`php flo serve` takes the next free port when this one is in use. On the network, the site listens on `0.0.0.0`: only do this on networks you trust.</source>
         <translation>`php flo serve` پۆرتی بەتاڵی دواتر وەردەگرێت ئەگەر ئەم پۆرتە بەکارهاتبێت. لەسەر تۆڕ، ماڵپەڕەکە لەسەر `0.0.0.0` گوێ دەگرێت: تەنها لەسەر تۆڕێک ئەمە بکە کە متمانەت پێیەتی.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="215" />
+        <location filename="../qml/SettingsPage.qml" line="208" />
         <source>Editor</source>
         <translation>دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="220" />
+        <location filename="../qml/SettingsPage.qml" line="213" />
         <source>Editor command</source>
         <translation>فەرمانی دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="224" />
+        <location filename="../qml/SettingsPage.qml" line="217" />
         <source>`{folder}` becomes the project's folder; quotes group words. For example `code "{folder}"` or `phpstorm {folder}`.</source>
         <translation>`{folder}` دەبێتە فۆڵدەری پڕۆژەکە؛ دوو کەوانە وشەکان کۆدەکاتەوە. بۆ نموونە `code "{folder}"` یان `phpstorm {folder}`.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="239" />
+        <location filename="../qml/SettingsPage.qml" line="232" />
         <source>Project folders</source>
         <translation>فۆڵدەرەکانی پڕۆژە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="241" />
+        <location filename="../qml/SettingsPage.qml" line="234" />
         <source>Studio lists every FloCMS project inside these folders.</source>
         <translation>Studio هەموو پڕۆژەکانی FloCMS ـی ناو ئەم فۆڵدەرانە پیشان دەدات.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="251" />
+        <location filename="../qml/SettingsPage.qml" line="244" />
         <source>Remove</source>
         <translation>لابردن</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="254" />
+        <location filename="../qml/SettingsPage.qml" line="247" />
         <source>Add a folder…</source>
         <translation>زیادکردنی فۆڵدەر…</translation>
     </message>

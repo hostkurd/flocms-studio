@@ -146,7 +146,8 @@ ScrollView {
                 spacing: 8
                 Mono {
                     readonly property var row: Studio.tools.find(t => t.tool === "composer")
-                    text: Studio.composerPath !== "" ? Studio.composerPath : (row && row.path ? row.path : qsTr("Not found"))
+                    // A path, or "Not found" (translated: ui adds the RTL mark)
+                    ui: Studio.composerPath !== "" ? Studio.composerPath : (row && row.path ? row.path : qsTr("Not found"))
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                 }

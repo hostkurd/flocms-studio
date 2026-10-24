@@ -12,29 +12,35 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LABELS = {"AppText", "Heading", "SectionLabel"}
-OPEN = re.compile(r"\b([A-Z]\w*)\s*\{")
+LABELS = {"AppText", "Heading", "SectionLabel", "Mono"}
+# An element opening ("AppText {"), any other brace (a JS block, an
+# object), or a `text:` binding, in the order they appear
+TOKEN = re.compile(r"\b([A-Z]\w*)\s*\{|\{|\}|\btext:\s*([^;\n]*)")
 TRANSLATED = re.compile(r"\bqsTr\(|\bTexts\.")
 
 
 def check(path: Path) -> list[str]:
     problems = []
-    stack: list[str] = []
+    stack: list[str] = []  # element names; "" for a brace that isn't one
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        code = line.split("//")[0]
-        # Each element opened on this line, innermost last; then the text
-        # on the line belongs to the innermost one still open
-        opened = []
-        for match in OPEN.finditer(code):
-            opened.append(match.group(1))
-        stack.extend(opened)
-        current = stack[-1] if stack else ""
-        text = re.search(r"\btext:\s*(.*)", code)
-        if text and current in LABELS and TRANSLATED.search(text.group(1)):
-            problems.append(f"{path.relative_to(ROOT)}:{number}: {current} shows a translation with `text:`; use `ui:`")
-        for _ in range(code.count("}") - (code.count("{") - len(opened))):
-            if stack:
-                stack.pop()
+        # String contents blanked (same length), so braces and `//` inside
+        # strings count for nothing; then the comment is cut off
+        code = re.sub(r'"(?:\\.|[^"\\])*"', lambda m: '"' + "x" * (len(m.group(0)) - 2) + '"', line)
+        if "//" in code:
+            code = code[: code.index("//")]
+        original = line
+        for match in TOKEN.finditer(code):
+            token = match.group(0)
+            if match.group(2) is not None:
+                current = stack[-1] if stack else ""
+                value = original[match.start(2):match.end(2)]
+                if current in LABELS and TRANSLATED.search(value):
+                    problems.append(f"{path.relative_to(ROOT)}:{number}: {current} shows a translation with `text:`; use `ui:`")
+            elif token == "}":
+                if stack:
+                    stack.pop()
+            else:
+                stack.append(match.group(1) or "")
     return problems
 
 

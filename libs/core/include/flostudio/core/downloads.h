@@ -8,6 +8,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <atomic>
 #include <functional>
 
 class QObject;
@@ -80,19 +81,24 @@ FLOSTUDIOCORE_EXPORT QString sha256OfFile(const QString &path);
 // Error codes: tool_extract.
 FLOSTUDIOCORE_EXPORT Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder);
 
-// Installs an already downloaded and checked file: unpack (or copy the
-// phar), write php.ini on Windows, make the programs executable, then
-// swap the folder in and write the marker. Blocks. Returns the program.
-// Error codes: tool_extract, tool_install.
+// Installs an already downloaded and checked file into a staging folder
+// (<id>.new): unpack (or copy the phar), refuse links that point outside
+// it, write php.ini on Windows, make the programs executable, write the
+// marker; then swap it in, moving the old install aside (<id>.old) and
+// back if the swap fails. A failure leaves the old install as it was.
+// cancelled (may be null) is checked before the swap. Blocks. Returns the
+// program. Error codes: tool_extract, tool_install, tool_cancelled.
 FLOSTUDIOCORE_EXPORT Result<QString> installDownloaded(const ToolPackage &package, const QString &file,
-                                                       const QString &toolsDir = toolsFolder());
+                                                       const QString &toolsDir = toolsFolder(),
+                                                       const std::atomic<bool> *cancelled = nullptr);
 
 // Downloads, checks and installs a package. Progress arrives while it
 // downloads; done once at the end with the installed program, or an
 // error: tool_download (every address failed; the detail says why),
 // tool_hash (the file is not the one in the tool list: it is deleted),
 // tool_cancelled, tool_extract, tool_install. Handlers run on owner's
-// thread. The returned object belongs to owner; cancelToolInstall() stops it.
+// thread, always from its event loop (never inside cancelToolInstall).
+// The returned object belongs to owner; cancelToolInstall() stops it.
 using DownloadProgressHandler = std::function<void(qint64 received, qint64 total)>;
 using InstallDoneHandler = std::function<void(const Result<QString> &program)>;
 FLOSTUDIOCORE_EXPORT QObject *startToolInstall(const ToolPackage &package, QObject *owner,

@@ -16,6 +16,9 @@
 #include <QNetworkProxyFactory>
 #include <QProcess>
 #include <QTemporaryDir>
+#include <QSet>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QTest>
 
 #include <algorithm>
@@ -117,9 +120,15 @@ private slots:
         QJsonObject escape = toolEntry(QStringLiteral("../evil"), QStringLiteral("php"), QStringLiteral("8.4.1"), QStringLiteral("any"));
         QJsonObject exe = toolEntry(QStringLiteral("php-8.3"), QStringLiteral("php"), QStringLiteral("8.3.1"), QStringLiteral("any"),
                                     QStringLiteral("https://example.org/x.exe"), QStringLiteral("exe"));
-        const auto packages = toolPackages(manifest({http, badHash, escape, exe}), QStringLiteral("linux-x86_64"));
+        QJsonObject noSize = toolEntry(QStringLiteral("php-8.2"), QStringLiteral("php"), QStringLiteral("8.2.1"), QStringLiteral("any"));
+        noSize.insert(QStringLiteral("size"), 0);
+        const QJsonObject good = toolEntry(QStringLiteral("composer"), QStringLiteral("composer"), QStringLiteral("2.10.3"),
+                                           QStringLiteral("any"), QStringLiteral("https://example.org/composer.phar"),
+                                           QStringLiteral("phar"));
+        const auto packages = toolPackages(manifest({http, badHash, escape, exe, noSize, good}), QStringLiteral("linux-x86_64"));
         QVERIFY(packages.ok());
-        QVERIFY(packages->isEmpty());
+        QCOMPARE(packages->size(), 1); // only the good one
+        QCOMPARE(packages->first().id, QStringLiteral("composer"));
     }
 
     void theBuiltInListIsValid()
@@ -128,18 +137,21 @@ private slots:
         QVERIFY(file.open(QIODevice::ReadOnly));
         const QByteArray json = file.readAll();
         const QJsonArray all = QJsonDocument::fromJson(json).object().value(QStringLiteral("tools")).toArray();
-        int valid = 0;
+        // Every entry, those for any platform included, is accepted somewhere
+        QSet<QString> accepted;
         for (const QString &platform : {QStringLiteral("windows-x86_64"), QStringLiteral("macos-arm64"), QStringLiteral("macos-x86_64"),
                                         QStringLiteral("linux-x86_64"), QStringLiteral("linux-arm64")}) {
             const auto packages = toolPackages(json, platform);
             QVERIFY(packages.ok());
             for (const ToolPackage &p : packages.value())
-                valid += p.platform == platform ? 1 : 0;
+                accepted << p.id + u'@' + p.platform;
         }
-        int platformEntries = 0;
+        QSet<QString> listed;
         for (const auto &item : all)
-            platformEntries += item.toObject().value(QStringLiteral("platform")).toString() != u"any" ? 1 : 0;
-        QCOMPARE(valid, platformEntries); // no entry is left out
+            listed << item.toObject().value(QStringLiteral("id")).toString() + u'@'
+                          + item.toObject().value(QStringLiteral("platform")).toString();
+        QCOMPARE(accepted, listed);
+        QVERIFY(listed.size() >= 10);
     }
 
     void phpIniForWindows()
@@ -261,6 +273,143 @@ private slots:
         QCOMPARE(error.code, QStringLiteral("tool_download"));
         QVERIFY(error.detail.contains(QStringLiteral("a.tar.gz")));
         QVERIFY(error.detail.contains(QStringLiteral("b.tar.gz")));
+    }
+
+    void aFailedInstallKeepsTheOldOne()
+    {
+        const QTemporaryDir dir;
+        const QString content = dir.filePath(QStringLiteral("content"));
+        writeFile(content + QStringLiteral("/php"), "#!/bin/sh\n");
+        const QString archive = dir.filePath(QStringLiteral("php.tar.gz"));
+        QVERIFY(makeTarGz(archive, content));
+        const QString tools = dir.filePath(QStringLiteral("tools"));
+        const ToolPackage php = package(QStringLiteral("php"), QStringLiteral("linux-x86_64"), QStringLiteral("tar.gz"),
+                                        sha256OfFile(archive));
+        QVERIFY(installDownloaded(php, archive, tools).ok());
+
+        // A newer package without the program: refused, the old one stays
+        const QString empty = dir.filePath(QStringLiteral("empty"));
+        writeFile(empty + QStringLiteral("/README"), "x");
+        QVERIFY(makeTarGz(dir.filePath(QStringLiteral("empty.tar.gz")), empty));
+        ToolPackage newer = php;
+        newer.sha256 = QString(64, u'e');
+        QCOMPARE(installDownloaded(newer, dir.filePath(QStringLiteral("empty.tar.gz")), tools).error().code,
+                 QStringLiteral("tool_install"));
+        QVERIFY(!installedProgram(php, tools).isEmpty());
+
+        // Cancelled before the swap: the same
+        const std::atomic<bool> cancelled{true};
+        QCOMPARE(installDownloaded(newer, archive, tools, &cancelled).error().code, QStringLiteral("tool_cancelled"));
+        QVERIFY(!installedProgram(php, tools).isEmpty());
+        QVERIFY(!QDir(tools + QStringLiteral("/php-8.5.new")).exists());
+        QVERIFY(!QDir(tools + QStringLiteral("/php-8.5.old")).exists());
+    }
+
+    void refusesLinksThatPointOutside()
+    {
+#ifdef Q_OS_WIN
+        QSKIP("tar makes no links on Windows");
+#else
+        const QTemporaryDir dir;
+        const QString content = dir.filePath(QStringLiteral("content"));
+        writeFile(content + QStringLiteral("/php"), "#!/bin/sh\n");
+        writeFile(dir.filePath(QStringLiteral("outside")), "keep");
+        QVERIFY(QFile::link(dir.filePath(QStringLiteral("outside")), content + QStringLiteral("/link")));
+        const QString archive = dir.filePath(QStringLiteral("php.tar.gz"));
+        QVERIFY(makeTarGz(archive, content));
+        const QString tools = dir.filePath(QStringLiteral("tools"));
+        const ToolPackage php = package(QStringLiteral("php"), QStringLiteral("linux-x86_64"), QStringLiteral("tar.gz"),
+                                        sha256OfFile(archive));
+        const auto installed = installDownloaded(php, archive, tools);
+        QCOMPARE(installed.error().code, QStringLiteral("tool_extract"));
+        QVERIFY(!QDir(installFolder(php, tools)).exists());
+        QVERIFY(!QDir(installFolder(php, tools) + QStringLiteral(".new")).exists());
+
+        // A link inside the package is fine
+        QFile::remove(content + QStringLiteral("/link"));
+        QVERIFY(QFile::link(QStringLiteral("php"), content + QStringLiteral("/php-cli")));
+        QVERIFY(makeTarGz(archive, content));
+        ToolPackage again = php;
+        again.sha256 = sha256OfFile(archive);
+        QVERIFY(installDownloaded(again, archive, tools).ok());
+#endif
+    }
+
+    void listsInstalledFoldersNewestFirst()
+    {
+        const QTemporaryDir dir;
+        for (const char *name : {"php-8.4", "php-8.10", "php-8.5", "php-8.5.new", "php-8.5.old", "composer", "empty"}) {
+            const QString folder = dir.filePath(QString::fromLatin1(name));
+            QDir().mkpath(folder);
+            if (qstrcmp(name, "empty") != 0)
+                writeFile(folder + QStringLiteral("/.flostudio-package"), QByteArray(64, 'a'));
+        }
+        const auto native = [&dir](const char *name) { return QDir::toNativeSeparators(dir.filePath(QString::fromLatin1(name))); };
+        QCOMPARE(installedToolFolders(dir.path()),
+                 (QStringList{native("composer"), native("php-8.10"), native("php-8.5"), native("php-8.4")}));
+    }
+
+    void cancelledBeforeItStarts()
+    {
+        const QTemporaryDir dir;
+        ToolPackage php = package(QStringLiteral("php"), currentPlatform(), QStringLiteral("tar.gz"), QString(64, u'd'));
+        php.size = 10;
+        QObject owner;
+        bool done = false;
+        Error error;
+        QObject *install = startToolInstall(php, &owner, {}, [&](const Result<QString> &result) {
+            done = true;
+            error = result ? Error{} : result.error();
+        }, dir.path());
+        cancelToolInstall(install);
+        QVERIFY(!done); // never from inside cancelToolInstall
+        QTRY_VERIFY_WITH_TIMEOUT(done, 10000);
+        QCOMPARE(error.code, QStringLiteral("tool_cancelled"));
+        QVERIFY(!QFileInfo::exists(dir.filePath(QStringLiteral(".downloads/php-8.5.part"))));
+    }
+
+    // A local plain-HTTP server: refused as not HTTPS, and a file larger
+    // than the list says is stopped before it is all read
+    void refusesPlainHttpAndOversizedFiles()
+    {
+        QTcpServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        const QByteArray body(qsizetype{64} * 1024, 'x');
+        connect(&server, &QTcpServer::newConnection, &server, [&server, &body] {
+            QTcpSocket *socket = server.nextPendingConnection();
+            connect(socket, &QTcpSocket::readyRead, socket, [socket, &body] {
+                socket->readAll();
+                socket->write("HTTP/1.1 200 OK\r\nContent-Length: " + QByteArray::number(body.size())
+                              + "\r\nConnection: close\r\n\r\n" + body);
+                socket->disconnectFromHost();
+            });
+            connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+        });
+        const QString url = QStringLiteral("http://127.0.0.1:%1/php.tar.gz").arg(server.serverPort());
+        const auto run = [&url](qint64 size) -> Error {
+            const QTemporaryDir dir;
+            ToolPackage php = package(QStringLiteral("php"), currentPlatform(), QStringLiteral("tar.gz"), QString(64, u'd'));
+            php.urls = {url};
+            php.size = size;
+            QObject owner;
+            bool done = false;
+            Error error;
+            startToolInstall(php, &owner, {}, [&](const Result<QString> &result) {
+                done = true;
+                error = result ? Error{} : result.error();
+            }, dir.path());
+            if (!QTest::qWaitFor([&done] { return done; }, 10000))
+                return Error{QStringLiteral("timeout"), url};
+            if (QFileInfo::exists(dir.filePath(QStringLiteral(".downloads/php-8.5.part"))))
+                return Error{QStringLiteral("part_left"), url};
+            return error;
+        };
+        const Error plain = run(body.size());
+        QCOMPARE(plain.code, QStringLiteral("tool_download"));
+        QVERIFY2(plain.detail.contains(QStringLiteral("not HTTPS")), qUtf8Printable(plain.detail));
+        const Error big = run(1000);
+        QCOMPARE(big.code, QStringLiteral("tool_download"));
+        QVERIFY2(big.detail.contains(QStringLiteral("larger than 1000 bytes")), qUtf8Printable(big.detail));
     }
 
     // --- online (FLOSTUDIO_ONLINE=1) --------------------------------------

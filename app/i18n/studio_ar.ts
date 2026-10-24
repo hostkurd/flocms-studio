@@ -56,98 +56,98 @@
 <context>
     <name>DownloadsDialog</name>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="51" />
+        <location filename="../qml/DownloadsDialog.qml" line="53" />
         <source>Download the tools Studio needs</source>
         <translation>تنزيل الأدوات التي يحتاجها Studio</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="51" />
+        <location filename="../qml/DownloadsDialog.qml" line="53" />
         <source>Downloading the tools</source>
         <translation>جارٍ تنزيل الأدوات</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="63" />
+        <location filename="../qml/DownloadsDialog.qml" line="80" />
         <source>They go into Studio's own folder for your user. Nothing else on the computer changes, and no administrator rights are needed.</source>
         <translation>تُحفظ في مجلد Studio الخاص بمستخدمك. لا يتغير شيء آخر في الحاسوب، ولا حاجة إلى صلاحيات المسؤول.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="81" />
+        <location filename="../qml/DownloadsDialog.qml" line="98" />
         <source>Newest · from %1</source>
         <translation>الأحدث · من %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="81" />
+        <location filename="../qml/DownloadsDialog.qml" line="98" />
         <source>from %1</source>
         <translation>من %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="82" />
-        <location filename="../qml/DownloadsDialog.qml" line="104" />
+        <location filename="../qml/DownloadsDialog.qml" line="99" />
+        <location filename="../qml/DownloadsDialog.qml" line="121" />
         <source>already downloaded</source>
         <translation>نُزّل من قبل</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="92" />
+        <location filename="../qml/DownloadsDialog.qml" line="109" />
         <source>No PHP</source>
         <translation>بلا PHP</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="93" />
+        <location filename="../qml/DownloadsDialog.qml" line="110" />
         <source>Keep the PHP this computer has</source>
         <translation>الإبقاء على PHP الموجود في هذا الحاسوب</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="97" />
+        <location filename="../qml/DownloadsDialog.qml" line="114" />
         <source>Also download</source>
         <translation>تنزيل أيضاً</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="103" />
+        <location filename="../qml/DownloadsDialog.qml" line="120" />
         <source>Needed to create projects · from %1</source>
         <translation>لازم لإنشاء المشاريع · من %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="113" />
+        <location filename="../qml/DownloadsDialog.qml" line="130" />
         <source>Only for projects that use MySQL; SQLite needs nothing · from %1</source>
         <translation>فقط للمشاريع التي تستخدم MySQL، ولا يحتاج SQLite إلى شيء · من %1</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="119" />
+        <location filename="../qml/DownloadsDialog.qml" line="136" />
         <source>MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.</source>
         <translation>MariaDB (فقط للمشاريع التي تستخدم MySQL): لا تُصدر MariaDB نسخاً لنظام macOS. ثبّتها عبر Homebrew: `brew install mariadb`.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="131" />
+        <location filename="../qml/DownloadsDialog.qml" line="148" />
         <source>Every file is checked against its `SHA-256` before Studio uses it.</source>
         <translation>يُفحص كل ملف مقابل بصمة `SHA-256` الخاصة به قبل أن يستخدمه Studio.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="137" />
-        <source>Into: %1</source>
-        <translation>إلى: %1</translation>
+        <location filename="../qml/DownloadsDialog.qml" line="157" />
+        <source>Into:</source>
+        <translation>إلى:</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="155" />
+        <location filename="../qml/DownloadsDialog.qml" line="177" />
         <source>Each file is used only after its `SHA-256` check.</source>
         <translation>لا يُستخدم أي ملف إلا بعد فحص `SHA-256`.</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="169" />
+        <location filename="../qml/DownloadsDialog.qml" line="193" />
         <source>Choose my own PHP…</source>
         <translation>اختيار PHP خاص بي…</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="175" />
+        <location filename="../qml/DownloadsDialog.qml" line="199" />
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="181" />
+        <location filename="../qml/DownloadsDialog.qml" line="205" />
         <source>Download</source>
         <translation>تنزيل</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadsDialog.qml" line="195" />
+        <location filename="../qml/DownloadsDialog.qml" line="219" />
         <source>Close</source>
         <translation>إغلاق</translation>
     </message>
@@ -263,8 +263,8 @@
     </message>
     <message numerus="yes">
         <location filename="../qml/OverviewTab.qml" line="107" />
-        <source>and %n other package(s)</source>
-        <translation><numerusform>و%n حزمة أخرى</numerusform><numerusform>وحزمة أخرى واحدة</numerusform><numerusform>وحزمتان أخريان</numerusform><numerusform>و%n حزم أخرى</numerusform><numerusform>و%n حزمة أخرى</numerusform><numerusform>و%n حزمة أخرى</numerusform></translation>
+        <source>and %Ln other package(s)</source>
+        <translation><numerusform>و%Ln حزمة أخرى</numerusform><numerusform>وحزمة أخرى واحدة</numerusform><numerusform>وحزمتان أخريان</numerusform><numerusform>و%Ln حزم أخرى</numerusform><numerusform>و%Ln حزمة أخرى</numerusform><numerusform>و%Ln حزمة أخرى</numerusform></translation>
     </message>
     <message>
         <location filename="../qml/OverviewTab.qml" line="113" />
@@ -459,78 +459,78 @@
         <translation>Composer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="149" />
+        <location filename="../qml/SettingsPage.qml" line="150" />
         <source>Not found</source>
         <translation>غير موجود</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="153" />
+        <location filename="../qml/SettingsPage.qml" line="154" />
         <source>Choose…</source>
         <translation>اختيار…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="154" />
+        <location filename="../qml/SettingsPage.qml" line="155" />
         <source>Use the one found</source>
         <translation>استخدام الموجود</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="157" />
+        <location filename="../qml/SettingsPage.qml" line="158" />
         <source>Downloads go into `%1`, for your user only. No administrator rights are needed.</source>
         <translation>تُحفظ التنزيلات في `%1`، لمستخدمك فقط. لا حاجة إلى صلاحيات المسؤول.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="171" />
+        <location filename="../qml/SettingsPage.qml" line="172" />
         <source>Server</source>
         <translation>الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="174" />
+        <location filename="../qml/SettingsPage.qml" line="175" />
         <location filename="../qml/SettingsPage.qml" line="183" />
         <source>First port to try</source>
         <translation>أول منفذ للتجربة</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="191" />
+        <location filename="../qml/SettingsPage.qml" line="189" />
         <source>Let other devices on the network open the site (phones for testing)</source>
         <translation>السماح لأجهزة أخرى على الشبكة بفتح الموقع (الهواتف للتجربة)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="201" />
+        <location filename="../qml/SettingsPage.qml" line="194" />
         <source>`php flo serve` takes the next free port when this one is in use. On the network, the site listens on `0.0.0.0`: only do this on networks you trust.</source>
         <translation>يأخذ `php flo serve` المنفذ الحر التالي إذا كان هذا المنفذ مستخدماً. على الشبكة، يستمع الموقع على `0.0.0.0`: افعل ذلك فقط على شبكات تثق بها.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="215" />
+        <location filename="../qml/SettingsPage.qml" line="208" />
         <source>Editor</source>
         <translation>المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="220" />
+        <location filename="../qml/SettingsPage.qml" line="213" />
         <source>Editor command</source>
         <translation>أمر المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="224" />
+        <location filename="../qml/SettingsPage.qml" line="217" />
         <source>`{folder}` becomes the project's folder; quotes group words. For example `code "{folder}"` or `phpstorm {folder}`.</source>
         <translation>يُستبدل `{folder}` بمجلد المشروع، وعلامات الاقتباس تجمع الكلمات. مثلاً `code "{folder}"` أو `phpstorm {folder}`.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="239" />
+        <location filename="../qml/SettingsPage.qml" line="232" />
         <source>Project folders</source>
         <translation>مجلدات المشاريع</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="241" />
+        <location filename="../qml/SettingsPage.qml" line="234" />
         <source>Studio lists every FloCMS project inside these folders.</source>
         <translation>يعرض Studio كل مشاريع FloCMS داخل هذه المجلدات.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="251" />
+        <location filename="../qml/SettingsPage.qml" line="244" />
         <source>Remove</source>
         <translation>إزالة</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="254" />
+        <location filename="../qml/SettingsPage.qml" line="247" />
         <source>Add a folder…</source>
         <translation>إضافة مجلد…</translation>
     </message>

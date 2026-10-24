@@ -8,7 +8,6 @@
 
 #include <QJsonObject>
 #include <QObject>
-#include <QPointer>
 #include <QStringList>
 #include <QUrl>
 #include <QVariantList>
@@ -165,7 +164,8 @@ private:
     QList<FloStudio::Core::ToolPackage> m_packages;
     QVariantList m_downloads;
     QStringList m_queue;
-    QPointer<QObject> m_install;
+    QObject *m_install = nullptr; // a child of this; cleared when it reports back
+    bool m_closing = false;
     QString m_platform = FloStudio::Core::currentPlatform();
     QString m_demoDialog;
     QString m_demoToolsFolder;
