@@ -1,0 +1,25 @@
+ [ OK ] PHP version            8.3.6
+ [ OK ] Extension pdo          loaded
+ [ OK ] Extension mbstring     loaded
+ [ OK ] Extension fileinfo     loaded
+ [ OK ] Extension gd           loaded
+ [ OK ] Extension openssl      loaded
+ [ OK ] Extension curl         loaded
+ [ OK ] Extension pdo_mysql    loaded
+ [ OK ] Composer dependencies  installed
+ [ OK ] storage/               writable
+ [ OK ] storage/logs/          writable
+ [WARN] storage/cache/         missing
+ [ OK ] views/cache/           writable
+ [ OK ] .env file              present
+ [ OK ] .env keys              complete
+ [ OK ] APP_KEY                set
+ [ OK ] APP_URL                http://localhost
+ [ OK ] APP_DEBUG              true (local)
+ [ OK ] Database               connected (mysql)
+ [ OK ] Migrations             up to date
+ [ OK ] public/.htaccess       rewrite rules present
+ [ OK ] Document root          point the document root at public/ (the root .htaccess forwards there as a fallback)
+ [ OK ] Maintenance mode       off
+
+[OK] All checks passed (1 warning(s)).

@@ -1,0 +1,8 @@
+PHP 8.3.6
+hostkurd/flocms-admin v0.39.3
+hostkurd/flocms-api v1.3.0
+hostkurd/flocms-captcha v1.1.0
+hostkurd/flocms-cli v2.0.1
+hostkurd/flocms-core v2.9.0
+hostkurd/flocms-reactive v0.5.1
+hostkurd/flocms-uploader v1.2.1

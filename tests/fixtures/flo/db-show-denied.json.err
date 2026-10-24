@@ -1,0 +1,4 @@
+
+ [ERROR] Cannot connect to the database (127.0.0.1:3306/studio_full): SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: YES)
+         Check DB_USERNAME and DB_PASSWORD.
+

@@ -3,9 +3,28 @@ configure_file(src/version.h.in "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/c
 flostudio_add_library(FloStudioCore Core
     SOURCES
         src/buildinfo.cpp
+        src/commands.cpp
+        src/env.cpp
+        src/logs.cpp
+        src/output.cpp
+        src/process.cpp
+        src/project.cpp
+        src/settings.cpp
+        src/tools.cpp
     HEADERS
         include/flostudio/core/buildinfo.h
+        include/flostudio/core/commands.h
+        include/flostudio/core/env.h
+        include/flostudio/core/logs.h
+        include/flostudio/core/output.h
+        include/flostudio/core/process.h
+        include/flostudio/core/project.h
+        include/flostudio/core/result.h
+        include/flostudio/core/settings.h
+        include/flostudio/core/tools.h
         "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/core/version.h"
+    # Network: portAnswers() (is the database or the server listening)
+    QT Network
 )
 
 target_compile_definitions(FloStudioCore PRIVATE

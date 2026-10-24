@@ -67,6 +67,22 @@ window, draw it once, fail on any warning) and `--screenshot file.png`.
 clang-tidy, as CI runs it: build with Clang, then
 `python3 tools/run_clang_tidy.py build`.
 
+## Tests
+
+`ctest --test-dir build --output-on-failure` runs every suite. The Core
+tests read real `php flo` output from `tests/fixtures/flo/`; when PHP and
+Composer are installed they also find and run them (otherwise those tests
+are skipped).
+
+- `tst_realproject` runs Core against a real, installed FloCMS project:
+  `FLOSTUDIO_REAL_PROJECT=/path/to/site ctest --test-dir build -R tst_realproject -V`.
+  CI makes one with `composer create-project hostkurd/flocms` on every
+  system (`.github/scripts/real_project.sh`).
+- When FloCMS changes the output of a command, refresh the fixtures from
+  an installed project with flocms-admin (its database is emptied):
+  `python3 tools/capture_fixtures.py /path/to/site`, then run the tests to
+  see what changed.
+
 ## Release builds
 
 CI's `release` job (`.github/workflows/ci.yml`) shows the exact steps:

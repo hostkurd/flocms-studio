@@ -1,0 +1,6 @@
+Composer plugins have been disabled for safety in this non-interactive session.
+Set COMPOSER_ALLOW_SUPERUSER=1 if you want to allow plugins to run as root/super user.
+Do not run Composer as root/super user! See https://getcomposer.org/root for details
+Composer version 2.8.12 2025-09-19 13:41:59
+PHP version 8.3.6 (/usr/bin/php8.3)
+Run the "diagnose" command to get more detailed diagnostics output.

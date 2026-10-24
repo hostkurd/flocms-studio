@@ -1,0 +1,43 @@
+[Sat Oct 24 12:53:56 2026] PHP 8.3.6 Development Server (http://127.0.0.1:8123) started
+[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 Accepted
+[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 [200]: GET /themes/default/css/style.css
+[Sat Oct 24 12:53:56 2026] 127.0.0.1:47124 Closing
+[Sat Oct 24 12:53:56 2026] 127.0.0.1:47126 Accepted
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47126 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47134 Accepted
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47134 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 Accepted
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 [200]: GET /themes/default/css/style.css
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47150 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47154 Accepted
+[Sat Oct 24 12:53:57 2026] FloCMS\Core\HttpException: HTTP 404 in /home/claude/work/full/vendor/hostkurd/flocms-core/src/App.php:92
+Stack trace:
+#0 /home/claude/work/full/vendor/hostkurd/flocms-core/src/App.php(437): FloCMS\Core\App::fallback()
+#1 /home/claude/work/full/public/index.php(47): FloCMS\Core\App::run()
+#2 /home/claude/work/full/vendor/hostkurd/flocms-cli/resources/router.php(24): require('...')
+#3 {main}
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47154 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 Accepted
+[Sat Oct 24 12:53:57 2026] PHP Fatal error:  Uncaught Error: Call to undefined function undefined_studio_function() in /home/claude/work/full/public/studio-fatal.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/claude/work/full/public/studio-fatal.php on line 2
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 [500]: GET /studio-fatal.php - Uncaught Error: Call to undefined function undefined_studio_function() in /home/claude/work/full/public/studio-fatal.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/claude/work/full/public/studio-fatal.php on line 2
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47158 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 Accepted
+[Sat Oct 24 12:53:57 2026] PHP Warning:  Studio test warning in /home/claude/work/full/public/studio-warning.php on line 2
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 [200]: GET /studio-warning.php
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47170 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47184 Accepted
+[Sat Oct 24 12:53:57 2026] FloCMS\Core\HttpException: HTTP 404 in /home/claude/work/full/vendor/hostkurd/flocms-core/src/App.php:92
+Stack trace:
+#0 /home/claude/work/full/vendor/hostkurd/flocms-core/src/App.php(429): FloCMS\Core\App::fallback()
+#1 /home/claude/work/full/public/index.php(47): FloCMS\Core\App::run()
+#2 /home/claude/work/full/vendor/hostkurd/flocms-cli/resources/router.php(24): require('...')
+#3 {main}
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47184 Closing
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47186 Accepted
+[Sat Oct 24 12:53:57 2026] 127.0.0.1:47186 Closing
