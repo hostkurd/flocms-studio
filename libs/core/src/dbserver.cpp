@@ -203,6 +203,9 @@ public:
     }
 
 private:
+    // The watcher is a child of this (deleted when it finishes, or with
+    // this): the analyzer can't see Qt's parent ownership
+    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
     template <typename Work, typename Then> void run(Work work, Then then)
     {
         using T = decltype(work());
@@ -213,6 +216,7 @@ private:
         });
         watcher->setFuture(QtConcurrent::run(std::move(work)));
     }
+    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     void line(bool error, const QString &text)
     {
