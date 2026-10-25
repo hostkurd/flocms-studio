@@ -77,7 +77,7 @@
     <message>
         <location filename="../qml/DatabaseCard.qml" line="83" />
         <source>migrations up to date</source>
-        <translation>مایگرەیشنەکان نوێن</translation>
+        <translation>هیچ مایگرەیشنێک چاوەڕێ ناکات</translation>
     </message>
     <message>
         <location filename="../qml/DatabaseCard.qml" line="84" />
@@ -613,8 +613,8 @@
         <location filename="../qml/DoctorCard.qml" line="59" />
         <source>and %Ln more</source>
         <translation>
-            <numerusform>و %Ln ی تر</numerusform>
-            <numerusform>و %Ln ی تر</numerusform>
+            <numerusform>و %Lnی تر</numerusform>
+            <numerusform>و %Lnی تر</numerusform>
         </translation>
     </message>
     <message>

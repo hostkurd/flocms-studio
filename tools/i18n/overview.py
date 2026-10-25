@@ -15,7 +15,7 @@ T = {
    ("يضبط `.env` المفتاح %1 مرتين. يستخدم الموقع القيمة الأولى، وبعض أوامر `php flo` القيمة الأخيرة: احذف إحداهما.",
     "`.env` دوو جار %1 دادەنێت. ماڵپەڕەکە یەکەم بەها بەکاردەهێنێت و هەندێک فەرمانی `php flo` دوایین بەها: یەکێکیان بسڕەوە."),
  # The Database tile
- "migrations up to date": ("الترحيلات محدّثة", "مایگرەیشنەکان نوێن"),
+ "migrations up to date": ("الترحيلات محدّثة", "هیچ مایگرەیشنێک چاوەڕێ ناکات"),
  "Another MariaDB is running on port %1.": ("يعمل MariaDB آخر على المنفذ %1.", "MariaDBیەکی تر لەسەر پۆرتی %1 کار دەکات."),
  "Studio's MariaDB is running on port %1.": ("يعمل MariaDB الخاص بـ Studio على المنفذ %1.", "MariaDBی Studio لەسەر پۆرتی %1 کار دەکات."),
  "Studio's MariaDB didn't start.": ("لم يبدأ MariaDB الخاص بـ Studio.", "MariaDBی Studio دەستی پێنەکرد."),
@@ -34,5 +34,5 @@ P = {
  "and %Ln more": (
    ["and %Ln more", "and %Ln more"],
    ["ولا شيء آخر", "وواحد آخر", "واثنان آخران", "و%Ln أخرى", "و%Ln أخرى", "و%Ln أخرى"],
-   ["و %Ln ی تر", "و %Ln ی تر"]),
+   ["و %Lnی تر", "و %Lnی تر"]),
 }

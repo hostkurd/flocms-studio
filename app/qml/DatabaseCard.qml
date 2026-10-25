@@ -29,8 +29,26 @@ Card {
     readonly property var mariadbRow: (Studio.tools || []).find(t => t.tool === "mariadb") || ({})
     readonly property bool serverIdle: server.state === "stopped" || (server.state === "failed" && server.error === "db_port_busy")
     readonly property bool otherHolds: serverIdle && server.port === 3306 && mariadbRow.state === "running"
-    readonly property bool canStart: onStudioServer && !otherHolds && (server.state === "stopped" || server.state === "failed")
+    // A port taken by something else (not on 3306, so not in the sidebar's
+    // look): the Database tab explains it and offers a free port
+    readonly property bool portBusy: server.state === "failed" && server.error === "db_port_busy"
+    readonly property bool canStart: onStudioServer && !otherHolds && !portBusy && (server.state === "stopped" || server.state === "failed")
     readonly property bool canStop: onStudioServer && server.state === "running"
+
+    // Studio's server just started (here, the Database tab, Settings):
+    // read the database again, so the tables and migrations show. The
+    // Database tab may not exist yet (tabs are made when first shown).
+    property string lastServerState: server.state
+    Connections {
+        target: card.server
+        function onChanged() {
+            const was = card.lastServerState
+            card.lastServerState = card.server.state
+            if (card.onStudioServer && card.server.state === "running" && was !== "running"
+                    && Studio.checks && card.dbState.state !== "running")
+                Studio.checks.refreshDatabase()
+        }
+    }
 
     // The SQLite file from the project's folder: shorter, and the same on
     // every computer
@@ -57,7 +75,7 @@ Card {
         elide: Text.ElideMiddle
         Layout.fillWidth: true
         ToolTip.visible: fileHover.hovered && truncated
-        ToolTip.text: card.db.name || ""
+        ToolTip.text: text
         HoverHandler { id: fileHover }
     }
     RichText {
@@ -76,8 +94,9 @@ Card {
     }
     // What the database says (stage 5): one line that wraps in a narrow tile
     AppText {
-        // On Studio's stopped server the server's line below says it
-        visible: !!card.db.configured && !(card.dbState.state === "failed" && card.onStudioServer)
+        // On Studio's server while it is down, the server's line below says
+        // why; while it runs, a failed connection is the project's own
+        visible: !!card.db.configured && !(card.dbState.state === "failed" && card.onStudioServer && card.server.state !== "running")
         ui: card.dbState.state === "done"
             ? qsTr("%Ln table(s)", "", (card.dbState.tables || []).length) + " · "
               + (card.pending > 0 ? qsTr("%Ln migration(s) waiting", "", card.pending) : qsTr("migrations up to date"))
@@ -96,6 +115,9 @@ Card {
         Layout.fillWidth: true
         Rectangle {
             width: 8; height: 8; radius: 4
+            // Level with the first line when the text wraps
+            Layout.alignment: Qt.AlignTop
+            Layout.topMargin: 6
             color: card.server.state === "running" ? Theme.ok
                  : (card.server.state === "starting" || card.server.state === "stopping" ? Theme.warn
                  : (card.server.state === "failed" && !card.otherHolds ? Theme.bad : Theme.idle))

@@ -13,7 +13,9 @@ Card {
     readonly property int failed: doctor.failed || 0
     readonly property int warnings: doctor.warnings || 0
     readonly property bool checking: doctor.state === "running" && !doctor.checks
-    readonly property var needLook: (doctor.checks || []).filter(c => c.status !== "ok")
+    // Problems before warnings, so a problem is never behind "and 1 more"
+    readonly property var needLook: (doctor.checks || []).filter(c => c.status === "fail")
+                                    .concat((doctor.checks || []).filter(c => c.status !== "ok" && c.status !== "fail"))
     property real now: Date.now()
     Timer { interval: 30000; repeat: true; running: card.visible; onTriggered: card.now = Date.now() }
     readonly property int minutes: doctor.checkedAt ? Math.max(0, Math.floor((now - Date.parse(doctor.checkedAt)) / 60000)) : -1

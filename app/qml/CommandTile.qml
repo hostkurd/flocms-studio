@@ -21,7 +21,7 @@ Button {
     hoverEnabled: true
     font.family: Lang.uiFont
     font.pixelSize: 14
-    Accessible.name: text + (detail ? ". " + detail : "")
+    Accessible.name: text + (detail ? ", " + detail : "")
 
     background: Rectangle {
         radius: 10
