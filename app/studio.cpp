@@ -211,7 +211,14 @@ void Studio::start()
     emit settingsChanged();
     emit darkChanged();
     refreshProjects();
-    refreshTools();
+    m_mariadb.attach(&m_settings, m_packages, m_platform);
+    connect(&m_mariadb, &MariadbServer::settingsChanged, this, &Studio::saveMariadbSettings);
+    // "Start the server when Studio opens" (D8), once the programs are known
+    connect(&m_mariadb, &MariadbServer::programsFound, this, [this] {
+        if (!std::exchange(m_autoStartDone, true) && m_settings.databaseAutoStart)
+            m_mariadb.start();
+    });
+    refreshTools(); // and Studio's MariaDB programs
     // Servers left running by a Studio that crashed (macOS, Linux): asking
     // `ps` takes a moment, so on a worker thread
     auto *leftovers = new QFutureWatcher<QList<LeftoverServer>>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): a child of this
@@ -256,6 +263,8 @@ Result<Done> Studio::startDemo(const QString &file)
             m_packages = packages.value();
     }
     m_projects.setProjects(demoProjects(demo.value(QStringLiteral("projects")).toArray()));
+    m_mariadb.attach(&m_settings, m_packages, m_platform);
+    m_mariadb.showDemo(demo.value(QStringLiteral("mariadb")).toObject().toVariantMap());
     m_tools = demo.value(QStringLiteral("tools")).toArray().toVariantList();
     m_phpChoices = demo.value(QStringLiteral("phpChoices")).toArray().toVariantList();
     m_downloads = demo.value(QStringLiteral("downloads")).toArray().toVariantList();
@@ -372,6 +381,35 @@ void Studio::changeSettings(const std::function<void(Settings &)> &change)
             setProblem(saved.error().code, saved.error().detail);
     }
     emit settingsChanged();
+}
+
+void Studio::saveMariadbSettings()
+{
+    // MariadbServer changed m_settings itself: normalized and saved here
+    m_settings = normalized(m_settings);
+    if (m_canSave && !m_demo) {
+        if (const auto saved = saveSettings(m_settings, settingsFolder()); !saved)
+            setProblem(saved.error().code, saved.error().detail);
+    }
+    emit settingsChanged();
+}
+
+void Studio::setDatabaseServer(const QString &kind, const QString &found)
+{
+    changeSettings([&](Settings &s) {
+        s.databaseServer = kind;
+        if (kind == u"found")
+            s.databaseFound = found;
+    });
+}
+
+void Studio::setOtherDatabase(const QString &host, int port, const QString &user)
+{
+    changeSettings([&](Settings &s) {
+        s.databaseHost = host;
+        s.databaseOtherPort = port;
+        s.databaseUser = user;
+    });
 }
 
 void Studio::setLanguage(const QString &code)
@@ -743,6 +781,7 @@ void Studio::refreshTools()
 {
     if (m_demo || m_closing)
         return;
+    m_mariadb.refresh(); // Studio's own MariaDB programs, on their own worker
     if (m_checking) {
         m_recheck = true; // once this run ends
         return;
@@ -819,7 +858,7 @@ void Studio::startDownloads(const QStringList &ids)
 void Studio::downloadNext()
 {
     if (m_queue.isEmpty()) {
-        refreshTools();
+        refreshTools(); // and Studio's MariaDB programs
         return;
     }
     const QString id = m_queue.takeFirst();

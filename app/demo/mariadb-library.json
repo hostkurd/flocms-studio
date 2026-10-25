@@ -1,0 +1,150 @@
+{
+  "platform": "linux-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "/home/khalat/Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\"",
+    "composerPath": ""
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.4.6",
+      "path": "/usr/bin/php"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "/usr/local/bin/composer"
+    },
+    {
+      "tool": "mariadb",
+      "state": "optional",
+      "version": "",
+      "product": "",
+      "path": ""
+    }
+  ],
+  "page": "settings",
+  "settingsSection": "database",
+  "toolsFolder": "/home/khalat/.local/share/HostKurd/FloCMS Studio/tools",
+  "phpChoices": [
+    {
+      "path": "/usr/bin/php",
+      "version": "8.4.6",
+      "origin": "system"
+    }
+  ],
+  "mariadb": {
+    "programs": [
+      {
+        "series": "12.3",
+        "version": "12.3.3",
+        "path": "/home/khalat/.local/share/HostKurd/FloCMS Studio/tools/mariadb-12.3/bin/mariadbd",
+        "origin": "studio"
+      }
+    ],
+    "state": "failed",
+    "error": "db_library",
+    "detail": "libaio.so.1",
+    "initialized": false,
+    "dataFolder": "/home/khalat/.local/share/HostKurd/FloCMS Studio/mariadb/12.3",
+    "lines": [
+      "› mariadbd --version",
+      "mariadbd: error while loading shared libraries: libaio.so.1: cannot open shared object file: No such file or directory"
+    ]
+  }
+}

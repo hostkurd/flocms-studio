@@ -18,20 +18,25 @@ Popup {
     readonly property var offer: Studio.downloadOffer
     readonly property var phps: offer.filter(p => p.tool === "php")
     readonly property var composer: offer.find(p => p.tool === "composer")
-    readonly property var mariadb: offer.find(p => p.tool === "mariadb")
+    // MariaDB: the newest LTS first (the default), then another version (D2)
+    readonly property var mariadbs: offer.filter(p => p.tool === "mariadb")
     readonly property bool choosing: Studio.downloads.length === 0
     readonly property bool finished: !choosing && !Studio.downloading
     property string phpChoice: ""
     property bool wantComposer: true
-    property bool wantMariadb: false
+    property string mariadbChoice: ""
     property string tab: "php"
     // What can be chosen: never what Studio has already, nor a Composer
     // older than (or as new as) the computer's own
     readonly property bool composerAvailable: !!composer && !composer.installed
         && !(found("composer") && !newer(composer.version, found("composer").version || ""))
-    readonly property bool mariadbAvailable: !!mariadb && !mariadb.installed
     readonly property bool composerChosen: wantComposer && composerAvailable
-    readonly property bool mariadbChosen: wantMariadb && mariadbAvailable
+    readonly property bool mariadbChosen: mariadbChoice !== ""
+    // A MariaDB this run downloaded: its series, for "Set up and start"
+    readonly property string downloadedSeries: {
+        const done = Studio.downloads.find(d => d.tool === "mariadb" && d.state === "done")
+        return done ? String(done.version).split(".").slice(0, 2).join(".") : ""
+    }
 
     // Whether version a is newer than b (2.10.3 > 2.9.1)
     function newer(a, b) {
@@ -70,7 +75,7 @@ Popup {
         const firstNew = phps.find(p => !p.installed)
         phpChoice = missing("php") && firstNew ? firstNew.id : ""
         wantComposer = missing("composer") && !!composer && !composer.installed
-        wantMariadb = false
+        mariadbChoice = ""
         tab = missing("php") ? "php" : (missing("composer") ? "composer" : "php")
         if (["php", "composer", "mariadb"].indexOf(Studio.demoTab) >= 0) tab = Studio.demoTab
     }
@@ -243,24 +248,46 @@ Popup {
                         onToggled: (on) => dialog.wantComposer = on
                     }
 
-                    // MariaDB: Studio's own server; another version when this
-                    // computer has one (XAMPP's, say)
+                    // MariaDB: Studio's own server, the newest LTS or another
+                    // version; the one this computer has stays as it is
+                    ButtonGroup { id: mariadbGroup }
+                    Repeater {
+                        model: dialog.tab === "mariadb" ? dialog.mariadbs : []
+                        delegate: OptionRow {
+                            required property var modelData
+                            required property int index
+                            Layout.fillWidth: true
+                            radio: true
+                            group: mariadbGroup
+                            checked: dialog.mariadbChoice === modelData.id
+                            enabled: !modelData.installed
+                            title: index === 0 ? qsTr("MariaDB %1 LTS").arg(modelData.version.split(".").slice(0, 2).join("."))
+                                               : qsTr("Another version: MariaDB %1 LTS").arg(modelData.version.split(".").slice(0, 2).join("."))
+                            note: (index === 0 ? qsTr("Newest · Studio starts and stops it · from %1").arg(modelData.source)
+                                               : qsTr("from %1").arg(modelData.source))
+                            badge: modelData.installed ? qsTr("Downloaded") : ""
+                            badgeColor: Theme.okBg
+                            badgeText: Theme.okText
+                            size: modelData.installed ? 0 : modelData.size
+                            onToggled: (on) => { if (on) dialog.mariadbChoice = modelData.id }
+                        }
+                    }
                     OptionRow {
-                        readonly property var have: dialog.found("mariadb")
-                        visible: dialog.tab === "mariadb" && !!dialog.mariadb
+                        visible: dialog.tab === "mariadb" && dialog.mariadbs.length > 0
                         Layout.fillWidth: true
-                        checked: dialog.mariadbChosen
-                        enabled: dialog.mariadbAvailable
-                        title: dialog.mariadb ? (have ? qsTr("Another version: MariaDB %1").arg(dialog.mariadb.version) : "MariaDB " + dialog.mariadb.version) : ""
-                        note: !dialog.mariadb ? ""
-                              : dialog.mariadb.installed ? qsTr("Already downloaded")
-                              : have ? qsTr("Studio's own, next to the one this computer has; that one stays as it is · from %1").arg(dialog.mariadb.source)
-                              : qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb.source)
-                        size: dialog.mariadb ? dialog.mariadb.size : 0
-                        onToggled: (on) => dialog.wantMariadb = on
+                        radio: true
+                        group: mariadbGroup
+                        checked: dialog.mariadbChoice === ""
+                        title: qsTr("No MariaDB")
+                        note: qsTr("Only projects that use MySQL need one; SQLite needs nothing")
+                        onToggled: (on) => { if (on) dialog.mariadbChoice = "" }
+                    }
+                    MariadbSetup {
+                        visible: dialog.tab === "mariadb" && Studio.mariadb.state !== "none"
+                        Layout.fillWidth: true
                     }
                     RichText {
-                        visible: dialog.tab === "mariadb" && !dialog.mariadb
+                        visible: dialog.tab === "mariadb" && dialog.mariadbs.length === 0
                         raw: Studio.mariadbFromHomebrew
                              ? qsTr("MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.")
                              : qsTr("Studio can't download MariaDB for this system yet. Install it with your package manager, for example `sudo apt install mariadb-server`.")
@@ -297,6 +324,12 @@ Popup {
                         entry: modelData
                         Layout.fillWidth: true
                     }
+                }
+                // A MariaDB arrived: set it up and start it from here
+                MariadbSetup {
+                    visible: dialog.finished && dialog.downloadedSeries !== "" && Studio.mariadb.state !== "none"
+                    series: dialog.downloadedSeries
+                    Layout.fillWidth: true
                 }
                 RowLayout {
                     visible: !dialog.choosing
@@ -339,7 +372,7 @@ Popup {
                     const ids = []
                     if (dialog.phpChoice !== "") ids.push(dialog.phpChoice)
                     if (dialog.composerChosen) ids.push(dialog.composer.id)
-                    if (dialog.mariadbChosen) ids.push(dialog.mariadb.id)
+                    if (dialog.mariadbChosen) ids.push(dialog.mariadbChoice)
                     Studio.startDownloads(ids)
                 }
             }

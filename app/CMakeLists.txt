@@ -4,6 +4,8 @@ qt_add_executable(Studio
     language.cpp
     logmodel.h
     logmodel.cpp
+    mariadbserver.h
+    mariadbserver.cpp
     newproject.h
     newproject.cpp
     projectchecks.h
@@ -95,6 +97,9 @@ set(STUDIO_QML
     qml/StatusIcon.qml
     qml/SettingsPage.qml
     qml/DownloadsDialog.qml
+    qml/DatabaseSettings.qml
+    qml/MariadbProblem.qml
+    qml/MariadbSetup.qml
 )
 foreach(file IN LISTS STUDIO_QML)
     cmake_path(GET file FILENAME name)

@@ -1,0 +1,171 @@
+{
+  "platform": "macos-arm64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\""
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.5.8",
+      "path": "/Users/khalat/Library/Application Support/HostKurd/FloCMS Studio/tools/php-8.5/php"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "/opt/homebrew/bin/composer"
+    },
+    {
+      "tool": "mariadb",
+      "state": "found",
+      "version": "12.3.3",
+      "product": "MariaDB",
+      "path": "/opt/homebrew/bin/mariadb"
+    }
+  ],
+  "page": "project",
+  "server": {
+    "state": "running",
+    "url": "http://127.0.0.1:8000",
+    "php": "8.4.27",
+    "startedMinutesAgo": 14
+  },
+  "running": [
+    "C:\\Sites\\fectumhellas"
+  ],
+  "checks": {
+    "doctor": {
+      "out": "{\n    \"ok\": true,\n    \"failed\": 0,\n    \"warnings\": 2,\n    \"checks\": [\n        {\n            \"status\": \"ok\",\n            \"check\": \"PHP version\",\n            \"detail\": \"8.3.6\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension pdo\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension mbstring\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension fileinfo\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension gd\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension openssl\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension curl\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Extension pdo_mysql\",\n            \"detail\": \"loaded\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Composer dependencies\",\n            \"detail\": \"installed\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"storage/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"storage/logs/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"warn\",\n            \"check\": \"storage/cache/\",\n            \"detail\": \"missing\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"views/cache/\",\n            \"detail\": \"writable\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \".env file\",\n            \"detail\": \"present\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \".env keys\",\n            \"detail\": \"complete\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_KEY\",\n            \"detail\": \"set\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_URL\",\n            \"detail\": \"http://localhost\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"APP_DEBUG\",\n            \"detail\": \"true (local)\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Database\",\n            \"detail\": \"connected (mysql)\"\n        },\n        {\n            \"status\": \"warn\",\n            \"check\": \"Migrations\",\n            \"detail\": \"2 pending: run php flo migrate\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"public/.htaccess\",\n            \"detail\": \"rewrite rules present\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Document root\",\n            \"detail\": \"point the document root at public/ (the root .htaccess forwards there as a fallback)\"\n        },\n        {\n            \"status\": \"ok\",\n            \"check\": \"Maintenance mode\",\n            \"detail\": \"off\"\n        }\n    ]\n}\n",
+      "err": "",
+      "code": 0
+    },
+    "adminDoctor": {
+      "out": "\nflocms-admin 0.39.3\n===================\n\n  ✓ config/admin.php found\n  ✓ Languages: en, ar, ku (default en)\n  ✓ Admin layout: templates/default/layouts/admin.html\n  ✓ Panel pages: /admin/dashboard, /admin/settings, /admin/accounts, /admin/profile\n  ✓ Database connection works\n\nApp\\Admin\\Resources\\PostResource  (/admin/posts)\n------------------------------------------------\n  ✓ Permissions: content.posts.view, content.posts.create, content.posts.update, content.posts.delete\n  CSV: export (content.posts.export), import (content.posts.import + create)\n  Translations: one language at a time (page mode), the panel default\n  ✗ Table \"posts\" not found (run php flo migrate?)\n\nFloCMS\\Admin\\Users\\UsersResource  (/admin/accounts)\n---------------------------------------------------\n  ✓ Permissions: users.manage, users.manage, users.manage, users.manage\n  CSV: export (content.accounts.export), import (content.accounts.import + create)\n  ✓ Table \"users\" (15 columns)\n\nSettings and preferences\n------------------------\n  ✓ No website settings pages (optional: php flo make:admin-settings)\n  ✓ Admin panel settings page (settings.panel)\n  ✓ Settings uploads: C:\\Sites\\fectumhellas/public/uploads/settings (served at /uploads/settings)\n  ✓ Table \"settings\"\n  ✓ Table \"admin_user_preferences\"\n\nMedia library  (/admin/media)\n-----------------------------\n  ✓ Table \"media\"\n  ✓ Table \"media_usage\"\n  ✓ Table \"media_folders\" (folders)\n  ✓ Files in C:\\Sites\\fectumhellas/public/uploads/editor/library (served at /uploads/editor/library)\n  Permissions: content.media.view, …create, …update, …delete\n\nTrash and activity log  (/admin/trash, /admin/activity)\n-------------------------------------------------------\n  ✓ Table \"admin_trash\" (trash)\n  ✓ Table \"admin_activity\" (activity log)\n  Trash: records are kept 30 days; php flo admin:trash-purge deletes older ones (panel pages do it hourly).\n  Activity log: entries are kept 365 days. The Activity page needs the permission activity.view.\n\nRoles  (/admin/roles)\n---------------------\n  ✓ Table \"admin_roles\": no changes, the roles of config/config.php apply\n  The page needs the permission roles.manage (Super Admin has it through *). php flo admin:roles lists the roles in force; php flo admin:roles-reset undoes changes.\n\nCSV import and export  (/admin/<slug>/import, /admin/imports)\n-------------------------------------------------------------\n  Export: on, up to 50,000 rows a file\n  ✓ Table \"admin_imports\"\n  ✓ Table \"admin_import_rows\"\n  Import: up to 10,000 rows and 10 MB a file, 100 rows a request, Undo for 7 days.\n  The browser sends files in parts of 2 MB, so PHP's upload_max_filesize (2M) only limits pages without JavaScript.\n  php flo admin:import-purge removes old upload files (panel pages do it hourly).\n\nForgot password  (/admin/password/forgot)\n-----------------------------------------\n  ✓ Table \"admin_password_resets\"\n  ✓ Email: PHP mail(), from info@flocms.com. Check it with: php flo admin:mail-test you@example.com\n  Links work once, for 60 minutes; 3 requests an hour per address, 10 per IP address.\n\nLogin security  (/admin/profile/security)\n-----------------------------------------\n  Off: add 'two_factor' => true and/or 'email_verification' => true to config/admin.php.\n\nPages  (/admin/site-pages)\n--------------------------\n  Off: add 'pages' => true to config/admin.php to manage the website's pages in the panel.\n\n",
+      "err": " ERROR  1 problem(s), 0 warning(s).\n",
+      "code": 1
+    },
+    "show": {
+      "out": "",
+      "err": " [ERROR] SQLSTATE[HY000] [2002] Connection refused\n",
+      "code": 1
+    },
+    "status": {
+      "out": "",
+      "err": " [ERROR] SQLSTATE[HY000] [2002] Connection refused\n",
+      "code": 1
+    },
+    "adminList": {
+      "out": "\nAdmin resources\n===============\n\n+----------+-----------------+-------+----------------------------------------------+--------------+\n| Resource | URL             | Table | Permissions                                  | Class        |\n+----------+-----------------+-------+----------------------------------------------+--------------+\n| Posts    | /admin/posts    | posts | content.posts.view (+create, update, delete) | PostResource |\n| Users    | /admin/accounts | users | users.manage (+create, update, delete)       | built in     |\n| Media    | /admin/media    | media | content.media.view (+create, update, delete) | built in     |\n+----------+-----------------+-------+----------------------------------------------+--------------+\n\nSettings pages\n--------------\n+-------------+----------------------------+---------+--------+----------------+\n| Page        | URL                        | Keys    | Fields | Permission     |\n+-------------+----------------------------+---------+--------+----------------+\n| Admin panel | /admin/settings/edit/panel | panel.* | 7      | settings.panel |\n+-------------+----------------------------+---------+--------+----------------+\n\nDashboard widgets\n-----------------\n! None: the dashboard shows resource counts. Create one with php flo make:admin-widget Overview\n\nPanel pages\n-----------\n! None: php flo make:admin-page SalesReport --view --table\n",
+      "err": "",
+      "code": 0
+    },
+    "checkedMinutesAgo": 2
+  },
+  "tab": "database",
+  "mariadb": {
+    "programs": [
+      {
+        "series": "12.3",
+        "version": "12.3.3",
+        "path": "/opt/homebrew/opt/mariadb/bin/mariadbd",
+        "origin": "homebrew"
+      }
+    ],
+    "state": "stopped",
+    "dataFolder": "/Users/khalat/Library/Application Support/HostKurd/FloCMS Studio/mariadb/12.3"
+  }
+}

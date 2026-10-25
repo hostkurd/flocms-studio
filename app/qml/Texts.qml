@@ -25,6 +25,26 @@ QtObject {
         return ""
     }
 
+    // Studio's MariaDB (MariaDB design note D11)
+    function mariadbState(state) {
+        Lang.code
+        switch (state) {
+        case "running": return qsTr("Running")
+        case "starting": return qsTr("Starting…")
+        case "stopping": return qsTr("Stopping…")
+        case "failed": return qsTr("Didn't start")
+        }
+        return qsTr("Stopped")
+    }
+
+    // Where the password of root is kept, by system
+    function secureStoreName() {
+        Lang.code
+        if (Studio.platform.startsWith("windows")) return qsTr("Windows Credential Manager")
+        if (Studio.platform.startsWith("macos")) return qsTr("the macOS Keychain")
+        return qsTr("the system's keyring")
+    }
+
     function typeName(type) {
         Lang.code
         switch (type) {
@@ -119,6 +139,16 @@ QtObject {
         case "editor_failed": return qsTr("The editor did not start.")
         case "unsafe_argument": return qsTr("The editor is a `.cmd` file, and the folder's name has characters `cmd.exe` would read itself ( ) & ! %. Choose the editor's `.exe` in Settings > Editor.")
         case "open_failed": return qsTr("The folder could not be opened.")
+        case "db_port_busy": return qsTr("The port is in use by another program, so Studio's MariaDB can't start on it.")
+        case "db_library": return qsTr("MariaDB needs a library this system doesn't have.")
+        case "db_program": return qsTr("Studio's MariaDB doesn't run on this computer.")
+        case "db_init": return qsTr("Studio could not set up the databases folder.")
+        case "db_start": return qsTr("MariaDB stopped while starting. The end of its log:")
+        case "db_timeout": return qsTr("MariaDB didn't answer in time. The end of its log:")
+        case "db_root": return qsTr("Studio could not set the password of MariaDB's `root` user.")
+        case "db_root_lost": return qsTr("The password of `root` is missing from the system's secure store, so Studio can't use these databases. Delete the databases in Settings to start again.")
+        case "db_keychain": return qsTr("Studio could not use the system's secure store for the password of `root`.")
+        case "db_crashed": return qsTr("MariaDB stopped unexpectedly. The end of its log:")
         case "tool_download": return qsTr("The download failed.")
         case "tool_hash": return qsTr("The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.")
         case "tool_extract": return qsTr("The download could not be unpacked.")

@@ -223,6 +223,41 @@ private slots:
         QCOMPARE(studio.startDemo(QStringLiteral("/no/such/demo.json")).error().code, QStringLiteral("demo_file"));
     }
 
+    void studiosOwnMariadbInADemo()
+    {
+        // MariaDB design note D7, D9, D11: the state the screens read
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/mariadb-port.json")).ok());
+        MariadbServer *server = studio.mariadb();
+        QCOMPARE(server->state(), QStringLiteral("failed"));
+        QCOMPARE(server->error(), QStringLiteral("db_port_busy"));
+        QCOMPARE(server->freePort(), 3307);
+        QCOMPARE(server->series(), QStringLiteral("12.3"));
+        QCOMPARE(server->version(), QStringLiteral("12.3.3"));
+        QCOMPARE(server->origin(), QStringLiteral("studio"));
+        QCOMPARE(server->port(), 3306);
+        QCOMPARE(studio.platform(), QStringLiteral("windows-x86_64"));
+        // A demo starts nothing; settings change in memory only
+        server->start();
+        QCOMPARE(server->state(), QStringLiteral("failed"));
+        server->setPort(3310);
+        QCOMPARE(server->port(), 3310);
+        server->setAutoStart(true);
+        QVERIFY(server->autoStart());
+        studio.setDatabaseServer(QStringLiteral("found"), QStringLiteral("D:\\xampp\\mysql\\bin\\mysql.exe"));
+        QCOMPARE(studio.databaseServer(), QStringLiteral("found"));
+        studio.setOtherDatabase(QStringLiteral("db.local"), 3311, QStringLiteral("dev"));
+        QCOMPARE(studio.databaseHost(), QStringLiteral("db.local"));
+        QCOMPARE(studio.databaseOtherPort(), 3311);
+        QVERIFY(!QFile::exists(QDir(settingsFolder()).filePath(QStringLiteral("settings.json"))));
+
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/mariadb-settings.json")).ok());
+        QCOMPARE(server->state(), QStringLiteral("running"));
+        QVERIFY(server->startedAt() > 0);
+        QCOMPARE(MariadbServer::passwordAccount(QStringLiteral("12.3")), QStringLiteral("flocms-studio-mariadb-12.3://root"));
+    }
+
     void everyDemoLoads()
     {
         const QDir demos(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo"));

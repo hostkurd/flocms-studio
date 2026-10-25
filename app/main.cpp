@@ -250,6 +250,10 @@ int main(int argc, char *argv[])
             *waited += poll->interval();
             if (swapped->load() < 1 && *waited < 15000)
                 return; // keep waiting, up to 15 seconds
+            // A screenshot waits a little longer, so layouts that settle
+            // after the first frame (a page opened on a section) are in it
+            if (!smoke && *waited < 800)
+                return;
             poll->stop();
 
             const QImage frame = window->grabWindow();

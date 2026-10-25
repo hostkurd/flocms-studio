@@ -43,6 +43,7 @@ flostudio_add_test(tst_studio FloStudio::Core FloStudio::Database FloStudio::Sec
 target_sources(tst_studio PRIVATE
     ../app/language.cpp ../app/language.h
     ../app/logmodel.cpp ../app/logmodel.h
+    ../app/mariadbserver.cpp ../app/mariadbserver.h
     ../app/newproject.cpp ../app/newproject.h
     ../app/projectchecks.cpp ../app/projectchecks.h
     ../app/projectgenerate.cpp ../app/projectgenerate.h

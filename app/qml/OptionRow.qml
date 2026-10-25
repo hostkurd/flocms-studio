@@ -12,6 +12,10 @@ Rectangle {
     property string title
     property string note
     property real size: 0
+    // A state chip at the end (Running, Downloaded)
+    property string badge
+    property color badgeColor: Theme.border
+    property color badgeText: Theme.muted
     signal toggled(bool on)
 
     implicitHeight: content.implicitHeight + 20
@@ -58,6 +62,12 @@ Rectangle {
             Layout.fillWidth: true
             AppText { ui: row.title; font.weight: Font.DemiBold }
             AppText { ui: row.note; color: Theme.muted; font.pixelSize: 13; wrapMode: Text.Wrap; Layout.fillWidth: true }
+        }
+        Pill {
+            visible: row.badge !== ""
+            text: row.badge
+            color: row.badgeColor
+            fg: row.badgeText
         }
         AppText {
             visible: row.size > 0

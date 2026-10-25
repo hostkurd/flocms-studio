@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logmodel.h"
+#include "mariadbserver.h"
 #include "newproject.h"
 #include "projectchecks.h"
 #include "projectgenerate.h"
@@ -80,6 +81,16 @@ class Studio : public QObject
     Q_PROPERTY(bool downloading READ downloading NOTIFY downloadsChanged)
     Q_PROPERTY(QString toolsFolder READ toolsFolder NOTIFY downloadsChanged)
     Q_PROPERTY(bool mariadbFromHomebrew READ mariadbFromHomebrew NOTIFY downloadsChanged)
+    // Studio's own MariaDB server (MariaDB design note D5–D12)
+    Q_PROPERTY(MariadbServer *mariadb READ mariadb CONSTANT)
+    // This computer in the tool list's terms (a demo's own): windows-x86_64, macos-arm64, ...
+    Q_PROPERTY(QString platform READ platform NOTIFY settingsChanged)
+    // The server new projects use (D9): auto, studio, found, other
+    Q_PROPERTY(QString databaseServer READ databaseServer NOTIFY settingsChanged)
+    Q_PROPERTY(QString databaseFound READ databaseFound NOTIFY settingsChanged)
+    Q_PROPERTY(QString databaseHost READ databaseHost NOTIFY settingsChanged)
+    Q_PROPERTY(int databaseOtherPort READ databaseOtherPort NOTIFY settingsChanged)
+    Q_PROPERTY(QString databaseUser READ databaseUser NOTIFY settingsChanged)
     Q_PROPERTY(bool demo READ demo CONSTANT)
     // A demo can open on a dialog ("downloads")
     Q_PROPERTY(QString demoDialog READ demoDialog CONSTANT)
@@ -131,6 +142,13 @@ public:
     bool downloading() const;
     QString toolsFolder() const;
     bool mariadbFromHomebrew() const;
+    MariadbServer *mariadb() { return &m_mariadb; }
+    QString platform() const { return m_platform; }
+    QString databaseServer() const { return m_settings.databaseServer; }
+    QString databaseFound() const { return m_settings.databaseFound; }
+    QString databaseHost() const { return m_settings.databaseHost; }
+    int databaseOtherPort() const { return m_settings.databaseOtherPort; }
+    QString databaseUser() const { return m_settings.databaseUser; }
     bool demo() const { return m_demo; }
     QString demoDialog() const { return m_demoDialog; }
     QString demoTab() const { return m_demoTab; }
@@ -143,6 +161,9 @@ public:
     Q_INVOKABLE void setEditorCommand(const QString &command);
     Q_INVOKABLE void setPhpPath(const QString &path);
     Q_INVOKABLE void setComposerPath(const QString &path);
+    // D9: studio, found (with the found server's client program), other
+    Q_INVOKABLE void setDatabaseServer(const QString &kind, const QString &found = {});
+    Q_INVOKABLE void setOtherDatabase(const QString &host, int port, const QString &user);
     Q_INVOKABLE void addProjectFolder(const QUrl &folder);
     Q_INVOKABLE void removeProjectFolder(const QString &folder);
     // "Open existing folder…": a FloCMS project is added and opened;
@@ -196,6 +217,7 @@ private:
     void setProblem(const QString &code, const QString &detail);
     void loadCurrent();
     void downloadNext();
+    void saveMariadbSettings();
     ProjectServer *serverFor(const QString &path);
     ProjectChecks *checksFor(const QString &path);
     ProjectGenerate *generateFor(const QString &path);
@@ -223,6 +245,8 @@ private:
     QObject *m_install = nullptr; // a child of this; cleared when it reports back
     bool m_closing = false;
     QString m_platform = FloStudio::Core::currentPlatform();
+    MariadbServer m_mariadb;
+    bool m_autoStartDone = false;
     QString m_demoDialog;
     QString m_demoTab;
     QStringList m_demoDownloaded;

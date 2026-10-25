@@ -26,6 +26,30 @@ ScrollView {
         return (maria ? "MariaDB" : "MySQL") + (version ? " " + version : "")
     }
 
+    // The project uses Studio's own MariaDB, which isn't running (D11):
+    // the connection fails because of that, so the tab offers to start it
+    readonly property var server: Studio.mariadb
+    readonly property bool onStudioServer: {
+        const db = Studio.current.database || {}
+        const host = String(db.host || "")
+        const port = Number(db.port || 3306)
+        return db.driver === "mysql" && (host === "127.0.0.1" || host === "localhost") && port === server.port
+               && server.state !== "none"
+    }
+    readonly property bool offerStart: onStudioServer && server.state !== "running" && tab.db.state === "failed"
+    property bool waitingForServer: false
+    Connections {
+        target: tab.server
+        function onChanged() {
+            if (tab.waitingForServer && tab.server.state === "running" && tab.checks) {
+                tab.waitingForServer = false
+                tab.checks.refreshDatabase()
+            } else if (tab.server.state === "failed" || tab.server.state === "stopped") {
+                tab.waitingForServer = false
+            }
+        }
+    }
+
     // From ProjectPage: runs a database action, asking first when it should
     property var startAction: function(action) {}
 
@@ -86,7 +110,36 @@ ScrollView {
                     onClicked: tab.checks.refreshDatabase()
                 }
             }
-            ProblemText { report: tab.db }
+            Rectangle {
+                visible: tab.offerStart
+                Layout.fillWidth: true
+                implicitHeight: startRow.implicitHeight + 24
+                radius: 10
+                color: Theme.optionSelectedBg
+                border.color: Theme.accent
+                RowLayout {
+                    id: startRow
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    anchors.leftMargin: 14
+                    spacing: 12
+                    RichText {
+                        raw: qsTr("This project uses Studio's MariaDB (`127.0.0.1:%1`), which is stopped.").arg(tab.server.port)
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
+                    AppButton {
+                        primary: true
+                        text: tab.server.state === "starting" ? qsTr("Starting…") : qsTr("Start the database server")
+                        iconPath: Icons.play
+                        iconFilled: true
+                        enabled: tab.server.state !== "starting" && tab.server.state !== "stopping"
+                        onClicked: { tab.waitingForServer = true; tab.server.start() }
+                    }
+                }
+            }
+            MariadbProblem { visible: tab.onStudioServer && code !== ""; Layout.fillWidth: true }
+            ProblemText { report: tab.db; visible: !tab.offerStart && (tab.db.state === "failed") }
         }
 
         GridLayout {
