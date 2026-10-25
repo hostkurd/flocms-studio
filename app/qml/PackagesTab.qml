@@ -63,6 +63,8 @@ ScrollView {
     }
     // A demo can open on an update
     Component.onCompleted: {
+        // Made when first shown (ShownOnce): ask now, as on being shown
+        Qt.callLater(checkOnce)
         tab.shownPk = tab.pk
         if (tab.run.name) { tab.chosen = tab.run.name; tab.chosenKind = tab.run.kind }
         else if (Studio.demoDialog) { tab.chosen = Studio.demoDialog; tab.chosenKind = tab.rows.some(r => r.name === Studio.demoDialog && r.canAdd) ? "add" : "update" }

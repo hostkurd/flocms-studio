@@ -7,6 +7,7 @@
 
 #include <QCommandLineParser>
 #include <QDir>
+#include <QEventLoop>
 #include <QFont>
 #include <QFontDatabase>
 #include <QNetworkProxyFactory>
@@ -224,14 +225,46 @@ int main(int argc, char *argv[])
         studio.start();
     }
 
+    // A small window at once, while the main one is made: on a cold start
+    // (first run, Windows checking the new program) that takes a moment.
+    // Not for a smoke test or a screenshot, which look at the main window.
+    QQuickWindow *splash = nullptr;
+    if (!smoke && !parser.isSet(shotOpt)) {
+        engine.load(QUrl(QStringLiteral("qrc:/qt/qml/FloStudio/App/Splash.qml")));
+        if (!engine.rootObjects().isEmpty())
+            splash = qobject_cast<QQuickWindow *>(engine.rootObjects().constLast());
+        if (splash) {
+            // Let it reach the screen before the main window keeps the
+            // thread busy (at most a quarter of a second)
+            QEventLoop drawn;
+            QObject::connect(splash, &QQuickWindow::frameSwapped, &drawn, &QEventLoop::quit, Qt::QueuedConnection);
+            QTimer::singleShot(250, &drawn, &QEventLoop::quit);
+            drawn.exec();
+        }
+    }
+
+    const qsizetype before = engine.rootObjects().size();
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/FloStudio/App/Main.qml")));
-    if (engine.rootObjects().isEmpty()) {
+    if (engine.rootObjects().size() == before) {
         qCritical("Could not load the main window.");
         return 1;
     }
+    auto *mainWindow = qobject_cast<QQuickWindow *>(engine.rootObjects().constLast());
+
+    // The splash goes once the main window has drawn its first frame
+    if (splash && mainWindow) {
+        auto closeSplash = std::make_shared<QMetaObject::Connection>();
+        *closeSplash = QObject::connect(mainWindow, &QQuickWindow::frameSwapped, splash, [splash, closeSplash] {
+            QObject::disconnect(*closeSplash);
+            splash->close();
+            splash->deleteLater();
+        }, Qt::QueuedConnection);
+    } else if (splash) {
+        splash->close();
+    }
 
     if (smoke || parser.isSet(shotOpt)) {
-        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());
+        auto *window = mainWindow;
         if (!window) {
             qCritical("The main window is not a Qt Quick window.");
             return 1;
