@@ -25,6 +25,16 @@ ScrollView {
     readonly property int updates: rows.filter(r => r.status === "update" || r.status === "major").length
     // The table's columns
     readonly property int versionWidth: 90
+    // The widths the header and every row use. In a narrow window (960 px,
+    // long labels) the version and status columns give up space, down to
+    // these, before the package name goes below 120 px
+    readonly property int versionMinimum: 74
+    readonly property int statusMinimum: 96
+    readonly property real tableWidth: tableHeader.width
+    readonly property real columnRoom: tableWidth - 20 - 4 * 14 - actionWidth - 120
+    readonly property real columnShare: Math.max(0, Math.min(1, columnRoom / (2 * versionWidth + statusWidth)))
+    readonly property int versionColumn: Math.max(versionMinimum, Math.floor(versionWidth * columnShare))
+    readonly property int statusColumn: Math.max(statusMinimum, Math.floor(statusWidth * columnShare))
     readonly property int statusWidth: Math.max(measureCurrent.implicitWidth, measureUpdate.implicitWidth, measureMajor.implicitWidth,
                                                 measureZero.implicitWidth, measureThrough.implicitWidth, measureAbandoned.implicitWidth)
     // The update's card beside the table: only when one is chosen and the
@@ -143,6 +153,7 @@ ScrollView {
             // out like a row below (inside an item as wide as the card), so
             // the columns line up
             Item {
+                id: tableHeader
                 Layout.fillWidth: true
                 implicitHeight: header.implicitHeight
                 RowLayout {
@@ -151,10 +162,10 @@ ScrollView {
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     spacing: 14
-                    SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 120 }
-                    SectionLabel { ui: qsTr("Installed"); Layout.preferredWidth: tab.versionWidth }
-                    SectionLabel { ui: qsTr("Latest"); Layout.preferredWidth: tab.versionWidth }
-                    SectionLabel { ui: qsTr("Status"); Layout.preferredWidth: tab.statusWidth }
+                    SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 80 }
+                    SectionLabel { ui: qsTr("Installed"); elide: Text.ElideRight; Layout.preferredWidth: tab.versionColumn }
+                    SectionLabel { ui: qsTr("Latest"); elide: Text.ElideRight; Layout.preferredWidth: tab.versionColumn }
+                    SectionLabel { ui: qsTr("Status"); elide: Text.ElideRight; Layout.preferredWidth: tab.statusColumn }
                     Item { Layout.preferredWidth: tab.actionWidth }
                 }
             }
@@ -177,38 +188,47 @@ ScrollView {
                         anchors.rightMargin: 10
                         spacing: 14
                         Mono {
-                            text: row.modelData.name
+                            // Without the "hostkurd/" every name has, when the
+                            // columns had to give up space
+                            text: tab.columnShare < 1 ? tab.shortName(row.modelData.name) : row.modelData.name
                             color: row.modelData.status === "missing" ? Theme.muted : Theme.text
                             elide: Text.ElideRight
                             Layout.fillWidth: true
-                            Layout.minimumWidth: 120
+                            Layout.minimumWidth: 80
                         }
                         Mono {
                             visible: row.modelData.status !== "missing"
                             text: row.modelData.version || ""
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         AppText {
                             visible: row.modelData.status === "missing"
                             ui: qsTr("Not installed")
                             color: Theme.muted
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         Mono {
                             text: row.modelData.latest || "—"
                             color: row.hasUpdate ? Theme.text : Theme.muted
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         Item {
-                            Layout.preferredWidth: tab.statusWidth
+                            Layout.preferredWidth: tab.statusColumn
                             implicitHeight: statusPill.implicitHeight
                         Pill {
                             id: statusPill
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
+                            // Cut at the column in the smallest window; the
+                            // whole label in the tooltip
+                            width: Math.min(implicitWidth, parent.width)
+                            clip: true
+                            ToolTip.visible: statusHover.hovered && width < implicitWidth
+                            ToolTip.text: text
+                            HoverHandler { id: statusHover }
                             visible: row.modelData.status !== "missing" && row.modelData.status !== "unknown"
                             text: row.modelData.abandoned ? qsTr("Abandoned")
                                   : row.modelData.status === "current" ? qsTr("Up to date")

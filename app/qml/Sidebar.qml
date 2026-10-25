@@ -160,7 +160,10 @@ Rectangle {
                     // unless it is stopped and another one (XAMPP, Laragon…)
                     // answers: then that one, and Studio's can still start
                     readonly property bool mine: modelData.tool === "mariadb" && Studio.mariadb.state !== "none"
-                    readonly property bool own: mine && !(ownState === "stopped" && modelData.state === "running")
+                    // (Studio's failing to start because that one holds the
+                    // port counts as stopped: its dialog says so)
+                    readonly property bool ownIdle: ownState === "stopped" || (ownState === "failed" && Studio.mariadb.error === "db_port_busy")
+                    readonly property bool own: mine && !(ownIdle && modelData.state === "running")
                     readonly property string ownState: Studio.mariadb.state
                     Layout.fillWidth: true
                     Layout.leftMargin: 6

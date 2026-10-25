@@ -19,7 +19,18 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+// winsock2.h before windows.h; iphlpapi.h for the listening sockets
+#include <winsock2.h>
 #include <windows.h>
+#include <iphlpapi.h>
+#pragma comment(lib, "iphlpapi.lib")
+#include <vector>
+#else
+#include <arpa/inet.h>
+#include <cerrno>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #endif
 
 namespace FloStudio::Core {
@@ -400,10 +411,111 @@ bool portAnswers(const QString &host, int port, int timeoutMs)
     return connected;
 }
 
+#ifdef Q_OS_WIN
+namespace {
+
+// The table's ports are in network byte order, in a DWORD's low 16 bits
+int tablePort(DWORD value)
+{
+    return static_cast<int>(((value & 0xFFU) << 8U) | ((value >> 8U) & 0xFFU));
+}
+
+// The listening sockets of one address family, from GetExtendedTcpTable
+// (asked again when the table grew between the two calls)
+std::vector<unsigned char> listeners(ULONG family)
+{
+    std::vector<unsigned char> buffer;
+    for (int attempt = 0; attempt < 4; ++attempt) {
+        DWORD size = static_cast<DWORD>(buffer.size());
+        const DWORD result = GetExtendedTcpTable(buffer.empty() ? nullptr : buffer.data(), &size, FALSE, family,
+                                                 TCP_TABLE_OWNER_PID_LISTENER, 0);
+        if (result == NO_ERROR)
+            return buffer;
+        if (result != ERROR_INSUFFICIENT_BUFFER)
+            return {};
+        buffer.resize(size + 256);
+    }
+    return {};
+}
+
+} // namespace
+#else
+namespace {
+
+// Binding refused with EADDRINUSE: something listens on that address (or
+// on the wildcard covering it). SO_REUSEADDR so a closed connection still
+// waiting (TIME_WAIT) doesn't count; the socket never listens or connects.
+bool bindRefused(int family, const sockaddr *address, socklen_t length)
+{
+    const int fd = ::socket(family, SOCK_STREAM, 0);
+    if (fd < 0)
+        return false;
+    const int on = 1;
+    ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
+    if (family == AF_INET6)
+        ::setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof on);
+    const bool refused = ::bind(fd, address, length) != 0 && errno == EADDRINUSE;
+    ::close(fd);
+    return refused;
+}
+
+} // namespace
+#endif
+
+bool portListening(int port)
+{
+    if (port <= 0 || port > 65535)
+        return false;
+#ifdef Q_OS_WIN
+    {
+        const std::vector<unsigned char> table = listeners(AF_INET);
+        if (!table.empty()) {
+            const auto *rows = reinterpret_cast<const MIB_TCPTABLE_OWNER_PID *>(table.data());
+            for (DWORD i = 0; i < rows->dwNumEntries; ++i) {
+                if (tablePort(rows->table[i].dwLocalPort) == port)
+                    return true;
+            }
+        }
+    }
+    {
+        const std::vector<unsigned char> table = listeners(AF_INET6);
+        if (!table.empty()) {
+            const auto *rows = reinterpret_cast<const MIB_TCP6TABLE_OWNER_PID *>(table.data());
+            for (DWORD i = 0; i < rows->dwNumEntries; ++i) {
+                if (tablePort(rows->table[i].dwLocalPort) == port)
+                    return true;
+            }
+        }
+    }
+    return false;
+#else
+    const auto networkPort = htons(static_cast<uint16_t>(port));
+    for (const in_addr_t host : {htonl(INADDR_LOOPBACK), htonl(INADDR_ANY)}) {
+        sockaddr_in address{};
+        address.sin_family = AF_INET;
+        address.sin_port = networkPort;
+        address.sin_addr.s_addr = host;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast): the sockets API takes a sockaddr
+        if (bindRefused(AF_INET, reinterpret_cast<const sockaddr *>(&address), sizeof address))
+            return true;
+    }
+    for (const in6_addr &host : {in6addr_loopback, in6addr_any}) {
+        sockaddr_in6 address{};
+        address.sin6_family = AF_INET6;
+        address.sin6_port = networkPort;
+        address.sin6_addr = host;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast): the sockets API takes a sockaddr
+        if (bindRefused(AF_INET6, reinterpret_cast<const sockaddr *>(&address), sizeof address))
+            return true;
+    }
+    return false;
+#endif
+}
+
 DatabaseServerStatus detectDatabaseServer(int port)
 {
     DatabaseServerStatus server;
-    server.running = portAnswers(QStringLiteral("127.0.0.1"), port, 400);
+    server.running = portListening(port);
     for (const QString &client : {QStringLiteral("mariadb"), QStringLiteral("mysql")}) {
         const QString path = findTool(client);
         if (path.isEmpty())

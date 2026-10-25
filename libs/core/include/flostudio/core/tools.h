@@ -125,7 +125,7 @@ struct DatabaseServerStatus
 {
     DatabaseProduct product; // from the client program; empty when it is not installed
     QString clientPath;
-    bool running = false;    // something answers on 127.0.0.1:3306
+    bool running = false;    // something listens on port 3306 (portListening)
     bool operator==(const DatabaseServerStatus &) const = default;
 };
 
@@ -135,6 +135,14 @@ FLOSTUDIOCORE_EXPORT DatabaseServerStatus detectDatabaseServer(int port = 3306);
 
 // Whether a TCP server answers on host:port within timeoutMs.
 FLOSTUDIOCORE_EXPORT bool portAnswers(const QString &host, int port, int timeoutMs);
+
+// Whether a program on this computer listens on TCP port (on any local
+// address), found without connecting to it: a database server counts a
+// connection dropped before its handshake as a failed one, and blocks
+// the address after max_connect_errors of them. Windows reads the
+// system's table of listening sockets; macOS and Linux try to bind the
+// port (and close at once), which only fails while something listens.
+FLOSTUDIOCORE_EXPORT bool portListening(int port);
 
 // The editor command template (Settings::editorCommand) as a program and
 // its arguments for a folder: quotes group words and are removed, {folder}
