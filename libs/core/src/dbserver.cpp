@@ -7,7 +7,6 @@
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <QHostAddress>
-#include <QPointer>
 #include <QProcess>
 #include <QRandomGenerator>
 #include <QRegularExpression>
@@ -309,6 +308,7 @@ private:
         m_process = startStreaming(
             server, this, [this](const OutputLine &output) { line(output.error, output.text); },
             [this](int exitCode, bool crashed) { ended(exitCode, crashed); });
+        connect(m_process, &QObject::destroyed, this, [this] { m_process = nullptr; });
         m_waited.start();
         waitForPort();
     }
@@ -388,7 +388,7 @@ private:
     DatabaseStartedHandler m_onStarted;
     ExitHandler m_onExit;
     std::vector<std::function<void()>> m_onStopped;
-    QPointer<QProcess> m_process;
+    QProcess *m_process = nullptr; // a child of this; cleared when it goes
     QElapsedTimer m_waited;
     bool m_started = false;
     bool m_stopping = false;
@@ -588,7 +588,7 @@ QString linkLibaioT64(const DatabaseServerFiles &files, const QStringList &libra
     if (system.isEmpty())
         return {};
     const QString lib = QDir(files.baseDir).filePath(QStringLiteral("lib"));
-    const QString link = QDir(lib).filePath(QStringLiteral("libaio.so.1"));
+    QString link = QDir(lib).filePath(QStringLiteral("libaio.so.1"));
     if (QFileInfo(link).isSymLink() && QFileInfo(link).symLinkTarget() == system)
         return link;
     QFile::remove(link);
@@ -603,7 +603,7 @@ QStringList databaseErrorLogTail(const DatabaseServerFiles &files, int lines)
     if (!log.open(QIODevice::ReadOnly))
         return {};
     const qint64 size = log.size();
-    const qint64 start = std::max<qint64>(0, size - 64 * 1024);
+    const qint64 start = std::max<qint64>(0, size - qint64{64} * 1024);
     log.seek(start);
     QStringList all = QString::fromUtf8(log.readAll()).split(u'\n', Qt::SkipEmptyParts);
     if (start > 0 && !all.isEmpty())
