@@ -262,6 +262,8 @@ Item {
                         }
                         OptionRow {
                             visible: !!page.form.hasSite
+                            // Apart from the setups above: it adds to them
+                            Layout.topMargin: 12
                             Layout.fillWidth: true
                             checked: !!page.form.addApi
                             title: qsTr("Also add the JSON API")
