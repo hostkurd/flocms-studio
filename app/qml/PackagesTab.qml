@@ -25,7 +25,12 @@ ScrollView {
     readonly property int updates: rows.filter(r => r.status === "update" || r.status === "major").length
     // The table's columns
     readonly property int versionWidth: 90
-    readonly property int statusWidth: 140
+    readonly property int statusWidth: Math.max(measureCurrent.implicitWidth, measureUpdate.implicitWidth, measureMajor.implicitWidth,
+                                                measureZero.implicitWidth, measureThrough.implicitWidth, measureAbandoned.implicitWidth)
+    // The update's card beside the table: only when one is chosen and the
+    // window is wide enough
+    readonly property bool showPlan: tab.chosen !== "" && !!tab.plan.name
+    readonly property bool sideBySide: tab.width > 1150 && showPlan
     readonly property int actionWidth: Math.max(measureAdmin.implicitWidth, measureApi.implicitWidth, measureReview.implicitWidth)
     contentWidth: availableWidth
     clip: true
@@ -58,6 +63,13 @@ ScrollView {
     AppButton { id: measureAdmin; visible: false; small: true; text: qsTr("Add the admin panel") }
     AppButton { id: measureApi; visible: false; small: true; text: qsTr("Add the API") }
     AppButton { id: measureReview; visible: false; small: true; text: qsTr("Review update") }
+    // ... and the status column as wide as its widest label
+    Pill { id: measureCurrent; visible: false; text: qsTr("Up to date") }
+    Pill { id: measureUpdate; visible: false; text: qsTr("Update") }
+    Pill { id: measureMajor; visible: false; text: qsTr("New major version") }
+    Pill { id: measureZero; visible: false; text: qsTr("New 0.x version") }
+    Pill { id: measureThrough; visible: false; text: qsTr("Through another package") }
+    Pill { id: measureAbandoned; visible: false; text: qsTr("Abandoned") }
 
     function shortName(name) { return name.replace("hostkurd/", "") }
     function choose(name, kind) {
@@ -69,7 +81,7 @@ ScrollView {
 
     GridLayout {
         width: tab.availableWidth
-        columns: tab.width > 1150 ? 2 : 1
+        columns: tab.sideBySide ? 2 : 1
         columnSpacing: 20
         rowSpacing: 20
 
@@ -77,11 +89,11 @@ ScrollView {
         Card {
             // Side by side as on board 8; on a narrower window the update
             // comes first, above the table
-            Layout.row: tab.width > 1150 ? 0 : 1
+            Layout.row: tab.sideBySide || !tab.showPlan ? 0 : 1
             Layout.column: 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) * 2 / 3 : tab.availableWidth
+            Layout.preferredWidth: tab.sideBySide ? (tab.availableWidth - 20) * 2 / 3 : tab.availableWidth
             Layout.maximumWidth: Layout.preferredWidth
             Layout.minimumWidth: 0
             padding: 20
@@ -127,17 +139,24 @@ ScrollView {
                 }
             }
 
-            // The table: package, installed, latest, status, action
-            RowLayout {
+            // The table: package, installed, latest, status, action. Laid
+            // out like a row below (inside an item as wide as the card), so
+            // the columns line up
+            Item {
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-                spacing: 14
-                SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 120 }
-                SectionLabel { ui: qsTr("Installed"); Layout.preferredWidth: tab.versionWidth }
-                SectionLabel { ui: qsTr("Latest"); Layout.preferredWidth: tab.versionWidth }
-                SectionLabel { ui: qsTr("Status"); Layout.preferredWidth: tab.statusWidth }
-                Item { Layout.preferredWidth: tab.actionWidth }
+                implicitHeight: header.implicitHeight
+                RowLayout {
+                    id: header
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 14
+                    SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 120 }
+                    SectionLabel { ui: qsTr("Installed"); Layout.preferredWidth: tab.versionWidth }
+                    SectionLabel { ui: qsTr("Latest"); Layout.preferredWidth: tab.versionWidth }
+                    SectionLabel { ui: qsTr("Status"); Layout.preferredWidth: tab.statusWidth }
+                    Item { Layout.preferredWidth: tab.actionWidth }
+                }
             }
             // A row per package, its columns as wide as the header's
             Repeater {
@@ -190,8 +209,6 @@ ScrollView {
                             id: statusPill
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
-                            width: Math.min(implicitWidth, parent.width)
-                            clip: true
                             visible: row.modelData.status !== "missing" && row.modelData.status !== "unknown"
                             text: row.modelData.abandoned ? qsTr("Abandoned")
                                   : row.modelData.status === "current" ? qsTr("Up to date")
@@ -257,12 +274,12 @@ ScrollView {
 
         // --- An update, or an addition ---
         Card {
-            visible: tab.chosen !== "" && !!tab.plan.name
+            visible: tab.showPlan
             Layout.row: 0
-            Layout.column: tab.width > 1150 ? 1 : 0
+            Layout.column: tab.sideBySide ? 1 : 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) / 3 : tab.availableWidth
+            Layout.preferredWidth: tab.sideBySide ? (tab.availableWidth - 20) / 3 : tab.availableWidth
             Layout.maximumWidth: Layout.preferredWidth
             Layout.minimumWidth: 0
             padding: 20

@@ -221,6 +221,10 @@ void Studio::start()
             m_mariadb.start();
     });
     refreshTools(); // and Studio's MariaDB programs
+    m_databasePoll.setInterval(5000);
+    connect(&m_databasePoll, &QTimer::timeout, this, &Studio::askDatabasePort);
+    if (!m_demo)
+        m_databasePoll.start();
     // Servers left running by a Studio that crashed (macOS, Linux): asking
     // `ps` takes a moment, so on a worker thread
     auto *leftovers = new QFutureWatcher<QList<LeftoverServer>>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): a child of this
@@ -809,6 +813,35 @@ void Studio::refreshTools()
             refreshTools();
     });
     watcher->setFuture(QtConcurrent::run(findTools, m_settings, m_packages));
+}
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
+// Whether a server answers on 3306 now: the MariaDB row follows another
+// server (XAMPP, Laragon…) started or stopped while Studio is open
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+void Studio::askDatabasePort()
+{
+    if (m_demo || m_closing || m_checking || m_databaseAsking || m_tools.size() < 3)
+        return;
+    m_databaseAsking = true;
+    auto *watcher = new QFutureWatcher<bool>(this); // a child of this, deleted when it finishes
+    connect(watcher, &QFutureWatcher<bool>::finished, this, [this, watcher] {
+        const bool running = watcher->result();
+        watcher->deleteLater();
+        m_databaseAsking = false;
+        if (m_checking || m_tools.size() < 3)
+            return; // a full look is on its way
+        QVariantMap row = m_tools.last().toMap();
+        const QString state = running ? QStringLiteral("running")
+                              : row.value(QStringLiteral("product")).toString().isEmpty() ? QStringLiteral("optional")
+                                                                                          : QStringLiteral("found");
+        if (row.value(QStringLiteral("state")).toString() == state)
+            return;
+        row.insert(QStringLiteral("state"), state);
+        m_tools.last() = row;
+        emit toolsChanged();
+    });
+    watcher->setFuture(QtConcurrent::run([] { return portAnswers(QStringLiteral("127.0.0.1"), 3306, 300); }));
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 

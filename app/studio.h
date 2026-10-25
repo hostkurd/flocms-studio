@@ -13,6 +13,7 @@
 #include <flostudio/core/tools.h>
 
 #include <QHash>
+#include <QTimer>
 #include <QJsonObject>
 #include <QObject>
 #include <QStringList>
@@ -226,6 +227,7 @@ private:
     ProjectPackages *packagesFor(const QString &path);
     bool currentHasAdmin() const;
     void serversChanged();
+    void askDatabasePort();
 
     Language *m_language;
     FloStudio::Core::Settings m_settings;
@@ -241,6 +243,10 @@ private:
     QVariantList m_phpChoices;
     bool m_checking = false;
     bool m_recheck = false;
+    // Another MariaDB (XAMPP, Laragon…) started or stopped after the tools
+    // were looked for: port 3306 asked every few seconds
+    QTimer m_databasePoll;
+    bool m_databaseAsking = false;
     QList<FloStudio::Core::ToolPackage> m_packages;
     QVariantList m_downloads;
     QStringList m_queue;

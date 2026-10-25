@@ -16,7 +16,7 @@ QtObject {
         switch (row.state) {
         case "checking": return qsTr("Looking…")
         case "found": return row.version
-        case "running": return qsTr("%1 running").arg(row.version)
+        case "running": return row.version ? qsTr("%1 running").arg(row.version) : qsTr("Running")
         case "missing": return qsTr("Missing")
         case "optional": return qsTr("Not found (optional)")
         case "unsupported": return qsTr("%1 is too old").arg(row.version)
