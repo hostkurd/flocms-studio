@@ -65,6 +65,15 @@ QString markerPath(const DatabaseServerFiles &files)
     return QDir(files.folder).filePath(QStringLiteral(".flostudio-root"));
 }
 
+// In the marker on Windows until root's password is on every root account
+constexpr QByteArrayView accountsPending = "accounts\n";
+
+QByteArray markerContents(const DatabaseServerFiles &files)
+{
+    QFile marker(markerPath(files));
+    return marker.open(QIODevice::ReadOnly) ? marker.read(64) : QByteArray();
+}
+
 bool runningAsRoot()
 {
 #ifdef Q_OS_WIN
@@ -441,11 +450,11 @@ private:
                 if (exitCode != 0 || crashed || !databaseServerInitialized(m_start.files))
                     return fail(Error{QStringLiteral("db_init"), QStringLiteral("mariadb-install-db: exit %1").arg(exitCode)});
                 // Windows: its tool set root's password (for root@localhost);
-                // every root account and no anonymous one follow at the start
+                // the marker says every root account and the anonymous ones
+                // still wait, until a start has done them
                 if (isWindowsPlatform(m_start.files.platform)) {
-                    m_freshWindows = true;
                     QFile marker(markerPath(m_start.files));
-                    if (!marker.open(QIODevice::WriteOnly))
+                    if (!marker.open(QIODevice::WriteOnly) || marker.write(accountsPending.data(), accountsPending.size()) != accountsPending.size())
                         return fail(Error{QStringLiteral("db_root"), marker.fileName()});
                 }
                 startServer();
@@ -539,13 +548,19 @@ private:
     {
         // A new Windows data folder: root's password on every root account,
         // anonymous ones dropped (as root, with its password)
-        const QString sql = std::exchange(m_freshWindows, false) ? rootPasswordSql(m_start.rootPassword) : QStringLiteral("SELECT 1;\n");
+        const bool accounts = markerContents(m_start.files) == accountsPending;
+        const QString sql = accounts ? rootPasswordSql(m_start.rootPassword) : QStringLiteral("SELECT 1;\n");
         const Command check = databaseSqlCommand(m_start.files, m_start.port, QStringLiteral("root"), m_start.rootPassword, sql);
-        run([check] { return runCaptured(check, 30000); }, [this](const Captured &captured) {
+        run([check] { return runCaptured(check, 30000); }, [this, accounts](const Captured &captured) {
             if (!going() || !alive(m_process))
                 return;
             if (!captured.succeeded())
                 return fail(capturedError(QStringLiteral("db_root"), captured));
+            if (accounts) {
+                QFile marker(markerPath(m_start.files));
+                if (!marker.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                    return fail(Error{QStringLiteral("db_root"), marker.fileName()});
+            }
             started();
         });
     }
@@ -592,7 +607,6 @@ private:
     bool m_failing = false;
     bool m_cancelled = false;
     bool m_restarting = false;
-    bool m_freshWindows = false; // set up just now on Windows: root's password goes everywhere at the start
 };
 
 } // namespace
