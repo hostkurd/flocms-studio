@@ -156,6 +156,11 @@ FLOSTUDIOCORE_EXPORT QObject *startDatabaseServer(const DatabaseServerStart &sta
 FLOSTUDIOCORE_EXPORT void stopDatabaseServer(QObject *server, const QString &rootPassword,
                                              std::function<void()> done, int graceMs = 30000);
 
+// The same, blocking, for when Studio closes: mariadb-admin shutdown, then
+// waits up to graceMs for the server to end, then ends it. onExit is not
+// called.
+FLOSTUDIOCORE_EXPORT void stopDatabaseServerNow(QObject *server, const QString &rootPassword, int graceMs = 20000);
+
 // The server started by startDatabaseServer is running (started and not
 // ended).
 FLOSTUDIOCORE_EXPORT bool databaseServerRunning(const QObject *server);

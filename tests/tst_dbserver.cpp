@@ -339,7 +339,7 @@ private slots:
         QVERIFY(!exitCrashed);
         QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300), 10000);
         const QString errors = databaseErrorLogTail(start.files, 40).join(u'\n');
-        QVERIFY2(errors.contains(QStringLiteral("Shutdown complete")), qUtf8Printable(errors));
+        QVERIFY2(errors.contains(QStringLiteral(": Shutdown complete")), qUtf8Printable(errors));
 
         // Again: no set-up, the database is still there
         done = false;
@@ -360,9 +360,19 @@ private slots:
         QCOMPARE(result.error().code, QStringLiteral("db_port_busy"));
         destroyNow(second);
 
-        stopped = false;
-        stopDatabaseServer(server, start.rootPassword, [&] { stopped = true; });
-        QTRY_VERIFY_WITH_TIMEOUT(stopped, 60000);
+        // As when Studio closes: blocking, cleanly
+        // The server's own line ("mariadbd: Shutdown complete"), not InnoDB's "Shutdown completed; ..."
+        const auto shutdowns = [&start] {
+            const QStringList lines = databaseErrorLogTail(start.files, 500);
+            return std::count_if(lines.begin(), lines.end(),
+                                 [](const QString &line) { return line.endsWith(QStringLiteral(": Shutdown complete")); });
+        };
+        const auto before = shutdowns();
+        stopDatabaseServerNow(server, start.rootPassword);
+        QVERIFY(!databaseServerRunning(server));
+        QCOMPARE(exits, 1); // not told
+        QVERIFY(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300));
+        QCOMPARE(shutdowns(), before + 1);
     }
 };
 

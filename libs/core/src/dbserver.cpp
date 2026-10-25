@@ -143,7 +143,36 @@ public:
         setObjectName(QStringLiteral("flostudio-database-server"));
     }
 
+    ~Server() override
+    {
+        // Ended at once when nobody stopped it first (its job object or
+        // process group would end it anyway): Qt then has no running
+        // process to warn about
+        if (m_process && m_process->state() != QProcess::NotRunning) {
+            QObject::disconnect(m_process, nullptr, this, nullptr);
+            m_process->kill();
+            m_process->waitForFinished(5000);
+        }
+    }
+    Server(const Server &) = delete;
+    Server &operator=(const Server &) = delete;
+
     void begin() { QTimer::singleShot(0, this, [this] { checkProgram(); }); }
+
+    void stopNow(const QString &rootPassword, int graceMs)
+    {
+        if (!m_process || m_process->state() == QProcess::NotRunning)
+            return;
+        m_stopping = true;
+        m_onExit = nullptr; // Studio is closing: nobody to tell
+        if (m_started)
+            runCaptured(databaseShutdownCommand(m_start.files, m_start.port, rootPassword), 15000);
+        if (!m_process->waitForFinished(graceMs)) {
+            QObject::disconnect(m_process, nullptr, this, nullptr);
+            m_process->kill();
+            m_process->waitForFinished(5000);
+        }
+    }
 
     bool running() const { return m_started && m_process && m_process->state() != QProcess::NotRunning; }
 
@@ -599,6 +628,12 @@ void stopDatabaseServer(QObject *server, const QString &rootPassword, std::funct
         own->stop(rootPassword, std::move(done), graceMs);
     else if (done)
         done();
+}
+
+void stopDatabaseServerNow(QObject *server, const QString &rootPassword, int graceMs)
+{
+    if (auto *own = dynamic_cast<Server *>(server))
+        own->stopNow(rootPassword, graceMs);
 }
 
 bool databaseServerRunning(const QObject *server)
