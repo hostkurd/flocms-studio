@@ -7,7 +7,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
+#include <QRegularExpression>
 #include <QStandardPaths>
+
+#include <utility>
 
 namespace FloStudio::Core {
 
@@ -24,6 +27,9 @@ const QStringList &knownKeys()
         QStringLiteral("language"),       QStringLiteral("theme"),          QStringLiteral("phpPath"),
         QStringLiteral("composerPath"),   QStringLiteral("editorCommand"),  QStringLiteral("projectFolders"),
         QStringLiteral("projects"),       QStringLiteral("serverPort"),     QStringLiteral("serverNetwork"),
+        QStringLiteral("databaseServer"), QStringLiteral("databaseFound"),  QStringLiteral("databaseSeries"),
+        QStringLiteral("databasePort"),   QStringLiteral("databaseAutoStart"), QStringLiteral("databaseHost"),
+        QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"),
     };
     return keys;
 }
@@ -69,6 +75,27 @@ Settings normalized(Settings settings)
         settings.theme = defaults.theme;
     if (settings.serverPort < 1 || settings.serverPort > 65535)
         settings.serverPort = defaults.serverPort;
+    static const QStringList databaseServers{QStringLiteral("auto"), QStringLiteral("studio"), QStringLiteral("found"),
+                                             QStringLiteral("other")};
+    if (!databaseServers.contains(settings.databaseServer))
+        settings.databaseServer = defaults.databaseServer;
+    settings.databaseFound = settings.databaseFound.trimmed();
+    if (settings.databaseServer == u"found" && settings.databaseFound.isEmpty())
+        settings.databaseServer = defaults.databaseServer;
+    static const QRegularExpression series(QStringLiteral(R"(^\d+\.\d+$)"));
+    settings.databaseSeries = settings.databaseSeries.trimmed();
+    if (!settings.databaseSeries.isEmpty() && !series.match(settings.databaseSeries).hasMatch())
+        settings.databaseSeries.clear();
+    if (settings.databasePort < 1 || settings.databasePort > 65535)
+        settings.databasePort = defaults.databasePort;
+    if (settings.databaseOtherPort < 1 || settings.databaseOtherPort > 65535)
+        settings.databaseOtherPort = defaults.databaseOtherPort;
+    settings.databaseHost = settings.databaseHost.trimmed();
+    if (settings.databaseHost.isEmpty())
+        settings.databaseHost = defaults.databaseHost;
+    settings.databaseUser = settings.databaseUser.trimmed();
+    if (settings.databaseUser.isEmpty())
+        settings.databaseUser = defaults.databaseUser;
     settings.editorCommand = settings.editorCommand.trimmed();
     if (settings.editorCommand.isEmpty())
         settings.editorCommand = defaults.editorCommand;
@@ -91,6 +118,14 @@ QJsonObject toJson(const Settings &settings)
     json.insert(QStringLiteral("projects"), QJsonArray::fromStringList(settings.projects));
     json.insert(QStringLiteral("serverPort"), settings.serverPort);
     json.insert(QStringLiteral("serverNetwork"), settings.serverNetwork);
+    json.insert(QStringLiteral("databaseServer"), settings.databaseServer);
+    json.insert(QStringLiteral("databaseFound"), settings.databaseFound);
+    json.insert(QStringLiteral("databaseSeries"), settings.databaseSeries);
+    json.insert(QStringLiteral("databasePort"), settings.databasePort);
+    json.insert(QStringLiteral("databaseAutoStart"), settings.databaseAutoStart);
+    json.insert(QStringLiteral("databaseHost"), settings.databaseHost);
+    json.insert(QStringLiteral("databaseOtherPort"), settings.databaseOtherPort);
+    json.insert(QStringLiteral("databaseUser"), settings.databaseUser);
     return json;
 }
 
@@ -115,6 +150,20 @@ Settings settingsFromJson(const QJsonObject &json)
     const QJsonValue network = json.value(QStringLiteral("serverNetwork"));
     if (network.isBool())
         settings.serverNetwork = network.toBool();
+    text("databaseServer", settings.databaseServer);
+    text("databaseFound", settings.databaseFound);
+    text("databaseSeries", settings.databaseSeries);
+    text("databaseHost", settings.databaseHost);
+    text("databaseUser", settings.databaseUser);
+    for (const auto &[key, out] : {std::pair{"databasePort", &settings.databasePort},
+                                   std::pair{"databaseOtherPort", &settings.databaseOtherPort}}) {
+        const QJsonValue value = json.value(QLatin1String(key));
+        if (value.isDouble())
+            *out = value.toInt(0);
+    }
+    const QJsonValue autoStart = json.value(QStringLiteral("databaseAutoStart"));
+    if (autoStart.isBool())
+        settings.databaseAutoStart = autoStart.toBool();
     for (auto it = json.begin(); it != json.end(); ++it) {
         if (!knownKeys().contains(it.key()))
             settings.unknown.insert(it.key(), it.value());

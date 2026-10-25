@@ -496,13 +496,9 @@ private slots:
         const QList<ToolPackage> packages = bundledToolPackages();
         QVERIFY2(!packages.isEmpty(), "the built-in tool list has nothing for this computer");
         Settings settings;
-        bool mariadbTried = false; // the default series only: the Linux bintar is ~470 MB
         for (const ToolPackage &p : packages) {
-            if (p.tool == u"mariadb") {
-                if (mariadbTried)
-                    continue;
-                mariadbTried = true;
-            }
+            if (p.tool == u"mariadb")
+                continue; // tst_dbserver downloads it, sets it up and runs it
             QObject owner;
             bool done = false;
             Result<QString> result = Error{};
@@ -527,16 +523,6 @@ private slots:
                          qUtf8Printable((missing.required + missing.recommended).join(u',')));
                 QVERIFY(missingExtensions(php.info.extensions, QStringLiteral("sqlite")).required.isEmpty());
                 QVERIFY2(php.info.extensions.contains(QStringLiteral("zip")), "Composer wants zip");
-            }
-            if (p.tool == u"mariadb") {
-                // Runs at all? On Linux this shows whether the bintar finds
-                // the system's libraries (libaio on Ubuntu 24.04: design Q5)
-                QProcess server;
-                server.start(result.value(), {QStringLiteral("--version")});
-                QVERIFY(server.waitForFinished(60000));
-                const QString output = QString::fromLocal8Bit(server.readAllStandardOutput() + server.readAllStandardError()).trimmed();
-                qInfo("%s --version (exit %d): %s", qUtf8Printable(p.id), server.exitCode(), qUtf8Printable(output));
-                QVERIFY(!QFileInfo::exists(QFileInfo(result.value()).dir().filePath(QStringLiteral("../mysql-test"))));
             }
             if (p.tool == u"composer") {
                 settings.composerPath = result.value();
