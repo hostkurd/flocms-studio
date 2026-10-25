@@ -29,7 +29,7 @@ const QStringList &knownKeys()
         QStringLiteral("projects"),       QStringLiteral("serverPort"),     QStringLiteral("serverNetwork"),
         QStringLiteral("databaseServer"), QStringLiteral("databaseFound"),  QStringLiteral("databaseSeries"),
         QStringLiteral("databasePort"),   QStringLiteral("databaseAutoStart"), QStringLiteral("databaseHost"),
-        QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"),
+        QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"), QStringLiteral("databaseProjects"),
     };
     return keys;
 }
@@ -103,6 +103,7 @@ Settings normalized(Settings settings)
     settings.composerPath = settings.composerPath.trimmed();
     settings.projectFolders = cleanList(settings.projectFolders);
     settings.projects = cleanList(settings.projects);
+    settings.databaseProjects = cleanList(settings.databaseProjects);
     return settings;
 }
 
@@ -126,6 +127,7 @@ QJsonObject toJson(const Settings &settings)
     json.insert(QStringLiteral("databaseHost"), settings.databaseHost);
     json.insert(QStringLiteral("databaseOtherPort"), settings.databaseOtherPort);
     json.insert(QStringLiteral("databaseUser"), settings.databaseUser);
+    json.insert(QStringLiteral("databaseProjects"), QJsonArray::fromStringList(settings.databaseProjects));
     return json;
 }
 
@@ -155,6 +157,7 @@ Settings settingsFromJson(const QJsonObject &json)
     text("databaseSeries", settings.databaseSeries);
     text("databaseHost", settings.databaseHost);
     text("databaseUser", settings.databaseUser);
+    settings.databaseProjects = stringList(json.value(QStringLiteral("databaseProjects")));
     for (const auto &[key, out] : {std::pair{"databasePort", &settings.databasePort},
                                    std::pair{"databaseOtherPort", &settings.databaseOtherPort}}) {
         const QJsonValue value = json.value(QLatin1String(key));

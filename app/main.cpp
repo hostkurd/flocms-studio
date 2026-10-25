@@ -246,10 +246,17 @@ int main(int argc, char *argv[])
         auto *poll = new QTimer(&app); // owned by app
         poll->setInterval(100);
         auto waited = std::make_shared<int>(0);
+        auto shown = std::make_shared<int>(0); // when the first frame was on screen
         QObject::connect(poll, &QTimer::timeout, &app, [=] {
             *waited += poll->interval();
             if (swapped->load() < 1 && *waited < 15000)
                 return; // keep waiting, up to 15 seconds
+            // A screenshot waits 1.6 s after the first frame, so layouts
+            // that settle after it (a page opened on a section) are in it
+            if (*shown == 0 && swapped->load() >= 1)
+                *shown = *waited;
+            if (!smoke && swapped->load() >= 1 && *waited - *shown < 1600)
+                return;
             poll->stop();
 
             const QImage frame = window->grabWindow();

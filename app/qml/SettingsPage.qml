@@ -13,14 +13,36 @@ ScrollView {
     contentWidth: availableWidth
     clip: true
 
-    readonly property var sections: ({ general: general, tools: tools, server: server, editor: editor, folders: folders })
+    readonly property var sections: ({ general: general, tools: tools, database: database, server: server, editor: editor, folders: folders })
+    function showSection() {
+        const card = page.sections[Studio.settingsSection]
+        if (card && Studio.page === "settings")
+            page.contentItem.contentY = Math.max(0, Math.min(card.y - 24, page.contentHeight - page.height))
+    }
     Connections {
         target: Studio
-        function onPageChanged() {
-            const card = page.sections[Studio.settingsSection]
-            if (card && Studio.page === "settings")
-                page.contentItem.contentY = Math.max(0, card.y - 24)
+        function onPageChanged() { page.showSection() }
+    }
+    // Opened on a section (a demo): kept there while the cards take their
+    // places, for the first second or until the person scrolls
+    property bool settling: true
+    property int settleTicks: 0
+    Timer {
+        interval: 100
+        repeat: true
+        running: page.settling
+        onTriggered: {
+            page.showSection()
+            if (++page.settleTicks >= 15) page.settling = false
         }
+    }
+    Connections {
+        target: page.contentItem
+        function onMovementStarted() { page.settling = false }
+    }
+    Connections {
+        target: page.ScrollBar.vertical
+        function onPressedChanged() { page.settling = false }
     }
 
     FileDialog {
@@ -161,6 +183,15 @@ ScrollView {
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
+        }
+
+        // --- Database server (MariaDB design note D9) ---
+        DatabaseSettings {
+            id: database
+            Layout.fillWidth: true
+            Layout.leftMargin: 28
+            Layout.rightMargin: 28
+            onDownloadRequested: page.downloadRequested()
         }
 
         // --- Server ---

@@ -120,6 +120,7 @@ Rectangle {
                 model: [
                     { id: "general", name: qsTr("General") },
                     { id: "tools", name: qsTr("PHP and tools") },
+                    { id: "database", name: qsTr("Database server") },
                     { id: "server", name: qsTr("Server") },
                     { id: "editor", name: qsTr("Editor") },
                     { id: "folders", name: qsTr("Project folders") }
@@ -153,18 +154,45 @@ Rectangle {
             Repeater {
                 model: Studio.tools
                 delegate: RowLayout {
+                    id: toolRow
                     required property var modelData
+                    // MariaDB: Studio's own server when it has one (D11)
+                    readonly property bool own: modelData.tool === "mariadb" && Studio.mariadb.state !== "none"
+                    readonly property string ownState: Studio.mariadb.state
                     Layout.fillWidth: true
                     Layout.leftMargin: 6
                     Layout.rightMargin: 6
-                    implicitHeight: 28
+                    implicitHeight: 30
+                    spacing: 6
                     AppText { ui: Texts.toolName(modelData.tool); Layout.fillWidth: true }
                     AppText {
+                        visible: !toolRow.own
                         readonly property bool bad: modelData.state === "missing" || modelData.state === "unsupported" || modelData.state === "failed"
                         ui: Texts.toolState(modelData)
                         font.family: modelData.state === "found" || modelData.state === "running" ? Theme.monoFont : Lang.uiFont
                         font.pixelSize: 13
                         color: bad ? Theme.badText : (modelData.state === "optional" ? Theme.muted : Theme.okText)
+                    }
+                    AppText {
+                        visible: toolRow.own
+                        ui: Texts.mariadbState(toolRow.ownState) + (toolRow.ownState === "running" ? " · " + Studio.mariadb.port : "")
+                        font.pixelSize: 13
+                        color: toolRow.ownState === "running" ? Theme.okText : (toolRow.ownState === "failed" ? Theme.badText : Theme.muted)
+                    }
+                    AppButton {
+                        visible: toolRow.own && toolRow.ownState !== "starting" && toolRow.ownState !== "stopping"
+                        small: true
+                        implicitWidth: 30
+                        leftPadding: 0
+                        rightPadding: 0
+                        iconPath: toolRow.ownState === "running" ? Icons.stop : Icons.play
+                        iconFilled: true
+                        danger: toolRow.ownState === "running"
+                        text: ""
+                        Accessible.name: toolRow.ownState === "running" ? qsTr("Stop the database server") : qsTr("Start the database server")
+                        ToolTip.visible: hovered
+                        ToolTip.text: Accessible.name
+                        onClicked: toolRow.ownState === "running" ? Studio.mariadb.stop() : Studio.mariadb.start()
                     }
                 }
             }

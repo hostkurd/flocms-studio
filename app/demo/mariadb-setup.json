@@ -1,0 +1,148 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "light",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\"",
+    "databasePort": 3307
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.2.12",
+      "path": "D:\\xampp\\php\\php.exe"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\composer\\composer.phar"
+    },
+    {
+      "tool": "mariadb",
+      "state": "running",
+      "version": "10.4.32",
+      "product": "MariaDB",
+      "path": "D:\\xampp\\mysql\\bin\\mysql.exe"
+    }
+  ],
+  "page": "project",
+  "dialog": "downloads",
+  "toolsFolder": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools",
+  "downloaded": [
+    "php-8.5",
+    "mariadb-12.3"
+  ],
+  "tab": "mariadb",
+  "mariadb": {
+    "programs": [
+      {
+        "series": "12.3",
+        "version": "12.3.3",
+        "path": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\mariadb-12.3\\bin\\mariadbd.exe",
+        "origin": "studio"
+      }
+    ],
+    "state": "starting",
+    "phase": "start",
+    "initialized": false,
+    "dataFolder": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\mariadb\\12.3",
+    "lines": [
+      "› mariadbd --version",
+      "mariadbd.exe  Ver 12.3.3-MariaDB for Win64 on AMD64 (MariaDB Server)",
+      "› mariadb-install-db.exe --datadir=C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\mariadb\\12.3\\data --port=3307",
+      "Creation of the database was successful",
+      "› mariadbd.exe --defaults-file=C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\mariadb\\12.3\\my.ini"
+    ]
+  },
+  "downloads": [
+    {
+      "id": "mariadb-12.3",
+      "tool": "mariadb",
+      "version": "12.3.3",
+      "source": "mariadb.org",
+      "state": "done",
+      "received": 104081715,
+      "total": 104081715,
+      "program": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\mariadb-12.3\\bin\\mariadbd.exe"
+    }
+  ]
+}
