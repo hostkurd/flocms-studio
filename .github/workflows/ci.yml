@@ -173,7 +173,8 @@ jobs:
               done
             done
             otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
-              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" || fail "could not add the bundle rpath"
+              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" 2> rpath.err \
+              || fail "could not add the bundle rpath: $(tr '\n' ' ' < rpath.err)"
             # The notices travel inside the app, even if only the app is copied.
             python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA" > /dev/null
             cp LICENSE "$app/Contents/Resources/LICENSE.txt"

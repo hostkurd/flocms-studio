@@ -43,7 +43,11 @@ elseif(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.hostkurd.flocmsstudio"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
-        MACOSX_BUNDLE_ICON_FILE "studio.icns")
+        MACOSX_BUNDLE_ICON_FILE "studio.icns"
+        # The packaging step finds our libraries in Contents/Frameworks
+        BUILD_RPATH "@executable_path/../Frameworks")
+    # Room in the header for the packaging step's rpath and name changes
+    target_link_options(Studio PRIVATE "LINKER:-headerpad_max_install_names")
     # The app's icon, in Contents/Resources
     set_source_files_properties(icons/studio.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(Studio PRIVATE icons/studio.icns)
