@@ -234,6 +234,51 @@ private slots:
         project.setup = Setup::ApiAdmin;
         QVERIFY(!ids(newProjectSteps(project)).contains(QStringLiteral("api-require")));
     }
+
+    void aDatabaseOnStudiosServer()
+    {
+        // MariaDB design note D10
+        NewProject project;
+        project.name = QStringLiteral("my-shop");
+        project.parentDir = QDir::tempPath();
+        project.mysql = true;
+        project.createDatabase = true;
+        project.dbName = QStringLiteral("my_shop");
+        project.dbUser = QStringLiteral("my_shop");
+        project.dbPassword = QStringLiteral("Secr3tPassw0rd");
+        project.dbPort = 3307;
+        project.adminName = QStringLiteral("Admin");
+        project.adminEmail = QStringLiteral("admin@example.com");
+        project.adminPassword = QStringLiteral("long enough");
+        const QList<WizardStep> steps = newProjectSteps(project);
+        QCOMPARE(ids(steps).mid(0, 4), (QStringList{QStringLiteral("create"), QStringLiteral("env"), QStringLiteral("db-create"),
+                                                    QStringLiteral("setup")}));
+        QCOMPARE(steps.at(2).kind, StepKind::CreateDatabase);
+        QVERIFY(!steps.at(2).shown.contains(project.dbPassword));
+        QVERIFY(ids(steps).contains(QStringLiteral("db-check")));
+
+        const QString sql = newProjectDatabaseSql(project);
+        QVERIFY(sql.contains(QStringLiteral("CREATE DATABASE IF NOT EXISTS `my_shop` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")));
+        QVERIFY(sql.contains(QStringLiteral("CREATE USER IF NOT EXISTS 'my_shop'@'localhost' IDENTIFIED BY 'Secr3tPassw0rd';")));
+        QVERIFY(sql.contains(QStringLiteral("CREATE USER IF NOT EXISTS 'my_shop'@'127.0.0.1' IDENTIFIED BY 'Secr3tPassw0rd';")));
+        // _ is a wildcard in GRANT's database name: escaped
+        QVERIFY(sql.contains(QStringLiteral("GRANT ALL PRIVILEGES ON `my\\_shop`.* TO 'my_shop'@'localhost';")));
+        QVERIFY(sql.endsWith(QStringLiteral("FLUSH PRIVILEGES;\n")));
+
+        // Studio's user: letters, digits and _, never root; a password always
+        QVERIFY2(checkNewProject(project).isEmpty(), qUtf8Printable(fields(checkNewProject(project)).join(u',')));
+        NewProject bad = project;
+        bad.dbUser = QStringLiteral("root");
+        bad.dbPassword.clear();
+        QCOMPARE(fields(checkNewProject(bad)), (QStringList{QStringLiteral("dbUser=db_user_invalid"), QStringLiteral("dbPassword=db_password_invalid")}));
+        bad.dbUser = QStringLiteral("my-shop");
+        bad.dbPassword = project.dbPassword;
+        QCOMPARE(fields(checkNewProject(bad)), QStringList{QStringLiteral("dbUser=db_user_invalid")});
+        // Without createDatabase nothing changes
+        bad.createDatabase = false;
+        QVERIFY(checkNewProject(bad).isEmpty());
+        QVERIFY(!ids(newProjectSteps(bad)).contains(QStringLiteral("db-create")));
+    }
 };
 
 QTEST_GUILESS_MAIN(TestWizard)

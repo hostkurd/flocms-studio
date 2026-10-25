@@ -143,3 +143,19 @@ P = {
    ["يعمل منذ %Ln دقيقة", "يعمل منذ دقيقة", "يعمل منذ دقيقتين", "يعمل منذ %Ln دقائق", "يعمل منذ %Ln دقيقة", "يعمل منذ %Ln دقيقة"],
    ["%Ln خولەکە کار دەکات", "%Ln خولەکە کار دەکات"]),
 }
+
+# The new project wizard on Studio's server (board 5, PR 4)
+T.update({
+ "On Studio's MariaDB %1 · `127.0.0.1:%2`": ("على MariaDB %1 من Studio · `127.0.0.1:%2`", "لەسەر MariaDB %1ی Studio · `127.0.0.1:%2`"),
+ "Change in Settings": ("التغيير في الإعدادات", "گۆڕین لە ڕێکخستنەکان"),
+ "The project's database": ("قاعدة بيانات المشروع", "داتابەیسی پڕۆژەکە"),
+ "Studio makes a new database and a user for this project": ("ينشئ Studio قاعدة بيانات جديدة ومستخدمًا لهذا المشروع", "Studio داتابەیسێکی نوێ و بەکارهێنەرێک بۆ ئەم پڕۆژەیە دروست دەکات"),
+ "The user can only reach this database. Its password goes to DB_PASSWORD in .env and to %1.":
+   ("لا يصل المستخدم إلا إلى قاعدة البيانات هذه. تُكتب كلمة مروره في DB_PASSWORD في .env وتُحفظ في %1.",
+    "بەکارهێنەرەکە تەنها دەگاتە ئەم داتابەیسە. وشەی نهێنییەکەی لە DB_PASSWORD لە .env دەنووسرێت و لە %1دا هەڵدەگیرێت."),
+ "Use a database that exists already": ("استخدام قاعدة بيانات موجودة", "بەکارهێنانی داتابەیسێکی هەبوو"),
+ "Name, user and password you give, as before.": ("الاسم والمستخدم وكلمة المرور من إدخالك، كما في السابق.", "ناو، بەکارهێنەر و وشەی نهێنی کە خۆت دەیدەیت، وەک پێشوو."),
+ "Starting Studio's MariaDB %1": ("جارٍ تشغيل MariaDB %1 من Studio", "دەستپێکردنی MariaDB %1ی Studio"),
+ "Letters, digits and `_` only, and not `root`.": ("حروف وأرقام و`_` فقط، وليس `root`.", "تەنها پیت، ژمارە و `_`، و نەک `root`."),
+ "Studio could not make the database and its user on its MariaDB.": ("تعذّر على Studio إنشاء قاعدة البيانات ومستخدمها على MariaDB الخاص به.", "Studio نەیتوانی داتابەیسەکە و بەکارهێنەرەکەی لەسەر MariaDBەکەی دروست بکات."),
+})

@@ -379,6 +379,13 @@ void MariadbServer::copyPassword()
     });
 }
 
+Command MariadbServer::rootSqlCommand(const QString &sql) const
+{
+    if (m_state != u"running" || m_password.isEmpty())
+        return {};
+    return databaseSqlCommand(files(), port(), QStringLiteral("root"), m_password, sql);
+}
+
 void MariadbServer::copyText(const QString &text)
 {
     if (QClipboard *clipboard = QGuiApplication::clipboard())

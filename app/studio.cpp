@@ -168,6 +168,7 @@ Studio::Studio(Language *language, QObject *parent)
 {
     // A new project is listed (in a project folder, or on its own); the
     // wizard's page stays until the person opens it
+    m_wizard.setMariadb(&m_mariadb);
     connect(&m_wizard, &NewProjectWizard::stepsChanged, this, &Studio::commandRunningChanged);
     connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
         const QString folderOfIt = QDir::toNativeSeparators(QFileInfo(path).absolutePath());

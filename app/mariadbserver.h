@@ -103,6 +103,10 @@ public:
     Q_INVOKABLE void remove(bool databasesToo);
     Q_INVOKABLE void copyText(const QString &text);
 
+    // SQL as root on the running server (the wizard's database, D10); an
+    // empty program when it isn't running
+    FloStudio::Core::Command rootSqlCommand(const QString &sql) const;
+
     // The account root's password is saved under in the secure store
     static QString passwordAccount(const QString &series);
 
