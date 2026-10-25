@@ -262,6 +262,59 @@ private slots:
         QCOMPARE(MariadbServer::passwordAccount(QStringLiteral("12.3")), QStringLiteral("flocms-studio-mariadb-12.3://root"));
     }
 
+    void theWizardMakesTheDatabaseOnStudiosServer()
+    {
+        // MariaDB design note D10: with Studio's server, MySQL means a new
+        // database and a user just for it, its password generated
+        Language language;
+        Studio studio(&language);
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/mariadb-wizard.json")).ok());
+        NewProjectWizard *wizard = studio.wizard();
+        QVariantMap form = wizard->form();
+        QCOMPARE(form.value(QStringLiteral("server")).toString(), QStringLiteral("studio"));
+        QVERIFY(form.value(QStringLiteral("createDatabase")).toBool());
+        QCOMPARE(form.value(QStringLiteral("dbName")).toString(), QStringLiteral("fectumhellas"));
+        QCOMPARE(form.value(QStringLiteral("dbUser")).toString(), QStringLiteral("fectumhellas"));
+        QCOMPARE(form.value(QStringLiteral("dbPassword")).toString().size(), 24);
+        QCOMPARE(form.value(QStringLiteral("dbPort")).toInt(), 3306);
+        QStringList ids;
+        for (const QVariant &step : wizard->plan())
+            ids << step.toMap().value(QStringLiteral("id")).toString();
+        QCOMPARE(ids.indexOf(QStringLiteral("db-create")), 2);
+        // A database that exists already: as before
+        wizard->set(QStringLiteral("createDatabase"), false);
+        form = wizard->form();
+        QCOMPARE(form.value(QStringLiteral("dbUser")).toString(), QStringLiteral("root"));
+        QVERIFY(form.value(QStringLiteral("dbPassword")).toString().isEmpty());
+        // Back: a new password
+        wizard->set(QStringLiteral("createDatabase"), true);
+        QCOMPARE(wizard->form().value(QStringLiteral("dbUser")).toString(), QStringLiteral("fectumhellas"));
+
+        // Settings changed while the form is open: it follows (D9)
+        studio.setOtherDatabase(QStringLiteral("db.local"), 3310, QStringLiteral("dev"));
+        studio.setDatabaseServer(QStringLiteral("other"));
+        form = wizard->form();
+        QCOMPARE(form.value(QStringLiteral("server")).toString(), QStringLiteral("other"));
+        QVERIFY(!form.value(QStringLiteral("createDatabase")).toBool());
+        QCOMPARE(form.value(QStringLiteral("dbHost")).toString(), QStringLiteral("db.local"));
+        QCOMPARE(form.value(QStringLiteral("dbPort")).toInt(), 3310);
+        studio.setDatabaseServer(QStringLiteral("studio"));
+        QVERIFY(wizard->form().value(QStringLiteral("createDatabase")).toBool());
+        // "Change in Settings" and back: the form stays
+        wizard->set(QStringLiteral("dbName"), QStringLiteral("kept_name"));
+        studio.showSettingsFromWizard(QStringLiteral("database"));
+        studio.showNewProject();
+        QCOMPARE(wizard->form().value(QStringLiteral("dbName")).toString(), QStringLiteral("kept_name"));
+
+        // Without a server of Studio's own: the one found, as before
+        Studio other(&language);
+        QVERIFY(other.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/new-database.json")).ok());
+        QCOMPARE(other.wizard()->form().value(QStringLiteral("server")).toString(), QStringLiteral("found"));
+        QVERIFY(!other.wizard()->form().value(QStringLiteral("createDatabase")).toBool());
+        other.wizard()->set(QStringLiteral("createDatabase"), true); // not offered
+        QVERIFY(!other.wizard()->form().value(QStringLiteral("createDatabase")).toBool());
+    }
+
     void everyDemoLoads()
     {
         const QDir demos(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo"));

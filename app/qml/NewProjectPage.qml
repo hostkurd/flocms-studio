@@ -295,8 +295,83 @@ Item {
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
+                    // On Studio's own MariaDB (MariaDB design note D10)
+                    Rectangle {
+                        visible: page.form.database === "mysql" && page.form.server === "studio"
+                        Layout.fillWidth: true
+                        implicitHeight: serverRow.implicitHeight + 20
+                        radius: 8
+                        color: "transparent"
+                        border.color: Theme.border
+                        RowLayout {
+                            id: serverRow
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 10
+                            Icon { path: "M5 6a7 3 0 1 0 14 0a7 3 0 1 0-14 0M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"; color: Theme.link; size: 18 }
+                            RichText {
+                                raw: qsTr("On Studio's MariaDB %1 · `127.0.0.1:%2`").arg(Studio.mariadb.series).arg(Studio.mariadb.port)
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Pill {
+                                text: Texts.mariadbState(Studio.mariadb.state)
+                                color: Studio.mariadb.state === "running" ? Theme.okBg : Theme.rule
+                                fg: Studio.mariadb.state === "running" ? Theme.okText : Theme.muted
+                            }
+                            AppButton { small: true; text: qsTr("Change in Settings"); onClicked: Studio.showSettingsFromWizard("database") }
+                        }
+                    }
+                    ColumnLayout {
+                        visible: page.form.database === "mysql" && page.form.server === "studio"
+                        spacing: 8
+                        Layout.fillWidth: true
+                        AppText { ui: qsTr("The project's database"); font.weight: Font.DemiBold }
+                        ButtonGroup { id: createGroup }
+                        OptionRow {
+                            Layout.fillWidth: true
+                            radio: true
+                            group: createGroup
+                            enabled: !page.started
+                            checked: !!page.form.createDatabase
+                            title: qsTr("Studio makes a new database and a user for this project")
+                            note: qsTr("The user can only reach this database. Studio writes its password into the project's settings and keeps it in %1.").arg(Texts.secureStoreName())
+                            onToggled: (on) => { if (on) page.wizard.set("createDatabase", true) }
+                        }
+                        GridLayout {
+                            visible: !!page.form.createDatabase
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 40
+                            columns: page.width > 900 ? 2 : 1
+                            columnSpacing: 18
+                            rowSpacing: 12
+                            FormField {
+                                label: qsTr("Database name")
+                                problem: page.problems.dbName || ""
+                                Layout.fillWidth: true
+                                Field { mono: true; text: page.form.dbName; Layout.fillWidth: true; Accessible.name: qsTr("Database name"); onTextEdited: page.wizard.set("dbName", text); onEditingFinished: page.wizard.touch("dbName") }
+                            }
+                            FormField {
+                                label: qsTr("User")
+                                problem: page.problems.dbUser || ""
+                                Layout.fillWidth: true
+                                Field { mono: true; text: page.form.dbUser; Layout.fillWidth: true; Accessible.name: qsTr("User"); onTextEdited: page.wizard.set("dbUser", text); onEditingFinished: page.wizard.touch("dbUser") }
+                            }
+                        }
+                        OptionRow {
+                            Layout.fillWidth: true
+                            radio: true
+                            group: createGroup
+                            enabled: !page.started
+                            checked: !page.form.createDatabase
+                            title: qsTr("Use a database that exists already")
+                            note: qsTr("Name, user and password you give, as before.")
+                            onToggled: (on) => { if (on) page.wizard.set("createDatabase", false) }
+                        }
+                    }
                     GridLayout {
-                        visible: page.form.database === "mysql"
+                        visible: page.form.database === "mysql" && !page.form.createDatabase
                         Layout.fillWidth: true
                         columns: page.width > 900 ? 2 : 1
                         columnSpacing: 18
@@ -348,7 +423,7 @@ Item {
                         }
                     }
                     OptionRow {
-                        visible: page.form.database === "mysql" && page.wizard.secureStore
+                        visible: page.form.database === "mysql" && page.wizard.secureStore && !page.form.createDatabase
                         Layout.fillWidth: true
                         checked: !!page.form.rememberPassword
                         title: Qt.platform.os === "osx" ? qsTr("Remember the password in the Keychain")

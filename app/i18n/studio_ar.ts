@@ -1668,177 +1668,224 @@
         <translation>قاعدة البيانات هي الملف `storage/database.sqlite`، ينشئه أول ترحيل. لا شيء يُثبّت؛ مناسبة للتجربة وللمواقع الصغيرة.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="305" />
-        <location filename="../qml/NewProjectPage.qml" line="309" />
+        <location filename="../qml/NewProjectPage.qml" line="314" />
+        <source>On Studio's MariaDB %1 · `127.0.0.1:%2`</source>
+        <translation>على MariaDB %1 من Studio · `127.0.0.1:%2`</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="323" />
+        <source>Change in Settings</source>
+        <translation>التغيير في الإعدادات</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="330" />
+        <source>The project's database</source>
+        <translation>قاعدة بيانات المشروع</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="338" />
+        <source>Studio makes a new database and a user for this project</source>
+        <translation>ينشئ Studio قاعدة بيانات جديدة ومستخدمًا لهذا المشروع</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="339" />
+        <source>The user can only reach this database. Studio writes its password into the project's settings and keeps it in %1.</source>
+        <translation>لا يصل المستخدم إلا إلى قاعدة البيانات هذه. يكتب Studio كلمة مروره في إعدادات المشروع ويحفظها في %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="350" />
+        <location filename="../qml/NewProjectPage.qml" line="353" />
+        <location filename="../qml/NewProjectPage.qml" line="380" />
+        <location filename="../qml/NewProjectPage.qml" line="384" />
         <source>Database name</source>
         <translation>اسم قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="306" />
+        <location filename="../qml/NewProjectPage.qml" line="368" />
+        <source>Use a database that exists already</source>
+        <translation>استخدام قاعدة بيانات موجودة</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="369" />
+        <source>Name, user and password you give, as before.</source>
+        <translation>الاسم والمستخدم وكلمة المرور من إدخالك، كما في السابق.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="381" />
         <source>It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.</source>
         <translation>يجب أن تكون موجودة مسبقًا: أنشئها في phpMyAdmin أو HeidiSQL أو `mysql`.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="312" />
-        <location filename="../qml/NewProjectPage.qml" line="318" />
+        <location filename="../qml/NewProjectPage.qml" line="387" />
+        <location filename="../qml/NewProjectPage.qml" line="393" />
         <source>Server</source>
         <translation>الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="324" />
+        <location filename="../qml/NewProjectPage.qml" line="399" />
         <source>Port</source>
         <translation>المنفذ</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="332" />
-        <location filename="../qml/NewProjectPage.qml" line="335" />
+        <location filename="../qml/NewProjectPage.qml" line="356" />
+        <location filename="../qml/NewProjectPage.qml" line="359" />
+        <location filename="../qml/NewProjectPage.qml" line="407" />
+        <location filename="../qml/NewProjectPage.qml" line="410" />
         <source>User</source>
         <translation>المستخدم</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="338" />
-        <location filename="../qml/NewProjectPage.qml" line="345" />
-        <location filename="../qml/NewProjectPage.qml" line="392" />
-        <location filename="../qml/NewProjectPage.qml" line="396" />
+        <location filename="../qml/NewProjectPage.qml" line="413" />
+        <location filename="../qml/NewProjectPage.qml" line="420" />
+        <location filename="../qml/NewProjectPage.qml" line="467" />
+        <location filename="../qml/NewProjectPage.qml" line="471" />
         <source>Password</source>
         <translation>كلمة المرور</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="339" />
+        <location filename="../qml/NewProjectPage.qml" line="414" />
         <source>Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.</source>
         <translation>تُكتب في `DB_PASSWORD` في `.env` حيث يقرؤها FloCMS. فارغة لمستخدم root في XAMPP.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="346" />
+        <location filename="../qml/NewProjectPage.qml" line="421" />
         <source>Use saved</source>
         <translation>استخدام المحفوظة</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="354" />
+        <location filename="../qml/NewProjectPage.qml" line="429" />
         <source>Remember the password in the Keychain</source>
         <translation>تذكّر كلمة المرور في سلسلة المفاتيح</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="355" />
+        <location filename="../qml/NewProjectPage.qml" line="430" />
         <source>Remember the password in Windows Credential Manager</source>
         <translation>تذكّر كلمة المرور في مدير بيانات الاعتماد في Windows</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="356" />
+        <location filename="../qml/NewProjectPage.qml" line="431" />
         <source>Remember the password in the system's keyring</source>
         <translation>تذكّر كلمة المرور في حلقة مفاتيح النظام</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="357" />
+        <location filename="../qml/NewProjectPage.qml" line="432" />
         <source>For your next project on this database server. Studio keeps no copy of its own.</source>
         <translation>لمشروعك التالي على خادم قاعدة البيانات هذا. لا يحتفظ Studio بنسخة خاصة به.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="368" />
+        <location filename="../qml/NewProjectPage.qml" line="443" />
         <source>The first user of the admin panel, with every right (super admin).</source>
         <translation>أول مستخدم للوحة الإدارة، بكل الصلاحيات (مدير أعلى).</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="379" />
-        <location filename="../qml/NewProjectPage.qml" line="382" />
+        <location filename="../qml/NewProjectPage.qml" line="454" />
+        <location filename="../qml/NewProjectPage.qml" line="457" />
         <source>Name</source>
         <translation>الاسم</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="385" />
-        <location filename="../qml/NewProjectPage.qml" line="389" />
+        <location filename="../qml/NewProjectPage.qml" line="460" />
+        <location filename="../qml/NewProjectPage.qml" line="464" />
         <source>Email</source>
         <translation>البريد الإلكتروني</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="386" />
+        <location filename="../qml/NewProjectPage.qml" line="461" />
         <source>Also the login name.</source>
         <translation>وهو أيضًا اسم الدخول.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="393" />
+        <location filename="../qml/NewProjectPage.qml" line="468" />
         <source>At least 8 characters. It goes to FloCMS on its input, never on a command line or in a log.</source>
         <translation>8 أحرف على الأقل. تُرسل إلى FloCMS عبر مدخلاته، لا في سطر أوامر ولا في سجل.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="428" />
+        <location filename="../qml/NewProjectPage.qml" line="503" />
         <source>Studio writes `.env`: name, address, languages, database</source>
         <translation>يكتب Studio الملف `.env`: الاسم والعنوان واللغات وقاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="435" />
+        <location filename="../qml/NewProjectPage.qml" line="510" />
         <source>The command ended with exit code %1.</source>
         <translation>انتهى الأمر برمز الخروج %1.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="460" />
+        <location filename="../qml/NewProjectPage.qml" line="535" />
         <source>`%1` is ready. Open it to start its server.</source>
         <translation>`%1` جاهز. افتحه لتشغيل خادمه.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="468" />
+        <location filename="../qml/NewProjectPage.qml" line="543" />
         <source>A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.</source>
         <translation>فشلت خطوة. أصلح ما تذكره (يقودك «رجوع» إلى إعدادات قاعدة البيانات والمدير)، ثم حاول مجددًا: يتابع Studio من تلك الخطوة.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="482" />
+        <location filename="../qml/NewProjectPage.qml" line="557" />
         <source>Start over</source>
         <translation>البدء من جديد</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="485" />
+        <location filename="../qml/NewProjectPage.qml" line="560" />
         <source>Start over?</source>
         <translation>البدء من جديد؟</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="486" />
+        <location filename="../qml/NewProjectPage.qml" line="561" />
         <source>Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.</source>
         <translation>يحذف Studio المجلد الذي أنشأه، `%1`، وكل ما فيه. ولا يحتفظ النموذج بشيء.</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="487" />
+        <location filename="../qml/NewProjectPage.qml" line="562" />
         <source>Delete and start over</source>
         <translation>حذف والبدء من جديد</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="529" />
+        <location filename="../qml/NewProjectPage.qml" line="604" />
         <source>Open the project</source>
         <translation>فتح المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="493" />
+        <location filename="../qml/NewProjectPage.qml" line="568" />
         <source>Back</source>
         <translation>رجوع</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: Database</source>
         <translation>التالي: قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: First admin</source>
         <translation>التالي: المدير الأول</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: Create</source>
         <translation>التالي: الإنشاء</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="507" />
+        <location filename="../qml/NewProjectPage.qml" line="582" />
         <source>Create the project</source>
         <translation>إنشاء المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="513" />
+        <location filename="../qml/NewProjectPage.qml" line="588" />
         <source>Stop</source>
         <translation>إيقاف</translation>
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="522" />
+        <location filename="../qml/NewProjectPage.qml" line="597" />
         <source>Try again</source>
         <translation>حاول مجددًا</translation>
+    </message>
+</context>
+<context>
+    <name>NewProjectWizard</name>
+    <message>
+        <location filename="../newproject.cpp" line="549" />
+        <source>Starting Studio's MariaDB %1</source>
+        <translation>جارٍ تشغيل MariaDB %1 من Studio</translation>
     </message>
 </context>
 <context>
@@ -3013,9 +3060,9 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="98" />
-        <location filename="../qml/Texts.qml" line="105" />
-        <location filename="../qml/Texts.qml" line="109" />
-        <location filename="../qml/Texts.qml" line="120" />
+        <location filename="../qml/Texts.qml" line="106" />
+        <location filename="../qml/Texts.qml" line="110" />
+        <location filename="../qml/Texts.qml" line="121" />
         <source>One line only.</source>
         <translation>سطر واحد فقط.</translation>
     </message>
@@ -3041,342 +3088,352 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="103" />
+        <source>Letters, digits and `_` only, and not `root`.</source>
+        <translation>حروف وأرقام و`_` فقط، وليس `root`.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="104" />
         <source>A port between 1 and 65535.</source>
         <translation>منفذ بين 1 و65535.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="104" />
+        <location filename="../qml/Texts.qml" line="105" />
         <source>Enter the database server (usually `127.0.0.1`).</source>
         <translation>أدخل خادم قاعدة البيانات (عادة `127.0.0.1`).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="106" />
-        <location filename="../qml/Texts.qml" line="111" />
+        <location filename="../qml/Texts.qml" line="107" />
+        <location filename="../qml/Texts.qml" line="112" />
         <source>Enter a name.</source>
         <translation>أدخل اسمًا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="107" />
+        <location filename="../qml/Texts.qml" line="108" />
         <source>Enter an email address.</source>
         <translation>أدخل عنوان بريد إلكتروني.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="108" />
+        <location filename="../qml/Texts.qml" line="109" />
         <source>Use at least 8 characters.</source>
         <translation>استخدم 8 أحرف على الأقل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="112" />
+        <location filename="../qml/Texts.qml" line="113" />
         <source>A class name in StudlyCase: a capital first, then letters and digits (`BlogPost`).</source>
         <translation>اسم صنف بصيغة StudlyCase: حرف كبير أولًا، ثم حروف وأرقام (`BlogPost`).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="113" />
+        <location filename="../qml/Texts.qml" line="114" />
         <source>Letters, digits, `-` and `_`, starting with a letter.</source>
         <translation>حروف وأرقام و`-` و`_`، يبدأ بحرف.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="114" />
+        <location filename="../qml/Texts.qml" line="115" />
         <source>Letters, digits and `_`, starting with a letter (`add_slug_to_posts`).</source>
         <translation>حروف وأرقام و`_`، يبدأ بحرف (`add_slug_to_posts`).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="115" />
+        <location filename="../qml/Texts.qml" line="116" />
         <source>A table name: letters, digits and `_`, up to 64.</source>
         <translation>اسم جدول: حروف وأرقام و`_`، حتى 64.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="116" />
+        <location filename="../qml/Texts.qml" line="117" />
         <source>Enter the table.</source>
         <translation>أدخل الجدول.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="117" />
+        <location filename="../qml/Texts.qml" line="118" />
         <source>Lower case letters and digits, with `-` between words.</source>
         <translation>حروف صغيرة وأرقام، مع `-` بين الكلمات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="118" />
+        <location filename="../qml/Texts.qml" line="119" />
         <source>A resource's class name, e.g. `Post`.</source>
         <translation>اسم صنف المورد، مثل `Post`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="119" />
+        <location filename="../qml/Texts.qml" line="120" />
         <source>Enter the resource it lists, e.g. `Post`.</source>
         <translation>أدخل المورد الذي تعرضه، مثل `Post`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="121" />
+        <location filename="../qml/Texts.qml" line="122" />
         <source>Too long: its template name would be over 41 characters.</source>
         <translation>طويل جدًا: سيتجاوز اسم قالبه 41 حرفًا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="134" />
+        <location filename="../qml/Texts.qml" line="135" />
         <source>This folder is not a FloCMS project: its `composer.json` neither is the FloCMS skeleton nor requires `hostkurd/flocms-core`.</source>
         <translation>هذا المجلد ليس مشروع FloCMS: ملف `composer.json` فيه ليس هيكل FloCMS ولا يتطلب `hostkurd/flocms-core`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="135" />
+        <location filename="../qml/Texts.qml" line="136" />
         <source>The project folder is gone.</source>
         <translation>مجلد المشروع لم يعد موجوداً.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="136" />
+        <location filename="../qml/Texts.qml" line="137" />
         <source>Studio could not read its settings file, so it runs with the defaults and won't save over it. Close the program that holds the file, then start Studio again.</source>
         <translation>تعذّر على Studio قراءة ملف إعداداته، لذا يعمل بالقيم الافتراضية ولن يكتب فوقه. أغلق البرنامج الذي يستخدم الملف، ثم شغّل Studio من جديد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="137" />
+        <location filename="../qml/Texts.qml" line="138" />
         <source>Studio could not save its settings.</source>
         <translation>تعذّر على Studio حفظ إعداداته.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="138" />
+        <location filename="../qml/Texts.qml" line="139" />
         <source>The editor in Settings &gt; Editor was not found.</source>
         <translation>لم يُعثر على المحرر المحدد في الإعدادات &gt; المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="139" />
+        <location filename="../qml/Texts.qml" line="140" />
         <source>The editor did not start.</source>
         <translation>لم يبدأ المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="140" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>The editor is a `.cmd` file, and the folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose the editor's `.exe` in Settings &gt; Editor.</source>
         <translation>المحرر ملف `.cmd`، واسم المجلد فيه أحرف يقرؤها `cmd.exe` بنفسه ( ) &amp; ! %. اختر ملف `.exe` الخاص بالمحرر في الإعدادات &gt; المحرر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="141" />
+        <location filename="../qml/Texts.qml" line="142" />
         <source>The folder could not be opened.</source>
         <translation>تعذّر فتح المجلد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="142" />
+        <location filename="../qml/Texts.qml" line="143" />
+        <source>Studio could not make the database and its user on its MariaDB.</source>
+        <translation>تعذّر على Studio إنشاء قاعدة البيانات ومستخدمها على MariaDB الخاص به.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="144" />
         <source>The port is in use by another program, so Studio's MariaDB can't start on it.</source>
         <translation>المنفذ يستخدمه برنامج آخر، لذا لا يمكن تشغيل MariaDB الخاص بـ Studio عليه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="143" />
+        <location filename="../qml/Texts.qml" line="145" />
         <source>MariaDB needs a library this system doesn't have.</source>
         <translation>يحتاج MariaDB إلى مكتبة غير موجودة في هذا النظام.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="144" />
+        <location filename="../qml/Texts.qml" line="146" />
         <source>Studio's MariaDB doesn't run on this computer.</source>
         <translation>لا يعمل MariaDB الخاص بـ Studio على هذا الحاسوب.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="145" />
+        <location filename="../qml/Texts.qml" line="147" />
         <source>Studio could not set up the databases folder.</source>
         <translation>تعذّر على Studio إعداد مجلد قواعد البيانات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="146" />
+        <location filename="../qml/Texts.qml" line="148" />
         <source>MariaDB stopped while starting. The end of its log:</source>
         <translation>توقف MariaDB أثناء التشغيل. نهاية سجله:</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="147" />
+        <location filename="../qml/Texts.qml" line="149" />
         <source>MariaDB didn't answer in time. The end of its log:</source>
         <translation>لم يستجب MariaDB في الوقت المحدد. نهاية سجله:</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="148" />
+        <location filename="../qml/Texts.qml" line="150" />
         <source>Studio could not set the password of MariaDB's `root` user.</source>
         <translation>تعذّر على Studio تعيين كلمة مرور المستخدم `root` في MariaDB.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="149" />
+        <location filename="../qml/Texts.qml" line="151" />
         <source>The password of `root` is missing from the system's secure store, so Studio can't use these databases. Delete the databases in Settings to start again.</source>
         <translation>كلمة مرور `root` غير موجودة في المخزن الآمن للنظام، لذا لا يستطيع Studio استخدام قواعد البيانات هذه. احذف قواعد البيانات من الإعدادات للبدء من جديد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="150" />
+        <location filename="../qml/Texts.qml" line="152" />
         <source>Studio could not use the system's secure store for the password of `root`.</source>
         <translation>تعذّر على Studio استخدام المخزن الآمن للنظام لكلمة مرور `root`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="151" />
+        <location filename="../qml/Texts.qml" line="153" />
         <source>MariaDB stopped unexpectedly. The end of its log:</source>
         <translation>توقف MariaDB بشكل غير متوقع. نهاية سجله:</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="152" />
+        <location filename="../qml/Texts.qml" line="154" />
         <source>The download failed.</source>
         <translation>فشل التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="153" />
+        <location filename="../qml/Texts.qml" line="155" />
         <source>The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.</source>
         <translation>الملف المنزّل ليس الملف الذي يتوقعه Studio (بصمة SHA-256 مختلفة)، لذا حُذف.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="154" />
+        <location filename="../qml/Texts.qml" line="156" />
         <source>The download could not be unpacked.</source>
         <translation>تعذّر فك ضغط التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="155" />
+        <location filename="../qml/Texts.qml" line="157" />
         <source>The download could not be installed.</source>
         <translation>تعذّر تثبيت التنزيل.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="156" />
+        <location filename="../qml/Texts.qml" line="158" />
         <source>Cancelled.</source>
         <translation>أُلغي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="157" />
+        <location filename="../qml/Texts.qml" line="159" />
         <source>The server did not start.</source>
         <translation>لم يبدأ الخادم.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="158" />
+        <location filename="../qml/Texts.qml" line="160" />
         <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
         <translation>قال الخادم إنه بدأ، لكن لا شيء يجيب على عنوانه. ربما يشغل برنامج آخر المنفذ: جرّب منفذًا آخر في الإعدادات &gt; الخادم.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="159" />
+        <location filename="../qml/Texts.qml" line="161" />
         <source>The server stopped by itself.</source>
         <translation>توقف الخادم من تلقاء نفسه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="160" />
+        <location filename="../qml/Texts.qml" line="162" />
         <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>لم يُعثر على PHP. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="161" />
+        <location filename="../qml/Texts.qml" line="163" />
         <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
         <translation>PHP ملف `.bat` أو `.cmd`، واسم مجلد المشروع فيه أحرف يقرؤها `cmd.exe` بنفسه ( ) &amp; ! %. اختر `php.exe` في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="162" />
+        <location filename="../qml/Texts.qml" line="164" />
         <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
         <translation>لا يحتوي المشروع على المشغّل `flo` بعد: شغّل `composer install` فيه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="163" />
+        <location filename="../qml/Texts.qml" line="165" />
         <source>The folder for the new project could not be made.</source>
         <translation>تعذّر إنشاء مجلد المشروع الجديد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="164" />
+        <location filename="../qml/Texts.qml" line="166" />
         <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
         <translation>تعذّر على Studio حذف المجلد الذي أنشأه. أغلق ما يستخدمه (محررًا أو طرفية)، ثم حاول مجددًا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="165" />
+        <location filename="../qml/Texts.qml" line="167" />
         <source>Studio could not write the project's `.env` file.</source>
         <translation>تعذّر على Studio كتابة ملف `.env` للمشروع.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="167" />
+        <location filename="../qml/Texts.qml" line="169" />
         <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
         <translation>في إحدى قيم `.env` حرف لا يستطيع FloCMS قراءته هناك (سطر جديد).</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="168" />
+        <location filename="../qml/Texts.qml" line="170" />
         <source>Stopped.</source>
         <translation>أُوقف.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="169" />
+        <location filename="../qml/Texts.qml" line="171" />
         <source>Composer could not say what is newer. It asks Packagist, so this needs the internet.</source>
         <translation>تعذّر على Composer معرفة ما هو أحدث. فهو يسأل Packagist، لذا يحتاج هذا إلى الإنترنت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="170" />
+        <location filename="../qml/Texts.qml" line="172" />
         <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation>لا يحتوي المشروع على المجلد `vendor/` بعد: شغّل `composer install` فيه.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="171" />
+        <location filename="../qml/Texts.qml" line="173" />
         <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation>المشروع أكبر من أن يُنسخ للمعاينة (أكثر من 400 ميغابايت أو 40,000 ملف، دون المرفوعات والسجلات). يعمل الإنشاء دون معاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="172" />
+        <location filename="../qml/Texts.qml" line="174" />
         <source>Studio could not copy the project for the preview.</source>
         <translation>تعذّر على Studio نسخ المشروع للمعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="173" />
+        <location filename="../qml/Texts.qml" line="175" />
         <source>The preview was stopped.</source>
         <translation>أُوقفت المعاينة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="174" />
+        <location filename="../qml/Texts.qml" line="176" />
         <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation>تعذّر على Studio حذف نسخة المعاينة. سيحاول مجددًا عند تشغيله التالي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="175" />
+        <location filename="../qml/Texts.qml" line="177" />
         <source>Studio does not run this command.</source>
         <translation>لا يشغّل Studio هذا الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="176" />
+        <location filename="../qml/Texts.qml" line="178" />
         <source>There is no secure store for passwords on this computer.</source>
         <translation>لا يوجد مخزن آمن لكلمات المرور على هذا الحاسوب.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="177" />
+        <location filename="../qml/Texts.qml" line="179" />
         <source>The secure store did not give the password.</source>
         <translation>لم يُعطِ المخزن الآمن كلمة المرور.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="178" />
+        <location filename="../qml/Texts.qml" line="180" />
         <source>No password is saved for this database user.</source>
         <translation>لا توجد كلمة مرور محفوظة لمستخدم قاعدة البيانات هذا.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="179" />
+        <location filename="../qml/Texts.qml" line="181" />
         <source>The secure store did not answer.</source>
         <translation>لم يستجب المخزن الآمن.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="180" />
+        <location filename="../qml/Texts.qml" line="182" />
         <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation>لم يُعثر على Composer. نزّله من «هذا الحاسوب»، أو اختره في الإعدادات &gt; PHP والأدوات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="181" />
+        <location filename="../qml/Texts.qml" line="183" />
         <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation>لا يزال أمر قيد التشغيل في هذا المشروع. أزله من القائمة حين ينتهي.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="182" />
+        <location filename="../qml/Texts.qml" line="184" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>لا يحتوي المشروع على ملف `.env`. انسخ `.env.example` إلى `.env`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="183" />
+        <location filename="../qml/Texts.qml" line="185" />
         <source>The command could not run.</source>
         <translation>تعذّر تشغيل الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="184" />
+        <location filename="../qml/Texts.qml" line="186" />
         <source>Studio could not read what the check printed.</source>
         <translation>تعذّر على Studio قراءة ما طبعه الفحص.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="185" />
+        <location filename="../qml/Texts.qml" line="187" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>تعذّر على Studio قراءة قاعدة البيانات. هل خادم قاعدة البيانات يعمل، وهل إعدادات `.env` صحيحة؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="186" />
+        <location filename="../qml/Texts.qml" line="188" />
         <source>Studio could not read the migrations.</source>
         <translation>تعذّر على Studio قراءة الترحيلات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="187" />
+        <location filename="../qml/Texts.qml" line="189" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>لا يوجد `storage/logs/app.log` بعد. يكتبه FloCMS عند أول رسالة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="189" />
+        <location filename="../qml/Texts.qml" line="191" />
         <source>Something went wrong (%1).</source>
         <translation>حدث خطأ (%1).</translation>
     </message>

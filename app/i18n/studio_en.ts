@@ -1620,176 +1620,223 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="305" />
-        <location filename="../qml/NewProjectPage.qml" line="309" />
-        <source>Database name</source>
+        <location filename="../qml/NewProjectPage.qml" line="314" />
+        <source>On Studio's MariaDB %1 · `127.0.0.1:%2`</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="306" />
-        <source>It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.</source>
+        <location filename="../qml/NewProjectPage.qml" line="323" />
+        <source>Change in Settings</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="312" />
-        <location filename="../qml/NewProjectPage.qml" line="318" />
-        <source>Server</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="324" />
-        <source>Port</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="332" />
-        <location filename="../qml/NewProjectPage.qml" line="335" />
-        <source>User</source>
+        <location filename="../qml/NewProjectPage.qml" line="330" />
+        <source>The project's database</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/NewProjectPage.qml" line="338" />
-        <location filename="../qml/NewProjectPage.qml" line="345" />
-        <location filename="../qml/NewProjectPage.qml" line="392" />
-        <location filename="../qml/NewProjectPage.qml" line="396" />
-        <source>Password</source>
+        <source>Studio makes a new database and a user for this project</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/NewProjectPage.qml" line="339" />
-        <source>Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.</source>
+        <source>The user can only reach this database. Studio writes its password into the project's settings and keeps it in %1.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="346" />
-        <source>Use saved</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="354" />
-        <source>Remember the password in the Keychain</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="355" />
-        <source>Remember the password in Windows Credential Manager</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="356" />
-        <source>Remember the password in the system's keyring</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/NewProjectPage.qml" line="357" />
-        <source>For your next project on this database server. Studio keeps no copy of its own.</source>
+        <location filename="../qml/NewProjectPage.qml" line="350" />
+        <location filename="../qml/NewProjectPage.qml" line="353" />
+        <location filename="../qml/NewProjectPage.qml" line="380" />
+        <location filename="../qml/NewProjectPage.qml" line="384" />
+        <source>Database name</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/NewProjectPage.qml" line="368" />
+        <source>Use a database that exists already</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="369" />
+        <source>Name, user and password you give, as before.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="381" />
+        <source>It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="387" />
+        <location filename="../qml/NewProjectPage.qml" line="393" />
+        <source>Server</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="399" />
+        <source>Port</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="356" />
+        <location filename="../qml/NewProjectPage.qml" line="359" />
+        <location filename="../qml/NewProjectPage.qml" line="407" />
+        <location filename="../qml/NewProjectPage.qml" line="410" />
+        <source>User</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="413" />
+        <location filename="../qml/NewProjectPage.qml" line="420" />
+        <location filename="../qml/NewProjectPage.qml" line="467" />
+        <location filename="../qml/NewProjectPage.qml" line="471" />
+        <source>Password</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="414" />
+        <source>Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="421" />
+        <source>Use saved</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="429" />
+        <source>Remember the password in the Keychain</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="430" />
+        <source>Remember the password in Windows Credential Manager</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="431" />
+        <source>Remember the password in the system's keyring</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="432" />
+        <source>For your next project on this database server. Studio keeps no copy of its own.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/NewProjectPage.qml" line="443" />
         <source>The first user of the admin panel, with every right (super admin).</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="379" />
-        <location filename="../qml/NewProjectPage.qml" line="382" />
+        <location filename="../qml/NewProjectPage.qml" line="454" />
+        <location filename="../qml/NewProjectPage.qml" line="457" />
         <source>Name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="385" />
-        <location filename="../qml/NewProjectPage.qml" line="389" />
+        <location filename="../qml/NewProjectPage.qml" line="460" />
+        <location filename="../qml/NewProjectPage.qml" line="464" />
         <source>Email</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="386" />
+        <location filename="../qml/NewProjectPage.qml" line="461" />
         <source>Also the login name.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="393" />
+        <location filename="../qml/NewProjectPage.qml" line="468" />
         <source>At least 8 characters. It goes to FloCMS on its input, never on a command line or in a log.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="428" />
+        <location filename="../qml/NewProjectPage.qml" line="503" />
         <source>Studio writes `.env`: name, address, languages, database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="435" />
+        <location filename="../qml/NewProjectPage.qml" line="510" />
         <source>The command ended with exit code %1.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="460" />
+        <location filename="../qml/NewProjectPage.qml" line="535" />
         <source>`%1` is ready. Open it to start its server.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="468" />
+        <location filename="../qml/NewProjectPage.qml" line="543" />
         <source>A step failed. Fix what it says (Back leads to the database and admin settings), then try again: Studio continues from that step.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="482" />
+        <location filename="../qml/NewProjectPage.qml" line="557" />
         <source>Start over</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="485" />
+        <location filename="../qml/NewProjectPage.qml" line="560" />
         <source>Start over?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="486" />
+        <location filename="../qml/NewProjectPage.qml" line="561" />
         <source>Studio deletes the folder it made, `%1`, and everything in it. The form keeps nothing.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="487" />
+        <location filename="../qml/NewProjectPage.qml" line="562" />
         <source>Delete and start over</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="529" />
+        <location filename="../qml/NewProjectPage.qml" line="604" />
         <source>Open the project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="493" />
+        <location filename="../qml/NewProjectPage.qml" line="568" />
         <source>Back</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: Database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: First admin</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="501" />
+        <location filename="../qml/NewProjectPage.qml" line="576" />
         <source>Next: Create</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="507" />
+        <location filename="../qml/NewProjectPage.qml" line="582" />
         <source>Create the project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="513" />
+        <location filename="../qml/NewProjectPage.qml" line="588" />
         <source>Stop</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/NewProjectPage.qml" line="522" />
+        <location filename="../qml/NewProjectPage.qml" line="597" />
         <source>Try again</source>
+        <translation type="unfinished" />
+    </message>
+</context>
+<context>
+    <name>NewProjectWizard</name>
+    <message>
+        <location filename="../newproject.cpp" line="549" />
+        <source>Starting Studio's MariaDB %1</source>
         <translation type="unfinished" />
     </message>
 </context>
@@ -2937,9 +2984,9 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="98" />
-        <location filename="../qml/Texts.qml" line="105" />
-        <location filename="../qml/Texts.qml" line="109" />
-        <location filename="../qml/Texts.qml" line="120" />
+        <location filename="../qml/Texts.qml" line="106" />
+        <location filename="../qml/Texts.qml" line="110" />
+        <location filename="../qml/Texts.qml" line="121" />
         <source>One line only.</source>
         <translation type="unfinished" />
     </message>
@@ -2965,342 +3012,352 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="103" />
-        <source>A port between 1 and 65535.</source>
+        <source>Letters, digits and `_` only, and not `root`.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="104" />
+        <source>A port between 1 and 65535.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="105" />
         <source>Enter the database server (usually `127.0.0.1`).</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="106" />
-        <location filename="../qml/Texts.qml" line="111" />
+        <location filename="../qml/Texts.qml" line="107" />
+        <location filename="../qml/Texts.qml" line="112" />
         <source>Enter a name.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="107" />
+        <location filename="../qml/Texts.qml" line="108" />
         <source>Enter an email address.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="108" />
+        <location filename="../qml/Texts.qml" line="109" />
         <source>Use at least 8 characters.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="112" />
+        <location filename="../qml/Texts.qml" line="113" />
         <source>A class name in StudlyCase: a capital first, then letters and digits (`BlogPost`).</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="113" />
+        <location filename="../qml/Texts.qml" line="114" />
         <source>Letters, digits, `-` and `_`, starting with a letter.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="114" />
+        <location filename="../qml/Texts.qml" line="115" />
         <source>Letters, digits and `_`, starting with a letter (`add_slug_to_posts`).</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="115" />
+        <location filename="../qml/Texts.qml" line="116" />
         <source>A table name: letters, digits and `_`, up to 64.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="116" />
+        <location filename="../qml/Texts.qml" line="117" />
         <source>Enter the table.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="117" />
+        <location filename="../qml/Texts.qml" line="118" />
         <source>Lower case letters and digits, with `-` between words.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="118" />
+        <location filename="../qml/Texts.qml" line="119" />
         <source>A resource's class name, e.g. `Post`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="119" />
+        <location filename="../qml/Texts.qml" line="120" />
         <source>Enter the resource it lists, e.g. `Post`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="121" />
+        <location filename="../qml/Texts.qml" line="122" />
         <source>Too long: its template name would be over 41 characters.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="134" />
+        <location filename="../qml/Texts.qml" line="135" />
         <source>This folder is not a FloCMS project: its `composer.json` neither is the FloCMS skeleton nor requires `hostkurd/flocms-core`.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="135" />
+        <location filename="../qml/Texts.qml" line="136" />
         <source>The project folder is gone.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="136" />
+        <location filename="../qml/Texts.qml" line="137" />
         <source>Studio could not read its settings file, so it runs with the defaults and won't save over it. Close the program that holds the file, then start Studio again.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="137" />
+        <location filename="../qml/Texts.qml" line="138" />
         <source>Studio could not save its settings.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="138" />
+        <location filename="../qml/Texts.qml" line="139" />
         <source>The editor in Settings &gt; Editor was not found.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="139" />
+        <location filename="../qml/Texts.qml" line="140" />
         <source>The editor did not start.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="140" />
+        <location filename="../qml/Texts.qml" line="141" />
         <source>The editor is a `.cmd` file, and the folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose the editor's `.exe` in Settings &gt; Editor.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="141" />
+        <location filename="../qml/Texts.qml" line="142" />
         <source>The folder could not be opened.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="142" />
-        <source>The port is in use by another program, so Studio's MariaDB can't start on it.</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
         <location filename="../qml/Texts.qml" line="143" />
-        <source>MariaDB needs a library this system doesn't have.</source>
+        <source>Studio could not make the database and its user on its MariaDB.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="144" />
-        <source>Studio's MariaDB doesn't run on this computer.</source>
+        <source>The port is in use by another program, so Studio's MariaDB can't start on it.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="145" />
-        <source>Studio could not set up the databases folder.</source>
+        <source>MariaDB needs a library this system doesn't have.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="146" />
-        <source>MariaDB stopped while starting. The end of its log:</source>
+        <source>Studio's MariaDB doesn't run on this computer.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="147" />
-        <source>MariaDB didn't answer in time. The end of its log:</source>
+        <source>Studio could not set up the databases folder.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="148" />
-        <source>Studio could not set the password of MariaDB's `root` user.</source>
+        <source>MariaDB stopped while starting. The end of its log:</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="149" />
-        <source>The password of `root` is missing from the system's secure store, so Studio can't use these databases. Delete the databases in Settings to start again.</source>
+        <source>MariaDB didn't answer in time. The end of its log:</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="150" />
-        <source>Studio could not use the system's secure store for the password of `root`.</source>
+        <source>Studio could not set the password of MariaDB's `root` user.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="151" />
-        <source>MariaDB stopped unexpectedly. The end of its log:</source>
+        <source>The password of `root` is missing from the system's secure store, so Studio can't use these databases. Delete the databases in Settings to start again.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="152" />
-        <source>The download failed.</source>
+        <source>Studio could not use the system's secure store for the password of `root`.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="153" />
-        <source>The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.</source>
+        <source>MariaDB stopped unexpectedly. The end of its log:</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="154" />
-        <source>The download could not be unpacked.</source>
+        <source>The download failed.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="155" />
-        <source>The download could not be installed.</source>
+        <source>The downloaded file is not the one Studio expects (its SHA-256 differs), so it was deleted.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="156" />
-        <source>Cancelled.</source>
+        <source>The download could not be unpacked.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="157" />
-        <source>The server did not start.</source>
+        <source>The download could not be installed.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="158" />
-        <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
+        <source>Cancelled.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="159" />
-        <source>The server stopped by itself.</source>
+        <source>The server did not start.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="160" />
-        <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
+        <source>The server said it started, but nothing answers at its address. Another program may hold the port: try another port in Settings &gt; Server.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="161" />
-        <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
+        <source>The server stopped by itself.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="162" />
-        <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
+        <source>PHP was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="163" />
-        <source>The folder for the new project could not be made.</source>
+        <source>PHP is a `.bat` or `.cmd` file, and the project folder's name has characters `cmd.exe` would read itself ( ) &amp; ! %. Choose `php.exe` in Settings &gt; PHP and tools.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="164" />
-        <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
+        <source>The project has no `flo` launcher yet: run `composer install` in it.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="165" />
-        <source>Studio could not write the project's `.env` file.</source>
+        <source>The folder for the new project could not be made.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="166" />
+        <source>Studio could not delete the folder it had made. Close what uses it (an editor, a terminal), then try again.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="167" />
-        <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../qml/Texts.qml" line="168" />
-        <source>Stopped.</source>
+        <source>Studio could not write the project's `.env` file.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="169" />
-        <source>Composer could not say what is newer. It asks Packagist, so this needs the internet.</source>
+        <source>A value for `.env` has a character FloCMS can't read there (a line break).</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="170" />
-        <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
+        <source>Stopped.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="171" />
-        <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
+        <source>Composer could not say what is newer. It asks Packagist, so this needs the internet.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="172" />
-        <source>Studio could not copy the project for the preview.</source>
+        <source>The project has no `vendor/` folder yet: run `composer install` in it.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="173" />
-        <source>The preview was stopped.</source>
+        <source>The project is too large to copy for a preview (over 400 MB or 40,000 files, without uploads and logs). Create works without one.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="174" />
-        <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
+        <source>Studio could not copy the project for the preview.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="175" />
-        <source>Studio does not run this command.</source>
+        <source>The preview was stopped.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="176" />
-        <source>There is no secure store for passwords on this computer.</source>
+        <source>Studio could not remove the preview's copy. It tries again when it next starts.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="177" />
-        <source>The secure store did not give the password.</source>
+        <source>Studio does not run this command.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="178" />
-        <source>No password is saved for this database user.</source>
+        <source>There is no secure store for passwords on this computer.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="179" />
-        <source>The secure store did not answer.</source>
+        <source>The secure store did not give the password.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="180" />
-        <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
+        <source>No password is saved for this database user.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="181" />
-        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
+        <source>The secure store did not answer.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="182" />
-        <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
+        <source>Composer was not found. Download it in This computer, or choose it in Settings &gt; PHP and tools.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="183" />
-        <source>The command could not run.</source>
+        <source>A command is still running in this project. Remove it from the list when it has finished.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="184" />
-        <source>Studio could not read what the check printed.</source>
+        <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="185" />
-        <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
+        <source>The command could not run.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="186" />
-        <source>Studio could not read the migrations.</source>
+        <source>Studio could not read what the check printed.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="187" />
-        <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
+        <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="188" />
+        <source>Studio could not read the migrations.</source>
         <translation type="unfinished" />
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="189" />
+        <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="191" />
         <source>Something went wrong (%1).</source>
         <translation type="unfinished" />
     </message>

@@ -8,6 +8,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+class MariadbServer;
 class QProcess;
 
 // The new project wizard (stage 6, board 6): the choices, what they are
@@ -23,7 +24,9 @@ class NewProjectWizard : public QObject
     // The choices: name, parentDir, setup (site-admin, site, admin,
     // api-admin, api), addApi, languages, defaultLanguage, appName,
     // database (sqlite, mysql), dbHost, dbPort, dbName, dbUser,
-    // dbPassword, rememberPassword, adminName, adminEmail, adminPassword
+    // dbPassword, rememberPassword, adminName, adminEmail, adminPassword,
+    // createDatabase (Studio makes it on its own MariaDB, D10) and
+    // server (studio, found, other: Settings' choice, D9)
     Q_PROPERTY(QVariantMap form READ form NOTIFY formChanged)
     // field → problem code (Core's checkNewProject), for what was touched
     Q_PROPERTY(QVariantMap problems READ problems NOTIFY formChanged)
@@ -75,6 +78,11 @@ public:
 
     // The demo: the form and the run from the demo file.
     void showDemo(const QVariantMap &demo);
+    // Studio's own MariaDB (it outlives the wizard)
+    void setMariadb(MariadbServer *server);
+    // Settings' server choice or Studio's server changed: the form follows
+    // while it is being filled (D9)
+    void serverChoiceChanged();
 
 signals:
     void formChanged();
@@ -88,6 +96,10 @@ signals:
 private:
     void runFrom(int index);
     void runStep(int index);
+    void runCreateDatabase(int index);
+    // The server MySQL projects use by default (Settings, D9): studio, found, other
+    QString defaultServer() const;
+    void applyServerDefaults();
     // Why a step failed: a code Texts.problem knows (with its detail), or
     // what the command itself said
     struct StepProblem
@@ -104,6 +116,9 @@ private:
     QList<FloStudio::Core::FieldProblem> currentProblems() const;
 
     const FloStudio::Core::Settings *m_settings; // Studio's; null for a demo
+    MariadbServer *m_mariadb = nullptr;          // Studio's
+    QMetaObject::Connection m_waitForServer;     // db-create waits for it to start
+    QString m_appliedServer;                     // the server the database fields were filled for
     FloStudio::Core::NewProject m_project;
     QString m_typedName;
     bool m_rememberPassword = true;

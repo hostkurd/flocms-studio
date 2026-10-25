@@ -1,4 +1,5 @@
 #include <flostudio/core/wizard.h>
+#include <flostudio/core/dbserver.h>
 
 #include <QDir>
 #include <QFileInfo>
@@ -104,8 +105,14 @@ QList<FieldProblem> checkNewProject(const NewProject &project)
         static const QRegularExpression database(QStringLiteral("^[A-Za-z0-9_$]{1,64}$"));
         if (!database.match(project.dbName).hasMatch())
             problems << FieldProblem{QStringLiteral("dbName"), QStringLiteral("db_name_invalid")};
+        static const QRegularExpression newUser(QStringLiteral("^[A-Za-z0-9_]{1,80}$"));
         if (project.dbUser.trimmed().isEmpty())
             problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_empty")};
+        else if (project.createDatabase
+                 && (!newUser.match(project.dbUser).hasMatch() || project.dbUser.compare(QStringLiteral("root"), Qt::CaseInsensitive) == 0))
+            problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_invalid")};
+        if (project.createDatabase && project.dbPassword.isEmpty())
+            problems << FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")};
         if (project.dbPort < 1 || project.dbPort > 65535)
             problems << FieldProblem{QStringLiteral("dbPort"), QStringLiteral("db_port_invalid")};
         if (project.dbHost.trimmed().isEmpty() || project.dbHost.contains(u'\n'))
@@ -177,6 +184,24 @@ WizardStep command(const QString &id, Program program, const QString &dir, const
 
 } // namespace
 
+QString newProjectDatabaseSql(const NewProject &project)
+{
+    const QString database = sqlIdentifier(project.dbName);
+    // In GRANT a database name is a pattern: _ and % match any character
+    QString pattern = project.dbName;
+    pattern.replace(u'_', QStringLiteral("\\_")).replace(u'%', QStringLiteral("\\%"));
+    const QString user = sqlString(project.dbUser);
+    const QString password = sqlString(project.dbPassword);
+    QString sql = QStringLiteral("CREATE DATABASE IF NOT EXISTS %1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n").arg(database);
+    for (const char *host : {"localhost", "127.0.0.1"}) {
+        const QString account = user + QStringLiteral("@'%1'").arg(QLatin1String(host));
+        sql += QStringLiteral("CREATE USER IF NOT EXISTS %1 IDENTIFIED BY %2;\n").arg(account, password)
+               + QStringLiteral("ALTER USER %1 IDENTIFIED BY %2;\n").arg(account, password)
+               + QStringLiteral("GRANT ALL PRIVILEGES ON %1.* TO %2;\n").arg(sqlIdentifier(pattern), account);
+    }
+    return sql + QStringLiteral("FLUSH PRIVILEGES;\n");
+}
+
 QList<WizardStep> newProjectSteps(const NewProject &project)
 {
     const QString folder = newProjectFolder(project);
@@ -188,6 +213,15 @@ QList<WizardStep> newProjectSteps(const NewProject &project)
     env.kind = StepKind::WriteEnv;
     env.shown = QStringLiteral(".env");
     steps << env;
+    // On Studio's own server: the database and its user first
+    if (project.mysql && project.createDatabase) {
+        WizardStep database;
+        database.id = QStringLiteral("db-create");
+        database.kind = StepKind::CreateDatabase;
+        database.shown = QStringLiteral("CREATE DATABASE %1; CREATE USER '%2'; GRANT ALL ON %1.*")
+                             .arg(sqlIdentifier(project.dbName), project.dbUser);
+        steps << database;
+    }
     // A plain website is what create-project made
     if (project.setup != Setup::Site) {
         steps << command(QStringLiteral("setup"), Program::Flo, folder,

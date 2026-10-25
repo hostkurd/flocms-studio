@@ -15,6 +15,7 @@
 //
 //   composer create-project hostkurd/flocms <name>   (in the parent folder)
 //   .env written by Studio: APP_NAME, APP_URL, LANGUAGES, DEFAULT_LANG, DB_*
+//   CREATE DATABASE + a user for it, on Studio's own MariaDB (createDatabase)
 //   php flo setup --as=<setup>                       (not for a plain website)
 //   composer require hostkurd/flocms-api + php flo api:install   (website + API)
 //   php flo db:check                                 (MySQL: the database answers)
@@ -46,6 +47,10 @@ struct NewProject
     QString dbName;     // MySQL: the database, which must exist
     QString dbUser;
     QString dbPassword; // written to .env (FloCMS reads it there), never shown
+    // Studio makes the database and a user just for it on its own MariaDB
+    // (MariaDB design note D10): dbName, dbUser (not root) with dbPassword
+    // (generated), allowed on that database only
+    bool createDatabase = false;
 
     // The first admin (setups with the admin panel)
     QString adminName;
@@ -68,7 +73,8 @@ FLOSTUDIOCORE_EXPORT QString databaseNameFor(const QString &folderName);
 // What is wrong with the choices, field by field: [{field, code}] with codes
 // name_invalid, folder_exists, parent_invalid (not an absolute folder
 // path; one that isn't there yet is made), languages_empty,
-// default_language, db_name_invalid, db_user_empty, db_port_invalid,
+// default_language, db_name_invalid, db_user_empty, db_user_invalid (a
+// user Studio makes: letters, digits and _, not root), db_port_invalid,
 // db_host_invalid, db_password_invalid, admin_name_empty, email_invalid,
 // password_short (FloCMS wants 8 bytes or more), password_invalid,
 // app_name_invalid. Empty when everything can go.
@@ -86,11 +92,11 @@ FLOSTUDIOCORE_EXPORT QString newProjectFolder(const NewProject &project);
 // The .env values Studio writes after create-project, in this order.
 FLOSTUDIOCORE_EXPORT QList<QPair<QString, QString>> newProjectEnv(const NewProject &project);
 
-enum class StepKind { Command, WriteEnv };
+enum class StepKind { Command, WriteEnv, CreateDatabase };
 
 struct WizardStep
 {
-    QString id;   // create, env, setup, api-require, api-install, db-check, migrate, admin
+    QString id;   // create, env, db-create, setup, api-require, api-install, db-check, migrate, admin
     StepKind kind = StepKind::Command;
     CommandRequest request; // for a command (prepareCommand turns it into one)
     QString shown;          // the command as the screen shows it, no secrets
@@ -101,6 +107,12 @@ struct WizardStep
                && request.input == other.request.input && shown == other.shown;
     }
 };
+
+// The SQL Studio runs as root on its own server for createDatabase: the
+// database (utf8mb4), its user for localhost and 127.0.0.1 with the
+// password, and every right on that database only. Holds the password:
+// for the client's input, never for the screen (the step's shown text).
+FLOSTUDIOCORE_EXPORT QString newProjectDatabaseSql(const NewProject &project);
 
 // Every step for these choices. The admin's password is only in the last
 // step's input.

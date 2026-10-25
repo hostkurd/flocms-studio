@@ -174,6 +174,8 @@ public:
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
     Q_INVOKABLE void showProjects();
     Q_INVOKABLE void showNewProject();
+    // From the wizard ("Change in Settings"): New project keeps its form
+    Q_INVOKABLE void showSettingsFromWizard(const QString &section);
     // The wizard made its project: open it, and the wizard starts again
     Q_INVOKABLE void openNewProject();
     Q_INVOKABLE void refreshProjects();
@@ -247,6 +249,7 @@ private:
     QString m_platform = FloStudio::Core::currentPlatform();
     MariadbServer m_mariadb;
     bool m_autoStartDone = false;
+    bool m_keepWizard = false;
     QString m_demoDialog;
     QString m_demoTab;
     QStringList m_demoDownloaded;

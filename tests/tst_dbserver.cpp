@@ -9,6 +9,7 @@
 #include <flostudio/core/dbserver.h>
 #include <flostudio/core/downloads.h>
 #include <flostudio/core/tools.h>
+#include <flostudio/core/wizard.h>
 
 #include <QDir>
 #include <QFile>
@@ -371,6 +372,27 @@ private slots:
         const Captured roots = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword,
                                                               QStringLiteral("SELECT COUNT(*) FROM mysql.global_priv WHERE User = 'root' AND JSON_VALUE(Priv, '$.authentication_string') = '';")));
         QVERIFY2(roots.out.trimmed() == u"0", qUtf8Printable(roots.out + roots.err));
+
+        // A project's database and user, as the wizard makes them (D10)
+        NewProject project;
+        project.mysql = true;
+        project.createDatabase = true;
+        project.dbName = QStringLiteral("my_shop");
+        project.dbUser = QStringLiteral("my_shop");
+        project.dbPassword = generateDatabasePassword();
+        const Captured made = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword,
+                                                             newProjectDatabaseSql(project)));
+        QVERIFY2(made.succeeded(), qUtf8Printable(made.err));
+        const Captured again = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword,
+                                                              newProjectDatabaseSql(project)));
+        QVERIFY2(again.succeeded(), qUtf8Printable(again.err)); // a retry is fine
+        const Captured own = runCaptured(databaseSqlCommand(start.files, start.port, project.dbUser, project.dbPassword,
+                                                            QStringLiteral("CREATE TABLE my_shop.t (id INT);\nSELECT COUNT(*) FROM my_shop.t;\n")));
+        QVERIFY2(own.succeeded(), qUtf8Printable(own.err));
+        runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword, QStringLiteral("CREATE DATABASE myXshop;\n")));
+        const Captured other = runCaptured(databaseSqlCommand(start.files, start.port, project.dbUser, project.dbPassword,
+                                                              QStringLiteral("CREATE TABLE myXshop.t (id INT);\n")));
+        QVERIFY2(!other.succeeded(), "the user reaches a database whose name only matches my_shop as a pattern");
 
         // A clean stop
         bool stopped = false;
