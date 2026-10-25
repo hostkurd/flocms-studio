@@ -40,6 +40,10 @@ ScrollView {
         target: page.contentItem
         function onMovementStarted() { page.settling = false }
     }
+    Connections {
+        target: page.ScrollBar.vertical
+        function onPressedChanged() { page.settling = false }
+    }
 
     FileDialog {
         id: pickPhp

@@ -7,6 +7,7 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <QGuiApplication>
@@ -81,8 +82,9 @@ MariadbServer::MariadbServer(QObject *parent)
 
 MariadbServer::~MariadbServer()
 {
-    // Studio is closing: a clean shutdown, blocking (D8)
-    if (m_server)
+    // Studio is closing: a clean shutdown, blocking (D8). A server still
+    // starting ends with Core's object, at once
+    if (m_server && (m_state == u"running" || m_state == u"stopping"))
         stopDatabaseServerNow(m_server, m_password);
 }
 
@@ -130,7 +132,8 @@ void MariadbServer::showDemo(const QVariantMap &demo)
 
 QVariantMap MariadbServer::current() const
 {
-    const QString wanted = m_settings ? m_settings->databaseSeries : QString();
+    // While it runs: the series it runs, whatever was downloaded since
+    const QString wanted = !m_activeSeries.isEmpty() ? m_activeSeries : (m_settings ? m_settings->databaseSeries : QString());
     for (const QVariant &program : m_programs) {
         if (program.toMap().value(QStringLiteral("series")).toString() == wanted)
             return program.toMap();
@@ -189,6 +192,8 @@ void MariadbServer::setState(const QString &state, const QString &error, const Q
     m_detail = detail;
     if (state != u"starting")
         m_phase.clear();
+    if (state != u"starting" && state != u"running" && state != u"stopping")
+        m_activeSeries.clear();
     emit changed();
 }
 
@@ -215,6 +220,13 @@ void MariadbServer::start()
 {
     if (m_demo || active() || program().isEmpty())
         return;
+    // The series is chosen for good the first time (a newer download never
+    // moves Studio to a new, empty data folder by itself)
+    if (m_settings && m_settings->databaseSeries.isEmpty()) {
+        m_settings->databaseSeries = series();
+        emit settingsChanged();
+    }
+    m_activeSeries = series();
     m_lines.clear();
     m_freePort = 0;
     m_phase = QStringLiteral("check");
@@ -270,6 +282,8 @@ void MariadbServer::launch(const QString &password)
                 m_server->deleteLater();
                 m_server = nullptr;
             }
+            if (started.error().code == u"db_cancelled")
+                return setState(QStringLiteral("stopped"));
             setState(QStringLiteral("failed"), started.error().code, started.error().detail);
         },
         [this, run](int, bool crashed) {
@@ -316,7 +330,7 @@ void MariadbServer::startOnFreePort()
 
 void MariadbServer::setPort(int port)
 {
-    if (!m_settings || port < 1 || port > 65535 || port == m_settings->databasePort)
+    if (!m_settings || active() || port < 1 || port > 65535 || port == m_settings->databasePort)
         return;
     m_settings->databasePort = port;
     emit settingsChanged();
@@ -387,19 +401,62 @@ void MariadbServer::openDataFolder()
 
 void MariadbServer::remove(bool databasesToo)
 {
-    if (m_demo || active() || origin() != u"studio")
+    // Homebrew's program is Homebrew's: only its databases go, when asked
+    if (m_demo || active() || (origin() != u"studio" && !databasesToo))
         return;
     const QString wanted = series();
     const DatabaseServerFiles serverFiles = files();
-    for (const ToolPackage &package : std::as_const(m_packages)) {
-        if (package.tool == u"mariadb" && mariadbSeries(package.version) == wanted)
-            QDir(installFolder(package)).removeRecursively();
+    if (origin() == u"studio") {
+        for (const ToolPackage &package : std::as_const(m_packages)) {
+            if (package.tool == u"mariadb" && mariadbSeries(package.version) == wanted)
+                QDir(installFolder(package)).removeRecursively();
+        }
     }
     if (databasesToo) {
         QDir(serverFiles.folder).removeRecursively();
         Security::forgetPassword(passwordAccount(wanted), this, [](const Result<QString> &) {});
     }
+    if (m_settings && m_settings->databaseSeries == wanted && origin() == u"studio") {
+        m_settings->databaseSeries.clear();
+        emit settingsChanged();
+    }
     m_lines.clear();
     setState(QStringLiteral("stopped"));
     refresh();
+}
+
+QString MariadbServer::libaioPackage()
+{
+    // /etc/os-release: ID=ubuntu VERSION_ID="24.04", ID=debian VERSION_ID="13"
+    QFile release(QStringLiteral("/etc/os-release"));
+    if (!release.open(QIODevice::ReadOnly))
+        return QStringLiteral("libaio1t64");
+    QString id;
+    double version = 0;
+    const QStringList lines = QString::fromUtf8(release.readAll()).split(u'\n');
+    for (const QString &line : lines) {
+        const QString value = line.section(u'=', 1).remove(u'"');
+        if (line.startsWith(QStringLiteral("ID=")))
+            id = value;
+        else if (line.startsWith(QStringLiteral("VERSION_ID=")))
+            version = value.toDouble();
+    }
+    const bool t64 = (id == u"ubuntu" && version >= 24.04) || (id == u"debian" && version >= 13) || version == 0;
+    return t64 ? QStringLiteral("libaio1t64") : QStringLiteral("libaio1");
+}
+
+bool MariadbServer::usedBy(const QString &projectPath) const
+{
+    if (m_demo)
+        return m_demoInfo.value(QStringLiteral("projects")).toStringList().contains(projectPath);
+    return m_settings && m_settings->databaseProjects.contains(QDir::toNativeSeparators(projectPath));
+}
+
+void MariadbServer::addProject(const QString &projectPath)
+{
+    const QString path = QDir::toNativeSeparators(projectPath);
+    if (!m_settings || m_settings->databaseProjects.contains(path))
+        return;
+    m_settings->databaseProjects << path;
+    emit settingsChanged();
 }

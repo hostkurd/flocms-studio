@@ -128,6 +128,15 @@ T = {
  "MariaDB stopped unexpectedly. The end of its log:": ("توقف MariaDB بشكل غير متوقع. نهاية سجله:", "MariaDB لەناکاو وەستا. کۆتایی تۆمارەکەی:"),
 }
 
+T.update({
+ "Port `%1` is in use by another program. Choose another port in Settings.":
+   ("المنفذ `%1` يستخدمه برنامج آخر. اختر منفذًا آخر في الإعدادات.", "پۆرتی `%1` بەرنامەیەکی تر بەکاری دەهێنێت. لە ڕێکخستنەکان پۆرتێکی تر هەڵبژێرە."),
+ "Delete the databases of Studio's MariaDB?": ("حذف قواعد بيانات MariaDB الخاص بـ Studio؟", "داتابەیسەکانی MariaDBی Studio بسڕدرێنەوە؟"),
+ "Every database in `%1` is deleted, with the password of `root`. Homebrew's MariaDB stays. Projects that use them stop working.":
+   ("ستُحذف كل قاعدة بيانات في `%1`، مع كلمة مرور `root`. يبقى MariaDB الخاص بـ Homebrew. ستتوقف المشاريع التي تستخدمها عن العمل.",
+    "هەموو داتابەیسێک لە `%1` دەسڕدرێتەوە، لەگەڵ وشەی نهێنیی `root`. MariaDBی Homebrew دەمێنێتەوە. ئەو پڕۆژانەی بەکاریان دەهێنن کار ناکەن."),
+})
+
 P = {
  "running for %Ln min": (
    ["running for %Ln min", "running for %Ln min"],

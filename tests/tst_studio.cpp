@@ -252,6 +252,10 @@ private slots:
         QCOMPARE(studio.databaseOtherPort(), 3311);
         QVERIFY(!QFile::exists(QDir(settingsFolder()).filePath(QStringLiteral("settings.json"))));
 
+        server->setPort(3312); // refused while it runs
+        QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/mariadb-database.json")).ok());
+        QVERIFY(server->usedBy(studio.currentPath()));
+        QVERIFY(!server->usedBy(QStringLiteral("C:\\Sites\\other")));
         QVERIFY(studio.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/mariadb-settings.json")).ok());
         QCOMPARE(server->state(), QStringLiteral("running"));
         QVERIFY(server->startedAt() > 0);

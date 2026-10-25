@@ -10,6 +10,9 @@ Rectangle {
     readonly property string code: server.state === "failed" ? server.error : ""
     readonly property bool portBusy: code === "db_port_busy"
     readonly property bool libaio: code === "db_library" && server.detail === "libaio.so.1"
+    // In Settings, where the port can be changed
+    property bool inSettings: false
+    readonly property string libaioCommand: "sudo apt install " + server.libaioPackage
     visible: code !== ""
     implicitHeight: row.implicitHeight + 24
     radius: 10
@@ -35,7 +38,8 @@ Rectangle {
                 raw: box.portBusy
                      ? (box.server.freePort > 0
                         ? qsTr("Port `%1` is in use by another program. Studio can start its MariaDB on port `%2`.").arg(box.server.port).arg(box.server.freePort)
-                        : qsTr("Port `%1` is in use by another program. Choose another port below.").arg(box.server.port))
+                        : box.inSettings ? qsTr("Port `%1` is in use by another program. Choose another port below.").arg(box.server.port)
+                        : qsTr("Port `%1` is in use by another program. Choose another port in Settings.").arg(box.server.port))
                      : (box.code !== "" ? Texts.problem(box.code) : "")
                 color: box.portBusy ? Theme.warnText : Theme.badText
                 wrapMode: Text.Wrap
@@ -64,8 +68,8 @@ Rectangle {
                     anchors.fill: parent
                     anchors.leftMargin: 12
                     anchors.rightMargin: 6
-                    Mono { text: "sudo apt install libaio1t64"; Layout.fillWidth: true }
-                    AppButton { text: qsTr("Copy"); small: true; onClicked: box.server.copyText("sudo apt install libaio1t64") }
+                    Mono { text: box.libaioCommand; Layout.fillWidth: true }
+                    AppButton { text: qsTr("Copy"); small: true; onClicked: box.server.copyText(box.libaioCommand) }
                 }
             }
             RichText {
@@ -94,7 +98,7 @@ Rectangle {
             onClicked: box.server.startOnFreePort()
         }
         AppButton {
-            visible: !box.portBusy
+            visible: !box.portBusy && box.code !== "db_root_lost"
             text: qsTr("Try again")
             Layout.alignment: Qt.AlignTop
             onClicked: box.server.start()

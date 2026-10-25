@@ -41,6 +41,9 @@ struct Settings
     QString databaseSeries;
     int databasePort = 3306;
     bool databaseAutoStart = false;
+    // The projects whose database is on Studio's server (the wizard made
+    // it there): the Database tab offers to start the server only for them
+    QStringList databaseProjects;
     // "Another server": its address and user (the password is in the
     // system's secure store).
     QString databaseHost = QStringLiteral("127.0.0.1");

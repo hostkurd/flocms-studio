@@ -84,6 +84,7 @@ private slots:
         settings.databaseHost = QStringLiteral("db.local");
         settings.databaseOtherPort = 3310;
         settings.databaseUser = QStringLiteral("dev");
+        settings.databaseProjects = {QStringLiteral("C:\\Sites\\shop")};
         QVERIFY(saveSettings(settings, dir.path()).ok());
         QCOMPARE(loadSettings(dir.path()).value(), settings);
 

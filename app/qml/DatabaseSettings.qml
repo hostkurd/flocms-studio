@@ -23,8 +23,12 @@ ColumnLayout {
         const own = String(Studio.toolsFolder).toLowerCase().replace(/\\/g, "/")
         return String(row.path).toLowerCase().replace(/\\/g, "/").startsWith(own) ? null : row
     }
-    readonly property string choice: Studio.databaseServer === "auto" ? (hasOwn ? "studio" : (found ? "found" : "other"))
-                                                                        : Studio.databaseServer
+    // "auto", or a choice that no longer exists (Studio's removed, nothing
+    // found any more), shows what the wizard will use
+    readonly property string choice: Studio.databaseServer === "other" ? "other"
+        : (Studio.databaseServer === "studio" && hasOwn) ? "studio"
+        : (Studio.databaseServer === "found" && found) ? "found"
+        : (hasOwn ? "studio" : (found ? "found" : "other"))
     // Minutes it has been running, kept fresh
     property real now: Date.now()
     Timer { interval: 30000; repeat: true; running: section.server.state === "running"; onTriggered: section.now = Date.now() }
@@ -109,7 +113,7 @@ ColumnLayout {
                 text: Studio.databaseHost
                 Layout.fillWidth: true
                 Accessible.name: qsTr("Host")
-                onEditingFinished: Studio.setOtherDatabase(text, Number(otherPort.text), otherUser.text)
+                onEditingFinished: Studio.setOtherDatabase(text, otherPort.acceptableInput ? Number(otherPort.text) : Studio.databaseOtherPort, otherUser.text)
             }
             Field {
                 id: otherPort
@@ -127,7 +131,7 @@ ColumnLayout {
                 text: Studio.databaseUser
                 Layout.fillWidth: true
                 Accessible.name: qsTr("User")
-                onEditingFinished: Studio.setOtherDatabase(otherHost.text, Number(otherPort.text), text)
+                onEditingFinished: Studio.setOtherDatabase(otherHost.text, otherPort.acceptableInput ? Number(otherPort.text) : Studio.databaseOtherPort, text)
             }
         }
         RichText {
@@ -206,7 +210,7 @@ ColumnLayout {
                 onClicked: section.server.stop()
             }
         }
-        MariadbProblem { Layout.fillWidth: true }
+        MariadbProblem { inSettings: true; Layout.fillWidth: true }
 
         // More than one series downloaded: which one runs
         RowLayout {
@@ -297,15 +301,16 @@ ColumnLayout {
                 Layout.fillWidth: true
             }
             AppButton {
-                visible: section.server.origin === "studio"
                 text: qsTr("Delete its databases…")
                 danger: true
                 small: true
                 enabled: !section.active
                 onClicked: {
                     confirm.deleteData = true
-                    confirm.ask({ title: qsTr("Delete Studio's MariaDB and its databases?"),
-                                  message: qsTr("The program and every database in `%1` are deleted, with the password of `root`. Projects that use them stop working.").arg(section.server.dataFolder),
+                    confirm.ask({ title: section.server.origin === "studio" ? qsTr("Delete Studio's MariaDB and its databases?") : qsTr("Delete the databases of Studio's MariaDB?"),
+                                  message: section.server.origin === "studio"
+                                           ? qsTr("The program and every database in `%1` are deleted, with the password of `root`. Projects that use them stop working.").arg(section.server.dataFolder)
+                                           : qsTr("Every database in `%1` is deleted, with the password of `root`. Homebrew's MariaDB stays. Projects that use them stop working.").arg(section.server.dataFolder),
                                   confirmText: qsTr("Delete") })
                 }
             }

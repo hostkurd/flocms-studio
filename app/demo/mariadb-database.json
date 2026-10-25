@@ -166,6 +166,9 @@
       }
     ],
     "state": "stopped",
-    "dataFolder": "/Users/khalat/Library/Application Support/HostKurd/FloCMS Studio/mariadb/12.3"
+    "dataFolder": "/Users/khalat/Library/Application Support/HostKurd/FloCMS Studio/mariadb/12.3",
+    "projects": [
+      "C:\\Sites\\fectumhellas"
+    ]
   }
 }

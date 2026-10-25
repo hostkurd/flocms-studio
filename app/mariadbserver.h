@@ -43,6 +43,9 @@ class MariadbServer : public QObject
     Q_PROPERTY(QStringList lines READ lines NOTIFY changed)
     // Where the secure store is: Windows Credential Manager, macOS Keychain, the keyring
     Q_PROPERTY(bool secureStore READ secureStore CONSTANT)
+    // Linux: the package with libaio for this system (libaio1t64 on Ubuntu
+    // 24.04+ and Debian 13+, else libaio1)
+    Q_PROPERTY(QString libaioPackage READ libaioPackage CONSTANT)
 
 public:
     explicit MariadbServer(QObject *parent = nullptr);
@@ -77,6 +80,11 @@ public:
     bool initialized() const;
     QStringList lines() const { return m_lines; }
     static bool secureStore();
+    static QString libaioPackage();
+    // The project's database is on Studio's server (made there by the
+    // wizard, or marked so)
+    Q_INVOKABLE bool usedBy(const QString &projectPath) const;
+    void addProject(const QString &projectPath);
     bool active() const { return m_state == u"starting" || m_state == u"running" || m_state == u"stopping"; }
 
     Q_INVOKABLE void start();
@@ -127,4 +135,5 @@ private:
     QStringList m_lines;
     bool m_demo = false;
     QVariantMap m_demoInfo;
+    QString m_activeSeries; // the series that runs (kept while active)
 };

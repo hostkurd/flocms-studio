@@ -33,20 +33,21 @@ ScrollView {
         const db = Studio.current.database || {}
         const host = String(db.host || "")
         const port = Number(db.port || 3306)
-        return db.driver === "mysql" && (host === "127.0.0.1" || host === "localhost") && port === server.port
-               && server.state !== "none"
+        // Only a project whose database Studio made on its server: XAMPP's
+        // projects use 3306 too
+        return server.state !== "none" && server.usedBy(Studio.current.path || "")
+               && db.driver === "mysql" && (host === "127.0.0.1" || host === "localhost") && port === server.port
     }
     readonly property bool offerStart: onStudioServer && server.state !== "running" && tab.db.state === "failed"
-    property bool waitingForServer: false
+    // However it was started (here, the sidebar, Settings): checked again
+    property string lastServerState: server.state
     Connections {
         target: tab.server
         function onChanged() {
-            if (tab.waitingForServer && tab.server.state === "running" && tab.checks) {
-                tab.waitingForServer = false
+            const was = tab.lastServerState
+            tab.lastServerState = tab.server.state
+            if (tab.onStudioServer && tab.server.state === "running" && was !== "running" && tab.checks)
                 tab.checks.refreshDatabase()
-            } else if (tab.server.state === "failed" || tab.server.state === "stopped") {
-                tab.waitingForServer = false
-            }
         }
     }
 
@@ -134,7 +135,7 @@ ScrollView {
                         iconPath: Icons.play
                         iconFilled: true
                         enabled: tab.server.state !== "starting" && tab.server.state !== "stopping"
-                        onClicked: { tab.waitingForServer = true; tab.server.start() }
+                        onClicked: tab.server.start()
                     }
                 }
             }
