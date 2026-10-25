@@ -79,7 +79,10 @@ public:
     // The demo: the form and the run from the demo file.
     void showDemo(const QVariantMap &demo);
     // Studio's own MariaDB (it outlives the wizard)
-    void setMariadb(MariadbServer *server) { m_mariadb = server; }
+    void setMariadb(MariadbServer *server);
+    // Settings' server choice or Studio's server changed: the form follows
+    // while it is being filled (D9)
+    void serverChoiceChanged();
 
 signals:
     void formChanged();
@@ -115,6 +118,7 @@ private:
     const FloStudio::Core::Settings *m_settings; // Studio's; null for a demo
     MariadbServer *m_mariadb = nullptr;          // Studio's
     QMetaObject::Connection m_waitForServer;     // db-create waits for it to start
+    QString m_appliedServer;                     // the server the database fields were filled for
     FloStudio::Core::NewProject m_project;
     QString m_typedName;
     bool m_rememberPassword = true;

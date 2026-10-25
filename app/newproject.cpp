@@ -174,6 +174,9 @@ void NewProjectWizard::set(const QString &field, const QVariant &value)
 {
     if (m_state == u"running" || m_state == u"done" || (m_state == u"failed" && !editableAfterFailure(field)))
         return;
+    // A database Studio made: its name, user and password are what it made
+    if (m_state == u"failed" && m_project.createDatabase && field.startsWith(u"db"))
+        return;
     const QString text = value.toString();
     if (field == u"parentDir") {
         m_project.parentDir = text;
@@ -245,9 +248,28 @@ QString NewProjectWizard::defaultServer() const
     return chosen;
 }
 
+void NewProjectWizard::setMariadb(MariadbServer *server)
+{
+    m_mariadb = server;
+    connect(server, &MariadbServer::changed, this, &NewProjectWizard::serverChoiceChanged);
+}
+
+void NewProjectWizard::serverChoiceChanged()
+{
+    if (m_state != u"editing")
+        return;
+    if (m_project.mysql && defaultServer() != m_appliedServer)
+        applyServerDefaults();
+    // Studio's server's port may have changed in Settings
+    if (m_project.mysql && m_project.createDatabase && m_mariadb && m_project.dbPort != m_mariadb->port())
+        m_project.dbPort = m_mariadb->port();
+    emit formChanged();
+}
+
 void NewProjectWizard::applyServerDefaults()
 {
     const QString server = defaultServer();
+    m_appliedServer = server;
     m_project.createDatabase = server == u"studio";
     if (server == u"studio") {
         m_project.dbHost = QStringLiteral("127.0.0.1");
@@ -421,8 +443,14 @@ void NewProjectWizard::startOver()
 
 void NewProjectWizard::cancel()
 {
-    if (m_running)
+    if (m_running) {
         stopProcess(m_running);
+    } else if (m_waitForServer) {
+        // Waiting for Studio's server: the step stops (the server goes on)
+        QObject::disconnect(m_waitForServer);
+        m_waitForServer = {};
+        stepDone(m_current, false, {QStringLiteral("step_stopped"), {}, {}});
+    }
 }
 
 void NewProjectWizard::runFrom(int index)
@@ -441,7 +469,11 @@ void NewProjectWizard::runStep(int index)
         m_state = QStringLiteral("done");
         m_projectPath = QDir::toNativeSeparators(newProjectFolder(m_project));
         // A password that worked is saved, if the person wanted that
-        if (m_project.mysql && m_rememberPassword && !m_project.dbPassword.isEmpty() && secureStore())
+        // Studio's server: the project is marked as its, for the Database tab
+        if (m_project.mysql && m_project.createDatabase && m_mariadb)
+            m_mariadb->addProject(m_projectPath);
+        // The password Studio made is always kept (its checkbox isn't shown)
+        if (m_project.mysql && (m_rememberPassword || m_project.createDatabase) && !m_project.dbPassword.isEmpty() && secureStore())
             Security::savePassword(Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser),
                                    m_project.dbPassword, this, [](const Result<QString> &) {});
         emit stepsChanged();
@@ -505,9 +537,11 @@ void NewProjectWizard::runCreateDatabase(int index)
             const QString state = m_mariadb->state();
             if (state == u"running") {
                 QObject::disconnect(m_waitForServer);
+                m_waitForServer = {};
                 runCreateDatabase(index);
             } else if (state == u"failed" || state == u"stopped") {
                 QObject::disconnect(m_waitForServer);
+                m_waitForServer = {};
                 stepDone(index, false, {m_mariadb->error().isEmpty() ? QStringLiteral("db_start") : m_mariadb->error(),
                                         m_mariadb->detail(), {}});
             }
@@ -515,6 +549,19 @@ void NewProjectWizard::runCreateDatabase(int index)
         addLine(QStringLiteral("› ") + tr("Starting Studio's MariaDB %1").arg(m_mariadb->series()));
         m_mariadb->start();
         return;
+    }
+    // Where the server really runs (it may have started on another port,
+    // say "Start on 3307"): .env follows
+    if (m_project.dbHost != u"127.0.0.1" || m_project.dbPort != m_mariadb->port()) {
+        m_project.dbHost = QStringLiteral("127.0.0.1");
+        m_project.dbPort = m_mariadb->port();
+        const auto written = writeEnvValues(newProjectFolder(m_project), newProjectEnv(m_project));
+        if (!written) {
+            stepDone(index, false, {written.error().code, written.error().detail, {}});
+            return;
+        }
+        readEnvSecrets();
+        emit formChanged();
     }
     const Command command = m_mariadb->rootSqlCommand(newProjectDatabaseSql(m_project));
     if (command.program.isEmpty()) {

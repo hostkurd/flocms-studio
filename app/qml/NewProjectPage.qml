@@ -320,7 +320,7 @@ Item {
                                 color: Studio.mariadb.state === "running" ? Theme.okBg : Theme.rule
                                 fg: Studio.mariadb.state === "running" ? Theme.okText : Theme.muted
                             }
-                            AppButton { small: true; text: qsTr("Change in Settings"); onClicked: Studio.showSettings("database") }
+                            AppButton { small: true; text: qsTr("Change in Settings"); onClicked: Studio.showSettingsFromWizard("database") }
                         }
                     }
                     ColumnLayout {
@@ -336,7 +336,7 @@ Item {
                             enabled: !page.started
                             checked: !!page.form.createDatabase
                             title: qsTr("Studio makes a new database and a user for this project")
-                            note: qsTr("The user can only reach this database. Its password goes to DB_PASSWORD in .env and to %1.").arg(Texts.secureStoreName())
+                            note: qsTr("The user can only reach this database. Studio writes its password into the project's settings and keeps it in %1.").arg(Texts.secureStoreName())
                             onToggled: (on) => { if (on) page.wizard.set("createDatabase", true) }
                         }
                         GridLayout {

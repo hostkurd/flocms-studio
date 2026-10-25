@@ -169,6 +169,7 @@ Studio::Studio(Language *language, QObject *parent)
     // A new project is listed (in a project folder, or on its own); the
     // wizard's page stays until the person opens it
     m_wizard.setMariadb(&m_mariadb);
+    connect(this, &Studio::settingsChanged, &m_wizard, &NewProjectWizard::serverChoiceChanged);
     connect(&m_wizard, &NewProjectWizard::stepsChanged, this, &Studio::commandRunningChanged);
     connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
         const QString folderOfIt = QDir::toNativeSeparators(QFileInfo(path).absolutePath());
@@ -694,9 +695,15 @@ void Studio::showSettings(const QString &section)
     emit pageChanged();
 }
 
+void Studio::showSettingsFromWizard(const QString &section)
+{
+    m_keepWizard = true; // coming back keeps what was typed
+    showSettings(section);
+}
+
 void Studio::showNewProject()
 {
-    if (m_wizard.state() == u"done" || m_wizard.state() == u"editing")
+    if (m_wizard.state() == u"done" || (m_wizard.state() == u"editing" && !std::exchange(m_keepWizard, false)))
         m_wizard.reset();
     m_page = QStringLiteral("new");
     emit pageChanged();

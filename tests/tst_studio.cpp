@@ -290,6 +290,22 @@ private slots:
         wizard->set(QStringLiteral("createDatabase"), true);
         QCOMPARE(wizard->form().value(QStringLiteral("dbUser")).toString(), QStringLiteral("fectumhellas"));
 
+        // Settings changed while the form is open: it follows (D9)
+        studio.setOtherDatabase(QStringLiteral("db.local"), 3310, QStringLiteral("dev"));
+        studio.setDatabaseServer(QStringLiteral("other"));
+        form = wizard->form();
+        QCOMPARE(form.value(QStringLiteral("server")).toString(), QStringLiteral("other"));
+        QVERIFY(!form.value(QStringLiteral("createDatabase")).toBool());
+        QCOMPARE(form.value(QStringLiteral("dbHost")).toString(), QStringLiteral("db.local"));
+        QCOMPARE(form.value(QStringLiteral("dbPort")).toInt(), 3310);
+        studio.setDatabaseServer(QStringLiteral("studio"));
+        QVERIFY(wizard->form().value(QStringLiteral("createDatabase")).toBool());
+        // "Change in Settings" and back: the form stays
+        wizard->set(QStringLiteral("dbName"), QStringLiteral("kept_name"));
+        studio.showSettingsFromWizard(QStringLiteral("database"));
+        studio.showNewProject();
+        QCOMPARE(wizard->form().value(QStringLiteral("dbName")).toString(), QStringLiteral("kept_name"));
+
         // Without a server of Studio's own: the one found, as before
         Studio other(&language);
         QVERIFY(other.startDemo(QStringLiteral(FLOSTUDIO_SOURCE "/app/demo/new-database.json")).ok());
