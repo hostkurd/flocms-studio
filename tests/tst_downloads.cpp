@@ -450,7 +450,13 @@ private slots:
         const QList<ToolPackage> packages = bundledToolPackages();
         QVERIFY2(!packages.isEmpty(), "the built-in tool list has nothing for this computer");
         Settings settings;
+        bool mariadbTried = false; // the default series only: the Linux bintar is ~470 MB
         for (const ToolPackage &p : packages) {
+            if (p.tool == u"mariadb") {
+                if (mariadbTried)
+                    continue;
+                mariadbTried = true;
+            }
             QObject owner;
             bool done = false;
             Result<QString> result = Error{};
