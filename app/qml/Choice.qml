@@ -26,6 +26,8 @@ Flow {
             checked: on
             enabled: modelData.enabled !== false
             implicitHeight: 36
+            topPadding: 0
+            bottomPadding: 0
             hoverEnabled: true
             leftPadding: 14
             rightPadding: 14

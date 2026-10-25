@@ -119,7 +119,8 @@ qt_add_qml_module(Studio
 # The logo (tools/make_icons.py), at :/icons/: the window icon and the sidebar
 qt_add_resources(Studio "icons"
     PREFIX /
-    FILES icons/logo-64.png icons/logo-128.png icons/logo-256.png icons/logo-512.png)
+    FILES icons/logo-64.png icons/logo-128.png icons/logo-256.png icons/logo-512.png
+          icons/app-icon-64.png icons/app-icon-128.png icons/app-icon-256.png icons/app-icon-512.png)
 
 # The bundled fonts (D8; tools/make_fonts.py), at :/fonts/
 file(GLOB STUDIO_FONTS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS fonts/*.ttf)

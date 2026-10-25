@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     // (flocms-studio.desktop) names it for Wayland
     QIcon icon;
     for (const int size : {64, 128, 256, 512})
-        icon.addFile(QStringLiteral(":/icons/logo-%1.png").arg(size), QSize(size, size));
+        icon.addFile(QStringLiteral(":/icons/app-icon-%1.png").arg(size), QSize(size, size));
     QGuiApplication::setWindowIcon(icon);
     QGuiApplication::setDesktopFileName(QStringLiteral("flocms-studio"));
     QNetworkProxyFactory::setUseSystemConfiguration(true); // tool downloads behind a company proxy

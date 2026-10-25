@@ -191,6 +191,8 @@ Item {
                     implicitHeight: 40
                     leftPadding: 4
                     rightPadding: 4
+                    topPadding: 0
+                    bottomPadding: 0
                     hoverEnabled: true
                     font.family: Lang.uiFont
                     font.pixelSize: 14

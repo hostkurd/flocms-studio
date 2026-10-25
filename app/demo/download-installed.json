@@ -86,28 +86,28 @@
     {
       "tool": "php",
       "state": "found",
-      "version": "8.5.12",
-      "path": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\php-8.5\\php.exe"
+      "version": "8.2.12",
+      "path": "D:\\xampp\\php\\php.exe"
     },
     {
       "tool": "composer",
       "state": "found",
-      "version": "2.10.3",
-      "path": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\composer\\composer.phar"
+      "version": "2.9.1",
+      "path": "D:\\xampp\\php\\composer.bat"
     },
     {
       "tool": "mariadb",
-      "state": "running",
-      "version": "11.4.5",
+      "state": "found",
+      "version": "10.4.32",
       "product": "MariaDB",
-      "path": "C:\\Program Files\\MariaDB 11.4\\bin\\mysql.exe"
+      "path": "D:\\xampp\\mysql\\bin\\mysql.exe"
     }
   ],
   "page": "project",
   "dialog": "downloads",
   "toolsFolder": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools",
   "downloaded": [
-    "php-8.5",
-    "composer"
-  ]
+    "php-8.5"
+  ],
+  "tab": "composer"
 }

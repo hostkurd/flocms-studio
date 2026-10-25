@@ -13,6 +13,10 @@ ItemDelegate {
     property string iconPath: ""
 
     implicitHeight: 38
+    // The label centred on the row: the style's own padding (12 above and
+    // below) left it no room and pushed it down
+    topPadding: 0
+    bottomPadding: 0
     leftPadding: 10
     rightPadding: 10
     hoverEnabled: true

@@ -24,6 +24,37 @@ Popup {
     property string phpChoice: ""
     property bool wantComposer: true
     property bool wantMariadb: false
+    property string tab: "php"
+    // What can be chosen: never what Studio has already, nor a Composer
+    // older than (or as new as) the computer's own
+    readonly property bool composerAvailable: !!composer && !composer.installed
+        && !(found("composer") && !newer(composer.version, found("composer").version || ""))
+    readonly property bool mariadbAvailable: !!mariadb && !mariadb.installed
+    readonly property bool composerChosen: wantComposer && composerAvailable
+    readonly property bool mariadbChosen: wantMariadb && mariadbAvailable
+
+    // Whether version a is newer than b (2.10.3 > 2.9.1)
+    function newer(a, b) {
+        const x = String(a).split(/[^0-9]+/).filter(p => p !== "").map(Number)
+        const y = String(b).split(/[^0-9]+/).filter(p => p !== "").map(Number)
+        for (let i = 0; i < Math.max(x.length, y.length); ++i) {
+            if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0)
+        }
+        return false
+    }
+    function toolName(tool, row) {
+        return tool === "php" ? "PHP" : tool === "composer" ? "Composer" : (row && row.product ? row.product : "MariaDB")
+    }
+    // Where a tool this computer has comes from
+    function sourceOf(path) {
+        const p = String(path).toLowerCase().replace(/\\/g, "/")
+        const own = String(Studio.toolsFolder).toLowerCase().replace(/\\/g, "/")
+        if (own !== "" && p.startsWith(own)) return qsTr("Downloaded by Studio")
+        if (p.indexOf("xampp") >= 0 || p.indexOf("lampp") >= 0) return qsTr("From XAMPP")
+        if (p.indexOf("laragon") >= 0) return qsTr("From Laragon")
+        if (p.indexOf("herd") >= 0) return qsTr("From Herd")
+        return qsTr("Installed on this computer")
+    }
 
     // What this computer has already (found by Studio, not downloaded)
     function found(tool) {
@@ -40,6 +71,8 @@ Popup {
         phpChoice = missing("php") && firstNew ? firstNew.id : ""
         wantComposer = missing("composer") && !!composer && !composer.installed
         wantMariadb = false
+        tab = missing("php") ? "php" : (missing("composer") ? "composer" : "php")
+        if (["php", "composer", "mariadb"].indexOf(Studio.demoTab) >= 0) tab = Studio.demoTab
     }
     onClosed: Studio.clearDownloads()
 
@@ -89,10 +122,81 @@ Popup {
                         Layout.fillWidth: true
                     }
 
-                    SectionLabel { text: "PHP" }
+                    // One tab per tool: what this computer has, then what
+                    // Studio can download (nothing it has already)
+                    Segmented {
+                        label: qsTr("Tool")
+                        value: dialog.tab
+                        Layout.fillWidth: true
+                        options: [
+                            { value: "php", text: "PHP" + (dialog.phpChoice !== "" ? " •" : "") },
+                            { value: "composer", text: "Composer" + (dialog.composerChosen ? " •" : "") },
+                            { value: "mariadb", text: "MariaDB" + (dialog.mariadbChosen ? " •" : "") }
+                        ]
+                        onChosen: (value) => dialog.tab = value
+                    }
+
+                    SectionLabel { ui: qsTr("On this computer"); Layout.topMargin: 4 }
+                    Rectangle {
+                        id: haveBox
+                        readonly property var row: dialog.found(dialog.tab)
+                        Layout.fillWidth: true
+                        implicitHeight: here.implicitHeight + 20
+                        radius: 10
+                        color: Theme.rule
+                        ColumnLayout {
+                            id: here
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
+                            spacing: 2
+                            RowLayout {
+                                spacing: 8
+                                Layout.fillWidth: true
+                                AppText {
+                                    text: haveBox.row
+                                          ? dialog.toolName(dialog.tab, haveBox.row) + " " + (haveBox.row.version || "")
+                                          : ""
+                                    visible: !!haveBox.row
+                                    font.weight: Font.DemiBold
+                                }
+                                AppText {
+                                    visible: !haveBox.row
+                                    ui: qsTr("Not found on this computer")
+                                    color: Theme.muted
+                                }
+                                Item { Layout.fillWidth: true }
+                                Pill {
+                                    visible: dialog.tab === "mariadb" && !!haveBox.row
+                                    text: haveBox.row && haveBox.row.state === "running" ? qsTr("Running") : qsTr("Not running")
+                                    color: haveBox.row && haveBox.row.state === "running" ? Theme.okBg : Theme.border
+                                    fg: haveBox.row && haveBox.row.state === "running" ? Theme.okText : Theme.muted
+                                }
+                            }
+                            AppText {
+                                visible: !!haveBox.row
+                                ui: haveBox.row ? dialog.sourceOf(haveBox.row.path) : ""
+                                color: Theme.muted
+                                font.pixelSize: 13
+                            }
+                            Mono {
+                                visible: !!haveBox.row
+                                text: haveBox.row ? haveBox.row.path : ""
+                                color: Theme.muted
+                                font.pixelSize: 12
+                                elide: Text.ElideMiddle
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+
+                    SectionLabel { ui: qsTr("Download"); Layout.topMargin: 4 }
+
+                    // PHP: a version, or none
                     ButtonGroup { id: phpGroup }
                     Repeater {
-                        model: dialog.phps
+                        model: dialog.tab === "php" ? dialog.phps : []
                         delegate: OptionRow {
                             required property var modelData
                             required property int index
@@ -110,6 +214,7 @@ Popup {
                         }
                     }
                     OptionRow {
+                        visible: dialog.tab === "php"
                         Layout.fillWidth: true
                         radio: true
                         group: phpGroup
@@ -119,34 +224,46 @@ Popup {
                         onToggled: (on) => { if (on) dialog.phpChoice = "" }
                     }
 
-                    SectionLabel { ui: qsTr("Also download"); Layout.topMargin: 4 }
+                    // Composer: Studio's own copy; an upgrade when this
+                    // computer's is older
                     OptionRow {
-                        visible: !!dialog.composer
+                        readonly property var have: dialog.found("composer")
+                        readonly property bool older: !!have && dialog.newer(dialog.composer ? dialog.composer.version : "", have.version || "")
+                        visible: dialog.tab === "composer" && !!dialog.composer
                         Layout.fillWidth: true
-                        checked: dialog.wantComposer && enabled
-                        enabled: !!dialog.composer && !dialog.composer.installed
-                        title: "Composer"
-                        note: qsTr("Needed to create projects · from %1").arg(dialog.composer ? dialog.composer.source : "")
-                              + (dialog.composer && dialog.composer.installed ? " · " + qsTr("already downloaded")
-                                 : (dialog.found("composer") ? " · " + qsTr("this computer has %1").arg(dialog.found("composer").version || "Composer") : ""))
+                        checked: dialog.composerChosen
+                        enabled: dialog.composerAvailable
+                        title: dialog.composer ? (older ? qsTr("Upgrade to Composer %1").arg(dialog.composer.version) : "Composer " + dialog.composer.version) : ""
+                        note: !dialog.composer ? ""
+                              : dialog.composer.installed ? qsTr("Already downloaded")
+                              : (!!have && !older) ? qsTr("This computer has the same or a newer version")
+                              : older ? qsTr("Studio's own copy, used instead of %1; that one stays as it is · from %2").arg(have.version).arg(dialog.composer.source)
+                              : qsTr("Needed to create projects · from %1").arg(dialog.composer.source)
                         size: dialog.composer ? dialog.composer.size : 0
                         onToggled: (on) => dialog.wantComposer = on
                     }
+
+                    // MariaDB: Studio's own server; another version when this
+                    // computer has one (XAMPP's, say)
                     OptionRow {
-                        visible: !!dialog.mariadb
+                        readonly property var have: dialog.found("mariadb")
+                        visible: dialog.tab === "mariadb" && !!dialog.mariadb
                         Layout.fillWidth: true
-                        checked: dialog.wantMariadb && enabled
-                        enabled: !!dialog.mariadb && !dialog.mariadb.installed
-                        title: dialog.mariadb ? "MariaDB " + dialog.mariadb.version : ""
-                        note: qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb ? dialog.mariadb.source : "")
-                              + (dialog.mariadb && dialog.mariadb.installed ? " · " + qsTr("already downloaded")
-                                 : (dialog.found("mariadb") ? " · " + qsTr("this computer has %1").arg(dialog.found("mariadb").version || "MariaDB") : ""))
+                        checked: dialog.mariadbChosen
+                        enabled: dialog.mariadbAvailable
+                        title: dialog.mariadb ? (have ? qsTr("Another version: MariaDB %1").arg(dialog.mariadb.version) : "MariaDB " + dialog.mariadb.version) : ""
+                        note: !dialog.mariadb ? ""
+                              : dialog.mariadb.installed ? qsTr("Already downloaded")
+                              : have ? qsTr("Studio's own, next to the one this computer has; that one stays as it is · from %1").arg(dialog.mariadb.source)
+                              : qsTr("Only for projects that use MySQL; SQLite needs nothing · from %1").arg(dialog.mariadb.source)
                         size: dialog.mariadb ? dialog.mariadb.size : 0
                         onToggled: (on) => dialog.wantMariadb = on
                     }
                     RichText {
-                        visible: !dialog.mariadb && Studio.mariadbFromHomebrew
-                        raw: qsTr("MariaDB (only for projects that use MySQL): MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.")
+                        visible: dialog.tab === "mariadb" && !dialog.mariadb
+                        raw: Studio.mariadbFromHomebrew
+                             ? qsTr("MariaDB makes no builds for macOS. Install it with Homebrew: `brew install mariadb`.")
+                             : qsTr("Studio can't download MariaDB for this system yet. Install it with your package manager, for example `sudo apt install mariadb-server`.")
                         color: Theme.muted
                         font.pixelSize: 13
                         wrapMode: Text.Wrap
@@ -217,13 +334,12 @@ Popup {
                 primary: true
                 text: qsTr("Download")
                 iconPath: Icons.download
-                enabled: dialog.phpChoice !== "" || (dialog.wantComposer && !!dialog.composer && !dialog.composer.installed)
-                         || (dialog.wantMariadb && !!dialog.mariadb && !dialog.mariadb.installed)
+                enabled: dialog.phpChoice !== "" || dialog.composerChosen || dialog.mariadbChosen
                 onClicked: {
                     const ids = []
                     if (dialog.phpChoice !== "") ids.push(dialog.phpChoice)
-                    if (dialog.wantComposer && dialog.composer && !dialog.composer.installed) ids.push(dialog.composer.id)
-                    if (dialog.wantMariadb && dialog.mariadb && !dialog.mariadb.installed) ids.push(dialog.mariadb.id)
+                    if (dialog.composerChosen) ids.push(dialog.composer.id)
+                    if (dialog.mariadbChosen) ids.push(dialog.mariadb.id)
                     Studio.startDownloads(ids)
                 }
             }

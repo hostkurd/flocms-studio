@@ -15,6 +15,13 @@
 #include <algorithm>
 #include <utility>
 
+#ifdef Q_OS_WIN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace FloStudio::Core {
 
 namespace {
@@ -126,6 +133,15 @@ QStringList commonToolFolders(const QString &home)
                << appData + QStringLiteral("/Composer/vendor/bin")
                << home + QStringLiteral("/.config/herd/bin")          // Herd for Windows
                << QStringLiteral("C:/xampp/php") << QStringLiteral("C:/xampp/mysql/bin");
+    // XAMPP on another fixed drive (D:\xampp); network and removable
+    // drives are not asked: they can take long to answer
+    for (const QFileInfo &drive : QDir::drives()) {
+        const std::wstring root = QDir::toNativeSeparators(drive.absolutePath()).toStdWString();
+        if (GetDriveTypeW(root.c_str()) != DRIVE_FIXED)
+            continue;
+        const QString xampp = drive.absolutePath() + QStringLiteral("xampp");
+        candidates << xampp + QStringLiteral("/php") << xampp + QStringLiteral("/mysql/bin");
+    }
     // Laragon and MariaDB keep a folder per version: newest name first
     const auto versioned = [&candidates](const QString &parent, const QString &pattern, const QString &sub) {
         QStringList names = QDir(parent).entryList({pattern}, QDir::Dirs | QDir::NoDotAndDotDot);
@@ -173,11 +189,30 @@ QStringList toolSearchPath()
 #endif
         for (const QString &folder : commonToolFolders(QDir::homePath()))
             addFolder(list, folder);
+        // A stack's PHP on PATH (XAMPP's D:\xampp\php): its database server
+        // is beside it (D:\xampp\mysql\bin)
+        const QStringList withPhp = list;
+        for (const QString &folder : withPhp) {
+            if (QFileInfo(folder).fileName().compare(QStringLiteral("php"), Qt::CaseInsensitive) != 0)
+                continue;
+            const QString mysql = QDir::cleanPath(folder + QStringLiteral("/../mysql/bin"));
+            if (QFileInfo(mysql).isDir())
+                addFolder(list, mysql);
+        }
         return list;
     }();
-    QStringList folders = system;
-    // Last: what Studio downloaded itself (D15), newest first
-    for (const QString &folder : installedToolFolders())
+    // Studio's own Composer first: it is downloaded to be used (an upgrade
+    // of the computer's own); the rest of what Studio downloaded last (D15),
+    // newest first, after the computer's own PHP and database server
+    QStringList folders;
+    const QStringList downloaded = installedToolFolders();
+    for (const QString &folder : downloaded) {
+        if (QFileInfo(folder).fileName().startsWith(QStringLiteral("composer")))
+            addFolder(folders, QDir::fromNativeSeparators(folder));
+    }
+    for (const QString &folder : system)
+        addFolder(folders, folder);
+    for (const QString &folder : downloaded)
         addFolder(folders, QDir::fromNativeSeparators(folder));
     for (QString &folder : folders)
         folder = QDir::toNativeSeparators(folder);
