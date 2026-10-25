@@ -33,6 +33,7 @@ flostudio_add_test(tst_commands FloStudio::Core)
 flostudio_add_test(tst_process FloStudio::Core)
 flostudio_add_test(tst_realproject FloStudio::Core)
 flostudio_add_test(tst_downloads FloStudio::Core Qt6::Network)
+flostudio_add_test(tst_dbserver FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_database FloStudio::Database FloStudio::Core)
 flostudio_add_test(tst_security FloStudio::Security)
 

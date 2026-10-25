@@ -7,7 +7,10 @@ name: Tool downloads
 #              the weekly run says when Studio needs an update.
 #  - install:  Studio's own download code (tst_downloads, online) downloads
 #              this system's PHP and Composer from the committed list,
-#              installs and runs them, and checks PHP has what FloCMS needs.
+#              installs and runs them, and checks PHP has what FloCMS needs;
+#              tst_dbserver downloads this system's MariaDB (Homebrew's on
+#              macOS), sets up a data folder, starts it, sets root's
+#              password, creates a database, stops it cleanly, starts again.
 
 on:
   pull_request:
@@ -17,6 +20,11 @@ on:
       - "libs/core/src/downloads.cpp"
       - "libs/core/include/flostudio/core/downloads.h"
       - "tests/tst_downloads.cpp"
+      - "libs/core/src/dbserver.cpp"
+      - "libs/core/src/process.cpp"
+      - "libs/core/src/tools.cpp"
+      - "libs/core/include/flostudio/core/dbserver.h"
+      - "tests/tst_dbserver.cpp"
       - ".github/workflows/tools.yml"
   schedule:
     - cron: "17 5 * * 1"
@@ -44,7 +52,7 @@ jobs:
     name: install (${{ matrix.os }})
     needs: list
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -86,7 +94,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then extra=("-DCMAKE_PREFIX_PATH=$QT_DIR"); else extra=(); fi
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "${extra[@]}"
-          cmake --build build --target tst_downloads
+          cmake --build build --target tst_downloads tst_dbserver
       - name: Download, install and run this system's PHP and Composer
         env:
           FLOSTUDIO_ONLINE: "1"
@@ -94,3 +102,25 @@ jobs:
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           .github/scripts/run_tests.sh build -R tst_downloads -V
           grep -E "QINFO" ctest.log | sed 's/^/::notice::/' || true
+      - name: MariaDB from Homebrew (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew list mariadb >/dev/null 2>&1 || brew install -q mariadb
+          echo "FLOSTUDIO_MARIADBD=$(brew --prefix mariadb)/bin/mariadbd" >> "$GITHUB_ENV"
+          echo "FLOSTUDIO_MARIADB_SERIES=$(brew info --json=v2 mariadb | python3 -c 'import json,sys; v=json.load(sys.stdin)["formulae"][0]["versions"]["stable"]; print(".".join(v.split(".")[:2]))')" >> "$GITHUB_ENV"
+      - name: Studio's own MariaDB server (download, set up, start, stop)
+        env:
+          FLOSTUDIO_ONLINE: "1"
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
+          status=0
+          # Run directly, its log to a file written line by line, so a crash
+          # still leaves what came before it
+          ./build/bin/tst_dbserver -o dbserver.txt,txt -v1 || status=$?
+          grep -E "QINFO|SKIP|Totals|FAIL" dbserver.txt | head -40 | sed 's/^/::notice::/' || true
+          if [ $status -ne 0 ]; then
+            echo "::error::tst_dbserver exit $status"
+            tail -c 3800 dbserver.txt | tr -d '\r' | sed -e 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}' | sed 's/^/::error title=tst_dbserver log end::/'
+            echo
+          fi
+          exit $status

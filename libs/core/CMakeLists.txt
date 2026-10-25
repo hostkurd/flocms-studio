@@ -4,6 +4,7 @@ flostudio_add_library(FloStudioCore Core
     SOURCES
         src/buildinfo.cpp
         src/commands.cpp
+        src/dbserver.cpp
         src/downloads.cpp
         src/env.cpp
         src/generators.cpp

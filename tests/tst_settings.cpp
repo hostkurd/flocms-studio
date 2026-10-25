@@ -68,6 +68,38 @@ private slots:
         QCOMPARE(settings.serverNetwork, false);
     }
 
+    void databaseServerSettings()
+    {
+        // MariaDB design note D9, D5-D8
+        QCOMPARE(Settings{}.databaseServer, QStringLiteral("auto"));
+        QCOMPARE(Settings{}.databasePort, 3306);
+        QCOMPARE(Settings{}.databaseAutoStart, false);
+        const QTemporaryDir dir;
+        Settings settings;
+        settings.databaseServer = QStringLiteral("found");
+        settings.databaseFound = QStringLiteral("D:\\xampp\\mysql\\bin\\mysql.exe");
+        settings.databaseSeries = QStringLiteral("12.3");
+        settings.databasePort = 3307;
+        settings.databaseAutoStart = true;
+        settings.databaseHost = QStringLiteral("db.local");
+        settings.databaseOtherPort = 3310;
+        settings.databaseUser = QStringLiteral("dev");
+        QVERIFY(saveSettings(settings, dir.path()).ok());
+        QCOMPARE(loadSettings(dir.path()).value(), settings);
+
+        write(dir.path(), R"({"databaseServer":"found","databaseFound":"  ","databaseSeries":"latest",
+                              "databasePort":0,"databaseOtherPort":"x","databaseHost":" ","databaseUser":"",
+                              "databaseAutoStart":"yes"})");
+        const Settings clean = loadSettings(dir.path()).value();
+        QCOMPARE(clean.databaseServer, QStringLiteral("auto")); // found, but nothing found
+        QCOMPARE(clean.databaseSeries, QString());
+        QCOMPARE(clean.databasePort, 3306);
+        QCOMPARE(clean.databaseOtherPort, 3306);
+        QCOMPARE(clean.databaseHost, QStringLiteral("127.0.0.1"));
+        QCOMPARE(clean.databaseUser, QStringLiteral("root"));
+        QCOMPARE(clean.databaseAutoStart, false);
+    }
+
     void keysFromANewerStudioAreKept()
     {
         const QTemporaryDir dir;

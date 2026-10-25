@@ -31,6 +31,22 @@ struct Settings
     int serverPort = 8000;      // the first port `php flo serve` tries
     bool serverNetwork = false; // listen on 0.0.0.0 instead of 127.0.0.1
 
+    // The database server new projects use (MariaDB design note D9):
+    // auto (Studio's when it has one, else the one found on this computer),
+    // studio, found (databaseFound: that server's client program), other.
+    QString databaseServer = QStringLiteral("auto");
+    QString databaseFound;
+    // Studio's own server (D5–D8): the series (empty: the newest installed),
+    // its port, and whether it starts when Studio opens.
+    QString databaseSeries;
+    int databasePort = 3306;
+    bool databaseAutoStart = false;
+    // "Another server": its address and user (the password is in the
+    // system's secure store).
+    QString databaseHost = QStringLiteral("127.0.0.1");
+    int databaseOtherPort = 3306;
+    QString databaseUser = QStringLiteral("root");
+
     // Keys this version doesn't know, written back unchanged, so a newer
     // Studio's settings survive a run of an older one.
     QJsonObject unknown;
