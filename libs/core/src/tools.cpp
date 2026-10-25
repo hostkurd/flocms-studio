@@ -20,7 +20,9 @@
 #define NOMINMAX
 #endif
 // winsock2.h before windows.h; iphlpapi.h for the listening sockets
+// (its IPv6 table needs ws2tcpip.h's address types first)
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <iphlpapi.h>
 #pragma comment(lib, "iphlpapi.lib")
