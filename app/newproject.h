@@ -114,6 +114,7 @@ private:
 
     const FloStudio::Core::Settings *m_settings; // Studio's; null for a demo
     MariadbServer *m_mariadb = nullptr;          // Studio's
+    QMetaObject::Connection m_waitForServer;     // db-create waits for it to start
     FloStudio::Core::NewProject m_project;
     QString m_typedName;
     bool m_rememberPassword = true;

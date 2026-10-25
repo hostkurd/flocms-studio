@@ -500,14 +500,14 @@ void NewProjectWizard::runCreateDatabase(int index)
     }
     // Studio's server first, if it isn't running (D10): the step waits for it
     if (m_mariadb->state() != u"running") {
-        auto *wait = new QObject(this); // NOLINT(cppcoreguidelines-owning-memory): a child of this, deleted below
-        connect(m_mariadb, &MariadbServer::changed, wait, [this, wait, index] {
+        QObject::disconnect(m_waitForServer);
+        m_waitForServer = connect(m_mariadb, &MariadbServer::changed, this, [this, index] {
             const QString state = m_mariadb->state();
             if (state == u"running") {
-                wait->deleteLater();
+                QObject::disconnect(m_waitForServer);
                 runCreateDatabase(index);
             } else if (state == u"failed" || state == u"stopped") {
-                wait->deleteLater();
+                QObject::disconnect(m_waitForServer);
                 stepDone(index, false, {m_mariadb->error().isEmpty() ? QStringLiteral("db_start") : m_mariadb->error(),
                                         m_mariadb->detail(), {}});
             }
