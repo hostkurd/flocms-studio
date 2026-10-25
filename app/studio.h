@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QStringList>
+#include <QTimer>
 #include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
@@ -226,6 +227,7 @@ private:
     ProjectPackages *packagesFor(const QString &path);
     bool currentHasAdmin() const;
     void serversChanged();
+    void askDatabasePort();
 
     Language *m_language;
     FloStudio::Core::Settings m_settings;
@@ -241,6 +243,13 @@ private:
     QVariantList m_phpChoices;
     bool m_checking = false;
     bool m_recheck = false;
+    // Another MariaDB (XAMPP, Laragon…) started or stopped after the tools
+    // were looked for: port 3306 looked at every few seconds (without
+    // connecting). Only the newest look counts: each one, and each full
+    // look for the tools, takes the next number.
+    QTimer m_databasePoll;
+    quint64 m_databaseLook = 0;
+    QString m_mariadbState; // Studio's own server's last state, to see it stop
     QList<FloStudio::Core::ToolPackage> m_packages;
     QVariantList m_downloads;
     QStringList m_queue;

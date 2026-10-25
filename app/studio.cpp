@@ -221,6 +221,17 @@ void Studio::start()
             m_mariadb.start();
     });
     refreshTools(); // and Studio's MariaDB programs
+    m_databasePoll.setInterval(5000);
+    connect(&m_databasePoll, &QTimer::timeout, this, &Studio::askDatabasePort);
+    if (!m_demo)
+        m_databasePoll.start();
+    // Studio's own server just stopped (or didn't start): look at once, so
+    // the row doesn't show it as another server until the next look
+    connect(&m_mariadb, &MariadbServer::changed, this, [this] {
+        const QString state = m_mariadb.state();
+        if (std::exchange(m_mariadbState, state) != state && (state == QLatin1String("stopped") || state == QLatin1String("failed")))
+            askDatabasePort();
+    });
     // Servers left running by a Studio that crashed (macOS, Linux): asking
     // `ps` takes a moment, so on a worker thread
     auto *leftovers = new QFutureWatcher<QList<LeftoverServer>>(this); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): a child of this
@@ -795,6 +806,7 @@ void Studio::refreshTools()
         return;
     }
     m_checking = true;
+    ++m_databaseLook; // a look at 3306 already on its way is older than this one
     emit toolsChanged();
     auto *watcher = new QFutureWatcher<Found>(this); // a child of this, deleted when it finishes
     connect(watcher, &QFutureWatcher<Found>::finished, this, [this, watcher] {
@@ -809,6 +821,45 @@ void Studio::refreshTools()
             refreshTools();
     });
     watcher->setFuture(QtConcurrent::run(findTools, m_settings, m_packages));
+}
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
+// Whether a server listens on 3306 now: the MariaDB row follows another
+// server (XAMPP, Laragon…) started or stopped while Studio is open
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+void Studio::askDatabasePort()
+{
+    if (m_demo || m_closing || m_checking)
+        return;
+    const quint64 look = ++m_databaseLook;
+    auto *watcher = new QFutureWatcher<bool>(this); // a child of this, deleted when it finishes
+    connect(watcher, &QFutureWatcher<bool>::finished, this, [this, watcher, look] {
+        const bool running = watcher->result();
+        watcher->deleteLater();
+        // A newer look, or a full look for the tools, has the last word
+        if (look != m_databaseLook || m_checking)
+            return;
+        // While Studio's own server runs (or starts, or stops) the row
+        // shows that one: 3306 may be its own port
+        const QString own = m_mariadb.state();
+        if (own == QLatin1String("starting") || own == QLatin1String("running") || own == QLatin1String("stopping"))
+            return;
+        for (QVariant &item : m_tools) {
+            QVariantMap row = item.toMap();
+            if (row.value(QStringLiteral("tool")).toString() != QLatin1String("mariadb"))
+                continue;
+            const QString state = running ? QStringLiteral("running")
+                                  : row.value(QStringLiteral("product")).toString().isEmpty() ? QStringLiteral("optional")
+                                                                                              : QStringLiteral("found");
+            if (row.value(QStringLiteral("state")).toString() == state)
+                return;
+            row.insert(QStringLiteral("state"), state);
+            item = row;
+            emit toolsChanged();
+            return;
+        }
+    });
+    watcher->setFuture(QtConcurrent::run([] { return portListening(3306); }));
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 

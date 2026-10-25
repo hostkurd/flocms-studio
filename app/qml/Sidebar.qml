@@ -156,8 +156,14 @@ Rectangle {
                 delegate: RowLayout {
                     id: toolRow
                     required property var modelData
-                    // MariaDB: Studio's own server when it has one (D11)
-                    readonly property bool own: modelData.tool === "mariadb" && Studio.mariadb.state !== "none"
+                    // MariaDB: Studio's own server when it has one (D11),
+                    // unless it is stopped and another one (XAMPP, Laragon…)
+                    // answers: then that one, and Studio's can still start
+                    readonly property bool mine: modelData.tool === "mariadb" && Studio.mariadb.state !== "none"
+                    // (Studio's failing to start because that one holds the
+                    // port counts as stopped: its dialog says so)
+                    readonly property bool ownIdle: ownState === "stopped" || (ownState === "failed" && Studio.mariadb.error === "db_port_busy")
+                    readonly property bool own: mine && !(ownIdle && modelData.state === "running")
                     readonly property string ownState: Studio.mariadb.state
                     Layout.fillWidth: true
                     Layout.leftMargin: 6
@@ -169,7 +175,7 @@ Rectangle {
                         visible: !toolRow.own
                         readonly property bool bad: modelData.state === "missing" || modelData.state === "unsupported" || modelData.state === "failed"
                         ui: Texts.toolState(modelData)
-                        font.family: modelData.state === "found" || modelData.state === "running" ? Theme.monoFont : Lang.uiFont
+                        font.family: modelData.state === "found" || (modelData.state === "running" && !!modelData.version) ? Theme.monoFont : Lang.uiFont
                         font.pixelSize: 13
                         color: bad ? Theme.badText : (modelData.state === "optional" ? Theme.muted : Theme.okText)
                     }
@@ -180,7 +186,7 @@ Rectangle {
                         color: toolRow.ownState === "running" ? Theme.okText : (toolRow.ownState === "failed" ? Theme.badText : Theme.muted)
                     }
                     AppButton {
-                        visible: toolRow.own && toolRow.ownState !== "starting" && toolRow.ownState !== "stopping"
+                        visible: toolRow.mine && toolRow.ownState !== "starting" && toolRow.ownState !== "stopping"
                         small: true
                         implicitWidth: 30
                         leftPadding: 0
@@ -189,7 +195,8 @@ Rectangle {
                         iconFilled: true
                         danger: toolRow.ownState === "running"
                         text: ""
-                        Accessible.name: toolRow.ownState === "running" ? qsTr("Stop the database server") : qsTr("Start the database server")
+                        Accessible.name: toolRow.ownState === "running" ? qsTr("Stop the database server")
+                                         : (toolRow.own ? qsTr("Start the database server") : qsTr("Start Studio's own MariaDB"))
                         ToolTip.visible: hovered
                         ToolTip.text: Accessible.name
                         onClicked: toolRow.ownState === "running" ? Studio.mariadb.stop() : Studio.mariadb.start()

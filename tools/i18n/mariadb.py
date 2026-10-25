@@ -65,6 +65,7 @@ T = {
    ("يستخدم هذا المشروع MariaDB الخاص بـ Studio (`127.0.0.1:%1`)، وهو متوقف.",
     "ئەم پڕۆژەیە MariaDBی Studio بەکاردەهێنێت (`127.0.0.1:%1`)، کە وەستاوە."),
  "Start the database server": ("تشغيل خادم قاعدة البيانات", "دەستپێکردنی سێرڤەری داتابەیس"),
+ "Start Studio's own MariaDB": ("تشغيل MariaDB الخاص بـ Studio", "دەستپێکردنی MariaDBی تایبەتی Studio"),
  "Stop the database server": ("إيقاف خادم قاعدة البيانات", "وەستاندنی سێرڤەری داتابەیس"),
 
  # Downloads › MariaDB (board 3)

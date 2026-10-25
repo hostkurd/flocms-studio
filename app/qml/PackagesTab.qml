@@ -25,7 +25,22 @@ ScrollView {
     readonly property int updates: rows.filter(r => r.status === "update" || r.status === "major").length
     // The table's columns
     readonly property int versionWidth: 90
-    readonly property int statusWidth: 140
+    // The widths the header and every row use. In a narrow window (960 px,
+    // long labels) the version and status columns give up space, down to
+    // these, before the package name goes below 120 px
+    readonly property int versionMinimum: 74
+    readonly property int statusMinimum: 96
+    readonly property real tableWidth: tableHeader.width
+    readonly property real columnRoom: tableWidth - 20 - 4 * 14 - actionWidth - 120
+    readonly property real columnShare: Math.max(0, Math.min(1, columnRoom / (2 * versionWidth + statusWidth)))
+    readonly property int versionColumn: Math.max(versionMinimum, Math.floor(versionWidth * columnShare))
+    readonly property int statusColumn: Math.max(statusMinimum, Math.floor(statusWidth * columnShare))
+    readonly property int statusWidth: Math.max(measureCurrent.implicitWidth, measureUpdate.implicitWidth, measureMajor.implicitWidth,
+                                                measureZero.implicitWidth, measureThrough.implicitWidth, measureAbandoned.implicitWidth)
+    // The update's card beside the table: only when one is chosen and the
+    // window is wide enough
+    readonly property bool showPlan: tab.chosen !== "" && !!tab.plan.name
+    readonly property bool sideBySide: tab.width > 1150 && showPlan
     readonly property int actionWidth: Math.max(measureAdmin.implicitWidth, measureApi.implicitWidth, measureReview.implicitWidth)
     contentWidth: availableWidth
     clip: true
@@ -58,6 +73,13 @@ ScrollView {
     AppButton { id: measureAdmin; visible: false; small: true; text: qsTr("Add the admin panel") }
     AppButton { id: measureApi; visible: false; small: true; text: qsTr("Add the API") }
     AppButton { id: measureReview; visible: false; small: true; text: qsTr("Review update") }
+    // ... and the status column as wide as its widest label
+    Pill { id: measureCurrent; visible: false; text: qsTr("Up to date") }
+    Pill { id: measureUpdate; visible: false; text: qsTr("Update") }
+    Pill { id: measureMajor; visible: false; text: qsTr("New major version") }
+    Pill { id: measureZero; visible: false; text: qsTr("New 0.x version") }
+    Pill { id: measureThrough; visible: false; text: qsTr("Through another package") }
+    Pill { id: measureAbandoned; visible: false; text: qsTr("Abandoned") }
 
     function shortName(name) { return name.replace("hostkurd/", "") }
     function choose(name, kind) {
@@ -69,7 +91,7 @@ ScrollView {
 
     GridLayout {
         width: tab.availableWidth
-        columns: tab.width > 1150 ? 2 : 1
+        columns: tab.sideBySide ? 2 : 1
         columnSpacing: 20
         rowSpacing: 20
 
@@ -77,11 +99,11 @@ ScrollView {
         Card {
             // Side by side as on board 8; on a narrower window the update
             // comes first, above the table
-            Layout.row: tab.width > 1150 ? 0 : 1
+            Layout.row: tab.sideBySide || !tab.showPlan ? 0 : 1
             Layout.column: 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) * 2 / 3 : tab.availableWidth
+            Layout.preferredWidth: tab.sideBySide ? (tab.availableWidth - 20) * 2 / 3 : tab.availableWidth
             Layout.maximumWidth: Layout.preferredWidth
             Layout.minimumWidth: 0
             padding: 20
@@ -127,17 +149,25 @@ ScrollView {
                 }
             }
 
-            // The table: package, installed, latest, status, action
-            RowLayout {
+            // The table: package, installed, latest, status, action. Laid
+            // out like a row below (inside an item as wide as the card), so
+            // the columns line up
+            Item {
+                id: tableHeader
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-                spacing: 14
-                SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 120 }
-                SectionLabel { ui: qsTr("Installed"); Layout.preferredWidth: tab.versionWidth }
-                SectionLabel { ui: qsTr("Latest"); Layout.preferredWidth: tab.versionWidth }
-                SectionLabel { ui: qsTr("Status"); Layout.preferredWidth: tab.statusWidth }
-                Item { Layout.preferredWidth: tab.actionWidth }
+                implicitHeight: header.implicitHeight
+                RowLayout {
+                    id: header
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 14
+                    SectionLabel { ui: qsTr("Package"); Layout.fillWidth: true; Layout.minimumWidth: 80 }
+                    SectionLabel { ui: qsTr("Installed"); elide: Text.ElideRight; Layout.preferredWidth: tab.versionColumn }
+                    SectionLabel { ui: qsTr("Latest"); elide: Text.ElideRight; Layout.preferredWidth: tab.versionColumn }
+                    SectionLabel { ui: qsTr("Status"); elide: Text.ElideRight; Layout.preferredWidth: tab.statusColumn }
+                    Item { Layout.preferredWidth: tab.actionWidth }
+                }
             }
             // A row per package, its columns as wide as the header's
             Repeater {
@@ -158,40 +188,47 @@ ScrollView {
                         anchors.rightMargin: 10
                         spacing: 14
                         Mono {
-                            text: row.modelData.name
+                            // Without the "hostkurd/" every name has, when the
+                            // columns had to give up space
+                            text: tab.columnShare < 1 ? tab.shortName(row.modelData.name) : row.modelData.name
                             color: row.modelData.status === "missing" ? Theme.muted : Theme.text
                             elide: Text.ElideRight
                             Layout.fillWidth: true
-                            Layout.minimumWidth: 120
+                            Layout.minimumWidth: 80
                         }
                         Mono {
                             visible: row.modelData.status !== "missing"
                             text: row.modelData.version || ""
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         AppText {
                             visible: row.modelData.status === "missing"
                             ui: qsTr("Not installed")
                             color: Theme.muted
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         Mono {
                             text: row.modelData.latest || "—"
                             color: row.hasUpdate ? Theme.text : Theme.muted
                             elide: Text.ElideRight
-                            Layout.preferredWidth: tab.versionWidth
+                            Layout.preferredWidth: tab.versionColumn
                         }
                         Item {
-                            Layout.preferredWidth: tab.statusWidth
+                            Layout.preferredWidth: tab.statusColumn
                             implicitHeight: statusPill.implicitHeight
                         Pill {
                             id: statusPill
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
+                            // Cut at the column in the smallest window; the
+                            // whole label in the tooltip
                             width: Math.min(implicitWidth, parent.width)
                             clip: true
+                            ToolTip.visible: statusHover.hovered && width < implicitWidth
+                            ToolTip.text: text
+                            HoverHandler { id: statusHover }
                             visible: row.modelData.status !== "missing" && row.modelData.status !== "unknown"
                             text: row.modelData.abandoned ? qsTr("Abandoned")
                                   : row.modelData.status === "current" ? qsTr("Up to date")
@@ -257,12 +294,12 @@ ScrollView {
 
         // --- An update, or an addition ---
         Card {
-            visible: tab.chosen !== "" && !!tab.plan.name
+            visible: tab.showPlan
             Layout.row: 0
-            Layout.column: tab.width > 1150 ? 1 : 0
+            Layout.column: tab.sideBySide ? 1 : 0
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: tab.width > 1150 ? (tab.availableWidth - 20) / 3 : tab.availableWidth
+            Layout.preferredWidth: tab.sideBySide ? (tab.availableWidth - 20) / 3 : tab.availableWidth
             Layout.maximumWidth: Layout.preferredWidth
             Layout.minimumWidth: 0
             padding: 20

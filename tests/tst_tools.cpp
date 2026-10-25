@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QTcpServer>
+#include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -246,6 +247,32 @@ private slots:
         const quint16 port = server.serverPort();
         server.close();
         QVERIFY(!portAnswers(QStringLiteral("127.0.0.1"), port, 500));
+    }
+
+    // Seen without a connection: a database server would count one dropped
+    // before its handshake as failed (and block the address)
+    void listeningPorts()
+    {
+        for (const QHostAddress &host : {QHostAddress(QHostAddress::LocalHost), QHostAddress(QHostAddress::AnyIPv4),
+                                         QHostAddress(QHostAddress::Any), QHostAddress(QHostAddress::LocalHostIPv6)}) {
+            QTcpServer server;
+            if (!server.listen(host))
+                continue; // no IPv6 on this computer
+            const quint16 port = server.serverPort();
+            QVERIFY2(portListening(port), qPrintable(host.toString()));
+            QTest::qWait(50);
+            QVERIFY2(!server.hasPendingConnections(), "portListening connected to the server");
+            // Something connected: still listening, and that connection doesn't count
+            QTcpSocket client;
+            client.connectToHost(QHostAddress::LocalHost == host || host == QHostAddress(QHostAddress::LocalHostIPv6) ? host : QHostAddress(QHostAddress::LocalHost), port);
+            if (client.waitForConnected(1000))
+                QVERIFY(portListening(port));
+            client.abort();
+            server.close();
+            QVERIFY2(!portListening(port), qPrintable(host.toString()));
+        }
+        QVERIFY(!portListening(0));
+        QVERIFY(!portListening(70000));
     }
 };
 

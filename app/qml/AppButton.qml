@@ -12,6 +12,9 @@ Button {
     property string iconPath: ""
     property bool iconFilled: false // a solid shape (play, stop)
     property bool iconDirectional: false // flipped in right-to-left languages (a "back" arrow)
+    // A label with a `code word` is rich text. Not from `visible`: a hidden
+    // button (one that measures a column) must keep its label and width
+    readonly property bool richLabel: text.indexOf("`") >= 0
 
     implicitHeight: small ? 30 : 36
     topPadding: 0
@@ -59,15 +62,15 @@ Button {
         // Plain text, centred on the button's middle: rich text (only for a
         // label with a `code word`) lays its line out taller, low in the button
         AppText {
-            visible: control.text.indexOf("`") < 0
-            ui: visible ? control.text : ""
+            visible: !control.richLabel
+            ui: control.richLabel ? "" : control.text
             font: control.font
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
             Layout.alignment: Qt.AlignVCenter
         }
         RichText {
-            visible: control.text.indexOf("`") >= 0
-            raw: visible ? control.text : ""
+            visible: control.richLabel
+            raw: control.richLabel ? control.text : ""
             font: control.font
             color: control.primary ? Theme.accentText : (control.danger ? Theme.bad : Theme.text)
             Layout.alignment: Qt.AlignVCenter
