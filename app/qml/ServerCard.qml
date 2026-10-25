@@ -53,6 +53,8 @@ Card {
             + (card.minutes < 1 ? qsTr("started just now") : qsTr("started %Ln min ago", "", card.minutes))
         color: Theme.muted
         font.pixelSize: 13
+        wrapMode: Text.Wrap
+        Layout.fillWidth: true
     }
     // --host=0.0.0.0: the addresses for a phone or another computer
     ColumnLayout {
@@ -87,6 +89,8 @@ Card {
         wrapMode: Text.WrapAnywhere
         Layout.fillWidth: true
     }
+    // The button sits at the bottom, level with the other tiles' (Overview)
+    Item { Layout.fillHeight: true }
     AppButton {
         Layout.topMargin: 4
         text: card.running || card.state === "starting" ? qsTr("Stop server") : qsTr("Start server")

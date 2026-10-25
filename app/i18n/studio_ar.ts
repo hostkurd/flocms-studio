@@ -37,6 +37,123 @@
     </message>
 </context>
 <context>
+    <name>DatabaseCard</name>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="43" />
+        <source>Database</source>
+        <translation>قاعدة البيانات</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="46" />
+        <source>Not set up yet</source>
+        <translation>لم تُضبط بعد</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="65" />
+        <source>from `DB_DSN`</source>
+        <translation>من `DB_DSN`</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="71" />
+        <source>Set `DB_NAME` (and `DB_USERNAME` for MySQL) in `.env`. The Database tab will do this for you.</source>
+        <translation>اضبط `DB_NAME` (و`DB_USERNAME` لـ MySQL) في `.env`. سيقوم تبويب قاعدة البيانات بذلك نيابة عنك.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DatabaseCard.qml" line="82" />
+        <source>%Ln table(s)</source>
+        <translation>
+            <numerusform>لا جداول</numerusform>
+            <numerusform>جدول واحد</numerusform>
+            <numerusform>جدولان</numerusform>
+            <numerusform>%Ln جداول</numerusform>
+            <numerusform>%Ln جدولًا</numerusform>
+            <numerusform>%Ln جدول</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DatabaseCard.qml" line="83" />
+        <source>%Ln migration(s) waiting</source>
+        <translation>
+            <numerusform>لا ترحيلات بالانتظار</numerusform>
+            <numerusform>ترحيل واحد بالانتظار</numerusform>
+            <numerusform>ترحيلان بالانتظار</numerusform>
+            <numerusform>%Ln ترحيلات بالانتظار</numerusform>
+            <numerusform>%Ln ترحيلًا بالانتظار</numerusform>
+            <numerusform>%Ln ترحيل بالانتظار</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="83" />
+        <source>migrations up to date</source>
+        <translation>الترحيلات محدّثة</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="84" />
+        <source>Can't connect</source>
+        <translation>تعذّر الاتصال</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="85" />
+        <source>Checking…</source>
+        <translation>جارٍ الفحص…</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="104" />
+        <source>Another MariaDB is running on port %1.</source>
+        <translation>يعمل MariaDB آخر على المنفذ %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="105" />
+        <source>Studio's MariaDB is running on port %1.</source>
+        <translation>يعمل MariaDB الخاص بـ Studio على المنفذ %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="107" />
+        <source>Studio's MariaDB didn't start.</source>
+        <translation>لم يبدأ MariaDB الخاص بـ Studio.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="108" />
+        <source>Studio's MariaDB is stopped.</source>
+        <translation>MariaDB الخاص بـ Studio متوقف.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="117" />
+        <source>`.env` sets %1 twice. The website uses the first value, some `php flo` commands the last: remove one.</source>
+        <translation>يضبط `.env` المفتاح %1 مرتين. يستخدم الموقع القيمة الأولى، وبعض أوامر `php flo` القيمة الأخيرة: احذف إحداهما.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="133" />
+        <source>Run migrations</source>
+        <translation>تشغيل الترحيلات</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="141" />
+        <source>Start</source>
+        <translation>تشغيل</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="142" />
+        <source>Start the database server</source>
+        <translation>تشغيل خادم قاعدة البيانات</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="150" />
+        <source>Stop</source>
+        <translation>إيقاف</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="151" />
+        <source>Stop the database server</source>
+        <translation>إيقاف خادم قاعدة البيانات</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseCard.qml" line="158" />
+        <source>Database tab</source>
+        <translation>تبويب قاعدة البيانات</translation>
+    </message>
+</context>
+<context>
     <name>DatabaseSettings</name>
     <message>
         <location filename="../qml/DatabaseSettings.qml" line="59" />
@@ -472,6 +589,92 @@
             <numerusform>%Ln جدولًا وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
             <numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>DoctorCard</name>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="21" />
+        <source>Doctor</source>
+        <translation>الفحص</translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="31" />
+        <source>Checking…</source>
+        <translation>جارٍ الفحص…</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DoctorCard.qml" line="32" />
+        <source>%Ln problem(s)</source>
+        <translation>
+            <numerusform>لا مشكلات</numerusform>
+            <numerusform>مشكلة واحدة</numerusform>
+            <numerusform>مشكلتان</numerusform>
+            <numerusform>%Ln مشكلات</numerusform>
+            <numerusform>%Ln مشكلة</numerusform>
+            <numerusform>%Ln مشكلة</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DoctorCard.qml" line="33" />
+        <source>%Ln warning(s)</source>
+        <translation>
+            <numerusform>لا تحذيرات</numerusform>
+            <numerusform>تحذير واحد</numerusform>
+            <numerusform>تحذيران</numerusform>
+            <numerusform>%Ln تحذيرات</numerusform>
+            <numerusform>%Ln تحذيرًا</numerusform>
+            <numerusform>%Ln تحذير</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="34" />
+        <source>All checks pass</source>
+        <translation>كل الفحوص ناجحة</translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="34" />
+        <source>Not checked yet</source>
+        <translation>لم يُفحص بعد</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DoctorCard.qml" line="59" />
+        <source>and %Ln more</source>
+        <translation>
+            <numerusform>ولا شيء آخر</numerusform>
+            <numerusform>وواحد آخر</numerusform>
+            <numerusform>واثنان آخران</numerusform>
+            <numerusform>و%Ln أخرى</numerusform>
+            <numerusform>و%Ln أخرى</numerusform>
+            <numerusform>و%Ln أخرى</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="65" />
+        <source>Last checked: just now</source>
+        <translation>آخر فحص: الآن</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/DoctorCard.qml" line="65" />
+        <source>Last checked: %Ln min ago</source>
+        <translation>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل دقيقتين</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقائق</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+            <numerusform>آخر فحص: قبل %Ln دقيقة</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="76" />
+        <source>Run again</source>
+        <translation>إعادة الفحص</translation>
+    </message>
+    <message>
+        <location filename="../qml/DoctorCard.qml" line="81" />
+        <source>All checks</source>
+        <translation>كل الفحوص</translation>
     </message>
 </context>
 <context>
@@ -1891,127 +2094,62 @@
 <context>
     <name>OverviewTab</name>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="209" />
+        <location filename="../qml/OverviewTab.qml" line="78" />
         <source>Project</source>
         <translation>المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="211" />
+        <location filename="../qml/OverviewTab.qml" line="80" />
         <source>Name</source>
         <translation>الاسم</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="213" />
+        <location filename="../qml/OverviewTab.qml" line="82" />
         <source>Environment</source>
         <translation>البيئة</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="214" />
+        <location filename="../qml/OverviewTab.qml" line="83" />
         <source>production (not set)</source>
         <translation>production (غير محددة)</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="217" />
+        <location filename="../qml/OverviewTab.qml" line="86" />
         <source>Address</source>
         <translation>العنوان</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="219" />
+        <location filename="../qml/OverviewTab.qml" line="88" />
         <source>Started from</source>
         <translation>بدأ من</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="220" />
+        <location filename="../qml/OverviewTab.qml" line="89" />
         <source>skeleton %1</source>
         <translation>الهيكل %1</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="225" />
+        <location filename="../qml/OverviewTab.qml" line="94" />
         <source>Languages</source>
         <translation>اللغات</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="233" />
+        <location filename="../qml/OverviewTab.qml" line="102" />
         <source>%1 · default</source>
         <translation>%1 · الافتراضية</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="38" />
-        <location filename="../qml/OverviewTab.qml" line="46" />
-        <source>Database</source>
-        <translation>قاعدة البيانات</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="41" />
-        <source>Not set up yet</source>
-        <translation>لم تُضبط بعد</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="45" />
-        <source>Server</source>
-        <translation>الخادم</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="46" />
-        <source>File</source>
-        <translation>الملف</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="47" />
-        <source>Connection</source>
-        <translation>الاتصال</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="47" />
-        <source>from `DB_DSN`</source>
-        <translation>من `DB_DSN`</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="50" />
-        <source>Set `DB_NAME` (and `DB_USERNAME` for MySQL) in `.env`. The Database tab will do this for you.</source>
-        <translation>اضبط `DB_NAME` (و`DB_USERNAME` لـ MySQL) في `.env`. سيقوم تبويب قاعدة البيانات بذلك نيابة عنك.</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/OverviewTab.qml" line="60" />
-        <source>%Ln table(s)</source>
-        <translation>
-            <numerusform>لا جداول</numerusform>
-            <numerusform>جدول واحد</numerusform>
-            <numerusform>جدولان</numerusform>
-            <numerusform>%Ln جداول</numerusform>
-            <numerusform>%Ln جدولًا</numerusform>
-            <numerusform>%Ln جدول</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/OverviewTab.qml" line="64" />
-        <source>%Ln migration(s) waiting</source>
-        <translation>
-            <numerusform>لا ترحيلات بالانتظار</numerusform>
-            <numerusform>ترحيل واحد بالانتظار</numerusform>
-            <numerusform>ترحيلان بالانتظار</numerusform>
-            <numerusform>%Ln ترحيلات بالانتظار</numerusform>
-            <numerusform>%Ln ترحيلًا بالانتظار</numerusform>
-            <numerusform>%Ln ترحيل بالانتظار</numerusform>
-        </translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="72" />
-        <source>Run migrations</source>
-        <translation>تشغيل الترحيلات</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="78" />
-        <source>`.env` sets %1 twice. The website uses the first value, some `php flo` commands the last: remove one.</source>
-        <translation>يضبط `.env` المفتاح %1 مرتين. يستخدم الموقع القيمة الأولى، وبعض أوامر `php flo` القيمة الأخيرة: احذف إحداهما.</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="90" />
+        <location filename="../qml/OverviewTab.qml" line="185" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
+    <message>
+        <location filename="../qml/OverviewTab.qml" line="188" />
+        <source>Packages tab</source>
+        <translation>تبويب الحزم</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../qml/OverviewTab.qml" line="103" />
+        <location filename="../qml/OverviewTab.qml" line="204" />
         <source>and %Ln other package(s)</source>
         <translation>
             <numerusform>و%Ln حزمة أخرى</numerusform>
@@ -2023,57 +2161,47 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="109" />
+        <location filename="../qml/OverviewTab.qml" line="210" />
         <source>No `composer.lock` yet: run `composer install` in the project.</source>
         <translation>لا يوجد `composer.lock` بعد: شغّل `composer install` في المشروع.</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="116" />
+        <location filename="../qml/OverviewTab.qml" line="217" />
         <source>The packages are not installed (no `vendor/`): run `composer install`.</source>
         <translation>الحزم غير مثبّتة (لا يوجد `vendor/`): شغّل `composer install`.</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="129" />
-        <source>Doctor</source>
-        <translation>الفحص</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="132" />
-        <source>Run again</source>
-        <translation>إعادة الفحص</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="140" />
-        <source>Checking…</source>
-        <translation>جارٍ الفحص…</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="157" />
-        <source>All checks</source>
-        <translation>كل الفحوص</translation>
-    </message>
-    <message>
-        <location filename="../qml/OverviewTab.qml" line="166" />
+        <location filename="../qml/OverviewTab.qml" line="115" />
         <source>Quick commands</source>
         <translation>أوامر سريعة</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="174" />
+        <location filename="../qml/OverviewTab.qml" line="127" />
         <source>Admin resource…</source>
         <translation>مورد إدارة…</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="180" />
+        <location filename="../qml/OverviewTab.qml" line="128" />
+        <source>A page in the admin panel</source>
+        <translation>صفحة في لوحة الإدارة</translation>
+    </message>
+    <message>
+        <location filename="../qml/OverviewTab.qml" line="137" />
         <source>Migration…</source>
         <translation>ترحيل…</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="186" />
+        <location filename="../qml/OverviewTab.qml" line="138" />
+        <source>A new table or a change to one</source>
+        <translation>جدول جديد أو تعديل على جدول</translation>
+    </message>
+    <message>
+        <location filename="../qml/OverviewTab.qml" line="147" />
         <source>Clear cache</source>
         <translation>مسح الذاكرة المؤقتة</translation>
     </message>
     <message>
-        <location filename="../qml/OverviewTab.qml" line="192" />
+        <location filename="../qml/OverviewTab.qml" line="158" />
         <source>Optimize</source>
         <translation>تحسين</translation>
     </message>
@@ -2412,67 +2540,67 @@
         <translation>هذا موقع إنتاج.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="120" />
+        <location filename="../qml/ProjectPage.qml" line="136" />
         <source>Open site</source>
         <translation>فتح الموقع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="127" />
+        <location filename="../qml/ProjectPage.qml" line="143" />
         <source>Open admin</source>
         <translation>فتح لوحة الإدارة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="132" />
+        <location filename="../qml/ProjectPage.qml" line="148" />
         <source>Open folder</source>
         <translation>فتح المجلد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="137" />
+        <location filename="../qml/ProjectPage.qml" line="153" />
         <source>Open in editor</source>
         <translation>فتح في المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="145" />
+        <location filename="../qml/ProjectPage.qml" line="161" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="145" />
+        <location filename="../qml/ProjectPage.qml" line="161" />
         <source>Start server</source>
         <translation>تشغيل الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="166" />
+        <location filename="../qml/ProjectPage.qml" line="182" />
         <source>Remove from the list</source>
         <translation>إزالة من القائمة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Overview</source>
         <translation>نظرة عامة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Generate</source>
         <translation>المولّدات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="184" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>
@@ -2527,22 +2655,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/ServerCard.qml" line="61" />
+        <location filename="../qml/ServerCard.qml" line="63" />
         <source>From other devices on your network:</source>
         <translation>من الأجهزة الأخرى على شبكتك:</translation>
     </message>
     <message>
-        <location filename="../qml/ServerCard.qml" line="69" />
+        <location filename="../qml/ServerCard.qml" line="71" />
         <source>Runs the site with `php flo serve` on port %1.</source>
         <translation>يشغّل الموقع بالأمر `php flo serve` على المنفذ %1.</translation>
     </message>
     <message>
-        <location filename="../qml/ServerCard.qml" line="92" />
+        <location filename="../qml/ServerCard.qml" line="96" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ServerCard.qml" line="92" />
+        <location filename="../qml/ServerCard.qml" line="96" />
         <source>Start server</source>
         <translation>تشغيل الخادم</translation>
     </message>

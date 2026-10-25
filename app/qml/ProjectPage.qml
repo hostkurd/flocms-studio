@@ -100,7 +100,10 @@ Item {
         GridLayout {
             id: header
             Layout.fillWidth: true
-            columns: nameColumn.implicitWidth + actions.implicitWidth + columnSpacing <= width ? 2 : 1
+            // From the page's width (minus the margins), not the header's
+            // own: the wrapping buttons change the header's width
+            readonly property real room: Math.max(0, page.width - 56)
+            columns: nameColumn.implicitWidth + actions.oneLine + columnSpacing <= room ? 2 : 1
             columnSpacing: 16
             rowSpacing: 12
             ColumnLayout {
@@ -111,10 +114,26 @@ Item {
                 Heading { level: 1; text: page.info.name || ""; elide: Text.ElideRight; Layout.fillWidth: true }
                 Mono { text: page.info.path || ""; color: Theme.muted; elide: Text.ElideMiddle; Layout.fillWidth: true }
             }
-            RowLayout {
+            // On their own line they wrap, so long labels (Kurdish) never
+            // push the page past the window's edge
+            Flow {
                 id: actions
                 spacing: 8
+                // Their width on one line
+                readonly property real oneLine: {
+                    let total = 0
+                    let shown = 0
+                    for (let i = 0; i < children.length; ++i) {
+                        if (children[i].visible) {
+                            total += children[i].implicitWidth
+                            shown += 1
+                        }
+                    }
+                    return total + Math.max(0, shown - 1) * spacing
+                }
                 Layout.alignment: header.columns === 2 ? Qt.AlignTop : Qt.AlignLeft
+                Layout.preferredWidth: header.columns === 2 ? oneLine : header.room
+                Layout.maximumWidth: Layout.preferredWidth
                 AppButton {
                     visible: !page.info.error
                     text: qsTr("Open site")
