@@ -69,7 +69,8 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     currentIndex: Studio.page === "new" ? 3 : (Studio.page === "settings" ? 2 : (Studio.page === "project" ? 1 : 0))
-                    // Each page is made the first time it is shown, then kept
+                    // Each page is made the first time it is shown, then kept;
+                    // `index` must match currentIndex above
                     ShownOnce { index: 0; sourceComponent: Component { WelcomePage { onDownloadRequested: downloads.open() } } }
                     ShownOnce { index: 1; sourceComponent: Component { ProjectPage {} } }
                     ShownOnce { index: 2; sourceComponent: Component { SettingsPage { onDownloadRequested: downloads.open() } } }

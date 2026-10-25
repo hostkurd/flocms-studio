@@ -9,8 +9,9 @@ Window {
     id: splash
     width: 360
     height: 200
-    x: Math.round((Screen.width - width) / 2)
-    y: Math.round((Screen.height - height) / 2)
+    // The middle of the main screen, wherever it sits on the desktop
+    x: Screen.virtualX + Math.round((Screen.width - width) / 2)
+    y: Screen.virtualY + Math.round((Screen.height - height) / 2)
     flags: Qt.SplashScreen | Qt.FramelessWindowHint
     // Solid: a see-through window shows black corners where there is no
     // compositor (some Linux desktops)
@@ -37,7 +38,7 @@ Window {
                     source: "qrc:/icons/logo-128.png"
                     width: 44
                     height: 44
-                    sourceSize: Qt.size(88, 88)
+                    sourceSize: Qt.size(128, 128)
                     smooth: true
                     anchors.verticalCenter: parent.verticalCenter
                 }

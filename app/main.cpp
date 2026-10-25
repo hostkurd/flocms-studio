@@ -253,6 +253,14 @@ int main(int argc, char *argv[])
 
     // The splash goes once the main window has drawn its first frame
     if (splash && mainWindow) {
+        // Also after a few seconds, and when the main window is minimized:
+        // a window started minimized (or on another macOS Space) never
+        // draws, and the frameless splash would stay. Closing twice is fine.
+        QTimer::singleShot(5000, splash, [splash] { splash->close(); });
+        QObject::connect(mainWindow, &QWindow::windowStateChanged, splash, [splash](Qt::WindowState state) {
+            if (state == Qt::WindowMinimized)
+                splash->close();
+        });
         auto closeSplash = std::make_shared<QMetaObject::Connection>();
         *closeSplash = QObject::connect(mainWindow, &QQuickWindow::frameSwapped, splash, [splash, closeSplash] {
             QObject::disconnect(*closeSplash);
