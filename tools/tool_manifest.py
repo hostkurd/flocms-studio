@@ -15,8 +15,10 @@ Sources, all HTTPS:
   PHP, Windows       windows.php.net (NTS x64 zips; no ARM builds exist)
   PHP, macOS/Linux   dl.static-php.dev, the "common" builds (one php binary)
   Composer           getcomposer.org (composer.phar, run with the chosen PHP)
-  MariaDB, Windows   archive.mariadb.org (the zip). None for macOS (MariaDB
-                     builds none: Homebrew), none for Linux (the packages)
+  MariaDB            archive.mariadb.org: the Windows zip and the Linux
+                     x86_64 bintar (linux-systemd), the two newest LTS
+                     series. Linux arm64 when MariaDB publishes a bintar
+                     for it. None for macOS (MariaDB builds none: Homebrew)
 """
 import argparse
 import hashlib
@@ -31,7 +33,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "libs" / "core" / "resources" / "tools.json"
 PHP_MINORS = 2          # the two newest PHP versions (Q9)
-MARIADB_SERIES = "11.8"  # the newest LTS
+# The two newest LTS series, newest first: the first is the default download,
+# the second "Another version" (MariaDB design note D2). 12.3 GA 29 May 2026.
+MARIADB_SERIES = ["12.3", "11.8"]
+# Each MariaDB platform: (Studio platform, archive folder, file suffix, type, required)
+MARIADB_PLATFORMS = [
+    ("windows-x86_64", "winx64-packages", "winx64.zip", "zip", True),
+    ("linux-x86_64", "bintar-linux-systemd-x86_64", "linux-systemd-x86_64.tar.gz", "tar.gz", True),
+    ("linux-arm64", "bintar-linux-systemd-aarch64", "linux-systemd-aarch64.tar.gz", "tar.gz", False),
+]
 STATIC_PLATFORMS = {("macos", "aarch64"): "macos-arm64", ("macos", "x86_64"): "macos-x86_64",
                     ("linux", "x86_64"): "linux-x86_64", ("linux", "aarch64"): "linux-arm64"}
 UA = {"User-Agent": "FloCMS Studio tool list (github.com/hostkurd/flocms-studio)"}
@@ -131,21 +141,44 @@ def composer() -> list[dict]:
     return [entry("composer", "composer", stable["version"], "any", [url], "phar", "getcomposer.org", published)]
 
 
+def published_sha256(folder: str, name: str) -> str | None:
+    """The hash in the folder's sha256sums.txt for name; None when the folder
+    or the line isn't there."""
+    try:
+        sums = fetch(folder + "sha256sums.txt").decode()
+    except RuntimeError:
+        return None
+    return next((line.split()[0] for line in sums.splitlines() if line.strip().endswith(name)), None)
+
+
 def mariadb() -> list[dict]:
     base = "https://archive.mariadb.org/"
     listing = fetch(base).decode("utf-8", "replace")
-    patches = sorted(set(re.findall(rf"mariadb-({re.escape(MARIADB_SERIES)}\.\d+)/", listing)), key=version_key)
-    if not patches:
-        raise RuntimeError(f"archive.mariadb.org: no {MARIADB_SERIES} release")
-    version = patches[-1]
-    folder = f"{base}mariadb-{version}/winx64-packages/"
-    sums = fetch(folder + "sha256sums.txt").decode()
-    name = f"mariadb-{version}-winx64.zip"
-    published = next((line.split()[0] for line in sums.splitlines() if line.strip().endswith(name)), None)
-    if not published:
-        raise RuntimeError(f"{folder}sha256sums.txt has no {name}")
-    return [entry(f"mariadb-{MARIADB_SERIES}", "mariadb", version, "windows-x86_64", [folder + name], "zip",
-                  "mariadb.org", published)]
+    out = []
+    for series in MARIADB_SERIES:
+        patches = sorted(set(re.findall(rf"mariadb-({re.escape(series)}\.\d+)/", listing)), key=version_key, reverse=True)
+        if not patches:
+            raise RuntimeError(f"archive.mariadb.org: no {series} release")
+        # The newest patch whose Windows zip is published (a release being
+        # uploaded has its folder before its files)
+        for version in patches[:3]:
+            folder = f"{base}mariadb-{version}/winx64-packages/"
+            if published_sha256(folder, f"mariadb-{version}-winx64.zip"):
+                break
+        else:
+            raise RuntimeError(f"archive.mariadb.org: no {series} release with a Windows zip in {patches[:3]}")
+        for platform, sub, suffix, archive, required in MARIADB_PLATFORMS:
+            folder = f"{base}mariadb-{version}/{sub}/"
+            name = f"mariadb-{version}-{suffix}"
+            published = published_sha256(folder, name)
+            if not published:
+                if required:
+                    raise RuntimeError(f"{folder}sha256sums.txt has no {name}")
+                notice("notice", f"MariaDB {version}: no {platform} build ({folder})")
+                continue
+            out.append(entry(f"mariadb-{series}", "mariadb", version, platform, [folder + name], archive,
+                             "mariadb.org", published))
+    return out
 
 
 def main() -> int:

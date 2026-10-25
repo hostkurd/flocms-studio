@@ -124,6 +124,19 @@ bool linksStayInside(const QString &folder)
     return true;
 }
 
+// What Studio leaves out of an archive. MariaDB's carry its test suite,
+// benchmarks, headers and static/link libraries (the Linux bintar is about
+// 400 MiB): Studio only runs bin/, lib/ (plugins, shared libraries),
+// share/ and scripts/ (MariaDB design note D3).
+QStringList unpackExclusions(const ToolPackage &package)
+{
+    if (package.tool != u"mariadb")
+        return {};
+    return {QStringLiteral("mysql-test"), QStringLiteral("mariadb-test"), QStringLiteral("sql-bench"),
+            QStringLiteral("include"),    QStringLiteral("*.a"),          QStringLiteral("*.lib"),
+            QStringLiteral("*.pdb")};
+}
+
 bool isWorkFolder(const QString &name)
 {
     return name.endsWith(QStringLiteral(".new")) || name.endsWith(QStringLiteral(".old")) || name.startsWith(u'.');
@@ -431,15 +444,22 @@ QString sha256OfFile(const QString &path)
     return QString::fromLatin1(hash.result().toHex());
 }
 
-Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder)
+Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder,
+                            const QStringList &exclude)
 {
     if (!QDir().mkpath(folder))
         return Error{QStringLiteral("tool_extract"), folder};
     QProcess tar;
     tar.setProgram(tarProgram());
     // -x extract, -f file, -C into; bsdtar and GNU tar both read .tar.gz with -z implied
-    tar.setArguments({QStringLiteral("-x"), QStringLiteral("-f"), QDir::toNativeSeparators(archive), QStringLiteral("-C"),
-                      QDir::toNativeSeparators(folder)});
+    QStringList arguments{QStringLiteral("-x")};
+    // bsdtar and GNU tar both match --exclude patterns at any folder level;
+    // given before the archive so both read them as options
+    for (const QString &pattern : exclude)
+        arguments << QStringLiteral("--exclude=") + pattern;
+    arguments << QStringLiteral("-f") << QDir::toNativeSeparators(archive) << QStringLiteral("-C")
+              << QDir::toNativeSeparators(folder);
+    tar.setArguments(arguments);
     tar.start();
     if (!tar.waitForFinished(10 * 60 * 1000) || tar.exitStatus() != QProcess::NormalExit || tar.exitCode() != 0)
         return Error{QStringLiteral("tool_extract"),
@@ -476,7 +496,8 @@ Result<QString> installDownloaded(const ToolPackage &package, const QString &fil
     if (package.archive == u"phar") {
         if (!QDir().mkpath(staging) || !QFile::copy(file, QDir(staging).filePath(QStringLiteral("composer.phar"))))
             return fail(Error{QStringLiteral("tool_install"), staging});
-    } else if (const auto extracted = extractArchive(file, package.archive, staging); !extracted) {
+    } else if (const auto extracted = extractArchive(file, package.archive, staging, unpackExclusions(package));
+               !extracted) {
         return fail(extracted.error());
     }
 
