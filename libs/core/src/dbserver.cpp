@@ -346,6 +346,8 @@ private:
         if (!QDir().mkpath(files.folder))
             return fail(Error{QStringLiteral("db_init"), files.folder});
         QFile::setPermissions(files.folder, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        if (!files.socket.isEmpty())
+            QDir().mkpath(QFileInfo(files.socket).path());
         run([port] { return portAnswers(QStringLiteral("127.0.0.1"), port, 400); }, [this, files](bool busy) {
             if (!going())
                 return;
@@ -438,8 +440,10 @@ private:
                     return;
                 if (exitCode != 0 || crashed || !databaseServerInitialized(m_start.files))
                     return fail(Error{QStringLiteral("db_init"), QStringLiteral("mariadb-install-db: exit %1").arg(exitCode)});
-                // Windows: its tool set root's password
+                // Windows: its tool set root's password (for root@localhost);
+                // every root account and no anonymous one follow at the start
                 if (isWindowsPlatform(m_start.files.platform)) {
+                    m_freshWindows = true;
                     QFile marker(markerPath(m_start.files));
                     if (!marker.open(QIODevice::WriteOnly))
                         return fail(Error{QStringLiteral("db_root"), marker.fileName()});
@@ -533,8 +537,10 @@ private:
     // 5: root's password works (an existing data folder), over TCP
     void checkRoot()
     {
-        const Command check = databaseSqlCommand(m_start.files, m_start.port, QStringLiteral("root"), m_start.rootPassword,
-                                                 QStringLiteral("SELECT 1;\n"));
+        // A new Windows data folder: root's password on every root account,
+        // anonymous ones dropped (as root, with its password)
+        const QString sql = std::exchange(m_freshWindows, false) ? rootPasswordSql(m_start.rootPassword) : QStringLiteral("SELECT 1;\n");
+        const Command check = databaseSqlCommand(m_start.files, m_start.port, QStringLiteral("root"), m_start.rootPassword, sql);
         run([check] { return runCaptured(check, 30000); }, [this](const Captured &captured) {
             if (!going() || !alive(m_process))
                 return;
@@ -586,6 +592,7 @@ private:
     bool m_failing = false;
     bool m_cancelled = false;
     bool m_restarting = false;
+    bool m_freshWindows = false; // set up just now on Windows: root's password goes everywhere at the start
 };
 
 } // namespace
@@ -632,9 +639,11 @@ DatabaseServerFiles databaseServerFiles(const QString &server, const QString &se
     // A socket path has a limit (104 bytes on macOS, 108 on Linux): a long
     // one goes to this user's private runtime folder instead
     if (!windows && files.socket.toUtf8().size() > 100) {
-        QString runtime = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
-        if (runtime.isEmpty() || runtime.toUtf8().size() > 60)
-            runtime = QStandardPaths::writableLocation(QStandardPaths::TempLocation); // per user on macOS
+        // Linux: the user's private runtime folder ($XDG_RUNTIME_DIR, 0700);
+        // macOS: the user's own temporary folder (/var/folders/.../T, 0700)
+        QString runtime = qEnvironmentVariable("XDG_RUNTIME_DIR");
+        if (runtime.isEmpty() || !QFileInfo(runtime).isDir())
+            runtime = QDir::tempPath();
         files.socket = QDir(runtime).filePath(QStringLiteral("flostudio-mariadb-%1.sock").arg(series));
     }
     return files;
