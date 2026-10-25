@@ -40,7 +40,11 @@ elseif(APPLE)
         MACOSX_BUNDLE_BUNDLE_NAME "FloCMS Studio"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.hostkurd.flocmsstudio"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_ICON_FILE "studio.icns")
+    # The app's icon, in Contents/Resources
+    set_source_files_properties(icons/studio.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(Studio PRIVATE icons/studio.icns)
 else()
     set_target_properties(Studio PROPERTIES OUTPUT_NAME "flocms-studio")
 endif()
@@ -111,6 +115,11 @@ qt_add_qml_module(Studio
         appinfo.h
         appinfo.cpp
 )
+
+# The logo (tools/make_icons.py), at :/icons/: the window icon and the sidebar
+qt_add_resources(Studio "icons"
+    PREFIX /
+    FILES icons/logo-64.png icons/logo-128.png icons/logo-256.png icons/logo-512.png)
 
 # The bundled fonts (D8; tools/make_fonts.py), at :/fonts/
 file(GLOB STUDIO_FONTS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS fonts/*.ttf)

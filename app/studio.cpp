@@ -245,6 +245,10 @@ Result<Done> Studio::startDemo(const QString &file)
     m_demoDialog = demo.value(QStringLiteral("dialog")).toString();
     m_demoTab = demo.value(QStringLiteral("tab")).toString();
     m_demoToolsFolder = demo.value(QStringLiteral("toolsFolder")).toString();
+    // Packages the demo has downloaded already (their ids)
+    m_demoDownloaded.clear();
+    for (const auto &id : demo.value(QStringLiteral("downloaded")).toArray())
+        m_demoDownloaded << id.toString();
     QFile list(QStringLiteral(":/flostudio/core/tools.json"));
     if (list.open(QIODevice::ReadOnly)) {
         const auto packages = toolPackages(list.readAll(), m_platform);
@@ -324,7 +328,7 @@ QVariantList Studio::downloadOffer() const
 {
     QVariantList offer;
     for (const ToolPackage &package : m_packages) {
-        const bool installed = !m_demo && !installedProgram(package).isEmpty();
+        const bool installed = m_demo ? m_demoDownloaded.contains(package.id) : !installedProgram(package).isEmpty();
         offer << QVariantMap{{QStringLiteral("id"), package.id},         {QStringLiteral("tool"), package.tool},
                              {QStringLiteral("version"), package.version}, {QStringLiteral("source"), package.source},
                              {QStringLiteral("size"), package.size},       {QStringLiteral("installed"), installed}};

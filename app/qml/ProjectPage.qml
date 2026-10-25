@@ -191,6 +191,7 @@ Item {
                     implicitHeight: 40
                     leftPadding: 4
                     rightPadding: 4
+                    hoverEnabled: true
                     font.family: Lang.uiFont
                     font.pixelSize: 14
                     font.weight: tabs.currentIndex === index ? Font.DemiBold : Font.Medium
@@ -200,13 +201,13 @@ Item {
                             anchors.bottom: parent.bottom
                             width: parent.width
                             height: 2
-                            color: tabs.currentIndex === tabButton.index ? Theme.accent : "transparent"
+                            color: tabs.currentIndex === tabButton.index ? Theme.accent : (tabButton.hovered ? Theme.controlBorder : "transparent")
                         }
                     }
                     contentItem: AppText {
                         ui: tabButton.text
                         font: tabButton.font
-                        color: tabs.currentIndex === tabButton.index ? Theme.selectedText : Theme.muted
+                        color: tabs.currentIndex === tabButton.index ? Theme.selectedText : (tabButton.hovered ? Theme.text : Theme.muted)
                         horizontalAlignment: Text.AlignHCenter
                     }
                 }

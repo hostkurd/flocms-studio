@@ -16,8 +16,22 @@ Rectangle {
 
     implicitHeight: content.implicitHeight + 20
     radius: 10
-    color: row.checked ? Theme.optionSelectedBg : "transparent"
-    border.color: row.checked ? Theme.accent : Theme.border
+    // The whole row is the control: it shows the pointer over it, and a
+    // click anywhere on it chooses it. Not enabled: greyed, nothing happens
+    color: row.checked ? Theme.optionSelectedBg : (hover.hovered ? Theme.hoverBg : "transparent")
+    border.color: row.checked ? Theme.accent : (hover.hovered ? Theme.controlBorderHover : Theme.border)
+    opacity: row.enabled ? 1 : 0.55
+    HoverHandler { id: hover; enabled: row.enabled; cursorShape: Qt.PointingHandCursor }
+    TapHandler {
+        enabled: row.enabled
+        onTapped: {
+            if (row.radio) {
+                if (!row.checked) row.toggled(true)
+            } else {
+                row.toggled(!row.checked)
+            }
+        }
+    }
 
     RowLayout {
         id: content

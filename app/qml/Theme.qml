@@ -22,6 +22,15 @@ QtObject {
     readonly property color selectedBg: dark ? "#18323F" : "#E7F4F9"
     readonly property color selectedText: dark ? "#E4ECF1" : "#0B4F68"
     readonly property color optionSelectedBg: dark ? "#132A35" : "#F1F9FC"
+    // Controls: what can be clicked shows it (a border, hover and pressed
+    // backgrounds), as native controls do
+    readonly property color controlBg: dark ? "#1A2731" : "#FFFFFF"
+    readonly property color controlBorder: dark ? "#3A4D5A" : "#BCC8D1"
+    readonly property color controlBorderHover: dark ? "#557080" : "#8FA1AE"
+    readonly property color hoverBg: dark ? "#213240" : "#EEF4F7"
+    readonly property color pressedBg: dark ? "#2A3E4D" : "#DFE9EF"
+    readonly property color accentHover: dark ? "#5CC8E7" : "#095D7B"
+    readonly property color accentPressed: dark ? "#2AA6CA" : "#074C64"
     readonly property color brand: "#38BBE0"
     readonly property color brandText: "#05303F"
     readonly property color idle: dark ? "#5F7180" : "#9AA7B1"

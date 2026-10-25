@@ -100,8 +100,8 @@ ScrollView {
             Card {
                 Layout.fillWidth: true
                 // Fixed shares of the row, whatever the content asks for
-                Layout.preferredWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 3 / 5
-                Layout.maximumWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 3 / 5
+                Layout.preferredWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 3 / 5
+                Layout.maximumWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 3 / 5
                 Layout.minimumWidth: 0
                 Layout.alignment: Qt.AlignTop
                 RowLayout {
@@ -190,8 +190,8 @@ ScrollView {
             Card {
                 Layout.fillWidth: true
                 // Fixed shares of the row, whatever the content asks for
-                Layout.preferredWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 2 / 5
-                Layout.maximumWidth: cards.columns === 1 ? cards.width : (cards.width - cards.columnSpacing) * 2 / 5
+                Layout.preferredWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 2 / 5
+                Layout.maximumWidth: cards.columns === 1 ? tab.availableWidth : (tab.availableWidth - cards.columnSpacing) * 2 / 5
                 Layout.minimumWidth: 0
                 Layout.alignment: Qt.AlignTop
                 RowLayout {

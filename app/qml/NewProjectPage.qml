@@ -90,10 +90,12 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
-                Rectangle {
-                    width: 32; height: 32; radius: 8
-                    color: Theme.brand
-                    AppText { anchors.centerIn: parent; text: "F"; color: Theme.brandText; font.family: Lang.displayFont; font.weight: Font.Bold; font.pixelSize: 17 }
+                Image {
+                    source: "qrc:/icons/logo-128.png"
+                    sourceSize: Qt.size(64, 64)
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
+                    mipmap: true
                 }
                 Heading { level: 1; ui: qsTr("New FloCMS project"); Layout.fillWidth: true }
                 AppButton {

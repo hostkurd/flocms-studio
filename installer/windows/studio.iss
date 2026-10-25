@@ -34,6 +34,8 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayIcon={app}\Studio.exe
+; The setup program's own icon (relative to this file)
+SetupIconFile=..\..\app\icons\studio.ico
 UninstallDisplayName=FloCMS Studio
 LicenseFile={#SourceDir}\LICENSE.txt
 

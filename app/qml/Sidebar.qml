@@ -38,17 +38,13 @@ Rectangle {
             spacing: 10
             Layout.leftMargin: 6
             Layout.bottomMargin: 16
-            Rectangle {
-                width: 32; height: 32; radius: 8
-                color: Theme.brand
-                AppText {
-                    anchors.centerIn: parent
-                    text: "F"
-                    color: Theme.brandText
-                    font.family: "Bricolage Grotesque"
-                    font.weight: Font.Bold
-                    font.pixelSize: 17
-                }
+            Image {
+                source: "qrc:/icons/logo-128.png"
+                sourceSize: Qt.size(64, 64)
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                smooth: true
+                mipmap: true
             }
             AppText { text: "FloCMS Studio"; font.family: "Bricolage Grotesque"; font.weight: Font.Bold; font.pixelSize: 17 }
         }
