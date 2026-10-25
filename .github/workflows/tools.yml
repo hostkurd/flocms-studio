@@ -112,4 +112,4 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           .github/scripts/run_tests.sh build -R tst_dbserver -V
-          grep -E "QINFO|›" ctest.log | head -40 | sed 's/^/::notice::/' || true
+          grep -E "QINFO|SKIP|Totals|FAIL" ctest.log | head -40 | sed 's/^/::notice::/' || true
