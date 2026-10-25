@@ -235,7 +235,7 @@ private slots:
         for (const char *name : {"bin/mariadbd", "bin/mariadb-admin", "scripts/mariadb-install-db", "lib/libmariadb.so.3",
                                  "lib/plugin/ha_rocksdb.so", "share/english/errmsg.sys", "lib/libmariadbd.a",
                                  "mariadb-test/mariadb-test-run.pl", "mysql-test/suite/x.test", "sql-bench/run-all-tests",
-                                 "include/mysql/mysql.h"})
+                                 "include/mysql/mysql.h", "lib/mariadbclient.lib", "bin/mariadbd.pdb", "share/include_me.txt"})
             writeFile(top + u'/' + QLatin1String(name), "x");
 #ifndef Q_OS_WIN
         // The bintar's bin/ links into the test suite Studio leaves out: dropped
@@ -251,9 +251,10 @@ private slots:
         QVERIFY(installDownloaded(db, archive, tools).ok());
         const QString root = tools + QStringLiteral("/mariadb-12.3/");
         for (const char *kept : {"bin/mariadbd", "bin/mariadb-admin", "scripts/mariadb-install-db", "lib/libmariadb.so.3",
-                                 "lib/plugin/ha_rocksdb.so", "share/english/errmsg.sys"})
+                                 "lib/plugin/ha_rocksdb.so", "share/english/errmsg.sys", "share/include_me.txt"})
             QVERIFY2(QFileInfo::exists(root + QLatin1String(kept)), kept);
-        for (const char *left : {"lib/libmariadbd.a", "mariadb-test", "mysql-test", "sql-bench", "include"})
+        for (const char *left : {"lib/libmariadbd.a", "mariadb-test", "mysql-test", "sql-bench", "include",
+                                 "lib/mariadbclient.lib", "bin/mariadbd.pdb"})
             QVERIFY2(!QFileInfo::exists(root + QLatin1String(left)), left);
 #ifndef Q_OS_WIN
         QVERIFY(!QFileInfo(root + QStringLiteral("bin/mariadb-test-run")).isSymLink());
@@ -372,8 +373,34 @@ private slots:
         QCOMPARE(refused.error().code, QStringLiteral("tool_extract"));
         QVERIFY(refused.error().detail.contains(QStringLiteral("(link)")));
 
-        // A link inside the package is fine
+        // Through a linked folder: "d/.." is where d's target goes up to,
+        // not d's own folder (Qt's cleaned link text would say inside)
         QFile::remove(content + QStringLiteral("/link"));
+        QDir().mkpath(content + QStringLiteral("/x/y/z"));
+        writeFile(content + QStringLiteral("/x/y/secret"), "decoy");
+        // d itself stays inside (it is x/); x/.. /.. is the tools folder
+        QVERIFY(QFile::link(QStringLiteral("../../../x"), content + QStringLiteral("/x/y/z/d")));
+        QVERIFY(QFile::link(QStringLiteral("x/y/z/d/../../secret"), content + QStringLiteral("/link")));
+        writeFile(tools + QStringLiteral("/secret"), "outside");
+        QVERIFY(makeTarGz(archive, content));
+        ToolPackage tricky = php;
+        tricky.sha256 = sha256OfFile(archive);
+        QCOMPARE(installDownloaded(tricky, archive, tools).error().code, QStringLiteral("tool_extract"));
+        QFile::remove(content + QStringLiteral("/link"));
+        QFile::remove(content + QStringLiteral("/x/y/z/d"));
+
+        // Checked where links finally are: a link to the top folder's parent
+        // points outside once the top folder's contents move up
+        const QString nested = dir.filePath(QStringLiteral("nested"));
+        writeFile(nested + QStringLiteral("/top/php"), "#!/bin/sh\n");
+        QVERIFY(QFile::link(QStringLiteral(".."), nested + QStringLiteral("/top/up")));
+        QVERIFY(makeTarGz(archive, nested));
+        ToolPackage moved = php;
+        moved.sha256 = sha256OfFile(archive);
+        QCOMPARE(installDownloaded(moved, archive, tools).error().code, QStringLiteral("tool_extract"));
+        QVERIFY(QFileInfo::exists(tools + QStringLiteral("/secret")));
+
+        // A link inside the package is fine
         QVERIFY(QFile::link(QStringLiteral("php"), content + QStringLiteral("/php-cli")));
         QVERIFY(makeTarGz(archive, content));
         ToolPackage again = php;

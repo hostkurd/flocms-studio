@@ -85,8 +85,22 @@ def version_key(version: str) -> tuple[int, ...]:
     return tuple(int(part) for part in re.findall(r"\d+", version))
 
 
+def committed_entry(url: str) -> dict | None:
+    try:
+        tools = json.loads(MANIFEST.read_text(encoding="utf-8"))["tools"]
+    except (OSError, ValueError, KeyError):
+        return None
+    return next((t for t in tools if t.get("urls", [None])[0] == url), None)
+
+
 def entry(tool_id, tool, version, platform, urls, archive, source, published=None):
-    sha256, size = measure(urls[0])
+    # A file the source publishes a hash for, already in the committed list
+    # with that hash: not downloaded again (MariaDB's are 100-500 MB each)
+    known = committed_entry(urls[0])
+    if published and known and known.get("sha256") == published.lower():
+        sha256, size = known["sha256"], known["size"]
+    else:
+        sha256, size = measure(urls[0])
     if published and published.lower() != sha256:
         raise RuntimeError(f"{urls[0]}: SHA-256 {sha256}, the source publishes {published}")
     print(f"  {tool_id:14} {platform:15} {version:9} {size // 1024:>7} KiB  {'checked' if published else 'recorded'}",
@@ -159,25 +173,27 @@ def mariadb() -> list[dict]:
         patches = sorted(set(re.findall(rf"mariadb-({re.escape(series)}\.\d+)/", listing)), key=version_key, reverse=True)
         if not patches:
             raise RuntimeError(f"archive.mariadb.org: no {series} release")
-        # The newest patch whose Windows zip is published (a release being
-        # uploaded has its folder before its files)
+        # The newest of the last three patches with every required file
+        # published (a release being uploaded has its folder, or its Windows
+        # zip, before the rest)
+        chosen = None
         for version in patches[:3]:
-            folder = f"{base}mariadb-{version}/winx64-packages/"
-            if published_sha256(folder, f"mariadb-{version}-winx64.zip"):
+            found = {}
+            for platform, sub, suffix, archive, required in MARIADB_PLATFORMS:
+                folder = f"{base}mariadb-{version}/{sub}/"
+                name = f"mariadb-{version}-{suffix}"
+                found[platform] = (folder + name, archive, published_sha256(folder, name), required)
+            if all(hash_ for _, _, hash_, required in found.values() if required):
+                chosen = (version, found)
                 break
-        else:
-            raise RuntimeError(f"archive.mariadb.org: no {series} release with a Windows zip in {patches[:3]}")
-        for platform, sub, suffix, archive, required in MARIADB_PLATFORMS:
-            folder = f"{base}mariadb-{version}/{sub}/"
-            name = f"mariadb-{version}-{suffix}"
-            published = published_sha256(folder, name)
+        if not chosen:
+            raise RuntimeError(f"archive.mariadb.org: no {series} release in {patches[:3]} has every required file")
+        version, found = chosen
+        for platform, (url, archive, published, required) in found.items():
             if not published:
-                if required:
-                    raise RuntimeError(f"{folder}sha256sums.txt has no {name}")
-                notice("notice", f"MariaDB {version}: no {platform} build ({folder})")
+                notice("notice", f"MariaDB {version}: no {platform} build ({url.rsplit('/', 1)[0]}/)")
                 continue
-            out.append(entry(f"mariadb-{series}", "mariadb", version, platform, [folder + name], archive,
-                             "mariadb.org", published))
+            out.append(entry(f"mariadb-{series}", "mariadb", version, platform, [url], archive, "mariadb.org", published))
     return out
 
 
