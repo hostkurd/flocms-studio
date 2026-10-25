@@ -237,6 +237,11 @@ private slots:
                                  "mariadb-test/mariadb-test-run.pl", "mysql-test/suite/x.test", "sql-bench/run-all-tests",
                                  "include/mysql/mysql.h"})
             writeFile(top + u'/' + QLatin1String(name), "x");
+#ifndef Q_OS_WIN
+        // The bintar's bin/ links into the test suite Studio leaves out: dropped
+        QVERIFY(QFile::link(QStringLiteral("../mariadb-test/mariadb-test-run.pl"), top + QStringLiteral("/bin/mariadb-test-run")));
+        QVERIFY(QFile::link(QStringLiteral("mariadbd"), top + QStringLiteral("/bin/mysqld")));
+#endif
         const QString archive = dir.filePath(QStringLiteral("m.tar.gz"));
         QVERIFY(makeTarGz(archive, dir.filePath(QStringLiteral("content"))));
         const QString tools = dir.filePath(QStringLiteral("tools"));
@@ -250,6 +255,10 @@ private slots:
             QVERIFY2(QFileInfo::exists(root + QLatin1String(kept)), kept);
         for (const char *left : {"lib/libmariadbd.a", "mariadb-test", "mysql-test", "sql-bench", "include"})
             QVERIFY2(!QFileInfo::exists(root + QLatin1String(left)), left);
+#ifndef Q_OS_WIN
+        QVERIFY(!QFileInfo(root + QStringLiteral("bin/mariadb-test-run")).isSymLink());
+        QVERIFY(QFileInfo(root + QStringLiteral("bin/mysqld")).isSymLink());
+#endif
         // Other tools keep everything
         QCOMPARE(extractArchive(archive, QStringLiteral("tar.gz"), dir.filePath(QStringLiteral("all"))).ok(), true);
         QVERIFY(QFileInfo::exists(dir.filePath(QStringLiteral("all/mysql-test/suite/x.test"))));
@@ -352,6 +361,16 @@ private slots:
         QCOMPARE(installed.error().code, QStringLiteral("tool_extract"));
         QVERIFY(!QDir(installFolder(php, tools)).exists());
         QVERIFY(!QDir(installFolder(php, tools) + QStringLiteral(".new")).exists());
+
+        // Also when what it points to is missing
+        QFile::remove(content + QStringLiteral("/link"));
+        QVERIFY(QFile::link(QStringLiteral("../../nothing-here"), content + QStringLiteral("/link")));
+        QVERIFY(makeTarGz(archive, content));
+        ToolPackage dangling = php;
+        dangling.sha256 = sha256OfFile(archive);
+        const auto refused = installDownloaded(dangling, archive, tools);
+        QCOMPARE(refused.error().code, QStringLiteral("tool_extract"));
+        QVERIFY(refused.error().detail.contains(QStringLiteral("(link)")));
 
         // A link inside the package is fine
         QFile::remove(content + QStringLiteral("/link"));

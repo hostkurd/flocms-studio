@@ -106,22 +106,40 @@ bool renameWithRetry(const QString &from, const QString &to)
 }
 
 // Every link inside folder points inside it (D15: nothing unpacked may
-// reach out of the tools folder).
-bool linksStayInside(const QString &folder)
+// reach out of the tools folder). A link to something missing that would
+// be inside (a file Studio left out: MariaDB's bin/ links into its test
+// suite) is removed. Returns the first link that points outside; empty
+// when all is well.
+QString linkOutside(const QString &folder)
 {
     const QString root = QFileInfo(folder).canonicalFilePath() + u'/';
+    QStringList dangling;
     QDirIterator it(folder, QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QFileInfo entry(it.next());
         if (!entry.isSymLink() && !entry.isJunction())
             continue;
-        // A link to something missing has no canonical path: also refused
         const QString target = QFileInfo(entry.symLinkTarget()).canonicalFilePath();
-        if (target.isEmpty() || !(target + u'/').startsWith(root))
-            return false;
+        if (!target.isEmpty()) {
+            if (!(target + u'/').startsWith(root))
+                return entry.filePath();
+            continue;
+        }
+        // Missing: where it would be, by name only (the folder it is in is
+        // inside, as the iterator doesn't follow links). symLinkTarget() is
+        // absolute through the link's folder as written, so it is taken
+        // relative to that folder and put on the folder's real path.
+        const QString relative = QDir(entry.absolutePath()).relativeFilePath(entry.symLinkTarget());
+        const QString wanted =
+            QDir::cleanPath(QFileInfo(entry.absolutePath()).canonicalFilePath() + u'/' + relative);
+        if (!(wanted + u'/').startsWith(root))
+            return entry.filePath();
+        dangling << entry.filePath();
     }
-    return true;
+    for (const QString &link : std::as_const(dangling))
+        QFile::remove(link);
+    return {};
 }
 
 // What Studio leaves out of an archive. MariaDB's carry its test suite,
@@ -465,8 +483,10 @@ Result<Done> extractArchive(const QString &archive, const QString &type, const Q
         return Error{QStringLiteral("tool_extract"),
                      QStringLiteral("%1 (%2): %3").arg(QFileInfo(archive).fileName(), type,
                                                        QString::fromLocal8Bit(tar.readAllStandardError()).trimmed())};
-    if (!linksStayInside(folder))
-        return Error{QStringLiteral("tool_extract"), QStringLiteral("%1: a link points outside the package").arg(QFileInfo(archive).fileName())};
+    if (const QString outside = linkOutside(folder); !outside.isEmpty())
+        return Error{QStringLiteral("tool_extract"),
+                     QStringLiteral("%1: a link points outside the package (%2)")
+                         .arg(QFileInfo(archive).fileName(), QDir(folder).relativeFilePath(outside))};
     // One top folder only (mariadb-11.8.5-winx64/...): its contents move up
     const QDir dir(folder);
     const QFileInfoList top = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
