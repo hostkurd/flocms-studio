@@ -106,22 +106,59 @@ bool renameWithRetry(const QString &from, const QString &to)
 }
 
 // Every link inside folder points inside it (D15: nothing unpacked may
-// reach out of the tools folder).
-bool linksStayInside(const QString &folder)
+// reach out of the tools folder), and none points at the folder itself.
+// A link to something missing that would be inside (a file Studio left
+// out: MariaDB's bin/ links into its test suite) is removed. Returns the
+// first link that points outside; empty when all is well.
+QString linkOutside(const QString &folder)
 {
-    const QString root = QFileInfo(folder).canonicalFilePath() + u'/';
+    const QString base = QFileInfo(folder).canonicalFilePath();
+    const QString root = base + u'/';
+    QStringList dangling;
     QDirIterator it(folder, QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QFileInfo entry(it.next());
         if (!entry.isSymLink() && !entry.isJunction())
             continue;
-        // A link to something missing has no canonical path: also refused
-        const QString target = QFileInfo(entry.symLinkTarget()).canonicalFilePath();
-        if (target.isEmpty() || !(target + u'/').startsWith(root))
-            return false;
+        // Where the system really goes, link by link (realpath): never the
+        // link text cleaned first, where "d/.." is undone even when d is a
+        // link itself
+        const QString target = QFileInfo(entry.filePath()).canonicalFilePath();
+        if (!target.isEmpty()) {
+            if (target == base || !target.startsWith(root))
+                return entry.filePath();
+            continue;
+        }
+        // Missing: where it would be, by name. Only ever removed, so a wrong
+        // guess costs a link, never reaches out. symLinkTarget() is absolute
+        // through the link's folder as written, so it is taken relative to
+        // that folder and put on the folder's real path.
+        const QString relative = QDir(entry.absolutePath()).relativeFilePath(entry.symLinkTarget());
+        const QString wanted =
+            QDir::cleanPath(QFileInfo(entry.absolutePath()).canonicalFilePath() + u'/' + relative);
+        if (!wanted.startsWith(root))
+            return entry.filePath();
+        dangling << entry.filePath();
     }
-    return true;
+    for (const QString &link : std::as_const(dangling))
+        QFile::remove(link);
+    return {};
+}
+
+// What Studio leaves out of an archive. MariaDB's carry its test suite,
+// benchmarks, headers and static/link libraries (the Linux bintar is about
+// 470 MiB): Studio only runs bin/, lib/ (plugins, shared libraries),
+// share/ and scripts/ (MariaDB design note D3). Patterns match at any
+// level, so "mariadb-test" also leaves out bin/mariadb-test (the test
+// client, not needed to run a server) and its old-name link is dropped.
+QStringList unpackExclusions(const ToolPackage &package)
+{
+    if (package.tool != u"mariadb")
+        return {};
+    return {QStringLiteral("mysql-test"), QStringLiteral("mariadb-test"), QStringLiteral("sql-bench"),
+            QStringLiteral("include"),    QStringLiteral("*.a"),          QStringLiteral("*.lib"),
+            QStringLiteral("*.pdb")};
 }
 
 bool isWorkFolder(const QString &name)
@@ -431,33 +468,45 @@ QString sha256OfFile(const QString &path)
     return QString::fromLatin1(hash.result().toHex());
 }
 
-Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder)
+Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder,
+                            const QStringList &exclude)
 {
     if (!QDir().mkpath(folder))
         return Error{QStringLiteral("tool_extract"), folder};
     QProcess tar;
     tar.setProgram(tarProgram());
     // -x extract, -f file, -C into; bsdtar and GNU tar both read .tar.gz with -z implied
-    tar.setArguments({QStringLiteral("-x"), QStringLiteral("-f"), QDir::toNativeSeparators(archive), QStringLiteral("-C"),
-                      QDir::toNativeSeparators(folder)});
+    QStringList arguments{QStringLiteral("-x")};
+    // bsdtar and GNU tar both match --exclude patterns at any folder level;
+    // given before the archive so both read them as options
+    for (const QString &pattern : exclude)
+        arguments << QStringLiteral("--exclude=") + pattern;
+    arguments << QStringLiteral("-f") << QDir::toNativeSeparators(archive) << QStringLiteral("-C")
+              << QDir::toNativeSeparators(folder);
+    tar.setArguments(arguments);
     tar.start();
     if (!tar.waitForFinished(10 * 60 * 1000) || tar.exitStatus() != QProcess::NormalExit || tar.exitCode() != 0)
         return Error{QStringLiteral("tool_extract"),
                      QStringLiteral("%1 (%2): %3").arg(QFileInfo(archive).fileName(), type,
                                                        QString::fromLocal8Bit(tar.readAllStandardError()).trimmed())};
-    if (!linksStayInside(folder))
-        return Error{QStringLiteral("tool_extract"), QStringLiteral("%1: a link points outside the package").arg(QFileInfo(archive).fileName())};
-    // One top folder only (mariadb-11.8.5-winx64/...): its contents move up
+    // One top folder only (mariadb-11.8.5-winx64/...): its contents move up.
+    // Never through a link: that would move someone else's files.
     const QDir dir(folder);
-    const QFileInfoList top = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-    if (top.size() == 1 && top.constFirst().isDir()) {
+    const QFileInfoList top = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
+    if (top.size() == 1 && top.constFirst().isDir() && !top.constFirst().isSymLink() && !top.constFirst().isJunction()) {
         const QDir inner(top.constFirst().filePath());
-        for (const QString &name : inner.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden)) {
+        for (const QString &name : inner.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System)) {
             if (!QDir().rename(inner.filePath(name), dir.filePath(name)))
                 return Error{QStringLiteral("tool_extract"), name};
         }
         QDir().rmdir(inner.path());
     }
+    // The links last, where they finally are: a relative link gains a level
+    // when its folder moves up
+    if (const QString outside = linkOutside(folder); !outside.isEmpty())
+        return Error{QStringLiteral("tool_extract"),
+                     QStringLiteral("%1: a link points outside the package (%2)")
+                         .arg(QFileInfo(archive).fileName(), QDir(folder).relativeFilePath(outside))};
     return Done{};
 }
 
@@ -476,7 +525,8 @@ Result<QString> installDownloaded(const ToolPackage &package, const QString &fil
     if (package.archive == u"phar") {
         if (!QDir().mkpath(staging) || !QFile::copy(file, QDir(staging).filePath(QStringLiteral("composer.phar"))))
             return fail(Error{QStringLiteral("tool_install"), staging});
-    } else if (const auto extracted = extractArchive(file, package.archive, staging); !extracted) {
+    } else if (const auto extracted = extractArchive(file, package.archive, staging, unpackExclusions(package));
+               !extracted) {
         return fail(extracted.error());
     }
 

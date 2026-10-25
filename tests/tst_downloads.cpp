@@ -227,6 +227,44 @@ private slots:
         QCOMPARE(installedToolFolders(tools), QStringList{QDir::toNativeSeparators(tools + QStringLiteral("/mariadb-11.8/bin"))});
     }
 
+    void leavesOutMariadbsTestSuiteAndLibraries()
+    {
+        // MariaDB design note D3: only what Studio runs is unpacked
+        const QTemporaryDir dir;
+        const QString top = dir.filePath(QStringLiteral("content/mariadb-12.3.2-linux-systemd-x86_64"));
+        for (const char *name : {"bin/mariadbd", "bin/mariadb-admin", "scripts/mariadb-install-db", "lib/libmariadb.so.3",
+                                 "lib/plugin/ha_rocksdb.so", "share/english/errmsg.sys", "lib/libmariadbd.a",
+                                 "mariadb-test/mariadb-test-run.pl", "mysql-test/suite/x.test", "sql-bench/run-all-tests",
+                                 "include/mysql/mysql.h", "lib/mariadbclient.lib", "bin/mariadbd.pdb", "share/include_me.txt"})
+            writeFile(top + u'/' + QLatin1String(name), "x");
+#ifndef Q_OS_WIN
+        // The bintar's bin/ links into the test suite Studio leaves out: dropped
+        QVERIFY(QFile::link(QStringLiteral("../mariadb-test/mariadb-test-run.pl"), top + QStringLiteral("/bin/mariadb-test-run")));
+        QVERIFY(QFile::link(QStringLiteral("mariadbd"), top + QStringLiteral("/bin/mysqld")));
+#endif
+        const QString archive = dir.filePath(QStringLiteral("m.tar.gz"));
+        QVERIFY(makeTarGz(archive, dir.filePath(QStringLiteral("content"))));
+        const QString tools = dir.filePath(QStringLiteral("tools"));
+        ToolPackage db = package(QStringLiteral("mariadb"), QStringLiteral("linux-x86_64"), QStringLiteral("tar.gz"),
+                                 sha256OfFile(archive));
+        db.id = QStringLiteral("mariadb-12.3");
+        QVERIFY(installDownloaded(db, archive, tools).ok());
+        const QString root = tools + QStringLiteral("/mariadb-12.3/");
+        for (const char *kept : {"bin/mariadbd", "bin/mariadb-admin", "scripts/mariadb-install-db", "lib/libmariadb.so.3",
+                                 "lib/plugin/ha_rocksdb.so", "share/english/errmsg.sys", "share/include_me.txt"})
+            QVERIFY2(QFileInfo::exists(root + QLatin1String(kept)), kept);
+        for (const char *left : {"lib/libmariadbd.a", "mariadb-test", "mysql-test", "sql-bench", "include",
+                                 "lib/mariadbclient.lib", "bin/mariadbd.pdb"})
+            QVERIFY2(!QFileInfo::exists(root + QLatin1String(left)), left);
+#ifndef Q_OS_WIN
+        QVERIFY(!QFileInfo(root + QStringLiteral("bin/mariadb-test-run")).isSymLink());
+        QVERIFY(QFileInfo(root + QStringLiteral("bin/mysqld")).isSymLink());
+#endif
+        // Other tools keep everything
+        QCOMPARE(extractArchive(archive, QStringLiteral("tar.gz"), dir.filePath(QStringLiteral("all"))).ok(), true);
+        QVERIFY(QFileInfo::exists(dir.filePath(QStringLiteral("all/mysql-test/suite/x.test"))));
+    }
+
     void installsComposer()
     {
         const QTemporaryDir dir;
@@ -325,8 +363,44 @@ private slots:
         QVERIFY(!QDir(installFolder(php, tools)).exists());
         QVERIFY(!QDir(installFolder(php, tools) + QStringLiteral(".new")).exists());
 
-        // A link inside the package is fine
+        // Also when what it points to is missing
         QFile::remove(content + QStringLiteral("/link"));
+        QVERIFY(QFile::link(QStringLiteral("../../nothing-here"), content + QStringLiteral("/link")));
+        QVERIFY(makeTarGz(archive, content));
+        ToolPackage dangling = php;
+        dangling.sha256 = sha256OfFile(archive);
+        const auto refused = installDownloaded(dangling, archive, tools);
+        QCOMPARE(refused.error().code, QStringLiteral("tool_extract"));
+        QVERIFY(refused.error().detail.contains(QStringLiteral("(link)")));
+
+        // Through a linked folder: "d/.." is where d's target goes up to,
+        // not d's own folder (Qt's cleaned link text would say inside)
+        QFile::remove(content + QStringLiteral("/link"));
+        QDir().mkpath(content + QStringLiteral("/x/y/z"));
+        writeFile(content + QStringLiteral("/x/y/secret"), "decoy");
+        // d itself stays inside (it is x/); x/.. /.. is the tools folder
+        QVERIFY(QFile::link(QStringLiteral("../../../x"), content + QStringLiteral("/x/y/z/d")));
+        QVERIFY(QFile::link(QStringLiteral("x/y/z/d/../../secret"), content + QStringLiteral("/link")));
+        writeFile(tools + QStringLiteral("/secret"), "outside");
+        QVERIFY(makeTarGz(archive, content));
+        ToolPackage tricky = php;
+        tricky.sha256 = sha256OfFile(archive);
+        QCOMPARE(installDownloaded(tricky, archive, tools).error().code, QStringLiteral("tool_extract"));
+        QFile::remove(content + QStringLiteral("/link"));
+        QFile::remove(content + QStringLiteral("/x/y/z/d"));
+
+        // Checked where links finally are: a link to the top folder's parent
+        // points outside once the top folder's contents move up
+        const QString nested = dir.filePath(QStringLiteral("nested"));
+        writeFile(nested + QStringLiteral("/top/php"), "#!/bin/sh\n");
+        QVERIFY(QFile::link(QStringLiteral(".."), nested + QStringLiteral("/top/up")));
+        QVERIFY(makeTarGz(archive, nested));
+        ToolPackage moved = php;
+        moved.sha256 = sha256OfFile(archive);
+        QCOMPARE(installDownloaded(moved, archive, tools).error().code, QStringLiteral("tool_extract"));
+        QVERIFY(QFileInfo::exists(tools + QStringLiteral("/secret")));
+
+        // A link inside the package is fine
         QVERIFY(QFile::link(QStringLiteral("php"), content + QStringLiteral("/php-cli")));
         QVERIFY(makeTarGz(archive, content));
         ToolPackage again = php;
@@ -422,9 +496,13 @@ private slots:
         const QList<ToolPackage> packages = bundledToolPackages();
         QVERIFY2(!packages.isEmpty(), "the built-in tool list has nothing for this computer");
         Settings settings;
+        bool mariadbTried = false; // the default series only: the Linux bintar is ~470 MB
         for (const ToolPackage &p : packages) {
-            if (p.tool == u"mariadb")
-                continue; // 80 MB, and needs its own setup (stage 5)
+            if (p.tool == u"mariadb") {
+                if (mariadbTried)
+                    continue;
+                mariadbTried = true;
+            }
             QObject owner;
             bool done = false;
             Result<QString> result = Error{};
@@ -449,6 +527,16 @@ private slots:
                          qUtf8Printable((missing.required + missing.recommended).join(u',')));
                 QVERIFY(missingExtensions(php.info.extensions, QStringLiteral("sqlite")).required.isEmpty());
                 QVERIFY2(php.info.extensions.contains(QStringLiteral("zip")), "Composer wants zip");
+            }
+            if (p.tool == u"mariadb") {
+                // Runs at all? On Linux this shows whether the bintar finds
+                // the system's libraries (libaio on Ubuntu 24.04: design Q5)
+                QProcess server;
+                server.start(result.value(), {QStringLiteral("--version")});
+                QVERIFY(server.waitForFinished(60000));
+                const QString output = QString::fromLocal8Bit(server.readAllStandardOutput() + server.readAllStandardError()).trimmed();
+                qInfo("%s --version (exit %d): %s", qUtf8Printable(p.id), server.exitCode(), qUtf8Printable(output));
+                QVERIFY(!QFileInfo::exists(QFileInfo(result.value()).dir().filePath(QStringLiteral("../mysql-test"))));
             }
             if (p.tool == u"composer") {
                 settings.composerPath = result.value();

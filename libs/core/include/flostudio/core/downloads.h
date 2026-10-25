@@ -30,7 +30,7 @@ namespace FloStudio::Core {
 
 struct ToolPackage
 {
-    QString id;        // php-8.5, composer, mariadb-11.8
+    QString id;        // php-8.5, composer, mariadb-12.3
     QString tool;      // php, composer, mariadb
     QString version;   // 8.5.1
     QString platform;  // windows-x86_64, macos-arm64, macos-x86_64, linux-x86_64, linux-arm64, any
@@ -77,12 +77,15 @@ FLOSTUDIOCORE_EXPORT QString sha256OfFile(const QString &path);
 
 // Unpacks a zip or tar.gz into a new folder with the system's tar (bsdtar
 // on Windows 10+ and macOS reads zip too). When everything is inside one
-// top folder (MariaDB's archives), its contents are moved up. Blocks.
-// Error codes: tool_extract.
-FLOSTUDIOCORE_EXPORT Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder);
+// top folder (MariaDB's archives), its contents are moved up. Entries
+// matching an exclude pattern (tar's --exclude, at any folder level) are
+// skipped. Blocks. Error codes: tool_extract.
+FLOSTUDIOCORE_EXPORT Result<Done> extractArchive(const QString &archive, const QString &type, const QString &folder,
+                                                 const QStringList &exclude = {});
 
 // Installs an already downloaded and checked file into a staging folder
-// (<id>.new): unpack (or copy the phar), refuse links that point outside
+// (<id>.new): unpack (or copy the phar; MariaDB without its test suite,
+// headers and static libraries), refuse links that point outside
 // it, write php.ini on Windows, make the programs executable, write the
 // marker; then swap it in, moving the old install aside (<id>.old) and
 // back if the swap fails. A failure leaves the old install as it was.
