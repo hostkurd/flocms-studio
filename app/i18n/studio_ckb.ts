@@ -2021,22 +2021,22 @@
 <context>
     <name>PackagesTab</name>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="105" />
+        <location filename="../qml/PackagesTab.qml" line="115" />
         <source>FloCMS packages</source>
         <translation>پاکێجەکانی FloCMS</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="108" />
+        <location filename="../qml/PackagesTab.qml" line="118" />
         <source>Checking…</source>
         <translation>پشکنین…</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="108" />
+        <location filename="../qml/PackagesTab.qml" line="118" />
         <source>Check for updates</source>
         <translation>پشکنینی نوێکردنەوەکان</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/PackagesTab.qml" line="115" />
+        <location filename="../qml/PackagesTab.qml" line="125" />
         <source>%Ln update(s).</source>
         <translation>
             <numerusform>%Ln نوێکردنەوە.</numerusform>
@@ -2044,17 +2044,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="115" />
+        <location filename="../qml/PackagesTab.qml" line="125" />
         <source>Everything is up to date.</source>
         <translation>هەموو شتێک نوێیە.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="116" />
+        <location filename="../qml/PackagesTab.qml" line="126" />
         <source>Checked just now.</source>
         <translation>ئێستا پشکنرا.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/PackagesTab.qml" line="116" />
+        <location filename="../qml/PackagesTab.qml" line="126" />
         <source>Checked %Ln min ago.</source>
         <translation>
             <numerusform>پێش %Ln خولەک پشکنرا.</numerusform>
@@ -2062,188 +2062,188 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="154" />
+        <location filename="../qml/PackagesTab.qml" line="165" />
         <source>Package</source>
         <translation>پاکێج</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="155" />
+        <location filename="../qml/PackagesTab.qml" line="166" />
         <source>Installed</source>
         <translation>دامەزراو</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="156" />
+        <location filename="../qml/PackagesTab.qml" line="167" />
         <source>Latest</source>
         <translation>نوێترین</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="157" />
+        <location filename="../qml/PackagesTab.qml" line="168" />
         <source>Status</source>
         <translation>دۆخ</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="194" />
+        <location filename="../qml/PackagesTab.qml" line="207" />
         <source>Not installed</source>
         <translation>دانەمەزراوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="72" />
-        <location filename="../qml/PackagesTab.qml" line="213" />
+        <location filename="../qml/PackagesTab.qml" line="82" />
+        <location filename="../qml/PackagesTab.qml" line="233" />
         <source>Abandoned</source>
         <translation>وازلێهێنراو</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="67" />
-        <location filename="../qml/PackagesTab.qml" line="214" />
+        <location filename="../qml/PackagesTab.qml" line="77" />
+        <location filename="../qml/PackagesTab.qml" line="234" />
         <source>Up to date</source>
         <translation>نوێیە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="68" />
-        <location filename="../qml/PackagesTab.qml" line="215" />
-        <location filename="../qml/PackagesTab.qml" line="436" />
+        <location filename="../qml/PackagesTab.qml" line="78" />
+        <location filename="../qml/PackagesTab.qml" line="235" />
+        <location filename="../qml/PackagesTab.qml" line="456" />
         <source>Update</source>
         <translation>نوێکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="69" />
-        <location filename="../qml/PackagesTab.qml" line="216" />
+        <location filename="../qml/PackagesTab.qml" line="79" />
+        <location filename="../qml/PackagesTab.qml" line="236" />
         <source>New major version</source>
         <translation>وەشانی سەرەکیی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="70" />
-        <location filename="../qml/PackagesTab.qml" line="216" />
+        <location filename="../qml/PackagesTab.qml" line="80" />
+        <location filename="../qml/PackagesTab.qml" line="236" />
         <source>New 0.x version</source>
         <translation>وەشانی 0.x ـی نوێ</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="71" />
-        <location filename="../qml/PackagesTab.qml" line="217" />
+        <location filename="../qml/PackagesTab.qml" line="81" />
+        <location filename="../qml/PackagesTab.qml" line="237" />
         <source>Through another package</source>
         <translation>لە ڕێگەی پاکێجێکی ترەوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="347" />
+        <location filename="../qml/PackagesTab.qml" line="367" />
         <source>`.env` names no database, so `migrate` doesn't run. Run it from the Database tab once one is set.</source>
         <translation>`.env` هیچ داتابەیسێک ناو نابات، بۆیە `migrate` جێبەجێ ناکرێت. دوای دانانی داتابەیس لە تابی داتابەیسەوە جێبەجێی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="354" />
+        <location filename="../qml/PackagesTab.qml" line="374" />
         <source>`APP_ENV` says this is a production site: Composer leaves out the development packages (`--update-no-dev`), and `migrate` changes its database.</source>
         <translation>`APP_ENV` دەڵێت ئەمە ماڵپەڕێکی بەرهەمهێنانە: Composer پاکێجەکانی گەشەپێدان دانانێت (`--update-no-dev`)، و `migrate` داتابەیسەکەی دەگۆڕێت.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="65" />
-        <location filename="../qml/PackagesTab.qml" line="232" />
+        <location filename="../qml/PackagesTab.qml" line="75" />
+        <location filename="../qml/PackagesTab.qml" line="252" />
         <source>Review update</source>
         <translation>پێداچوونەوەی نوێکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="64" />
-        <location filename="../qml/PackagesTab.qml" line="239" />
+        <location filename="../qml/PackagesTab.qml" line="74" />
+        <location filename="../qml/PackagesTab.qml" line="259" />
         <source>Add the API</source>
         <translation>زیادکردنی API</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="63" />
-        <location filename="../qml/PackagesTab.qml" line="239" />
-        <location filename="../qml/PackagesTab.qml" line="291" />
+        <location filename="../qml/PackagesTab.qml" line="73" />
+        <location filename="../qml/PackagesTab.qml" line="259" />
+        <location filename="../qml/PackagesTab.qml" line="311" />
         <source>Add the admin panel</source>
         <translation>زیادکردنی پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="258" />
+        <location filename="../qml/PackagesTab.qml" line="278" />
         <source>Other packages (%1)</source>
         <translation>پاکێجەکانی تر (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="291" />
+        <location filename="../qml/PackagesTab.qml" line="311" />
         <source>Add the JSON API</source>
         <translation>زیادکردنی JSON API</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="292" />
+        <location filename="../qml/PackagesTab.qml" line="312" />
         <source>Update %1</source>
         <translation>نوێکردنەوەی %1</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="310" />
+        <location filename="../qml/PackagesTab.qml" line="330" />
         <source>Before 1.0, a new minor version may change how things work. Read the changelog first.</source>
         <translation>پێش وەشانی 1.0، وەشانێکی لاوەکیی نوێ لەوانەیە شێوەی کارکردنی شتەکان بگۆڕێت. سەرەتا تۆماری گۆڕانکارییەکان بخوێنەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="311" />
+        <location filename="../qml/PackagesTab.qml" line="331" />
         <source>A new major version: it may change how things work. Read the changelog first.</source>
         <translation>وەشانێکی سەرەکیی نوێ: لەوانەیە شێوەی کارکردنی شتەکان بگۆڕێت. سەرەتا تۆماری گۆڕانکارییەکان بخوێنەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="319" />
+        <location filename="../qml/PackagesTab.qml" line="339" />
         <source>Read the changelog</source>
         <translation>خوێندنەوەی تۆماری گۆڕانکارییەکان</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="320" />
+        <location filename="../qml/PackagesTab.qml" line="340" />
         <source>Read UPGRADING.md</source>
         <translation>خوێندنەوەی UPGRADING.md</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="334" />
+        <location filename="../qml/PackagesTab.qml" line="354" />
         <source>After Composer adds it</source>
         <translation>دوای ئەوەی Composer زیادی دەکات</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="334" />
+        <location filename="../qml/PackagesTab.qml" line="354" />
         <source>After the update</source>
         <translation>دوای نوێکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="337" />
+        <location filename="../qml/PackagesTab.qml" line="357" />
         <source>Studio runs `admin:install`, which only adds what is missing, and then `migrate`.</source>
         <translation>Studio فەرمانی `admin:install` جێبەجێ دەکات، کە تەنها ئەوەی کەمە زیادی دەکات، پاشان `migrate`.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="339" />
+        <location filename="../qml/PackagesTab.qml" line="359" />
         <source>Studio runs `api:install`, which only adds what is missing, and then `migrate`.</source>
         <translation>Studio فەرمانی `api:install` جێبەجێ دەکات، کە تەنها ئەوەی کەمە زیادی دەکات، پاشان `migrate`.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="340" />
+        <location filename="../qml/PackagesTab.qml" line="360" />
         <source>Studio runs `migrate` for the package's new tables.</source>
         <translation>Studio فەرمانی `migrate` بۆ خشتە نوێیەکانی پاکێجەکە جێبەجێ دەکات.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="364" />
+        <location filename="../qml/PackagesTab.qml" line="384" />
         <source>Commands</source>
         <translation>فەرمانەکان</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="397" />
+        <location filename="../qml/PackagesTab.qml" line="417" />
         <source>Added. The project's tabs show it now.</source>
         <translation>زیادکرا. تابەکانی پڕۆژەکە ئێستا پیشانی دەدەن.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="397" />
+        <location filename="../qml/PackagesTab.qml" line="417" />
         <source>Updated to %1.</source>
         <translation>نوێکرایەوە بۆ %1.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="409" />
+        <location filename="../qml/PackagesTab.qml" line="429" />
         <source>A command failed (exit code %1). What ran before it stays done.</source>
         <translation>فەرمانێک سەرکەوتوو نەبوو (کۆدی دەرچوون %1). ئەوەی پێشتر جێبەجێ کرا وەک خۆی دەمێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="429" />
+        <location filename="../qml/PackagesTab.qml" line="449" />
         <source>Close</source>
         <translation>داخستن</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="429" />
+        <location filename="../qml/PackagesTab.qml" line="449" />
         <source>Cancel</source>
         <translation>هەڵوەشاندنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/PackagesTab.qml" line="436" />
+        <location filename="../qml/PackagesTab.qml" line="456" />
         <source>Add</source>
         <translation>زیادکردن</translation>
     </message>
@@ -2713,7 +2713,7 @@
     </message>
     <message>
         <location filename="../qml/Sidebar.qml" line="118" />
-        <location filename="../qml/Sidebar.qml" line="222" />
+        <location filename="../qml/Sidebar.qml" line="221" />
         <source>Settings</source>
         <translation>ڕێکخستنەکان</translation>
     </message>
@@ -2758,27 +2758,12 @@
         <translation>ئەم کۆمپیوتەرە</translation>
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="195" />
-        <source>Stop the database server</source>
-        <translation>وەستاندنی سێرڤەری داتابەیس</translation>
-    </message>
-    <message>
-        <location filename="../qml/Sidebar.qml" line="196" />
-        <source>Start the database server</source>
-        <translation>دەستپێکردنی سێرڤەری داتابەیس</translation>
-    </message>
-    <message>
-        <location filename="../qml/Sidebar.qml" line="196" />
-        <source>Start Studio's own MariaDB</source>
-        <translation>دەستپێکردنی MariaDBی تایبەتی Studio</translation>
-    </message>
-    <message>
-        <location filename="../qml/Sidebar.qml" line="205" />
+        <location filename="../qml/Sidebar.qml" line="204" />
         <source>Looking for PHP, Composer and MariaDB…</source>
         <translation>گەڕان بەدوای PHP، Composer و MariaDB…</translation>
     </message>
     <message>
-        <location filename="../qml/Sidebar.qml" line="212" />
+        <location filename="../qml/Sidebar.qml" line="211" />
         <source>Download…</source>
         <translation>داگرتن…</translation>
     </message>
