@@ -339,7 +339,14 @@ private slots:
         bool done = false;
         QObject *server = startDatabaseServer(start, &owner, onLine, [&](const Result<Done> &r) { result = r; done = true; }, onExit);
         QTRY_VERIFY_WITH_TIMEOUT(done, 300000);
-        QVERIFY2(result.ok(), qUtf8Printable(result ? QString() : result.error().code + u' ' + result.error().detail + u'\n' + log.join(u'\n')));
+        if (!result.ok()) {
+            // Every line, as warnings: CI repeats those when a test fails
+            for (const QString &line : std::as_const(log))
+                qWarning("%s", qUtf8Printable(line));
+            for (const QString &line : databaseErrorLogTail(start.files, 40))
+                qWarning("log: %s", qUtf8Printable(line));
+        }
+        QVERIFY2(result.ok(), qUtf8Printable(result ? QString() : result.error().code + u' ' + result.error().detail));
         qInfo("%s", qUtf8Printable(log.join(u'\n')));
         QVERIFY(databaseServerRunning(server));
         QVERIFY(databaseServerInitialized(start.files));

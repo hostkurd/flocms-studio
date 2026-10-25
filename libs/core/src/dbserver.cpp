@@ -15,6 +15,7 @@
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QTcpServer>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -412,12 +413,25 @@ private:
                 return fail(Error{QStringLiteral("db_init"), files.dataDir});
             line(true, QStringLiteral("An unfinished data folder was moved to %1").arg(QDir::toNativeSeparators(aside)));
         }
-        const Command install = databaseInstallCommand(files, m_start.port, m_start.rootPassword);
+        // MariaDB's set-up script can't take a base folder with a space
+        // (Studio's tools folder is in "FloCMS Studio"): it is reached
+        // through a link in a private temporary folder of this user's
+        DatabaseServerFiles setupFiles = files;
+        if (!isWindowsPlatform(files.platform) && files.baseDir.contains(u' ')) {
+            m_baseLink = std::make_unique<QTemporaryDir>(QDir(QDir::tempPath()).filePath(QStringLiteral("flostudio-XXXXXX")));
+            const QString link = m_baseLink->filePath(QStringLiteral("mariadb"));
+            if (!m_baseLink->isValid() || m_baseLink->path().contains(u' ') || !QFile::link(files.baseDir, link))
+                return fail(Error{QStringLiteral("db_init"), QStringLiteral("no folder without spaces for MariaDB's set-up")});
+            setupFiles.baseDir = link;
+            setupFiles.installDb = link + files.installDb.mid(files.baseDir.size());
+        }
+        const Command install = databaseInstallCommand(setupFiles, m_start.port, m_start.rootPassword);
         line(false, QStringLiteral("› ") + install.shown);
         m_install = startStreaming(
             install, this, [this](const OutputLine &output) { line(output.error, output.text); },
             [this](int exitCode, bool crashed) {
                 m_install = nullptr;
+                m_baseLink.reset();
                 if (m_cancelled)
                     return finishCancelled();
                 if (!going())
@@ -564,6 +578,7 @@ private:
     std::vector<std::function<void()>> m_onStopped;
     QProcess *m_process = nullptr; // mariadbd, a child of this; cleared when it goes
     QProcess *m_install = nullptr; // mariadb-install-db while it runs, a child of this
+    std::unique_ptr<QTemporaryDir> m_baseLink; // the install reached without spaces, during set-up
     QElapsedTimer m_waited;
     qint64 m_logFrom = 0; // the error log's size when this start began
     bool m_started = false;
@@ -614,6 +629,14 @@ DatabaseServerFiles databaseServerFiles(const QString &server, const QString &se
     files.pidFile = folder.filePath(QStringLiteral("mariadbd.pid"));
     if (!windows)
         files.socket = folder.filePath(QStringLiteral("mysqld.sock"));
+    // A socket path has a limit (104 bytes on macOS, 108 on Linux): a long
+    // one goes to this user's private runtime folder instead
+    if (!windows && files.socket.toUtf8().size() > 100) {
+        QString runtime = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        if (runtime.isEmpty() || runtime.toUtf8().size() > 60)
+            runtime = QStandardPaths::writableLocation(QStandardPaths::TempLocation); // per user on macOS
+        files.socket = QDir(runtime).filePath(QStringLiteral("flostudio-mariadb-%1.sock").arg(series));
+    }
     return files;
 }
 
@@ -678,7 +701,11 @@ Command databaseInstallCommand(const DatabaseServerFiles &files, int port, const
     } else {
         arguments << QStringLiteral("--no-defaults") << QStringLiteral("--basedir=") + files.baseDir
                   << QStringLiteral("--datadir=") + data << QStringLiteral("--auth-root-authentication-method=normal")
-                  << QStringLiteral("--skip-test-db");
+                  << QStringLiteral("--skip-test-db")
+                  // Never stopped by a computer name that doesn't resolve
+                  // (the script's only use of --force): Studio's accounts
+                  // are for localhost anyway
+                  << QStringLiteral("--force");
         if (runningAsRoot())
             arguments << QStringLiteral("--user=root");
     }
