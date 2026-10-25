@@ -66,9 +66,11 @@ FLOSTUDIOCORE_EXPORT QString mariadbSeries(const QString &version);
 // Studio's config for the server (D6): datadir, port, bind-address
 // 127.0.0.1, pid file, error log, socket, utf8mb4 / utf8mb4_unicode_ci,
 // innodb_buffer_pool_size 128M, and a [client] section with the port.
+// Without networking (the first start on macOS and Linux, while root has
+// no password yet) only the socket in Studio's folder answers.
 // Paths are written with forward slashes and quoted (MariaDB reads \ as an
 // escape in option files).
-FLOSTUDIOCORE_EXPORT QString databaseServerConfig(const DatabaseServerFiles &files, int port);
+FLOSTUDIOCORE_EXPORT QString databaseServerConfig(const DatabaseServerFiles &files, int port, bool networking = true);
 
 // The data folder has been set up (its mysql/ system database exists).
 FLOSTUDIOCORE_EXPORT bool databaseServerInitialized(const DatabaseServerFiles &files);
@@ -78,9 +80,13 @@ FLOSTUDIOCORE_EXPORT bool databaseServerInitialized(const DatabaseServerFiles &f
 FLOSTUDIOCORE_EXPORT bool databaseRootPasswordSet(const DatabaseServerFiles &files);
 
 // The commands, for runCaptured / startStreaming and for the screen.
-// Setting up the data folder, once: no test database; on macOS and Linux
-// root logs in with a password, not by OS user name.
-FLOSTUDIOCORE_EXPORT Command databaseInstallCommand(const DatabaseServerFiles &files, int port);
+// Setting up the data folder, once: no test database (anonymous users are
+// dropped when root's password is set);
+// on macOS and Linux root logs in with a password, not by OS user name. On
+// Windows the tool sets root's password itself (an argument: the only way
+// it takes one; `shown` hides it).
+FLOSTUDIOCORE_EXPORT Command databaseInstallCommand(const DatabaseServerFiles &files, int port,
+                                                    const QString &rootPassword = {});
 // The server itself, with Studio's config only (--defaults-file).
 FLOSTUDIOCORE_EXPORT Command databaseServerCommand(const DatabaseServerFiles &files);
 // A clean shutdown through mariadb-admin over TCP.
@@ -112,14 +118,16 @@ FLOSTUDIOCORE_EXPORT QString missingSharedLibrary(const QString &output);
 
 // Linux (MariaDB design note D4, Q5): when the bintar wants libaio.so.1
 // and the system only has Ubuntu 24.04's libaio.so.1t64, a link to it is
-// made inside the install's own lib/ folder (never in a system folder).
+// made inside the install's own lib/ folder (never in a system folder:
+// not for an install in /usr and the like, nor one this user can't write).
 // Returns the link, or an empty string when the system file isn't there.
 // libraryDirs: where to look (the default is the usual system folders).
 FLOSTUDIOCORE_EXPORT QString linkLibaioT64(const DatabaseServerFiles &files,
                                            const QStringList &libraryDirs = {});
 
-// The last lines of the error log, for the screen when a start fails.
-FLOSTUDIOCORE_EXPORT QStringList databaseErrorLogTail(const DatabaseServerFiles &files, int lines = 12);
+// The last lines of the error log, for the screen when a start fails;
+// from `from` (the log's size when that start began) on.
+FLOSTUDIOCORE_EXPORT QStringList databaseErrorLogTail(const DatabaseServerFiles &files, int lines = 12, qint64 from = 0);
 
 // Starting and stopping (D6–D8). startDatabaseServer:
 //  1. refuses when something already answers on the port: db_port_busy
@@ -127,17 +135,24 @@ FLOSTUDIOCORE_EXPORT QStringList databaseErrorLogTail(const DatabaseServerFiles 
 //  2. checks the program runs (`--version`), making the libaio link when
 //     that is all that's missing; otherwise db_library (detail: the
 //     library) or db_program;
-//  3. writes the config; sets up the data folder the first time
-//     (db_init, detail: the program's output);
-//  4. starts mariadbd and waits until the port answers (db_start, detail:
-//     the error log's last lines; db_timeout after timeoutMs);
-//  5. the first time, sets root's password (rootPassword, from the secure
-//     store; the app saves it there before starting): db_root.
-// Lines (commands run and their output) arrive in onLine; onStarted once,
-// with the result; onExit when the server ends later (stopped, crashed).
-// All on owner's thread from its event loop. The returned object belongs
-// to owner; deleting it ends the server at once (its job object or process
-// group), so stop it with stopDatabaseServer() first.
+//  3. the first time, sets up the data folder (db_init): a folder left
+//     half-way is moved aside (data.failed-<time>), never deleted; on
+//     Windows the tool sets root's password;
+//  4. writes the config and starts mariadbd, checking the port is still
+//     free, and waits until it is ready and proven ours (our process wrote
+//     the pid file): db_start (it ended; detail: this start's log lines),
+//     db_timeout after timeoutMs;
+//  5. macOS and Linux, the first time: the server runs without networking,
+//     root's password is set through its socket, and it starts again with
+//     networking; then (every time) root's password is checked over TCP:
+//     db_root.
+// rootPassword comes from the secure store (the app saves a new one there
+// before the first start). Lines (commands run and their output) arrive
+// in onLine; onStarted once, with the result (db_cancelled when it was
+// stopped while starting); onExit when the server ends later (stopped,
+// crashed). All on owner's thread from its event loop. The returned object
+// belongs to owner; deleting it ends the server at once (its job object or
+// process group), so stop it with stopDatabaseServer() first.
 struct DatabaseServerStart
 {
     DatabaseServerFiles files;
@@ -151,8 +166,10 @@ FLOSTUDIOCORE_EXPORT QObject *startDatabaseServer(const DatabaseServerStart &sta
                                                   ExitHandler onExit);
 
 // A clean shutdown: mariadb-admin shutdown, then waits up to graceMs for
-// the server to end, then ends it. done runs once the server has ended
-// (also when it was not running). server is startDatabaseServer's object.
+// the server to end, then ends it. While it is still starting, the start
+// stops instead (set-up ended, a server that runs ended politely). done
+// runs once the server has ended (also when it was not running). server
+// is startDatabaseServer's object.
 FLOSTUDIOCORE_EXPORT void stopDatabaseServer(QObject *server, const QString &rootPassword,
                                              std::function<void()> done, int graceMs = 30000);
 

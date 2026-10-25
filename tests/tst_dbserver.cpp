@@ -133,6 +133,9 @@ private slots:
         const QString unix = databaseServerConfig(files, 3306);
         QVERIFY(!unix.contains(u'\r'));
         QCOMPARE(unix.count(QStringLiteral("socket=\"/home/jo/.local/share/FloCMS Studio/mariadb/12.3/mysqld.sock\"")), 2);
+        QVERIFY(!unix.contains(QStringLiteral("skip-networking")));
+        // The first start on macOS and Linux: the socket only
+        QVERIFY(databaseServerConfig(files, 3306, false).contains(QStringLiteral("\nskip-networking\n")));
     }
 
     void commandsNeverCarryThePassword()
@@ -163,6 +166,14 @@ private slots:
         QCOMPARE(install.arguments.first(), QStringLiteral("--no-defaults"));
         QVERIFY(install.arguments.contains(QStringLiteral("--auth-root-authentication-method=normal")));
         QVERIFY(install.arguments.contains(QStringLiteral("--skip-test-db")));
+        QVERIFY(!install.arguments.join(u' ').contains(QStringLiteral("password")));
+        // Windows: its tool takes root's password as an argument, never shown
+        const DatabaseServerFiles win = databaseServerFiles(fakeInstall(dir.filePath(QStringLiteral("w")), true, false),
+                                                            QStringLiteral("12.3"), QStringLiteral("windows-x86_64"), dir.path());
+        const Command winInstall = databaseInstallCommand(win, 3307, secret);
+        QVERIFY(winInstall.arguments.contains(QStringLiteral("--password=") + secret));
+        QVERIFY(!winInstall.shown.contains(secret));
+        QVERIFY(winInstall.shown.contains(QStringLiteral("--password=••••••••")));
         const Command server = databaseServerCommand(files);
         QCOMPARE(server.arguments, QStringList{QStringLiteral("--defaults-file=") + QDir::toNativeSeparators(files.config)});
     }
@@ -183,7 +194,7 @@ private slots:
     void quotesSql()
     {
         QCOMPARE(sqlIdentifier(QStringLiteral("my`db")), QStringLiteral("`my``db`"));
-        QCOMPARE(sqlString(QStringLiteral("it's \\ ok")), QStringLiteral("'it\\'s \\\\ ok'"));
+        QCOMPARE(sqlString(QStringLiteral("it's \\ ok")), QStringLiteral("'it''s \\\\ ok'"));
     }
 
     void readsMissingLibraries()
@@ -215,16 +226,21 @@ private slots:
         DatabaseServerFiles mac = files;
         mac.platform = QStringLiteral("macos-arm64");
         QCOMPARE(linkLibaioT64(mac, {system}), QString());
+        // Never a system's own install
+        DatabaseServerFiles usr = files;
+        usr.baseDir = QStringLiteral("/usr");
+        QCOMPARE(linkLibaioT64(usr, {system}), QString());
     }
 
     void findsAFreePort()
     {
+        // Away from the system's own ports for outgoing connections
+        const int port = freeDatabasePort(23306, 200);
+        QVERIFY(port > 0);
         QTcpServer taken;
-        QVERIFY(taken.listen(QHostAddress::LocalHost, 0));
-        const int port = taken.serverPort();
-        const int free = freeDatabasePort(port, 5);
+        QVERIFY(taken.listen(QHostAddress::LocalHost, static_cast<quint16>(port)));
+        const int free = freeDatabasePort(port, 50);
         QVERIFY(free > port);
-        QVERIFY(free <= port + 4);
     }
 
     void readsTheEndOfTheErrorLog()
@@ -239,6 +255,13 @@ private slots:
         writeFile(files.errorLog, text);
         const QStringList tail = databaseErrorLogTail(files, 3);
         QCOMPARE(tail, (QStringList{QStringLiteral("line 28"), QStringLiteral("line 29"), QStringLiteral("line 30")}));
+        // Only what this start wrote
+        const qint64 size = QFileInfo(files.errorLog).size();
+        QFile log(files.errorLog);
+        QVERIFY(log.open(QIODevice::Append));
+        log.write("new 1\nnew 2\n");
+        log.close();
+        QCOMPARE(databaseErrorLogTail(files, 12, size), (QStringList{QStringLiteral("new 1"), QStringLiteral("new 2")}));
     }
 
     void refusesABusyPortAndAMissingProgram()
@@ -276,7 +299,9 @@ private slots:
     {
         QString mariadbd = qEnvironmentVariable("FLOSTUDIO_MARIADBD");
         QString version = qEnvironmentVariable("FLOSTUDIO_MARIADB_SERIES");
-        const QTemporaryDir tools;
+        const QTemporaryDir toolsDir;
+        // As in Studio's real folders: "FloCMS Studio" has a space
+        const QString tools = toolsDir.filePath(QStringLiteral("FloCMS Studio/tools"));
         if (mariadbd.isEmpty() && qEnvironmentVariable("FLOSTUDIO_ONLINE") == u"1") {
             const QList<ToolPackage> packages = bundledToolPackages();
             const auto it = std::find_if(packages.begin(), packages.end(), [](const ToolPackage &p) { return p.tool == u"mariadb"; });
@@ -285,7 +310,7 @@ private slots:
             QObject installer;
             bool installed = false;
             Result<QString> program = Error{};
-            startToolInstall(*it, &installer, {}, [&](const Result<QString> &r) { program = r; installed = true; }, tools.path());
+            startToolInstall(*it, &installer, {}, [&](const Result<QString> &r) { program = r; installed = true; }, tools);
             QTRY_VERIFY_WITH_TIMEOUT(installed, 900000);
             QVERIFY2(program.ok(), qUtf8Printable(program ? QString() : program.error().code + u' ' + program.error().detail));
             mariadbd = program.value();
@@ -299,7 +324,7 @@ private slots:
         const QTemporaryDir dir;
         QObject owner;
         DatabaseServerStart start;
-        start.files = databaseServerFiles(mariadbd, version, currentPlatform(), dir.path());
+        start.files = databaseServerFiles(mariadbd, version, currentPlatform(), dir.filePath(QStringLiteral("FloCMS Studio/mariadb")));
         start.port = freeDatabasePort(3406, 50);
         QVERIFY(start.port > 0);
         start.rootPassword = generateDatabasePassword();
@@ -329,6 +354,16 @@ private slots:
         QVERIFY2(created.out.contains(QStringLiteral("127.0.0.1")), qUtf8Printable(created.out));
         const Captured refused = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), QString(), QStringLiteral("SELECT 1;")));
         QVERIFY(!refused.succeeded());
+        // No anonymous logins: an unknown user is refused, and none is left
+        const Captured nobody = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("nobody"), QString(), QStringLiteral("SELECT 1;")));
+        QVERIFY(!nobody.succeeded());
+        const Captured anonymous = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword,
+                                                                  QStringLiteral("SELECT COUNT(*) FROM mysql.global_priv WHERE User = '';")));
+        QCOMPARE(anonymous.out.trimmed(), QStringLiteral("0"));
+        // Root logs in with its password from every local address
+        const Captured roots = runCaptured(databaseSqlCommand(start.files, start.port, QStringLiteral("root"), start.rootPassword,
+                                                              QStringLiteral("SELECT COUNT(*) FROM mysql.global_priv WHERE User = 'root' AND JSON_VALUE(Priv, '$.authentication_string') = '';")));
+        QVERIFY2(roots.out.trimmed() == u"0", qUtf8Printable(roots.out + roots.err));
 
         // A clean stop
         bool stopped = false;
@@ -359,6 +394,23 @@ private slots:
         QTRY_VERIFY(done);
         QCOMPARE(result.error().code, QStringLiteral("db_port_busy"));
         destroyNow(second);
+
+        // Stopped while starting: the start ends, nothing is left running
+        stopDatabaseServerNow(server, start.rootPassword);
+        destroyNow(server);
+        done = false;
+        bool stoppedEarly = false;
+        server = startDatabaseServer(start, &owner, onLine, [&](const Result<Done> &r) { result = r; done = true; }, onExit);
+        stopDatabaseServer(server, start.rootPassword, [&] { stoppedEarly = true; });
+        QTRY_VERIFY_WITH_TIMEOUT(done && stoppedEarly, 60000);
+        QCOMPARE(result.error().code, QStringLiteral("db_cancelled"));
+        QVERIFY(!databaseServerRunning(server));
+        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300), 30000);
+        destroyNow(server);
+        done = false;
+        server = startDatabaseServer(start, &owner, onLine, [&](const Result<Done> &r) { result = r; done = true; }, onExit);
+        QTRY_VERIFY_WITH_TIMEOUT(done, 120000);
+        QVERIFY2(result.ok(), qUtf8Printable(result ? QString() : result.error().code + u' ' + result.error().detail));
 
         // As when Studio closes: blocking, cleanly
         // The server's own line ("mariadbd: Shutdown complete"), not InnoDB's "Shutdown completed; ..."

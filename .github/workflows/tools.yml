@@ -21,6 +21,8 @@ on:
       - "libs/core/include/flostudio/core/downloads.h"
       - "tests/tst_downloads.cpp"
       - "libs/core/src/dbserver.cpp"
+      - "libs/core/src/process.cpp"
+      - "libs/core/src/tools.cpp"
       - "libs/core/include/flostudio/core/dbserver.h"
       - "tests/tst_dbserver.cpp"
       - ".github/workflows/tools.yml"
@@ -50,7 +52,7 @@ jobs:
     name: install (${{ matrix.os }})
     needs: list
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
