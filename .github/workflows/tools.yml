@@ -113,5 +113,13 @@ jobs:
           FLOSTUDIO_ONLINE: "1"
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
-          .github/scripts/run_tests.sh build -R tst_dbserver -V
+          status=0
+          .github/scripts/run_tests.sh build -R tst_dbserver -V || status=$?
           grep -E "QINFO|SKIP|Totals|FAIL" ctest.log | head -40 | sed 's/^/::notice::/' || true
+          # On failure, the end of the log as one annotation (a step keeps only
+          # ten lines' worth of annotations otherwise)
+          if [ $status -ne 0 ]; then
+            tail -c 3800 ctest.log | tr -d '\r' | sed -e 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}' | sed 's/^/::error title=tst_dbserver log end::/'
+            echo
+          fi
+          exit $status
