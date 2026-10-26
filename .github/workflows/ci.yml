@@ -27,6 +27,10 @@ on:
     paths-ignore:
       - "prototypes/**"
       - ".github/workflows/rtl-check.yml"
+  # Weekly on main: the static Qt cache (unused for 7 days, GitHub drops
+  # it) stays ready for a release
+  schedule:
+    - cron: "23 4 * * 1"
   workflow_dispatch:
   # The release workflow (release.yml) runs all of CI first and signs what
   # the release job built
@@ -171,6 +175,7 @@ jobs:
             # The same minimum macOS as Qt itself, not the runner's SDK.
             minos=$(otool -l "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
             echo "::notice::Qt $QT_VERSION needs macOS $minos or newer"
+            echo "MACOS_MIN=$minos" >> "$GITHUB_ENV"
             extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" "-DCMAKE_OSX_DEPLOYMENT_TARGET=$minos")
           fi
           { cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "${extra[@]}" \
@@ -226,7 +231,8 @@ jobs:
           # Only the static Qt: not the shared one the tests used
           unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH Qt6_DIR QT_ROOT_DIR CMAKE_PREFIX_PATH
           extra=()
-          if [ "$RUNNER_OS" = "macOS" ]; then extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"); fi
+          # The same minimum macOS as Qt's own build (release notes say it)
+          if [ "$RUNNER_OS" = "macOS" ]; then extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" "-DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOS_MIN"); fi
           { cmake -S . -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release \
               -DFLOSTUDIO_SHARED_LIBS=OFF -DFLOSTUDIO_BUILD_TESTS=OFF \
               -DCMAKE_TOOLCHAIN_FILE="$STATIC_QT/lib/cmake/Qt6/qt.toolchain.cmake" "${extra[@]}" \
@@ -270,9 +276,15 @@ jobs:
             cp "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" "$app/Contents/Resources/LICENSE.txt" dist/
           fi
           echo "APP_DIR=$app" >> "$GITHUB_ENV"
+          # The static Qt's folders are built into Qt as places to look for
+          # plugins and QML: away with them (and the build), so the tests
+          # below can only use what ships
+          mv "$STATIC_QT" "$STATIC_QT.away"
+          mv build-static build-static.away
 
       - name: Check the build
         run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
           echo "::notice::$("$STUDIO" --version | tr -d '\r' | tr '\n' ';')"
           version=$("$STUDIO" --version | tr -d '\r' | head -1 | awk '{print $3}')
           echo "VERSION=$version" >> "$GITHUB_ENV"
@@ -290,8 +302,9 @@ jobs:
           fi
           if [ "$RUNNER_OS" = "Windows" ]; then
             # Only Windows' own DLLs: no Qt, no FloStudio, no Visual C++ runtime
-            deps=$(dumpbin //dependents "$STUDIO" | awk '/^ +[A-Za-z0-9_.-]+\.dll$/{print $1}' | tr 'A-Z' 'a-z' | sort -u)
+            deps=$(dumpbin //dependents "$STUDIO" | tr -d '\r' | awk '/^ +[A-Za-z0-9_.-]+\.dll$/{print $1}' | tr 'A-Z' 'a-z' | sort -u)
             echo "::notice::Studio.exe uses: $(echo $deps)"
+            echo "$deps" | grep -qx kernel32.dll || { echo "::error::could not read Studio.exe's DLLs"; exit 1; }
             bad=$(echo "$deps" | grep -E '^(qt6|flostudio|vcruntime|msvcp|concrt|ucrtbase)' || true)
             if [ -n "$bad" ]; then echo "::error::Studio.exe needs DLLs that don't ship: $(echo $bad)"; exit 1; fi
           fi
@@ -299,6 +312,7 @@ jobs:
             archs=$(lipo -archs "$STUDIO")
             minos=$(otool -l "$STUDIO" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
             echo "::notice::architectures: $archs; minimum macOS: $minos"
+            [ "$minos" = "$MACOS_MIN" ] || { echo "::error::Studio needs macOS $minos, Qt $MACOS_MIN"; exit 1; }
             case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
             # Only macOS's own libraries and frameworks
             bad=$(otool -L "$STUDIO" | awk '/^\t/{print $1}' | { grep -vE '^(/System/|/usr/lib/)' || true; } | sort -u)
@@ -377,7 +391,8 @@ jobs:
           dmg="FloCMS-Studio-$VERSION.dmg"
           hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > /dev/null
           echo "::notice::disk image: $dmg $(( $(stat -f %z "$dmg") / 1024 )) KiB"
-          # Move the build folder away, so the app can only use what is inside it.
+          # Move the build folder away, so the app can only use what is inside
+          # it (the static Qt and its build are away already).
           mv build build-moved
           mnt="$RUNNER_TEMP/mnt"
           hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null

@@ -24,6 +24,7 @@ Usage:
                                 [--static] [--qtkeychain <QtKeychain's COPYING>]
 """
 import argparse
+import re
 import json
 from pathlib import Path
 
@@ -116,7 +117,8 @@ def main() -> None:
     if args.qtkeychain:
         if not args.qtkeychain.exists():
             raise SystemExit(f"missing {args.qtkeychain}: QtKeychain's license (build folder, _deps/qtkeychain-src)")
-        lines += ["- QtKeychain 0.15.0 (https://github.com/frankosterfeld/qtkeychain), BSD-3-Clause:", "",
+        pin = re.search(r"GIT_TAG \S+ # (\S+)", (ROOT / "libs" / "security" / "CMakeLists.txt").read_text(encoding="utf-8"))
+        lines += [f"- QtKeychain {pin.group(1) if pin else ''} (https://github.com/frankosterfeld/qtkeychain), BSD-3-Clause:", "",
                   args.qtkeychain.read_text(encoding="utf-8", errors="replace").rstrip(), ""]
     fonts = ROOT / "app" / "fonts" / "LICENSES.txt"
     lines += ["- The fonts built into FloCMS Studio:", "", fonts.read_text(encoding="utf-8").rstrip(), ""]
