@@ -60,11 +60,9 @@
       </Directory>
     </StandardDirectory>
 
-    <!-- Studio.exe on its own, for the shortcut and "Start FloCMS Studio";
-         then everything else in the deployed folder: the FloStudio and Qt
-         DLLs, Qt's plugins and QML files, the Visual C++ runtime DLLs,
-         LICENSE.txt and THIRD-PARTY-NOTICES.txt. (The final release, stage
-         9, installs one static Studio.exe instead.) -->
+    <!-- Studio.exe on its own, for the shortcut and "Start FloCMS Studio"
+         (one program: Qt, our libraries and the C++ runtime are inside);
+         then the rest of the folder: LICENSE.txt and THIRD-PARTY-NOTICES.txt -->
     <ComponentGroup Id="StudioFiles" Directory="INSTALLFOLDER">
       <Component Id="StudioExe">
         <File Id="StudioExe" Source="$(var.SourceDir)\Studio.exe" KeyPath="yes" />

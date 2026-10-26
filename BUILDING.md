@@ -1,9 +1,9 @@
 # Building FloCMS Studio
 
-Studio is C++20 with Qt 6 and CMake, built against Qt 6.12. Until the final
-release, builds ship as a folder: `Studio.exe` with the Qt and FloStudio
-DLLs (a `.app` bundle on macOS). The final release (stage 9) links
-everything into one `Studio.exe`; see "The final single-file build" below.
+Studio is C++20 with Qt 6 and CMake, built against Qt 6.12. Day-to-day
+builds use Qt's shared libraries (DLLs, frameworks). Releases are one
+`Studio.exe` (one `.app` on macOS) with Qt linked in; see "The release
+build" below.
 
 ## What you need
 
@@ -94,14 +94,16 @@ tool) and test it with `installer/windows/test_msi.ps1`, or a `.dmg` with
 then signing through SignPath and a draft GitHub release (see
 CODE_SIGNING.md).
 
-## The final single-file build (stage 9)
+## The release build (one file)
 
 Qt doesn't publish static builds. `.github/scripts/build_static_qt.py`
 builds one from Qt's official source archives (qtbase, qtshadertools,
 qtsvg, qtdeclarative, qttools), checking each against Qt's checksums. On
 Windows it uses the static C++ runtime (`/MT`), so `Studio.exe` needs no
 Visual C++ DLLs; on macOS `--universal` builds for Intel and Apple Silicon.
-It takes a few hours.
+It takes a few hours. CI does this in the `static-qt` job and keeps the
+result in its cache (a run that ends first saves the modules it built, and
+the next goes on from there); the `release` job then builds Studio with it.
 
 ```
 python .github/scripts/build_static_qt.py --version 6.12.0 --prefix C:\Qt\6.12.0-static --work C:\q
@@ -110,13 +112,15 @@ cmake --build build
 ```
 
 The result is one `build\bin\Studio.exe` (or one universal
-`FloCMS Studio.app`). CI will build it this way in stage 9.
+`FloCMS Studio.app`) that needs nothing but the system: CI checks that
+Studio.exe uses only Windows' own DLLs and has a TLS backend for downloads
+(`Studio.exe --version`).
 
 ## Using your own Qt (LGPL)
 
 Studio uses Qt under the GNU LGPL v3. You may change Qt and use your
-version with Studio: replace the Qt DLLs or frameworks that come with it,
-or build Studio from the source of the same release with the steps above,
+version with Studio: Qt is linked into the release, so build Studio from
+the source of the same release with the steps above,
 pointing `CMAKE_PREFIX_PATH` (or, for a static Qt, `CMAKE_TOOLCHAIN_FILE`)
 at your Qt.
 `THIRD-PARTY-NOTICES.txt`, shipped with every release, lists the Qt

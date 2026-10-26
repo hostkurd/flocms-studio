@@ -14,6 +14,10 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QNetworkProxyFactory>
+#include <QtNetwork/qtnetworkglobal.h>
+#if QT_CONFIG(ssl)
+#include <QSslSocket>
+#endif
 #include <QQuickStyle>
 #include <QGuiApplication>
 #include <QIcon>
@@ -250,7 +254,17 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     if (parser.isSet(versionOpt)) {
-        const QByteArray text = FloStudio::Core::toText(FloStudio::Core::currentBuildInfo()).toUtf8() + '\n';
+        // The TLS backends (plugins) Studio's downloads can use: a release
+        // build with Qt inside must have one (CI checks this line)
+#if QT_CONFIG(ssl)
+        const QStringList tls = QSslSocket::availableBackends();
+#else
+        const QStringList tls;
+#endif
+        const QByteArray text = (FloStudio::Core::toText(FloStudio::Core::currentBuildInfo()) + QStringLiteral("\nTLS: ")
+                                 + (tls.isEmpty() ? QStringLiteral("none") : tls.join(QStringLiteral(", "))))
+                                    .toUtf8()
+                                + '\n';
         return std::fwrite(text.constData(), 1, size_t(text.size()), stdout) == size_t(text.size()) ? 0 : 1;
     }
 

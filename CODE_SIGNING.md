@@ -8,10 +8,10 @@ FloCMS Studio's Windows release files are signed through SignPath Foundation's p
 
 Only files built from this repository's source code, by this repository's GitHub Actions workflow ([`.github/workflows/release.yml`](.github/workflows/release.yml)), from a version tag:
 
-- `Studio.exe`, `FloStudioCore.dll`, `FloStudioDatabase.dll` and `FloStudioSecurity.dll`, in the portable folder and in the installer
+- `Studio.exe`, in the portable folder and in the installer. It is one program: Studio's code with Qt, built by the same workflow from Qt's official source code, linked in.
 - the installer, `FloCMS-Studio-<version>-x64.msi`, built with the [WiX Toolset](https://wixtoolset.org)
 
-The other files that ship with Studio (Qt's libraries, plugins and QML files, and Microsoft's Visual C++ runtime) are other projects' work. They are shipped as their makers built them, and never signed with this certificate. The release workflow checks this: it fails if signing changed any file other than ours.
+Nothing else ships with Studio but its license texts (`LICENSE.txt`, `THIRD-PARTY-NOTICES.txt`), which aren't signed. The release workflow checks this: it fails if signing changed any file but `Studio.exe`, and CI fails if `Studio.exe` needs any DLL that isn't part of Windows.
 
 Every signed file says it is FloCMS Studio and carries the release's version (Properties > Details), and SignPath checks both before signing. What SignPath signs is set in [`.signpath/artifact-configurations/`](.signpath/artifact-configurations/).
 

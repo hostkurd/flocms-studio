@@ -2,9 +2,13 @@ name: CI
 
 # Stage 1 (design note D2, D6, D11, D12, D13), stage 2 (Core tests with PHP,
 # Composer and a real FloCMS project):
-#  - release:     Studio with Qt and the FloStudio libraries as DLLs (until
-#                 stage 9, which builds the single static program), tests,
-#                 smoke test, Windows installer (WiX) and macOS .dmg
+#  - static-qt:   Qt built statically from source (build_static_qt.py),
+#                 cached; the first build takes hours and resumes from the
+#                 cache when a run ends before it is done
+#  - release:     tests against Qt's own shared build, then the release:
+#                 Studio as one program with Qt inside (Studio.exe, or one
+#                 FloCMS Studio.app), smoke and memory tests, the Windows
+#                 installer (WiX) and the macOS .dmg
 #  - linux:       build and tests on Ubuntu with Qt 6.12 (shared), label
 #                 checks, screenshots of every demo screen (artifact)
 #  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
@@ -37,10 +41,12 @@ env:
   QT_FORCE_STDERR_LOGGING: "1"
 
 jobs:
-  release:
-    name: release (${{ matrix.os }})
+  static-qt:
+    name: static Qt (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # A job ends after 6 hours: the build stops before, saves what it has,
+    # and the next run goes on from there
+    timeout-minutes: 350
     strategy:
       fail-fast: false
       matrix:
@@ -50,6 +56,77 @@ jobs:
     defaults:
       run:
         shell: bash
+    env:
+      # Short paths: Qt's sources are deep, and Windows paths are short
+      STATIC_QT: ${{ runner.os == 'Windows' && 'C:/qs' || '/Users/runner/qs' }}
+      STATIC_WORK: ${{ runner.os == 'Windows' && 'C:/qw' || '/Users/runner/qw' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build tools
+        run: python -m pip install -q ninja
+
+      - name: MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # The newest save for this Qt version and this build script
+      - id: key
+        run: echo "key=static-qt-${{ runner.os }}-${QT_VERSION}-${{ hashFiles('.github/scripts/build_static_qt.py') }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STATIC_QT }}
+          key: ${{ steps.key.outputs.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ${{ steps.key.outputs.key }}-
+
+      - id: state
+        run: |
+          if [ -f "$STATIC_QT/share/flostudio/qt-build.json" ]; then
+            echo "done=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::static Qt $QT_VERSION: from the cache ($(du -sh "$STATIC_QT" | cut -f1))"
+          else
+            echo "done=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build static Qt
+        if: steps.state.outputs.done != 'true'
+        timeout-minutes: 320
+        run: |
+          universal=()
+          if [ "$RUNNER_OS" = "macOS" ]; then universal=(--universal); fi
+          python .github/scripts/build_static_qt.py --version "$QT_VERSION" --prefix "$STATIC_QT" --work "$STATIC_WORK" "${universal[@]}"
+
+      # Also after a failure or the time limit: the next run goes on from
+      # the modules already built
+      - uses: actions/cache/save@v4
+        if: always() && steps.state.outputs.done != 'true'
+        with:
+          path: ${{ env.STATIC_QT }}
+          key: ${{ steps.key.outputs.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+  release:
+    name: release (${{ matrix.os }})
+    needs: static-qt
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+          - os: macos-15
+    defaults:
+      run:
+        shell: bash
+    env:
+      STATIC_QT: ${{ runner.os == 'Windows' && 'C:/qs' || '/Users/runner/qs' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -129,64 +206,70 @@ jobs:
           .github/scripts/real_project.sh "$RUNNER_TEMP/site" sqlite
           FLOSTUDIO_REAL_PROJECT="$RUNNER_TEMP/site" FLOSTUDIO_WIZARD_TESTS=1 .github/scripts/run_tests.sh build -R "tst_realproject|tst_studio" -V
 
-      # Everything Studio needs goes next to it: Qt (windeployqt /
-      # macdeployqt), the FloStudio libraries, and on Windows the Visual C++
-      # runtime DLLs (not the 25 MB vc_redist installer).
-      - name: Collect Studio and its libraries
+      # The release: Studio again, against the static Qt (static-qt), as one
+      # program with Qt, our libraries and the C++ runtime inside. The
+      # tests above ran against Qt's shared build; the smoke and memory
+      # tests below run this one.
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STATIC_QT }}
+          key: static-qt-${{ runner.os }}-${{ env.QT_VERSION }}-${{ hashFiles('.github/scripts/build_static_qt.py') }}-none
+          restore-keys: static-qt-${{ runner.os }}-${{ env.QT_VERSION }}-${{ hashFiles('.github/scripts/build_static_qt.py') }}-
+
+      - name: Build Studio (static)
         run: |
+          set +e
+          if [ ! -f "$STATIC_QT/share/flostudio/qt-build.json" ]; then
+            echo "::error::the static Qt isn't finished yet (static-qt job): run CI again, it goes on from where it stopped"
+            exit 1
+          fi
+          # Only the static Qt: not the shared one the tests used
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH Qt6_DIR QT_ROOT_DIR CMAKE_PREFIX_PATH
+          extra=()
+          if [ "$RUNNER_OS" = "macOS" ]; then extra=("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"); fi
+          { cmake -S . -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release \
+              -DFLOSTUDIO_SHARED_LIBS=OFF -DFLOSTUDIO_BUILD_TESTS=OFF \
+              -DCMAKE_TOOLCHAIN_FILE="$STATIC_QT/lib/cmake/Qt6/qt.toolchain.cmake" "${extra[@]}" \
+            && cmake --build build-static; } > build-static.log 2>&1
+          status=$?
+          cat build-static.log
+          if [ $status -ne 0 ]; then
+            grep -iE "error|undefined|unresolved|cannot|not found|failed" build-static.log | head -25 | sed 's/^/::error::/'
+          fi
+          exit $status
+
+      # What ships: the program, LICENSE.txt and THIRD-PARTY-NOTICES.txt
+      # (next to Studio.exe on Windows, inside the app on macOS)
+      - name: Collect Studio
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
           mkdir -p dist
+          notices=(--qt-version "$QT_VERSION" --commit "$GITHUB_SHA" --static
+                   --attributions "$STATIC_QT/share/flostudio/qt-attributions.json"
+                   --qtkeychain build-static/_deps/qtkeychain-src/COPYING)
           if [ "$RUNNER_OS" = "Windows" ]; then
             app=dist/FloCMS-Studio
             mkdir -p "$app"
-            cp build/bin/Studio.exe build/bin/FloStudio*.dll "$app/"
-            "$QT_DIR/bin/windeployqt.exe" --release --qmldir app/qml --no-translations --no-compiler-runtime "$app/Studio.exe" > deploy.log
-            vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath | tr -d '\r')
-            cp "$(ls -d "$(cygpath -u "$vs")"/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT | tail -1)"/*.dll "$app/"
+            cp build-static/bin/Studio.exe "$app/" || fail "no Studio.exe"
+            python tools/make_notices.py "$app/THIRD-PARTY-NOTICES.txt" "${notices[@]}" || fail "notices"
+            cp LICENSE "$app/LICENSE.txt"
             echo "STUDIO=$app/Studio.exe" >> "$GITHUB_ENV"
           else
             app="dist/FloCMS Studio.app"
-            exe="$app/Contents/MacOS/FloCMS Studio"
-            fail() { echo "::error::$1"; [ -f deploy.log ] && tail -20 deploy.log | sed 's/^/::error::/'; exit 1; }
-            cp -R "build/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
-            command -v macdeployqt > /dev/null || fail "macdeployqt is not on PATH"
-            macdeployqt "$app" -qmldir=app/qml -verbose=1 > deploy.log 2>&1 || fail "macdeployqt failed"
-            # No SQL yet (stage 5 adds the SQLite driver only); the PostgreSQL,
-            # ODBC and Mimer drivers would need libraries outside the bundle.
-            rm -rf "$app/Contents/PlugIns/sqldrivers"
-            # Our own libraries into the bundle too, under the names the
-            # program asks for (@rpath/libFloStudioCore.0.dylib, ...).
-            mkdir -p "$app/Contents/Frameworks"
-            wanted=$(otool -L "$exe" | awk '/libFloStudio/{print $1}' | sort -u)
-            echo "::notice::the program asks for: $(echo $wanted)"
-            [ -n "$wanted" ] || fail "otool shows no FloStudio libraries in the program"
-            for ref in $wanted; do
-              lib=$(basename "$ref")
-              if [ ! -f "$app/Contents/Frameworks/$lib" ]; then
-                src=$(find build/libs -name "$lib" | head -1)
-                [ -n "$src" ] || fail "$lib not found in the build folder"
-                cp -L "$src" "$app/Contents/Frameworks/" || fail "could not copy $lib"
-              fi
-              case "$ref" in @rpath/*) ;; *) install_name_tool -change "$ref" "@rpath/$lib" "$exe" || fail "could not relink $lib";; esac
-            done
-            # Only rpaths inside the bundle: drop the build folder and Qt
-            # install ones from the program and from our own libraries.
-            for bin in "$exe" "$app"/Contents/Frameworks/libFloStudio*.dylib; do
-              for rp in $(otool -l "$bin" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | sort -u | grep '^/' || true); do
-                install_name_tool -delete_rpath "$rp" "$bin" || fail "could not remove rpath $rp from $(basename "$bin")"
-              done
-            done
-            otool -l "$exe" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | grep -qx '@executable_path/../Frameworks' \
-              || install_name_tool -add_rpath @executable_path/../Frameworks "$exe" 2> rpath.err \
-              || fail "could not add the bundle rpath: $(tr '\n' ' ' < rpath.err)"
-            # The notices travel inside the app, even if only the app is copied.
-            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA" > /dev/null
+            cp -R "build-static/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
+            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" "${notices[@]}" || fail "notices"
             cp LICENSE "$app/Contents/Resources/LICENSE.txt"
+            # Only macOS's own rpaths: drop the build folder's
+            for rp in $(otool -l "$app/Contents/MacOS/FloCMS Studio" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | sort -u); do
+              install_name_tool -delete_rpath "$rp" "$app/Contents/MacOS/FloCMS Studio" || fail "could not remove rpath $rp"
+            done
             # Ad-hoc signature over the whole bundle, so Apple Silicon runs it.
             codesign --force --deep --sign - "$app" || fail "codesign failed"
             echo "STUDIO=$app/Contents/MacOS/FloCMS Studio" >> "$GITHUB_ENV"
+            # Beside the app in the disk image too
+            cp "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" "$app/Contents/Resources/LICENSE.txt" dist/
           fi
           echo "APP_DIR=$app" >> "$GITHUB_ENV"
-          cat deploy.log | tail -20
 
       - name: Check the build
         run: |
@@ -196,15 +279,30 @@ jobs:
           files=$(find "$APP_DIR" -type f | wc -l | tr -d ' ')
           size=$(du -sk "$APP_DIR" | cut -f1)
           echo "::notice::$(basename "$APP_DIR"): $files files, $size KiB"
+          "$STUDIO" --version | grep -q "^Qt .*(static)" || { echo "::error::this Studio doesn't have Qt inside"; exit 1; }
+          "$STUDIO" --version | grep -q "^FloStudio libraries: static" || { echo "::error::the FloStudio libraries aren't inside"; exit 1; }
+          # HTTPS for downloads comes from a TLS plugin: it must be inside
+          # ("cert-only" reads certificates but can't connect)
+          tls=$("$STUDIO" --version | tr -d '\r' | sed -n 's/^TLS: //p')
+          echo "::notice::TLS backends: $tls"
+          if [ -z "$(echo "$tls" | tr ',' '\n' | tr -d ' ' | grep -vxE 'none|cert-only|')" ]; then
+            echo "::error::no TLS backend inside Studio: downloads would fail"; exit 1
+          fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            # Only Windows' own DLLs: no Qt, no FloStudio, no Visual C++ runtime
+            deps=$(dumpbin //dependents "$STUDIO" | awk '/^ +[A-Za-z0-9_.-]+\.dll$/{print $1}' | tr 'A-Z' 'a-z' | sort -u)
+            echo "::notice::Studio.exe uses: $(echo $deps)"
+            bad=$(echo "$deps" | grep -E '^(qt6|flostudio|vcruntime|msvcp|concrt|ucrtbase)' || true)
+            if [ -n "$bad" ]; then echo "::error::Studio.exe needs DLLs that don't ship: $(echo $bad)"; exit 1; fi
+          fi
           if [ "$RUNNER_OS" = "macOS" ]; then
             archs=$(lipo -archs "$STUDIO")
             minos=$(otool -l "$STUDIO" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')
             echo "::notice::architectures: $archs; minimum macOS: $minos"
             case "$archs" in *x86_64*arm64*|*arm64*x86_64*) ;; *) echo "::error::not a universal binary: $archs"; exit 1;; esac
-            # Every library must come from inside the bundle or from macOS.
-            bad=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -L {} \; 2>/dev/null \
-                  | awk '/^\t/{print $1}' | { grep -vE '^(@rpath|@executable_path|@loader_path|/System/|/usr/lib/)' || true; } | sort -u)
-            if [ -n "$bad" ]; then echo "::error::libraries from outside the bundle: $(echo $bad)"; exit 1; fi
+            # Only macOS's own libraries and frameworks
+            bad=$(otool -L "$STUDIO" | awk '/^\t/{print $1}' | { grep -vE '^(/System/|/usr/lib/)' || true; } | sort -u)
+            if [ -n "$bad" ]; then echo "::error::libraries that don't ship: $(echo $bad)"; exit 1; fi
             rpaths=$(find "$APP_DIR" -type f \( -perm -u+x -o -name '*.dylib' \) -exec otool -l {} \; 2>/dev/null \
                   | awk '/cmd LC_RPATH/{getline; getline; print $2}' | { grep '^/' || true; } | sort -u)
             if [ -n "$rpaths" ]; then echo "::error::rpaths outside the bundle: $(echo $rpaths)"; exit 1; fi
@@ -234,20 +332,14 @@ jobs:
           while IFS= read -r line; do echo "::notice title=Memory ($RUNNER_OS)::$line"; done < <(grep '^memory' memory.txt || true)
           exit $code
 
-      - name: Notices
-        run: |
-          python tools/make_notices.py "$APP_DIR/../THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA"
-          cp LICENSE "$APP_DIR/../LICENSE.txt"
-          if [ "$RUNNER_OS" = "Windows" ]; then cp dist/THIRD-PARTY-NOTICES.txt dist/LICENSE.txt "$APP_DIR/"; fi
-
-      # Code signing (CODE_SIGNING.md) signs only our own files, and checks
-      # that each says it is FloCMS Studio, with Studio's version
-      - name: Version information of our files
+      # Code signing (CODE_SIGNING.md) checks that Studio.exe says it is
+      # FloCMS Studio, with Studio's version
+      - name: Version information
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $files = @(Get-Item "$env:APP_DIR/Studio.exe") + @(Get-ChildItem "$env:APP_DIR/FloStudio*.dll")
-          if ($files.Count -ne 4) { Write-Output "::error::expected Studio.exe and 3 FloStudio DLLs, found $($files.Count)"; exit 1 }
+          $files = @(Get-ChildItem "$env:APP_DIR" -Recurse -File -Include *.exe, *.dll)
+          if ($files.Count -ne 1) { Write-Output "::error::expected Studio.exe alone, found $(($files | ForEach-Object Name) -join ', ')"; exit 1 }
           foreach ($f in $files) {
             $v = $f.VersionInfo
             if ($v.ProductName -ne 'FloCMS Studio' -or $v.ProductVersion -ne $env:VERSION -or $v.CompanyName -ne 'HostKurd') {
@@ -321,7 +413,7 @@ jobs:
           name: release-logs-${{ matrix.os }}
           path: |
             build.log
-            deploy.log
+            build-static.log
             install-older.log
             install.log
             uninstall.log

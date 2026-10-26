@@ -1,6 +1,6 @@
 """Build a static Qt from the official source archives, for the final single-file release (D6).
 
-Not used by CI yet: until stage 9, builds ship Qt as DLLs (decided 24 Oct).
+Used by CI (ci.yml, static-qt job) for every release build.
 
 Qt does not publish static builds, so CI builds one and caches it. Only the
 modules Studio needs are built: qtbase, qtshadertools, qtsvg, qtdeclarative
