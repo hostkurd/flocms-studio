@@ -21,7 +21,7 @@ private slots:
         {
             QList<QByteArray> blocks;
             for (int i = 0; i < 64; ++i)
-                blocks << QByteArray(256 * 1024, 'x');
+                blocks << QByteArray(qsizetype(256) * 1024, 'x');
         }
         FloStudio::Core::returnFreeMemory();
         const FloStudio::Core::ProcessMemory after = FloStudio::Core::currentProcessMemory();
