@@ -20,7 +20,12 @@ function Run-Msi([string[]] $arguments, [string] $log) {
     # 3010 and 1641: done, Windows wants a restart (not for a per-user
     # install, but not a failure either)
     if ($p.ExitCode -notin 0, 3010, 1641) {
-        Get-Content $log -ErrorAction SilentlyContinue | Select-String -Pattern 'error|failed|Return value 3' | Select-Object -Last 30
+        # Job logs can't always be read from outside GitHub: what led to the
+        # failure, as annotations
+        $lines = @(Get-Content $log -ErrorAction SilentlyContinue)
+        $at = [array]::FindIndex([string[]] $lines, [Predicate[string]] { param($l) $l -match 'Return value 3' })
+        $from = if ($at -ge 0) { [Math]::Max(0, $at - 12) } else { [Math]::Max(0, $lines.Count - 12) }
+        $lines[$from..([Math]::Min($lines.Count - 1, $from + 13))] | Where-Object { $_ } | ForEach-Object { Write-Output "::error::msi log: $($_.Substring(0, [Math]::Min(300, $_.Length)))" }
         Fail "msiexec $($arguments -join ' ') ended with $($p.ExitCode)"
     }
 }
