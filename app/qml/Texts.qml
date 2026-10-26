@@ -181,7 +181,10 @@ QtObject {
         case "keychain_failed": return qsTr("The secure store did not answer.")
         case "composer_not_found": return qsTr("Composer was not found. Download it in This computer, or choose it in Settings > PHP and tools.")
         case "project_busy": return qsTr("A command is still running in this project. Remove or delete it when it has finished.")
-        case "delete_protected": return qsTr("Studio doesn't delete this folder: it is or holds a folder Studio or your computer needs.")
+        case "delete_protected": return qsTr("Studio doesn't delete this folder: it is, holds or is inside a folder Studio or your computer needs (Studio's own files, your home or Documents folder, a project folder or another project).")
+        case "delete_link": return qsTr("This project's folder is a link to another folder, so Studio doesn't delete it. Delete the folder itself, then remove the project from Studio.")
+        case "delete_running": return qsTr("Studio is still deleting another project. Try again when it has finished.")
+        case "delete_server": return qsTr("The project's website server didn't stop, so its folder wasn't deleted. Stop the server, then try again.")
         case "trash_failed": return Qt.platform.os === "windows"
                                     ? qsTr("The folder could not be moved to the Recycle Bin. A program may be using a file in it, or the drive has no Recycle Bin. Nothing was deleted.")
                                     : qsTr("The folder could not be moved to the Trash. A program may be using a file in it, or the disk has no Trash. Nothing was deleted.")

@@ -173,8 +173,9 @@
   "dialog": "deleteProject",
   "deleteChoices": {
     "onStudioServer": true,
+    "databaseShared": false,
+    "configured": true,
     "database": "fectum",
-    "user": "fectum",
-    "userShared": false
+    "user": "fectum"
   }
 }

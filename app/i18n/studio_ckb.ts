@@ -584,29 +584,25 @@
         <translation>سەبەتەی خۆڵ</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="41" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="39" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="43" />
         <source>Delete %1?</source>
         <translation>%1 بسڕدرێتەوە؟</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="43" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="45" />
         <source>Its folder goes to the %1, so you can still bring it back from there. Its website server stops, and the project leaves Studio.</source>
         <translation>بوخچەکەی دەچێتە %1، بۆیە هێشتا دەتوانیت لەوێوە بیگەڕێنیتەوە. سێرڤەری ماڵپەڕەکەی دەوەستێت و پڕۆژەکە لە Studio لادەبرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="59" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="61" />
         <source>Also delete its database on Studio's MariaDB</source>
         <translation>داتابەیسەکەشی لەسەر MariaDBی Studio بسڕەوە</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="64" />
-        <source>The database `%1`, with all its data. The user `%2` stays: another project uses it.</source>
-        <translation>داتابەیسی `%1` لەگەڵ هەموو داتاکانی. بەکارهێنەری `%2` دەمێنێتەوە: پڕۆژەیەکی تر بەکاری دەهێنێت.</translation>
-    </message>
-    <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="65" />
-        <source>The database `%1`, with all its data, and its user `%2`.</source>
-        <translation>داتابەیسی `%1` لەگەڵ هەموو داتاکانی، و بەکارهێنەرەکەی `%2`.</translation>
+        <source>The database `%1`, with all its data; its user `%2` stays.</source>
+        <translation>داتابەیسی `%1` لەگەڵ هەموو داتاکانی؛ بەکارهێنەرەکەی `%2` دەمێنێتەوە.</translation>
     </message>
     <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="67" />
@@ -614,12 +610,22 @@
         <translation>ئەمە ناگەڕێتەوە.</translation>
     </message>
     <message>
+        <location filename="../qml/DeleteProjectDialog.qml" line="78" />
+        <source>Its database `%1` stays: another project uses it.</source>
+        <translation>داتابەیسەکەی `%1` دەمێنێتەوە: پڕۆژەیەکی تر بەکاری دەهێنێت.</translation>
+    </message>
+    <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="79" />
+        <source>Its database stays as it is.</source>
+        <translation>داتابەیسەکەی وەک خۆی دەمێنێتەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeleteProjectDialog.qml" line="90" />
         <source>Cancel</source>
         <translation>هەڵوەشاندنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="81" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="92" />
         <source>Delete project</source>
         <translation>سڕینەوەی پڕۆژە</translation>
     </message>
@@ -2437,12 +2443,12 @@
 <context>
     <name>ProjectMenu</name>
     <message>
-        <location filename="../qml/ProjectMenu.qml" line="45" />
+        <location filename="../qml/ProjectMenu.qml" line="54" />
         <source>Remove from Studio</source>
         <translation>لابردن لە Studio</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectMenu.qml" line="50" />
+        <location filename="../qml/ProjectMenu.qml" line="62" />
         <source>Delete project…</source>
         <translation>سڕینەوەی پڕۆژە…</translation>
     </message>
@@ -2518,82 +2524,82 @@
         <translation>ئەمە ماڵپەڕێکی بەرهەمهێنانە.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="164" />
+        <location filename="../qml/ProjectPage.qml" line="168" />
         <source>Open site</source>
         <translation>کردنەوەی ماڵپەڕ</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="171" />
+        <location filename="../qml/ProjectPage.qml" line="175" />
         <source>Open admin</source>
         <translation>کردنەوەی پانێڵی بەڕێوەبردن</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="176" />
+        <location filename="../qml/ProjectPage.qml" line="180" />
         <source>Open folder</source>
         <translation>کردنەوەی فۆڵدەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="181" />
+        <location filename="../qml/ProjectPage.qml" line="185" />
         <source>Open in editor</source>
         <translation>کردنەوە لە دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="189" />
+        <location filename="../qml/ProjectPage.qml" line="193" />
         <source>Stop server</source>
         <translation>وەستاندنی سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="189" />
+        <location filename="../qml/ProjectPage.qml" line="193" />
         <source>Start server</source>
         <translation>دەستپێکردنی سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="200" />
+        <location filename="../qml/ProjectPage.qml" line="204" />
         <source>Deleting…</source>
         <translation>دەسڕدرێتەوە…</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="200" />
+        <location filename="../qml/ProjectPage.qml" line="204" />
         <source>More</source>
         <translation>زیاتر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="203" />
+        <location filename="../qml/ProjectPage.qml" line="207" />
         <source>More actions for this project</source>
         <translation>کاری زیاتر بۆ ئەم پڕۆژەیە</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="226" />
+        <location filename="../qml/ProjectPage.qml" line="230" />
         <source>Remove from Studio</source>
         <translation>لابردن لە Studio</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Overview</source>
         <translation>گشتی</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Generate</source>
         <translation>دروستکەرەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Database</source>
         <translation>داتابەیس</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Logs</source>
         <translation>تۆمارەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Packages</source>
         <translation>پاکێجەکان</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Doctor</source>
         <translation>پشکنین</translation>
     </message>
@@ -3526,56 +3532,71 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="184" />
-        <source>Studio doesn't delete this folder: it is or holds a folder Studio or your computer needs.</source>
-        <translation>Studio ئەم بوخچەیە ناسڕێتەوە: خۆی یان بوخچەیەکی ناوی پێویستی Studio یان کۆمپیوتەرەکەتە.</translation>
+        <source>Studio doesn't delete this folder: it is, holds or is inside a folder Studio or your computer needs (Studio's own files, your home or Documents folder, a project folder or another project).</source>
+        <translation>Studio ئەم بوخچەیە ناسڕێتەوە: خۆی، یان بوخچەیەکی ناوی، یان ئەو بوخچەیەی تێیدایە پێویستی Studio یان کۆمپیوتەرەکەتە (فایلەکانی خودی Studio، بوخچەی ماڵەوە یان Documents، بوخچەی پڕۆژەکان، یان پڕۆژەیەکی تر).</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="185" />
+        <source>This project's folder is a link to another folder, so Studio doesn't delete it. Delete the folder itself, then remove the project from Studio.</source>
+        <translation>بوخچەی ئەم پڕۆژەیە بەستەرێکە بۆ بوخچەیەکی تر، بۆیە Studio نایسڕێتەوە. خودی بوخچەکە بسڕەوە، پاشان پڕۆژەکە لە Studio لاببە.</translation>
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="186" />
+        <source>Studio is still deleting another project. Try again when it has finished.</source>
+        <translation>Studio هێشتا پڕۆژەیەکی تر دەسڕێتەوە. کاتێک تەواو بوو دووبارە هەوڵ بدەرەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="187" />
+        <source>The project's website server didn't stop, so its folder wasn't deleted. Stop the server, then try again.</source>
+        <translation>سێرڤەری ماڵپەڕی پڕۆژەکە نەوەستا، بۆیە بوخچەکەی نەسڕایەوە. سێرڤەرەکە بوەستێنە، پاشان دووبارە هەوڵ بدەرەوە.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="189" />
         <source>The folder could not be moved to the Recycle Bin. A program may be using a file in it, or the drive has no Recycle Bin. Nothing was deleted.</source>
         <translation>بوخچەکە نەگوازرایەوە بۆ سەبەتەی خۆڵ. لەوانەیە بەرنامەیەک فایلێکی ناوی بەکاربهێنێت، یان ئەو دیسکە سەبەتەی خۆڵی نییە. هیچ شتێک نەسڕایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="187" />
+        <location filename="../qml/Texts.qml" line="190" />
         <source>The folder could not be moved to the Trash. A program may be using a file in it, or the disk has no Trash. Nothing was deleted.</source>
         <translation>بوخچەکە نەگوازرایەوە بۆ سەبەتەی خۆڵ. لەوانەیە بەرنامەیەک فایلێکی ناوی بەکاربهێنێت، یان ئەو دیسکە سەبەتەی خۆڵی نییە. هیچ شتێک نەسڕایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="188" />
+        <location filename="../qml/Texts.qml" line="191" />
         <source>The project was deleted, but Studio could not delete its database on its MariaDB. You can delete it with a database tool (HeidiSQL, DBeaver…), as `root`: Settings &gt; Database server has its password.</source>
         <translation>پڕۆژەکە سڕایەوە، بەڵام Studio نەیتوانی داتابەیسەکەی لەسەر MariaDBـەکەی بسڕێتەوە. دەتوانیت بە ئامرازێکی داتابەیس (HeidiSQL، DBeaver…) وەک `root` بیسڕیتەوە: وشەی نهێنییەکەی لە ڕێکخستنەکان &gt; سێرڤەری داتابەیس هەیە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="189" />
+        <location filename="../qml/Texts.qml" line="192" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>پڕۆژەکە فایلی `.env` ـی نییە. `.env.example` بۆ `.env` کۆپی بکە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="190" />
+        <location filename="../qml/Texts.qml" line="193" />
         <source>The command could not run.</source>
         <translation>فەرمانەکە نەتوانرا جێبەجێ بکرێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="191" />
+        <location filename="../qml/Texts.qml" line="194" />
         <source>Studio could not read what the check printed.</source>
         <translation>Studio نەیتوانی ئەوە بخوێنێتەوە کە پشکنینەکە چاپی کرد.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="192" />
+        <location filename="../qml/Texts.qml" line="195" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>Studio نەیتوانی داتابەیسەکە بخوێنێتەوە. ئایا سێرڤەری داتابەیس کار دەکات، و ڕێکخستنەکانی `.env` دروستن؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="193" />
+        <location filename="../qml/Texts.qml" line="196" />
         <source>Studio could not read the migrations.</source>
         <translation>Studio نەیتوانی مایگرەیشنەکان بخوێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="194" />
+        <location filename="../qml/Texts.qml" line="197" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>هێشتا `storage/logs/app.log` نییە. FloCMS لە یەکەم پەیامدا دەینووسێت.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="196" />
+        <location filename="../qml/Texts.qml" line="199" />
         <source>Something went wrong (%1).</source>
         <translation>هەڵەیەک ڕوویدا (%1).</translation>
     </message>

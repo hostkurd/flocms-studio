@@ -16,13 +16,13 @@
 #include <QHash>
 #include <QJsonObject>
 #include <QObject>
-
-#include <functional>
 #include <QStringList>
 #include <QTimer>
 #include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
+
+#include <functional>
 
 class Language;
 class ProjectServer;
@@ -182,13 +182,14 @@ public:
     Q_INVOKABLE void removeProject(const QString &path);
     // What "Delete project…" can do besides moving the folder:
     // {database, user, onStudioServer (its database is on Studio's own
-    // MariaDB), userShared (another project uses the same user)}
+    // MariaDB, made by the wizard, and no other project uses it),
+    // databaseShared (it is, but another project uses it), configured}
     Q_INVOKABLE QVariantMap deleteChoices(const QString &path) const;
     // "Delete project…": its website server stopped, the folder moved to the
     // Recycle Bin / Trash, the project removed from Studio; with database,
-    // its database on Studio's server dropped too (and its user, unless
-    // another project uses it). Problems: project_busy, delete_protected,
-    // trash_failed, db_drop.
+    // its database on Studio's server dropped too (its user stays).
+    // Problems: delete_running, project_busy, delete_server, delete_link,
+    // delete_protected, trash_failed, db_drop.
     Q_INVOKABLE void deleteProject(const QString &path, bool database);
     Q_INVOKABLE void selectProject(const QString &path);
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
@@ -276,7 +277,8 @@ private:
     // Then, once its website server has stopped
     void stopServerThen(const QString &path, const std::function<void()> &next);
     void trashProject(const QString &path, const QString &dropSql);
-    void dropDatabase(const QString &sql);
+    void dropDatabase(const QString &path, const QString &sql);
+    void forgetDatabaseOf(const QString &path);
     void deleteDone(const QString &code = {}, const QString &detail = {});
     ProjectChecks *checksFor(const QString &path);
     ProjectGenerate *generateFor(const QString &path);

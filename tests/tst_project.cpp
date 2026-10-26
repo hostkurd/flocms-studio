@@ -284,7 +284,23 @@ private slots:
         QCOMPARE(moveProjectToTrash(site, {dir.path()}).error().code, QStringLiteral("delete_protected"));
         QVERIFY(QFileInfo::exists(site));
 
-        const auto moved = moveProjectToTrash(site, {dir.filePath(QStringLiteral("elsewhere"))});
+        // A folder that may hold projects but never be one: the project
+        // itself, or one inside it, listed as such
+        QCOMPARE(moveProjectToTrash(site, {}, {site}).error().code, QStringLiteral("delete_protected"));
+        QCOMPARE(moveProjectToTrash(site, {}, {site + QStringLiteral("/storage")}).error().code,
+                 QStringLiteral("delete_protected"));
+#ifndef Q_OS_WIN
+        const QString link = dir.filePath(QStringLiteral("shop-link"));
+        QVERIFY(QFile::link(site, link));
+        QCOMPARE(moveProjectToTrash(link).error().code, QStringLiteral("delete_link"));
+        QVERIFY(QFileInfo::exists(site));
+#endif
+
+        // Not into the developer's own Trash (Linux; macOS and Windows
+        // have one Trash / Recycle Bin)
+        const QTemporaryDir data;
+        qputenv("XDG_DATA_HOME", data.path().toLocal8Bit());
+        const auto moved = moveProjectToTrash(site, {dir.filePath(QStringLiteral("elsewhere"))}, {dir.path()});
         if (!moved && moved.error().code == u"trash_failed")
             QSKIP("this system has no trash for the temporary folder");
         QVERIFY2(moved.ok(), moved.ok() ? "" : qPrintable(moved.error().code));

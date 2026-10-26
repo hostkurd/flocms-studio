@@ -604,29 +604,25 @@
         <translation>سلة المهملات</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="41" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="39" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="43" />
         <source>Delete %1?</source>
         <translation>حذف %1؟</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="43" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="45" />
         <source>Its folder goes to the %1, so you can still bring it back from there. Its website server stops, and the project leaves Studio.</source>
         <translation>ينتقل مجلده إلى %1، فيمكنك استعادته من هناك. يتوقف خادم موقعه، ويُزال المشروع من Studio.</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="59" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="61" />
         <source>Also delete its database on Studio's MariaDB</source>
         <translation>احذف أيضًا قاعدة بياناته على MariaDB الخاص بـ Studio</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="64" />
-        <source>The database `%1`, with all its data. The user `%2` stays: another project uses it.</source>
-        <translation>قاعدة البيانات `%1` بكل بياناتها. يبقى المستخدم `%2`: يستخدمه مشروع آخر.</translation>
-    </message>
-    <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="65" />
-        <source>The database `%1`, with all its data, and its user `%2`.</source>
-        <translation>قاعدة البيانات `%1` بكل بياناتها، ومستخدمها `%2`.</translation>
+        <source>The database `%1`, with all its data; its user `%2` stays.</source>
+        <translation>قاعدة البيانات `%1` بكل بياناتها؛ ويبقى مستخدمها `%2`.</translation>
     </message>
     <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="67" />
@@ -634,12 +630,22 @@
         <translation>لا يمكن التراجع عن هذا.</translation>
     </message>
     <message>
+        <location filename="../qml/DeleteProjectDialog.qml" line="78" />
+        <source>Its database `%1` stays: another project uses it.</source>
+        <translation>تبقى قاعدة بياناته `%1`: يستخدمها مشروع آخر.</translation>
+    </message>
+    <message>
         <location filename="../qml/DeleteProjectDialog.qml" line="79" />
+        <source>Its database stays as it is.</source>
+        <translation>تبقى قاعدة بياناته كما هي.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeleteProjectDialog.qml" line="90" />
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-        <location filename="../qml/DeleteProjectDialog.qml" line="81" />
+        <location filename="../qml/DeleteProjectDialog.qml" line="92" />
         <source>Delete project</source>
         <translation>حذف المشروع</translation>
     </message>
@@ -2521,12 +2527,12 @@
 <context>
     <name>ProjectMenu</name>
     <message>
-        <location filename="../qml/ProjectMenu.qml" line="45" />
+        <location filename="../qml/ProjectMenu.qml" line="54" />
         <source>Remove from Studio</source>
         <translation>إزالة من Studio</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectMenu.qml" line="50" />
+        <location filename="../qml/ProjectMenu.qml" line="62" />
         <source>Delete project…</source>
         <translation>حذف المشروع…</translation>
     </message>
@@ -2606,82 +2612,82 @@
         <translation>هذا موقع إنتاج.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="164" />
+        <location filename="../qml/ProjectPage.qml" line="168" />
         <source>Open site</source>
         <translation>فتح الموقع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="171" />
+        <location filename="../qml/ProjectPage.qml" line="175" />
         <source>Open admin</source>
         <translation>فتح لوحة الإدارة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="176" />
+        <location filename="../qml/ProjectPage.qml" line="180" />
         <source>Open folder</source>
         <translation>فتح المجلد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="181" />
+        <location filename="../qml/ProjectPage.qml" line="185" />
         <source>Open in editor</source>
         <translation>فتح في المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="189" />
+        <location filename="../qml/ProjectPage.qml" line="193" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="189" />
+        <location filename="../qml/ProjectPage.qml" line="193" />
         <source>Start server</source>
         <translation>تشغيل الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="200" />
+        <location filename="../qml/ProjectPage.qml" line="204" />
         <source>Deleting…</source>
         <translation>جارٍ الحذف…</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="200" />
+        <location filename="../qml/ProjectPage.qml" line="204" />
         <source>More</source>
         <translation>المزيد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="203" />
+        <location filename="../qml/ProjectPage.qml" line="207" />
         <source>More actions for this project</source>
         <translation>إجراءات أخرى لهذا المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="226" />
+        <location filename="../qml/ProjectPage.qml" line="230" />
         <source>Remove from Studio</source>
         <translation>إزالة من Studio</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Overview</source>
         <translation>نظرة عامة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Generate</source>
         <translation>المولّدات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="244" />
+        <location filename="../qml/ProjectPage.qml" line="249" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>
@@ -3618,56 +3624,71 @@
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="184" />
-        <source>Studio doesn't delete this folder: it is or holds a folder Studio or your computer needs.</source>
-        <translation>لا يحذف Studio هذا المجلد: فهو مجلد يحتاجه Studio أو حاسوبك، أو يحوي مجلدًا كهذا.</translation>
+        <source>Studio doesn't delete this folder: it is, holds or is inside a folder Studio or your computer needs (Studio's own files, your home or Documents folder, a project folder or another project).</source>
+        <translation>لا يحذف Studio هذا المجلد: فهو مجلد يحتاجه Studio أو حاسوبك، أو يحويه أو يقع داخله (ملفات Studio نفسه، أو مجلد المنزل أو المستندات، أو مجلد مشاريع، أو مشروع آخر).</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="185" />
+        <source>This project's folder is a link to another folder, so Studio doesn't delete it. Delete the folder itself, then remove the project from Studio.</source>
+        <translation>مجلد هذا المشروع رابط إلى مجلد آخر، لذا لا يحذفه Studio. احذف المجلد نفسه، ثم أزِل المشروع من Studio.</translation>
     </message>
     <message>
         <location filename="../qml/Texts.qml" line="186" />
+        <source>Studio is still deleting another project. Try again when it has finished.</source>
+        <translation>ما زال Studio يحذف مشروعًا آخر. حاول مجددًا بعد أن ينتهي.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="187" />
+        <source>The project's website server didn't stop, so its folder wasn't deleted. Stop the server, then try again.</source>
+        <translation>لم يتوقف خادم موقع المشروع، فلم يُحذف مجلده. أوقف الخادم ثم حاول مجددًا.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Texts.qml" line="189" />
         <source>The folder could not be moved to the Recycle Bin. A program may be using a file in it, or the drive has no Recycle Bin. Nothing was deleted.</source>
         <translation>تعذّر نقل المجلد إلى سلة المحذوفات. ربما يستخدم برنامج ملفًا فيه، أو لا توجد سلة محذوفات على القرص. لم يُحذف شيء.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="187" />
+        <location filename="../qml/Texts.qml" line="190" />
         <source>The folder could not be moved to the Trash. A program may be using a file in it, or the disk has no Trash. Nothing was deleted.</source>
         <translation>تعذّر نقل المجلد إلى سلة المهملات. ربما يستخدم برنامج ملفًا فيه، أو لا توجد سلة مهملات على القرص. لم يُحذف شيء.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="188" />
+        <location filename="../qml/Texts.qml" line="191" />
         <source>The project was deleted, but Studio could not delete its database on its MariaDB. You can delete it with a database tool (HeidiSQL, DBeaver…), as `root`: Settings &gt; Database server has its password.</source>
         <translation>حُذف المشروع، لكن Studio لم يتمكن من حذف قاعدة بياناته على MariaDB الخاص به. يمكنك حذفها بأداة قواعد بيانات (HeidiSQL وDBeaver…) بصفة `root`: كلمة مروره في الإعدادات &gt; خادم قاعدة البيانات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="189" />
+        <location filename="../qml/Texts.qml" line="192" />
         <source>The project has no `.env` file. Copy `.env.example` to `.env`.</source>
         <translation>لا يحتوي المشروع على ملف `.env`. انسخ `.env.example` إلى `.env`.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="190" />
+        <location filename="../qml/Texts.qml" line="193" />
         <source>The command could not run.</source>
         <translation>تعذّر تشغيل الأمر.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="191" />
+        <location filename="../qml/Texts.qml" line="194" />
         <source>Studio could not read what the check printed.</source>
         <translation>تعذّر على Studio قراءة ما طبعه الفحص.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="192" />
+        <location filename="../qml/Texts.qml" line="195" />
         <source>Studio could not read the database. Is the database server running, and are the settings in `.env` right?</source>
         <translation>تعذّر على Studio قراءة قاعدة البيانات. هل خادم قاعدة البيانات يعمل، وهل إعدادات `.env` صحيحة؟</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="193" />
+        <location filename="../qml/Texts.qml" line="196" />
         <source>Studio could not read the migrations.</source>
         <translation>تعذّر على Studio قراءة الترحيلات.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="194" />
+        <location filename="../qml/Texts.qml" line="197" />
         <source>There is no `storage/logs/app.log` yet. FloCMS writes it at the first message.</source>
         <translation>لا يوجد `storage/logs/app.log` بعد. يكتبه FloCMS عند أول رسالة.</translation>
     </message>
     <message>
-        <location filename="../qml/Texts.qml" line="196" />
+        <location filename="../qml/Texts.qml" line="199" />
         <source>Something went wrong (%1).</source>
         <translation>حدث خطأ (%1).</translation>
     </message>

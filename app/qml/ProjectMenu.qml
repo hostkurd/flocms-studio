@@ -26,6 +26,9 @@ Popup {
         font.family: Lang.uiFont
         font.pixelSize: 14
         Accessible.name: text
+        Accessible.role: Accessible.MenuItem
+        Keys.onReturnPressed: clicked()
+        Keys.onEnterPressed: clicked()
         background: Rectangle {
             radius: 6
             color: row.down ? Theme.pressedBg : (row.hovered || row.visualFocus ? Theme.hoverBg : "transparent")
@@ -37,16 +40,25 @@ Popup {
         }
     }
 
+    onOpened: removeItem.forceActiveFocus()
+
     contentItem: ColumnLayout {
         spacing: 2
+        Accessible.role: Accessible.PopupMenu
         LayoutMirroring.enabled: Lang.rtl
         LayoutMirroring.childrenInherit: true
         Item_ {
+            id: removeItem
+            KeyNavigation.down: deleteItem
+            KeyNavigation.up: deleteItem
             text: qsTr("Remove from Studio")
             iconPath: Icons.cross
             onClicked: { menu.close(); menu.removeChosen() }
         }
         Item_ {
+            id: deleteItem
+            KeyNavigation.down: removeItem
+            KeyNavigation.up: removeItem
             text: qsTr("Delete project…")
             iconPath: Icons.trash
             danger: true

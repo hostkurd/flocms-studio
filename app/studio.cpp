@@ -16,7 +16,9 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFutureWatcher>
+#include <QPointer>
 #include <QScopeGuard>
+#include <QTimer>
 #include <QStandardPaths>
 #include <QGuiApplication>
 #include <QJsonArray>
@@ -24,6 +26,7 @@
 #include <QStyleHints>
 #include <QtConcurrent>
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -512,13 +515,16 @@ bool Studio::projectBusy(const QString &path) const
     const ProjectGenerate *generate = m_generate.value(path);
     const ProjectPackages *packages = m_packagesTab.value(path);
     const ProjectChecks *checks = m_checks.value(path);
-    return (checks && checks->busy()) || (generate && generate->busy()) || (packages && packages->busy())
-           || m_deleting == path;
+    return (checks && checks->busy()) || (generate && generate->busy()) || (packages && packages->busy());
 }
 
 void Studio::removeProject(const QString &path)
 {
-    if (projectBusy(path) || !m_deleting.isEmpty()) {
+    if (!m_deleting.isEmpty()) {
+        setProblem(QStringLiteral("delete_running"), m_deleting);
+        return;
+    }
+    if (projectBusy(path)) {
         setProblem(QStringLiteral("project_busy"), path);
         return;
     }
@@ -534,15 +540,13 @@ void Studio::forgetProject(const QString &path, bool deleted)
                                       [&path](const QString &folder) {
                                           return sameFolder(QFileInfo(path).absolutePath(), folder);
                                       });
-    const QString native = QDir::toNativeSeparators(path);
+    const auto same = [&path](const QString &other) { return sameFolder(other, path) || other == path; };
     changeSettings([&](Settings &s) {
-        s.projects.removeAll(path);
-        if (deleted) {
-            s.hiddenProjects.removeAll(path);
-            s.databaseProjects.removeAll(native);
-        } else if (inFolder && !s.hiddenProjects.contains(path)) {
+        s.projects.removeIf(same);
+        if (deleted)
+            s.hiddenProjects.removeIf(same);
+        else if (inFolder && std::none_of(s.hiddenProjects.begin(), s.hiddenProjects.end(), same))
             s.hiddenProjects << path; // else the folder's scan shows it again
-        }
     });
     if (m_currentPath == path)
         m_currentPath.clear();
@@ -556,27 +560,36 @@ QVariantMap Studio::deleteChoices(const QString &path) const
 {
     if (m_demo)
         return m_demoDeleteChoices;
+    QVariantMap choices{{QStringLiteral("onStudioServer"), false}, {QStringLiteral("databaseShared"), false}};
     const auto info = projectInfo(path);
-    QVariantMap choices{{QStringLiteral("onStudioServer"), false}};
     if (!info)
         return choices;
     const DatabaseConfig &db = info.value().database;
-    const bool local = db.host == u"127.0.0.1" || db.host == u"localhost";
-    const bool onStudio = m_mariadb.state() != u"none" && m_mariadb.usedBy(path) && db.driver == u"mysql"
-                          && local && db.port == m_mariadb.port() && !db.usesDsn
-                          && !dropProjectDatabaseSql(db.name, db.username, false).isEmpty();
-    // Another project on the same server with the same user keeps the user
+    const auto onStudioServer = [this](const DatabaseConfig &config) {
+        const bool local = config.host == u"127.0.0.1" || config.host == u"localhost";
+        return m_mariadb.state() != u"none" && config.driver == u"mysql" && local && !config.usesDsn
+               && config.port == m_mariadb.port();
+    };
+    // Only a database the wizard made for this project on Studio's server
+    const bool ours = m_mariadb.usedBy(path) && onStudioServer(db)
+                      && !dropProjectDatabaseSql(db.name, db.username, false).isEmpty();
+    // Kept when any other project Studio knows uses the same database
+    QStringList others = m_settings.databaseProjects;
+    for (const auto &project : m_projects.projects())
+        others << project.path;
     bool shared = false;
-    for (const QString &other : m_settings.databaseProjects) {
-        if (sameFolder(other, path))
+    for (const QString &other : std::as_const(others)) {
+        if (shared || sameFolder(other, path))
             continue;
-        if (const auto otherInfo = projectInfo(other); otherInfo && otherInfo.value().database.username == db.username)
+        if (const auto otherInfo = projectInfo(other);
+            otherInfo && onStudioServer(otherInfo.value().database) && otherInfo.value().database.name == db.name)
             shared = true;
     }
-    choices.insert(QStringLiteral("onStudioServer"), onStudio);
+    choices.insert(QStringLiteral("onStudioServer"), ours && !shared);
+    choices.insert(QStringLiteral("databaseShared"), ours && shared);
     choices.insert(QStringLiteral("database"), db.name);
     choices.insert(QStringLiteral("user"), db.username);
-    choices.insert(QStringLiteral("userShared"), shared);
+    choices.insert(QStringLiteral("configured"), db.configured);
     return choices;
 }
 
@@ -584,72 +597,119 @@ void Studio::deleteProject(const QString &path, bool database)
 {
     if (m_demo)
         return;
-    if (projectBusy(path) || !m_deleting.isEmpty()) {
+    if (!m_deleting.isEmpty()) {
+        setProblem(QStringLiteral("delete_running"), m_deleting);
+        return;
+    }
+    if (projectBusy(path)) {
         setProblem(QStringLiteral("project_busy"), path);
         return;
     }
-    // Read what to drop now: the .env goes with the folder
+    // Read what to drop now: the .env goes with the folder. Only the
+    // database: its user may be older than the project (the wizard's
+    // CREATE USER IF NOT EXISTS takes one that is there), so it stays.
     QString sql;
     if (database) {
         const QVariantMap choices = deleteChoices(path);
         if (choices.value(QStringLiteral("onStudioServer")).toBool())
-            sql = dropProjectDatabaseSql(choices.value(QStringLiteral("database")).toString(),
-                                         choices.value(QStringLiteral("user")).toString(),
-                                         !choices.value(QStringLiteral("userShared")).toBool());
+            sql = dropProjectDatabaseSql(choices.value(QStringLiteral("database")).toString(), {}, false);
     }
     m_deleting = path;
     emit deletingChanged();
     stopServerThen(path, [this, path, sql] { trashProject(path, sql); });
 }
 
+// The analyzer misses that connect() hands its slot object to Qt, and
+// reports it where a line NOLINT can't reach
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 void Studio::stopServerThen(const QString &path, const std::function<void()> &next)
 {
-    ProjectServer *server = m_servers.value(path);
+    QPointer<ProjectServer> server = m_servers.value(path);
     if (!server || !server->active()) {
         next();
         return;
     }
-    QObject::disconnect(m_deleteWait);
-    m_deleteWait = connect(server, &ProjectServer::changed, this, [this, server, next] {
-        if (server->active())
+    // Once, whichever comes first: stopped, freed, or 30 s
+    auto done = std::make_shared<bool>(false);
+    const auto go = [this, done, next](bool stopped) {
+        if (*done)
             return;
+        *done = true;
         QObject::disconnect(m_deleteWait);
         m_deleteWait = {};
-        next();
+        if (stopped)
+            next();
+        else
+            deleteDone(QStringLiteral("delete_server"), {});
+    };
+    QObject::disconnect(m_deleteWait);
+    ProjectServer *sender = server.data();
+    m_deleteWait = connect(sender, &ProjectServer::changed, this, [server, go] {
+        if (server && !server->active())
+            go(true);
     });
+    connect(sender, &QObject::destroyed, this, [go] { go(true); });
+    QTimer::singleShot(30000, this, [server, go] { go(!server || !server->active()); });
     if (server->state() != u"stopping")
         server->stop();
 }
 
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
 void Studio::trashProject(const QString &path, const QString &dropSql)
 {
-    // Never a folder of Studio's own: settings, downloads, database data
-    const QStringList keep{settingsFolder(), toolsFolder(),
-                           QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
-    if (const auto moved = moveProjectToTrash(path, keep); !moved) {
+    // A command started while the server stopped: not now
+    if (projectBusy(path)) {
+        deleteDone(QStringLiteral("project_busy"), path);
+        return;
+    }
+    // Never a folder of Studio's own (settings, downloads, database data),
+    // and never one that is or holds the home folder, Documents, Desktop,
+    // Downloads, a project folder or another project
+    const QStringList studio{settingsFolder(), toolsFolder(),
+                             QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
+    QStringList keep = m_settings.projectFolders;
+    for (const auto location : {QStandardPaths::HomeLocation, QStandardPaths::DocumentsLocation,
+                                QStandardPaths::DesktopLocation, QStandardPaths::DownloadLocation})
+        keep << QStandardPaths::writableLocation(location);
+    for (const auto &project : m_projects.projects()) {
+        if (!sameFolder(project.path, path))
+            keep << project.path;
+    }
+    if (const auto moved = moveProjectToTrash(path, studio, keep); !moved) {
         deleteDone(moved.error().code, moved.error().detail);
         return;
     }
     forgetProject(path, true);
     if (dropSql.isEmpty()) {
+        forgetDatabaseOf(path);
         deleteDone();
         return;
     }
-    dropDatabase(dropSql);
+    dropDatabase(path, dropSql);
 }
 
-void Studio::dropDatabase(const QString &sql)
+void Studio::forgetDatabaseOf(const QString &path)
+{
+    changeSettings([&path](Settings &s) {
+        s.databaseProjects.removeIf([&path](const QString &other) {
+            return other == QDir::toNativeSeparators(path) || sameFolder(other, path);
+        });
+    });
+}
+
+void Studio::dropDatabase(const QString &path, const QString &sql)
 {
     // Studio's server first, if it isn't running (as the wizard does)
     if (m_mariadb.state() != u"running") {
         QObject::disconnect(m_deleteWait);
-        m_deleteWait = connect(&m_mariadb, &MariadbServer::changed, this, [this, sql] {
+        m_deleteWait = connect(&m_mariadb, &MariadbServer::changed, this, [this, path, sql] {
             const QString state = m_mariadb.state();
             if (state == u"running") {
                 QObject::disconnect(m_deleteWait);
                 m_deleteWait = {};
-                dropDatabase(sql);
-            } else if (state == u"failed" || state == u"stopped") {
+                dropDatabase(path, sql);
+            } else if (state != u"starting") {
                 QObject::disconnect(m_deleteWait);
                 m_deleteWait = {};
                 deleteDone(QStringLiteral("db_drop"), m_mariadb.detail());
@@ -657,6 +717,12 @@ void Studio::dropDatabase(const QString &sql)
         });
         if (m_mariadb.state() != u"starting")
             m_mariadb.start();
+        // start() refused (no program, a port in use): nothing will change
+        if (m_mariadb.state() != u"starting" && m_mariadb.state() != u"running") {
+            QObject::disconnect(m_deleteWait);
+            m_deleteWait = {};
+            deleteDone(QStringLiteral("db_drop"), m_mariadb.detail());
+        }
         return;
     }
     const Command command = m_mariadb.rootSqlCommand(sql);
@@ -671,11 +737,14 @@ void Studio::dropDatabase(const QString &sql)
             if (line.error)
                 *errors << line.text;
         },
-        [this, errors](int exitCode, bool crashed) {
-            if (exitCode != 0 || crashed)
+        [this, path, errors](int exitCode, bool crashed) {
+            if (exitCode != 0 || crashed) {
                 deleteDone(QStringLiteral("db_drop"), errors->join(u'\n'));
-            else
-                deleteDone();
+                return;
+            }
+            // Only now: a database that wasn't dropped stays on record
+            forgetDatabaseOf(path);
+            deleteDone();
         });
 }
 

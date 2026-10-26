@@ -35,6 +35,8 @@ Popup {
 
     contentItem: ColumnLayout {
         spacing: 14
+        Accessible.role: Accessible.Dialog
+        Accessible.name: qsTr("Delete %1?").arg(dialog.name)
         LayoutMirroring.enabled: Lang.rtl
         LayoutMirroring.childrenInherit: true
 
@@ -60,9 +62,7 @@ Popup {
                 Layout.fillWidth: true
             }
             RichText {
-                raw: (dialog.choices.userShared
-                      ? qsTr("The database `%1`, with all its data. The user `%2` stays: another project uses it.")
-                      : qsTr("The database `%1`, with all its data, and its user `%2`."))
+                raw: qsTr("The database `%1`, with all its data; its user `%2` stays.")
                          .arg(dialog.choices.database || "").arg(dialog.choices.user || "")
                      + " " + qsTr("This can't be undone.")
                 color: database.checked ? Theme.badText : Theme.muted
@@ -70,6 +70,17 @@ Popup {
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
+        }
+        // Otherwise the database isn't touched; say so, and why
+        RichText {
+            visible: !dialog.choices.onStudioServer && !!dialog.choices.configured
+            raw: dialog.choices.databaseShared
+                 ? qsTr("Its database `%1` stays: another project uses it.").arg(dialog.choices.database || "")
+                 : qsTr("Its database stays as it is.")
+            color: Theme.muted
+            font.pixelSize: 13
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
         }
         RowLayout {
             Layout.fillWidth: true

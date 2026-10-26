@@ -195,7 +195,7 @@ Item {
                     iconFilled: true
                     primary: !on && page.serverState !== "stopping"
                     danger: on
-                    enabled: page.serverState !== "stopping"
+                    enabled: page.serverState !== "stopping" && Studio.deleting !== page.info.path
                     onClicked: on ? Studio.stopServer() : Studio.startServer()
                 }
                 AppButton {
@@ -229,6 +229,7 @@ Item {
             AppButton {
                 text: qsTr("Remove from Studio")
                 iconPath: Icons.trash
+                enabled: Studio.deleting === ""
                 onClicked: Studio.removeProject(page.info.path)
             }
         }
