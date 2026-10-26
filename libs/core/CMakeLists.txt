@@ -12,6 +12,7 @@ flostudio_add_library(FloStudioCore Core
         src/output.cpp
         src/packages.cpp
         src/preview.cpp
+        src/memory.cpp
         src/process.cpp
         src/project.cpp
         src/server.cpp
@@ -25,6 +26,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/env.h
         include/flostudio/core/generators.h
         include/flostudio/core/logs.h
+        include/flostudio/core/memory.h
         include/flostudio/core/output.h
         include/flostudio/core/packages.h
         include/flostudio/core/preview.h

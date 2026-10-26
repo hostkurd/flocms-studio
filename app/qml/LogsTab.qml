@@ -53,6 +53,8 @@ Item {
                 Layout.preferredWidth: 220
                 Accessible.name: qsTr("Search the log")
                 onTextEdited: if (tab.logs) tab.logs.search = text
+                // Made again after being freed: the search the log still has
+                Component.onCompleted: text = tab.logs ? tab.logs.search : ""
             }
             // Each project has its own log and search: show the open one's
             Connections {

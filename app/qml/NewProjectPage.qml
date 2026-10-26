@@ -15,6 +15,9 @@ Item {
     readonly property bool hasAdmin: !!form.hasAdmin
     // 0 project, 1 database, 2 admin, 3 create
     property int step: 0
+    // Kept past the first step or once creating has begun: the step shown
+    // lives only here (ShownOnce)
+    readonly property bool keepLoaded: step > 0 || started
     readonly property var stepNames: [qsTr("Project"), qsTr("Database"), qsTr("First admin"), qsTr("Create")]
     readonly property bool running: wizard.state === "running"
     readonly property bool started: wizard.state !== "editing"

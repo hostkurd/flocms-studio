@@ -4,6 +4,7 @@
 #include "studio.h"
 
 #include <flostudio/core/buildinfo.h>
+#include <flostudio/core/memory.h>
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -23,6 +24,9 @@
 #include <QTimer>
 
 #include <atomic>
+#include <utility>
+#include <vector>
+#include <functional>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -138,6 +142,57 @@ bool loadFonts()
     return all;
 }
 
+// --memory-test: the memory in use at the start, after every page and
+// project tab has been opened, and after Studio freed what is idle (as its
+// sweep does after a few minutes), each on a line of its own; then quits.
+void printMemory(const char *when)
+{
+    const FloStudio::Core::ProcessMemory memory = FloStudio::Core::currentProcessMemory();
+    std::printf("memory %-12s in use %6.1f MB, own %6.1f MB\n", when, double(memory.inUse) / 1048576.0,
+                double(memory.own) / 1048576.0);
+    (void)std::fflush(stdout);
+}
+
+void runMemoryTest(Studio &studio)
+{
+    // Each step after the one before, with the time to wait for it
+    auto steps = std::make_shared<std::vector<std::pair<int, std::function<void()>>>>();
+    steps->emplace_back(2500, [] { printMemory("start"); });
+    for (const char *tab : {"generate", "database", "logs", "packages", "doctor", "overview"})
+        steps->emplace_back(600, [&studio, tab] { studio.requestTab(QString::fromLatin1(tab)); });
+    const QString project = studio.currentPath();
+    steps->emplace_back(600, [&studio] { studio.showSettings(); });
+    steps->emplace_back(800, [&studio] { studio.openNewProject(); });
+    steps->emplace_back(800, [&studio, project] { studio.selectProject(project); });
+    steps->emplace_back(1000, [] { printMemory("all opened"); });
+    steps->emplace_back(300, [&studio] { studio.releaseUnused(true); });
+    // Studio gives the memory back a second after freeing it
+    steps->emplace_back(2000, [] { printMemory("released"); });
+    // Everything again: what was freed is used again, so this stays near
+    // "all opened" instead of adding to it
+    for (const char *tab : {"generate", "database", "logs", "packages", "doctor", "overview"})
+        steps->emplace_back(600, [&studio, tab] { studio.requestTab(QString::fromLatin1(tab)); });
+    steps->emplace_back(600, [&studio] { studio.showSettings(); });
+    steps->emplace_back(800, [&studio] { studio.openNewProject(); });
+    steps->emplace_back(800, [&studio, project] { studio.selectProject(project); });
+    steps->emplace_back(1000, [] {
+        printMemory("reopened");
+        const QStringList warnings = takeWarnings();
+        for (const QString &warning : warnings)
+            std::printf("warning: %s\n", qUtf8Printable(warning));
+        QCoreApplication::exit(warnings.isEmpty() ? 0 : 1);
+    });
+    auto *timer = new QTimer(QCoreApplication::instance()); // owned by the application
+    timer->setSingleShot(true);
+    auto at = std::make_shared<std::size_t>(0);
+    QObject::connect(timer, &QTimer::timeout, timer, [timer, steps, at] {
+        (*steps)[*at].second();
+        if (++*at < steps->size())
+            timer->start((*steps)[*at].first);
+    });
+    timer->start(steps->front().first);
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -147,7 +202,8 @@ int main(int argc, char *argv[])
         attachParentConsole();
 #endif
 
-    const SmokeHandler smokeHandler(hasArgument(argc, argv, "--smoke-test"));
+    // --memory-test counts warnings the same way
+    const SmokeHandler smokeHandler(hasArgument(argc, argv, "--smoke-test") || hasArgument(argc, argv, "--memory-test"));
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("FloCMS Studio"));
@@ -184,7 +240,11 @@ int main(int argc, char *argv[])
     const QCommandLineOption themeOpt(QStringLiteral("theme"),
                                       QStringLiteral("light or dark, for this run (with --demo)."),
                                       QStringLiteral("name"));
-    parser.addOptions({versionOpt, smokeOpt, shotOpt, demoOpt, languageOpt, themeOpt});
+    const QCommandLineOption memoryOpt(QStringLiteral("memory-test"),
+                                       QStringLiteral("With --demo: print the memory in use at the start, after opening "
+                                                      "every page and tab, and after freeing what is idle; then quit. "
+                                                      "Fails on any warning."));
+    parser.addOptions({versionOpt, smokeOpt, shotOpt, demoOpt, languageOpt, themeOpt, memoryOpt});
     parser.process(app);
 
     if (parser.isSet(versionOpt)) {
@@ -193,6 +253,7 @@ int main(int argc, char *argv[])
     }
 
     const bool smoke = parser.isSet(smokeOpt);
+    const bool memoryTest = parser.isSet(memoryOpt) && parser.isSet(demoOpt);
     if (!loadFonts() && smoke)
         return 1;
 
@@ -229,7 +290,7 @@ int main(int argc, char *argv[])
     // (first run, Windows checking the new program) that takes a moment.
     // Not for a smoke test or a screenshot, which look at the main window.
     QQuickWindow *splash = nullptr;
-    if (!smoke && !parser.isSet(shotOpt)) {
+    if (!smoke && !memoryTest && !parser.isSet(shotOpt)) {
         engine.load(QUrl(QStringLiteral("qrc:/qt/qml/FloStudio/App/Splash.qml")));
         if (!engine.rootObjects().isEmpty())
             splash = qobject_cast<QQuickWindow *>(engine.rootObjects().constLast());
@@ -270,6 +331,16 @@ int main(int argc, char *argv[])
     } else if (splash) {
         splash->close();
     }
+
+    // Memory management: after Studio freed screens or data, the QML
+    // engine's collector, then the freed memory back to the system
+    QObject::connect(&studio, &Studio::memoryFreed, &engine, [&engine] {
+        engine.collectGarbage();
+        FloStudio::Core::returnFreeMemory();
+    });
+
+    if (memoryTest)
+        runMemoryTest(studio);
 
     if (smoke || parser.isSet(shotOpt)) {
         auto *window = mainWindow;
