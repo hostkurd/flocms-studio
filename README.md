@@ -1,5 +1,7 @@
 # FloCMS Studio
 
+[Code signing policy](CODE_SIGNING.md) · [Releases](https://github.com/hostkurd/flocms-studio/releases)
+
 A desktop app that creates, runs and changes [FloCMS](https://github.com/HostKurd/FloCMS) projects. Every action runs a real `php flo` or `composer` command in the project and shows it.
 
 This repo is the native app, written in C++ with Qt 6, for Windows and macOS first and Linux later. With it you can:

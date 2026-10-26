@@ -21,10 +21,12 @@ Nothing is signed by hand, and nothing built outside GitHub Actions is signed.
 
 | Role | Members |
 |---|---|
-| Committers and reviewers | [khalat-jalal](https://github.com/khalat-jalal), [sarmad-qadir](https://github.com/sarmad-qadir) |
+| Authors | [khalat-jalal](https://github.com/khalat-jalal), [sarmad-qadir](https://github.com/sarmad-qadir) |
+| Reviewers | [khalat-jalal](https://github.com/khalat-jalal), [sarmad-qadir](https://github.com/sarmad-qadir) |
 | Approvers | [khalat-jalal](https://github.com/khalat-jalal), [sarmad-qadir](https://github.com/sarmad-qadir) |
 
-- **Committers and reviewers** may change the source code. Every change goes to `main` through a pull request that the other member reviews.
+- **Authors** may change the source code in this repository.
+- **Reviewers** review every change from anyone who isn't an author before it is merged. Changes reach `main` only through pull requests.
 - **Approvers** approve each signing request in SignPath, one by one, after checking that it comes from the release workflow, for a version tag on `main`.
 
 Every member uses multi-factor authentication on GitHub and on SignPath.
