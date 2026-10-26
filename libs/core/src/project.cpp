@@ -250,8 +250,42 @@ Result<ProjectInfo> projectInfo(const QString &dir)
     return info;
 }
 
-QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStringList &projects)
+bool sameFolder(const QString &a, const QString &b)
 {
+    return !a.isEmpty() && !b.isEmpty() && canonical(a) == canonical(b);
+}
+
+Result<Done> moveProjectToTrash(const QString &dir, const QStringList &protectedFolders)
+{
+    if (!isProject(dir))
+        return Error{QStringLiteral("not_flocms"), dir};
+    const QString folder = canonical(dir);
+    const QString home = canonical(QDir::homePath());
+    // A drive or the home folder itself is never a project to delete
+    if (QFileInfo(folder).isRoot() || folder == home)
+        return Error{QStringLiteral("delete_protected"), dir};
+    const auto inside = [](const QString &path, const QString &parent) {
+        return path == parent || path.startsWith(parent.endsWith(u'/') ? parent : parent + u'/');
+    };
+    for (const QString &other : protectedFolders) {
+        if (other.isEmpty())
+            continue;
+        const QString keep = canonical(other);
+        if (inside(keep, folder) || inside(folder, keep))
+            return Error{QStringLiteral("delete_protected"), dir};
+    }
+    QString trashed;
+    if (!QFile::moveToTrash(dir, &trashed))
+        return Error{QStringLiteral("trash_failed"), QDir::toNativeSeparators(dir)};
+    return Done{};
+}
+
+QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStringList &projects,
+                                   const QStringList &hidden)
+{
+    QStringList hiddenKeys;
+    for (const QString &dir : hidden)
+        hiddenKeys << canonical(dir);
     QStringList seen;
     QList<ProjectSummary> list;
     const auto add = [&](const QString &dir) {
@@ -265,7 +299,7 @@ QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStr
         const QFileInfoList entries =
             QDir(folder).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name | QDir::IgnoreCase);
         for (const QFileInfo &entry : entries) {
-            if (isProject(entry.filePath()))
+            if (!hiddenKeys.contains(canonical(entry.filePath())) && isProject(entry.filePath()))
                 add(entry.filePath());
         }
     }

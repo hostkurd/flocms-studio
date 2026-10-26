@@ -16,6 +16,8 @@
 #include <QHash>
 #include <QJsonObject>
 #include <QObject>
+
+#include <functional>
 #include <QStringList>
 #include <QTimer>
 #include <QUrl>
@@ -48,6 +50,8 @@ class Studio : public QObject
     Q_PROPERTY(QString settingsFile READ settingsFile CONSTANT)
     // An error the screen shows until dismissed: {code, detail}
     Q_PROPERTY(QVariantMap problem READ problem NOTIFY problemChanged)
+    // The project "Delete project…" is working on, empty when none
+    Q_PROPERTY(QString deleting READ deleting NOTIFY deletingChanged)
     // Pages and projects
     Q_PROPERTY(QString page READ page NOTIFY pageChanged)          // welcome, project, settings
     Q_PROPERTY(QString settingsSection READ settingsSection NOTIFY pageChanged)
@@ -123,6 +127,7 @@ public:
     QStringList projectFolders() const { return m_settings.projectFolders; }
     QString settingsFile() const;
     QVariantMap problem() const { return m_problem; }
+    QString deleting() const { return m_deleting; }
     QString page() const { return m_page; }
     QString settingsSection() const { return m_settingsSection; }
     ProjectsModel *projects() { return &m_projects; }
@@ -171,7 +176,20 @@ public:
     // "Open existing folder…": a FloCMS project is added and opened;
     // anything else is a problem (not_flocms).
     Q_INVOKABLE void addProject(const QUrl &folder);
+    // "Remove from Studio": the project leaves the list (its website
+    // server stops); its files stay. One found in a project folder stays
+    // hidden until it is opened again with "Open existing folder…".
     Q_INVOKABLE void removeProject(const QString &path);
+    // What "Delete project…" can do besides moving the folder:
+    // {database, user, onStudioServer (its database is on Studio's own
+    // MariaDB), userShared (another project uses the same user)}
+    Q_INVOKABLE QVariantMap deleteChoices(const QString &path) const;
+    // "Delete project…": its website server stopped, the folder moved to the
+    // Recycle Bin / Trash, the project removed from Studio; with database,
+    // its database on Studio's server dropped too (and its user, unless
+    // another project uses it). Problems: project_busy, delete_protected,
+    // trash_failed, db_drop.
+    Q_INVOKABLE void deleteProject(const QString &path, bool database);
     Q_INVOKABLE void selectProject(const QString &path);
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
     Q_INVOKABLE void showProjects();
@@ -231,6 +249,7 @@ signals:
     void settingsChanged();
     void darkChanged();
     void problemChanged();
+    void deletingChanged();
     void pageChanged();
     void currentChanged();
     void toolsChanged();
@@ -251,6 +270,14 @@ private:
     void downloadNext();
     void saveMariadbSettings();
     ProjectServer *serverFor(const QString &path);
+    bool projectBusy(const QString &path) const;
+    // Off the list: settings, the open page, its objects; a server stopped
+    void forgetProject(const QString &path, bool deleted);
+    // Then, once its website server has stopped
+    void stopServerThen(const QString &path, const std::function<void()> &next);
+    void trashProject(const QString &path, const QString &dropSql);
+    void dropDatabase(const QString &sql);
+    void deleteDone(const QString &code = {}, const QString &detail = {});
     ProjectChecks *checksFor(const QString &path);
     ProjectGenerate *generateFor(const QString &path);
     ProjectPackages *packagesFor(const QString &path);
@@ -293,9 +320,12 @@ private:
     bool m_closing = false;
     QString m_platform = FloStudio::Core::currentPlatform();
     MariadbServer m_mariadb;
+    QString m_deleting;
+    QMetaObject::Connection m_deleteWait; // waiting for a server to stop or start
     bool m_autoStartDone = false;
     bool m_keepWizard = false;
     QString m_demoDialog;
+    QVariantMap m_demoDeleteChoices; // a demo's "Delete project…" choices
     QString m_demoTab;
     QStringList m_demoDownloaded;
     QString m_demoToolsFolder;

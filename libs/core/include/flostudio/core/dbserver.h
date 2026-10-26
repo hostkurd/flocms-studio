@@ -107,6 +107,12 @@ FLOSTUDIOCORE_EXPORT QString generateDatabasePassword(int length = 24);
 FLOSTUDIOCORE_EXPORT QString sqlIdentifier(const QString &name);
 FLOSTUDIOCORE_EXPORT QString sqlString(const QString &text);
 
+// "Delete project" on Studio's own server: DROP the project's database,
+// and its user (the two accounts the wizard made, @localhost and
+// @127.0.0.1) when dropUser. Empty when the name is empty or one of
+// MariaDB's own databases; the user is never root or a MariaDB account.
+FLOSTUDIOCORE_EXPORT QString dropProjectDatabaseSql(const QString &database, const QString &user, bool dropUser);
+
 // The first free port on 127.0.0.1 from `from`, trying `tries` ports;
 // 0 when none is free. "Free" = nothing answers and Studio can listen.
 FLOSTUDIOCORE_EXPORT int freeDatabasePort(int from = 3306, int tries = 20);

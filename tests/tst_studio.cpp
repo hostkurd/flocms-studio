@@ -168,6 +168,47 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
+    // Remove from Studio: off the list, files kept, and a project found in
+    // a project folder stays off until it is opened again. Delete
+    // project: to the Recycle Bin / Trash and off the list.
+    void removesAndDeletesProjects()
+    {
+        const QTemporaryDir dir;
+        const QString sites = dir.filePath(QStringLiteral("Sites"));
+        makeSite(sites + QStringLiteral("/one"));
+        makeSite(sites + QStringLiteral("/two"));
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProjectFolder(QUrl::fromLocalFile(sites));
+        QCOMPARE(studio.projects()->count(), 2);
+        const QStringList paths = studio.projectPaths();
+        studio.selectProject(paths.at(0));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+
+        studio.removeProject(paths.at(0));
+        QCOMPARE(studio.projectPaths(), QStringList{paths.at(1)});
+        QVERIFY(QFileInfo::exists(paths.at(0) + QStringLiteral("/composer.json")));
+        QVERIFY(studio.currentPath() != paths.at(0));
+        studio.refreshProjects();
+        QCOMPARE(studio.projects()->count(), 1); // the folder's scan doesn't bring it back
+        studio.addProject(QUrl::fromLocalFile(paths.at(0)));
+        QCOMPARE(studio.projects()->count(), 2);
+
+        // Nothing on Studio's server here: nothing more to choose
+        QVERIFY(!studio.deleteChoices(paths.at(1)).value(QStringLiteral("onStudioServer")).toBool());
+        QSignalSpy deleting(&studio, &Studio::deletingChanged);
+        studio.deleteProject(paths.at(1), true);
+        QTRY_VERIFY_WITH_TIMEOUT(studio.deleting().isEmpty(), 10000);
+        const QString code = studio.problem().value(QStringLiteral("code")).toString();
+        if (code == u"trash_failed")
+            QSKIP("this system has no trash for the temporary folder");
+        QVERIFY2(code.isEmpty(), qPrintable(code));
+        QVERIFY(!QFileInfo::exists(paths.at(1)));
+        QCOMPARE(studio.projectPaths(), QStringList{paths.at(0)});
+        QVERIFY(deleting.size() >= 2);
+    }
+
     // One Studio per user: a second copy asks the first to show its window
     // and quits once it has answered; Studio always starts when nothing
     // answers (two copies at worst, never none)

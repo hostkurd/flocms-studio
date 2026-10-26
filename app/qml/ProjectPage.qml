@@ -60,6 +60,13 @@ Item {
         })
     }
 
+    DeleteProjectDialog {
+        id: deleteDialog
+        parent: T.Overlay.overlay
+        anchors.centerIn: parent
+        onAccepted: (database) => Studio.deleteProject(path, database)
+    }
+
     ConfirmDialog {
         id: confirm
         property string action
@@ -80,6 +87,10 @@ Item {
     Component.onCompleted: {
         if (["migrate", "rollback", "seed", "fresh"].indexOf(Studio.demoDialog) >= 0)
             Qt.callLater(page.startAction, Studio.demoDialog)
+        else if (Studio.demoDialog === "projectMenu")
+            Qt.callLater(projectMenu.open)
+        else if (Studio.demoDialog === "deleteProject")
+            Qt.callLater(deleteDialog.ask, page.info.path, page.info.name)
     }
 
     // The memory test opens each tab in turn
@@ -187,6 +198,22 @@ Item {
                     enabled: page.serverState !== "stopping"
                     onClicked: on ? Studio.stopServer() : Studio.startServer()
                 }
+                AppButton {
+                    id: moreButton
+                    visible: !page.info.error
+                    text: Studio.deleting === page.info.path ? qsTr("Deleting…") : qsTr("More")
+                    iconPath: Icons.more
+                    enabled: Studio.deleting === ""
+                    Accessible.name: qsTr("More actions for this project")
+                    onClicked: projectMenu.open()
+                    ProjectMenu {
+                        id: projectMenu
+                        y: moreButton.height + 4
+                        x: Lang.rtl ? 0 : moreButton.width - width
+                        onRemoveChosen: Studio.removeProject(page.info.path)
+                        onDeleteChosen: deleteDialog.ask(page.info.path, page.info.name)
+                    }
+                }
             }
         }
 
@@ -200,7 +227,7 @@ Item {
                 Layout.fillWidth: true
             }
             AppButton {
-                text: qsTr("Remove from the list")
+                text: qsTr("Remove from Studio")
                 iconPath: Icons.trash
                 onClicked: Studio.removeProject(page.info.path)
             }
