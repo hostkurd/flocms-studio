@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "studio-installer": the Windows installer,
+  built by the release workflow from the files signed with "studio-files"
+  and uploaded as a GitHub artifact (a zip with the one .msi).
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <zip-file>
+    <msi-file path="FloCMS-Studio-${version}-x64.msi" product-name="FloCMS Studio" product-version="${version}">
+      <authenticode-sign />
+    </msi-file>
+  </zip-file>
+</artifact-configuration>
