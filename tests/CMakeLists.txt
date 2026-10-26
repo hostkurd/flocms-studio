@@ -50,7 +50,8 @@ target_sources(tst_studio PRIVATE
     ../app/projectpackages.cpp ../app/projectpackages.h
     ../app/projectserver.cpp ../app/projectserver.h
     ../app/projectsmodel.cpp ../app/projectsmodel.h
-    ../app/studio.cpp ../app/studio.h)
+    ../app/studio.cpp ../app/studio.h
+    ../app/singleinstance.cpp ../app/singleinstance.h)
 target_include_directories(tst_studio PRIVATE ../app)
 target_compile_definitions(tst_studio PRIVATE FLOSTUDIO_SOURCE="${PROJECT_SOURCE_DIR}")
 flostudio_set_warnings(tst_studio)

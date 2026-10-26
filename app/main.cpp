@@ -1,10 +1,12 @@
 // FloCMS Studio: starts the app shell (stage 3). See README.md.
 
 #include "language.h"
+#include "singleinstance.h"
 #include "studio.h"
 
 #include <flostudio/core/buildinfo.h>
 #include <flostudio/core/memory.h>
+#include <flostudio/core/settings.h>
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -253,6 +255,38 @@ int main(int argc, char *argv[])
     }
 
     const bool smoke = parser.isSet(smokeOpt);
+    // One Studio per user: started again, the running one comes to the
+    // front and this one quits. Tests, screenshots and demos run beside it.
+    const bool alone = !smoke && !parser.isSet(shotOpt) && !parser.isSet(demoOpt) && !parser.isSet(memoryOpt);
+    SingleInstance instance(FloStudio::Core::settingsFolder());
+    if (alone && !instance.claim())
+        return 0;
+    // Closing: no longer answers, so a Studio started now runs instead of
+    // asking this one
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, &instance, &SingleInstance::release);
+    // Started again before the window exists (during the splash): shown
+    // once it does
+    QQuickWindow *shownWindow = nullptr;
+    bool showWhenReady = false;
+    const auto bringForward = [](QQuickWindow *window) {
+        // Restored if minimized, keeping maximized
+        window->setWindowStates(window->windowStates() & ~Qt::WindowMinimized);
+        window->show();
+        window->raise();
+        window->requestActivate();
+#ifdef Q_OS_WIN
+        // Qt only flashes the taskbar button when another program has the
+        // focus; the copy just started allowed this one to take it
+        // NOLINTNEXTLINE(performance-no-int-to-ptr): a window handle
+        SetForegroundWindow(reinterpret_cast<HWND>(window->winId()));
+#endif
+    };
+    QObject::connect(&instance, &SingleInstance::activateRequested, &app, [&shownWindow, &showWhenReady, bringForward] {
+        if (shownWindow)
+            bringForward(shownWindow);
+        else
+            showWhenReady = true;
+    });
     const bool memoryTest = parser.isSet(memoryOpt) && parser.isSet(demoOpt);
     if (!loadFonts() && smoke)
         return 1;
@@ -331,6 +365,11 @@ int main(int argc, char *argv[])
     } else if (splash) {
         splash->close();
     }
+
+    // Started again: this window comes to the front
+    shownWindow = mainWindow;
+    if (mainWindow && std::exchange(showWhenReady, false))
+        bringForward(mainWindow);
 
     // Memory management: after Studio freed screens or data, the QML
     // engine's collector, then the freed memory back to the system
