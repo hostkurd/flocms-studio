@@ -13,16 +13,26 @@ param(
 $ErrorActionPreference = 'Stop'
 function Fail([string] $why) { Write-Output "::error::installer: $why"; exit 1 }
 
+# Start-Process joins the arguments as they are: each one is quoted here
 function Run-Msi([string[]] $arguments, [string] $log) {
-    $p = Start-Process msiexec.exe -ArgumentList ($arguments + @('/qn', '/norestart', '/l*v', $log)) -Wait -PassThru
-    if ($p.ExitCode -ne 0) {
+    $all = @($arguments + @('/qn', '/norestart', '/l*v', $log) | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } })
+    $p = Start-Process msiexec.exe -ArgumentList $all -Wait -PassThru
+    # 3010 and 1641: done, Windows wants a restart (not for a per-user
+    # install, but not a failure either)
+    if ($p.ExitCode -notin 0, 3010, 1641) {
         Get-Content $log -ErrorAction SilentlyContinue | Select-String -Pattern 'error|failed|Return value 3' | Select-Object -Last 30
         Fail "msiexec $($arguments -join ' ') ended with $($p.ExitCode)"
     }
 }
+# What Windows Installer has installed with Studio's UpgradeCode (per-user
+# installs aren't under HKCU's Uninstall key): product code and version
+$installer = New-Object -ComObject WindowsInstaller.Installer
 function Installed {
-    @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue |
-      Get-ItemProperty | Where-Object { $_.DisplayName -eq 'FloCMS Studio' })
+    $codes = $installer.RelatedProducts('{16604886-7502-402D-879A-8B0940B19498}')
+    @(for ($i = 0; $i -lt $codes.Count; $i++) {
+        $code = $codes.Item($i)
+        [pscustomobject] @{ Code = $code; Version = $installer.ProductInfo($code, 'VersionString'); Name = $installer.ProductInfo($code, 'ProductName') }
+    })
 }
 
 $folder = Join-Path $env:LOCALAPPDATA 'Programs\FloCMS Studio'
@@ -33,8 +43,7 @@ Run-Msi @('/i', (Resolve-Path $Older).Path) 'install-older.log'
 Run-Msi @('/i', (Resolve-Path $Msi).Path) 'install.log'
 $entries = Installed
 if ($entries.Count -ne 1) { Fail "$($entries.Count) FloCMS Studio entries in Settings > Apps after the upgrade, not 1" }
-# Windows Installer keeps a.b.c as the version it shows
-if ($entries[0].DisplayVersion -ne $Version) { Fail "Settings > Apps shows $($entries[0].DisplayVersion), not $Version" }
+if ($entries[0].Version -ne $Version -or $entries[0].Name -ne 'FloCMS Studio') { Fail "installed: $($entries[0].Name) $($entries[0].Version), not FloCMS Studio $Version" }
 if (-not (Test-Path (Join-Path $folder 'Studio.exe'))) { Fail "no Studio.exe in $folder" }
 foreach ($file in 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt') {
     if (-not (Test-Path (Join-Path $folder $file))) { Fail "no $file in $folder" }
@@ -52,7 +61,7 @@ $smoke = Start-Process (Join-Path $folder 'Studio.exe') -ArgumentList '--smoke-t
 if ($smoke.ExitCode -ne 0) { Fail "the installed Studio's smoke test ended with $($smoke.ExitCode)" }
 
 # What Settings > Apps runs to uninstall
-$uninstall = $entries[0].PSChildName
+$uninstall = $entries[0].Code
 Run-Msi @('/x', $uninstall) 'uninstall.log'
 if ((Installed).Count -ne 0) { Fail "Studio is still in Settings > Apps after uninstalling" }
 if (Test-Path $shortcut) { Fail "uninstalling left the Start menu shortcut" }

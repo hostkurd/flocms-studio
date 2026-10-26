@@ -20,7 +20,9 @@
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <!-- Never change UpgradeCode: Windows uses it to find the installed
-       Studio when a newer one replaces it (the Inno Setup AppId before). -->
+       Studio when a newer one replaces it. (The same GUID as the Inno Setup
+       test builds' AppId; those were never released, and an MSI can't
+       replace them: uninstall one by hand.) -->
   <Package Name="FloCMS Studio"
            Manufacturer="HostKurd"
            Version="$(var.Version)"
@@ -28,11 +30,13 @@
            Scope="perUser"
            Language="1033"
            Compressed="yes">
+    <!-- Subject and Author of the .msi: SignPath checks both before signing
+         (.signpath/artifact-configurations/studio-installer.xml) -->
     <SummaryInformation Description="FloCMS Studio $(var.Version) installer" Manufacturer="HostKurd" />
 
-    <!-- A newer Studio replaces the installed one (after installing, so
-         files that didn't change aren't copied again); an older one says why
-         it can't. -->
+    <!-- A newer Studio replaces the installed one: the old one is removed
+         first, then the new one installed, so no file of the old version is
+         left; an older one says why it can't. -->
     <MajorUpgrade Schedule="afterInstallInitialize"
                   DowngradeErrorMessage="A newer version of FloCMS Studio is already installed." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />

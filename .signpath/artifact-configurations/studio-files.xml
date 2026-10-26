@@ -5,8 +5,8 @@
   The release workflow uploads the portable folder as a GitHub artifact,
   which GitHub sends as a zip. Only our own files are signed: Studio.exe
   and the three FloStudio DLLs, each checked for its product name and the
-  version the release workflow passes. Qt's and Microsoft's files keep
-  their makers' signatures.
+  version the release workflow passes. Qt's and Microsoft's files are
+  shipped as their makers built them, never signed by us.
 -->
 <artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
   <parameters>

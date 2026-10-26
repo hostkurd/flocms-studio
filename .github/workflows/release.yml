@@ -4,11 +4,12 @@ name: Release
 #  1. check:    the tag is Studio's version (CMakeLists.txt)
 #  2. ci:       all of CI (ci.yml): builds, tests, the Windows installer test,
 #               the macOS disk image and the Linux AppImage
-#  3. windows:  sends Studio.exe and the FloStudio DLLs to SignPath, which
-#               waits for an approver (CODE_SIGNING.md) and signs them; then
-#               builds the installer from the signed files, tests it, and
-#               sends it to SignPath too
-#  4. publish:  a draft GitHub release with every file and its SHA-256, for a
+#  3. windows-files:     sends Studio.exe and the FloStudio DLLs to SignPath,
+#               which waits for an approver (CODE_SIGNING.md) and signs them
+#  4. windows-installer: builds the installer from the signed files, sends it
+#               to SignPath too, and tests it (two jobs: each may wait up to
+#               5 hours for its approval, and a job ends after 6)
+#  5. publish:  a draft GitHub release with every file and its SHA-256, for a
 #               person to read and publish
 #
 # Signing is on once SignPath gives the project (CODE_SIGNING.md, "Setting
@@ -35,8 +36,15 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: version
         run: |
+          # Only what is on main is released and signed
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME is not on main: tag a commit of main"
+            exit 1
+          fi
           version=$(sed -nE '/^project\(FloStudio/,/\)/s/^ +VERSION ([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' CMakeLists.txt)
           if [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "::error::the tag is $GITHUB_REF_NAME but CMakeLists.txt says $version: tag v$version, or change the version first"
@@ -49,11 +57,11 @@ jobs:
     needs: check
     uses: ./.github/workflows/ci.yml
 
-  windows:
+  windows-files:
     needs: [check, ci]
     runs-on: windows-2022
-    # The approver has up to 3 hours in SignPath for each request
-    timeout-minutes: 420
+    # The approver has up to 5 hours in SignPath
+    timeout-minutes: 345
     permissions:
       contents: read
       actions: read # SignPath reads the artifact and this job's details
@@ -86,7 +94,7 @@ jobs:
 
       - name: Sign Studio's files (SignPath)
         if: env.SIGNING == 'true'
-        uses: signpath/github-action-submit-signing-request@v1
+        uses: signpath/github-action-submit-signing-request@ced31329c0317e779dad2eec2a7c3bb46ea1343e # v1.3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
@@ -97,7 +105,7 @@ jobs:
           parameters: |
             version: "${{ env.VERSION }}"
           wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 10800
+          wait-for-completion-timeout-in-seconds: 18000
           output-artifact-directory: signed/FloCMS-Studio
 
       - name: Without signing
@@ -123,6 +131,7 @@ jobs:
               if ($env:SIGNING -ne 'true') { continue }
               $sig = Get-AuthenticodeSignature "signed/FloCMS-Studio$file"
               if ($sig.Status -ne 'Valid') { Write-Output "::error::$name is not signed: $($sig.Status) $($sig.StatusMessage)"; exit 1 }
+              if ($sig.SignerCertificate.Subject -notmatch 'SignPath Foundation') { Write-Output "::error::$name is signed by $($sig.SignerCertificate.Subject), not SignPath Foundation"; exit 1 }
               Write-Output "::notice::$name signed by $($sig.SignerCertificate.Subject)"
             } elseif (-not $same) {
               Write-Output "::error::signing changed $file, which isn't ours"; exit 1
@@ -134,6 +143,37 @@ jobs:
         run: |
           export PATH="/c/Windows/System32:/c/Windows:/usr/bin"
           signed/FloCMS-Studio/Studio.exe --smoke-test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-studio-files
+          path: signed/FloCMS-Studio/
+          if-no-files-found: error
+
+  windows-installer:
+    needs: [check, windows-files]
+    runs-on: windows-2022
+    timeout-minutes: 345
+    permissions:
+      contents: read
+      actions: read # SignPath reads the artifact and this job's details
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      SIGNING: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-studio-files
+          path: signed/FloCMS-Studio
 
       - name: Installer
         timeout-minutes: 15
@@ -152,7 +192,7 @@ jobs:
 
       - name: Sign the installer (SignPath)
         if: env.SIGNING == 'true'
-        uses: signpath/github-action-submit-signing-request@v1
+        uses: signpath/github-action-submit-signing-request@ced31329c0317e779dad2eec2a7c3bb46ea1343e # v1.3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
@@ -163,7 +203,7 @@ jobs:
           parameters: |
             version: "${{ env.VERSION }}"
           wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 10800
+          wait-for-completion-timeout-in-seconds: 18000
           output-artifact-directory: signed-msi
 
       - name: Installer without signing
@@ -178,6 +218,7 @@ jobs:
           if ($env:SIGNING -eq 'true') {
             $sig = Get-AuthenticodeSignature $msi
             if ($sig.Status -ne 'Valid') { Write-Output "::error::the installer is not signed: $($sig.Status)"; exit 1 }
+            if ($sig.SignerCertificate.Subject -notmatch 'SignPath Foundation') { Write-Output "::error::the installer is signed by $($sig.SignerCertificate.Subject), not SignPath Foundation"; exit 1 }
             Write-Output "::notice::installer signed by $($sig.SignerCertificate.Subject)"
           }
           installer/windows/test_msi.ps1 -Msi $msi -Older older.msi -Version $env:VERSION
@@ -206,7 +247,7 @@ jobs:
           if-no-files-found: ignore
 
   publish:
-    needs: [check, windows]
+    needs: [check, windows-installer]
     runs-on: ubuntu-24.04
     permissions:
       contents: write # the draft release
