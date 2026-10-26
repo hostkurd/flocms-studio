@@ -12,6 +12,7 @@
 #include "projectgenerate.h"
 #include "projectpackages.h"
 #include "projectserver.h"
+#include "singleinstance.h"
 #include "studio.h"
 
 #include <flostudio/core/env.h>
@@ -23,6 +24,7 @@
 
 #include <QAbstractItemModelTester>
 #include <QProcess>
+#include <QSysInfo>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QJsonDocument>
@@ -162,6 +164,47 @@ private slots:
         QVERIFY(studio.checks());
         QCOMPARE(studio.loadedProjects(), 2);
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
+    // One Studio per user: a second copy finds the first, asks it to show
+    // its window, and is told to quit; once the first is gone a new copy
+    // may run
+    void onlyOneStudioRuns()
+    {
+        const QTemporaryDir dir;
+        const QString lock = dir.filePath(QStringLiteral("studio.lock"));
+        const QString name = QStringLiteral("flocms-studio-test-") + QString::number(QCoreApplication::applicationPid());
+        {
+            SingleInstance first(lock, name);
+            QVERIFY(first.claim());
+            QSignalSpy shown(&first, &SingleInstance::activateRequested);
+            SingleInstance second(lock, name);
+            QVERIFY(!second.claim());
+            QTRY_COMPARE_WITH_TIMEOUT(shown.size(), 1, 5000);
+        }
+        // The first one quit: the next copy runs
+        SingleInstance next(lock, name);
+        QVERIFY(next.claim());
+        // Another user (another name and lock) isn't affected
+        SingleInstance other(dir.filePath(QStringLiteral("other.lock")), name + QStringLiteral("-other"));
+        QVERIFY(other.claim());
+        QVERIFY(SingleInstance::nameForUser().startsWith(QStringLiteral("flocms-studio-")));
+    }
+
+    // A Studio that crashed left its lock: the next one takes it over
+    void aCrashedStudiosLockIsTakenOver()
+    {
+        const QTemporaryDir dir;
+        const QString lock = dir.filePath(QStringLiteral("studio.lock"));
+        // A lock held by a program that has ended: QLockFile's own format
+        QProcess ended;
+        ended.start(QStringLiteral(FLOSTUDIO_TEST_HELPER), {QStringLiteral("exit"), QStringLiteral("0")});
+        QVERIFY(ended.waitForFinished(10000));
+        const qint64 gone = ended.processId() > 0 ? ended.processId() : 999999;
+        writeFile(lock, QByteArray::number(gone) + '\n' + QCoreApplication::applicationName().toUtf8() + '\n'
+                            + QSysInfo::machineHostName().toUtf8() + '\n');
+        SingleInstance next(lock, QStringLiteral("flocms-studio-crash-") + QString::number(QCoreApplication::applicationPid()));
+        QVERIFY(next.claim());
     }
 
     void refusesAFolderThatIsNotFloCms()

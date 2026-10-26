@@ -8,6 +8,8 @@ qt_add_executable(Studio
     mariadbserver.cpp
     newproject.h
     newproject.cpp
+    singleinstance.h
+    singleinstance.cpp
     projectchecks.h
     projectchecks.cpp
     projectgenerate.h

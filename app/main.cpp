@@ -1,10 +1,12 @@
 // FloCMS Studio: starts the app shell (stage 3). See README.md.
 
 #include "language.h"
+#include "singleinstance.h"
 #include "studio.h"
 
 #include <flostudio/core/buildinfo.h>
 #include <flostudio/core/memory.h>
+#include <flostudio/core/settings.h>
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -253,6 +255,13 @@ int main(int argc, char *argv[])
     }
 
     const bool smoke = parser.isSet(smokeOpt);
+    // One Studio per user: started again, the running one comes to the
+    // front and this one quits. Tests, screenshots and demos run beside it.
+    const bool alone = !smoke && !parser.isSet(shotOpt) && !parser.isSet(demoOpt) && !parser.isSet(memoryOpt);
+    SingleInstance instance(QDir(FloStudio::Core::settingsFolder()).filePath(QStringLiteral("studio.lock")),
+                            SingleInstance::nameForUser());
+    if (alone && !instance.claim())
+        return 0;
     const bool memoryTest = parser.isSet(memoryOpt) && parser.isSet(demoOpt);
     if (!loadFonts() && smoke)
         return 1;
@@ -330,6 +339,25 @@ int main(int argc, char *argv[])
         }, Qt::QueuedConnection);
     } else if (splash) {
         splash->close();
+    }
+
+    // Started again: this window comes to the front (restored if it was
+    // minimized)
+    if (mainWindow) {
+        QObject::connect(&instance, &SingleInstance::activateRequested, mainWindow, [mainWindow] {
+            if (mainWindow->windowState() & Qt::WindowMinimized)
+                mainWindow->showNormal();
+            else
+                mainWindow->show();
+            mainWindow->raise();
+            mainWindow->requestActivate();
+#ifdef Q_OS_WIN
+            // Qt only flashes the taskbar button when another program has
+            // the focus; the copy just started allowed this one to take it
+            // NOLINTNEXTLINE(performance-no-int-to-ptr): a window handle
+            SetForegroundWindow(reinterpret_cast<HWND>(mainWindow->winId()));
+#endif
+        });
     }
 
     // Memory management: after Studio freed screens or data, the QML
