@@ -58,8 +58,8 @@ jobs:
         shell: bash
     env:
       # Short paths: Qt's sources are deep, and Windows paths are short
-      STATIC_QT: ${{ runner.os == 'Windows' && 'C:/qs' || '/Users/runner/qs' }}
-      STATIC_WORK: ${{ runner.os == 'Windows' && 'C:/qw' || '/Users/runner/qw' }}
+      STATIC_QT: ${{ startsWith(matrix.os, 'windows') && 'C:/qs' || '/Users/runner/qs' }}
+      STATIC_WORK: ${{ startsWith(matrix.os, 'windows') && 'C:/qw' || '/Users/runner/qw' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -126,7 +126,7 @@ jobs:
       run:
         shell: bash
     env:
-      STATIC_QT: ${{ runner.os == 'Windows' && 'C:/qs' || '/Users/runner/qs' }}
+      STATIC_QT: ${{ startsWith(matrix.os, 'windows') && 'C:/qs' || '/Users/runner/qs' }}
     steps:
       - uses: actions/checkout@v4
 
