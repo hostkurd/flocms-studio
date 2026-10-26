@@ -258,10 +258,35 @@ int main(int argc, char *argv[])
     // One Studio per user: started again, the running one comes to the
     // front and this one quits. Tests, screenshots and demos run beside it.
     const bool alone = !smoke && !parser.isSet(shotOpt) && !parser.isSet(demoOpt) && !parser.isSet(memoryOpt);
-    SingleInstance instance(QDir(FloStudio::Core::settingsFolder()).filePath(QStringLiteral("studio.lock")),
-                            SingleInstance::nameForUser());
+    SingleInstance instance(FloStudio::Core::settingsFolder());
     if (alone && !instance.claim())
         return 0;
+    // Closing: no longer answers, so a Studio started now runs instead of
+    // asking this one
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, &instance, &SingleInstance::release);
+    // Started again before the window exists (during the splash): shown
+    // once it does
+    QQuickWindow *shownWindow = nullptr;
+    bool showWhenReady = false;
+    const auto bringForward = [](QQuickWindow *window) {
+        // Restored if minimized, keeping maximized
+        window->setWindowStates(window->windowStates() & ~Qt::WindowMinimized);
+        window->show();
+        window->raise();
+        window->requestActivate();
+#ifdef Q_OS_WIN
+        // Qt only flashes the taskbar button when another program has the
+        // focus; the copy just started allowed this one to take it
+        // NOLINTNEXTLINE(performance-no-int-to-ptr): a window handle
+        SetForegroundWindow(reinterpret_cast<HWND>(window->winId()));
+#endif
+    };
+    QObject::connect(&instance, &SingleInstance::activateRequested, &app, [&shownWindow, &showWhenReady, bringForward] {
+        if (shownWindow)
+            bringForward(shownWindow);
+        else
+            showWhenReady = true;
+    });
     const bool memoryTest = parser.isSet(memoryOpt) && parser.isSet(demoOpt);
     if (!loadFonts() && smoke)
         return 1;
@@ -341,24 +366,10 @@ int main(int argc, char *argv[])
         splash->close();
     }
 
-    // Started again: this window comes to the front (restored if it was
-    // minimized)
-    if (mainWindow) {
-        QObject::connect(&instance, &SingleInstance::activateRequested, mainWindow, [mainWindow] {
-            if (mainWindow->windowState() & Qt::WindowMinimized)
-                mainWindow->showNormal();
-            else
-                mainWindow->show();
-            mainWindow->raise();
-            mainWindow->requestActivate();
-#ifdef Q_OS_WIN
-            // Qt only flashes the taskbar button when another program has
-            // the focus; the copy just started allowed this one to take it
-            // NOLINTNEXTLINE(performance-no-int-to-ptr): a window handle
-            SetForegroundWindow(reinterpret_cast<HWND>(mainWindow->winId()));
-#endif
-        });
-    }
+    // Started again: this window comes to the front
+    shownWindow = mainWindow;
+    if (mainWindow && std::exchange(showWhenReady, false))
+        bringForward(mainWindow);
 
     // Memory management: after Studio freed screens or data, the QML
     // engine's collector, then the freed memory back to the system

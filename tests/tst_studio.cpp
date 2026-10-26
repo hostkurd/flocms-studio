@@ -24,6 +24,8 @@
 
 #include <QAbstractItemModelTester>
 #include <QProcess>
+#include <QtConcurrent>
+#include <QElapsedTimer>
 #include <QSysInfo>
 #include <QSignalSpy>
 #include <QStandardPaths>
@@ -166,45 +168,86 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
-    // One Studio per user: a second copy finds the first, asks it to show
-    // its window, and is told to quit; once the first is gone a new copy
-    // may run
+    // One Studio per user: a second copy asks the first to show its window
+    // and quits once it has answered; Studio always starts when nothing
+    // answers (two copies at worst, never none)
     void onlyOneStudioRuns()
     {
         const QTemporaryDir dir;
-        const QString lock = dir.filePath(QStringLiteral("studio.lock"));
-        const QString name = QStringLiteral("flocms-studio-test-") + QString::number(QCoreApplication::applicationPid());
-        {
-            SingleInstance first(lock, name);
-            QVERIFY(first.claim());
-            QSignalSpy shown(&first, &SingleInstance::activateRequested);
-            SingleInstance second(lock, name);
-            QVERIFY(!second.claim());
-            QTRY_COMPARE_WITH_TIMEOUT(shown.size(), 1, 5000);
-        }
-        // The first one quit: the next copy runs
-        SingleInstance next(lock, name);
+        const QString folder = dir.filePath(QStringLiteral("settings"));
+        SingleInstance first(folder);
+        QVERIFY(first.claim());
+        QSignalSpy shown(&first, &SingleInstance::activateRequested);
+        // The second copy on another thread: this one answers meanwhile
+        const auto second = QtConcurrent::run([folder] {
+            SingleInstance copy(folder);
+            return copy.claim();
+        });
+        QTRY_VERIFY_WITH_TIMEOUT(second.isFinished(), 10000);
+        QCOMPARE(second.result(), false);
+        QCOMPARE(shown.size(), 1);
+
+        // Closing (aboutToQuit): a copy started now runs at once
+        first.release();
+        QElapsedTimer timer;
+        timer.start();
+        SingleInstance next(folder);
         QVERIFY(next.claim());
-        // Another user (another name and lock) isn't affected
-        SingleInstance other(dir.filePath(QStringLiteral("other.lock")), name + QStringLiteral("-other"));
-        QVERIFY(other.claim());
-        QVERIFY(SingleInstance::nameForUser().startsWith(QStringLiteral("flocms-studio-")));
+        QVERIFY(timer.elapsed() < 2000);
+        QCOMPARE(next.socketName(), first.socketName());
+    }
+
+    // Studio starts even when the lock can't help: a settings folder that
+    // can't be used, a lock left on another computer sharing the folder
+    void studioAlwaysStarts()
+    {
+        const QTemporaryDir dir;
+        // A file where the folder should be
+        const QString blocked = dir.filePath(QStringLiteral("blocked"));
+        writeFile(blocked, "x");
+        SingleInstance unusable(blocked);
+        QVERIFY(unusable.claim());
+
+        const QString folder = dir.filePath(QStringLiteral("shared"));
+        QDir().mkpath(folder);
+        writeFile(folder + QStringLiteral("/studio.lock"),
+                  QByteArray::number(QCoreApplication::applicationPid()) + '\n'
+                      + QCoreApplication::applicationName().toUtf8() + "\nanother-computer\n");
+        QElapsedTimer timer;
+        timer.start();
+        SingleInstance here(folder);
+        QVERIFY(here.claim());
+        QVERIFY(timer.elapsed() < 5000);
     }
 
     // A Studio that crashed left its lock: the next one takes it over
     void aCrashedStudiosLockIsTakenOver()
     {
         const QTemporaryDir dir;
-        const QString lock = dir.filePath(QStringLiteral("studio.lock"));
+        const QString folder = dir.path();
         // A lock held by a program that has ended: QLockFile's own format
         QProcess ended;
         ended.start(QStringLiteral(FLOSTUDIO_TEST_HELPER), {QStringLiteral("exit"), QStringLiteral("0")});
         QVERIFY(ended.waitForFinished(10000));
         const qint64 gone = ended.processId() > 0 ? ended.processId() : 999999;
-        writeFile(lock, QByteArray::number(gone) + '\n' + QCoreApplication::applicationName().toUtf8() + '\n'
-                            + QSysInfo::machineHostName().toUtf8() + '\n');
-        SingleInstance next(lock, QStringLiteral("flocms-studio-crash-") + QString::number(QCoreApplication::applicationPid()));
+        writeFile(folder + QStringLiteral("/studio.lock"), QByteArray::number(gone) + '\n'
+                                                          + QCoreApplication::applicationName().toUtf8() + '\n'
+                                                          + QSysInfo::machineHostName().toUtf8() + '\n');
+        SingleInstance next(folder);
         QVERIFY(next.claim());
+    }
+
+    // Each user's own name, the same for every copy of one user
+    void theSocketNameIsPrivate()
+    {
+        const QTemporaryDir a;
+        const QTemporaryDir b;
+        const SingleInstance one(a.path());
+        const SingleInstance again(a.path());
+        const SingleInstance other(b.path());
+        QVERIFY(one.socketName().startsWith(QStringLiteral("flocms-studio-")));
+        QCOMPARE(again.socketName(), one.socketName());
+        QVERIFY(other.socketName() != one.socketName());
     }
 
     void refusesAFolderThatIsNotFloCms()
