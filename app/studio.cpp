@@ -14,6 +14,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFutureWatcher>
+#include <QScopeGuard>
 #include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -221,6 +222,10 @@ void Studio::start()
             m_mariadb.start();
     });
     refreshTools(); // and Studio's MariaDB programs
+    m_clock.start();
+    m_sweep.setInterval(60 * 1000);
+    connect(&m_sweep, &QTimer::timeout, this, [this] { releaseUnused(false); });
+    m_sweep.start();
     m_databasePoll.setInterval(5000);
     connect(&m_databasePoll, &QTimer::timeout, this, &Studio::askDatabasePort);
     if (!m_demo)
@@ -510,6 +515,10 @@ void Studio::removeProject(const QString &path)
 
 void Studio::selectProject(const QString &path)
 {
+    // The one left and the one opened were both just in use
+    if (!m_currentPath.isEmpty())
+        m_lastShown.insert(m_currentPath, m_clock.elapsed());
+    m_lastShown.insert(path, m_clock.elapsed());
     m_currentPath = path;
     m_page = QStringLiteral("project");
     loadCurrent();
@@ -596,6 +605,84 @@ bool Studio::currentHasAdmin() const
 {
     const QString type = m_current.value(QStringLiteral("type")).toString();
     return type == u"siteAdmin" || type == u"siteAdminApi" || type == u"admin" || type == u"apiAdmin";
+}
+
+void Studio::releaseUnused(bool now)
+{
+    if (m_closing)
+        return;
+    m_freed = false;
+    emit releaseIdle(now, kScreenIdleMs); // screens call screenReleased()
+    // Once the freed screens are gone: the collector, then back to the
+    // system (allocators keep freed memory for reuse otherwise)
+    const auto giveBack = qScopeGuard([this] {
+        if (m_freed)
+            QTimer::singleShot(1000, this, [this] { emit memoryFreed(); });
+    });
+    // A demo's data comes from its file and isn't read again
+    if (m_demo)
+        return;
+    const qint64 time = m_clock.elapsed();
+    if (!m_currentPath.isEmpty())
+        m_lastShown.insert(m_currentPath, time);
+    QSet<QString> paths;
+    for (const QString &path : m_checks.keys())
+        paths << path;
+    for (const QString &path : m_packagesTab.keys())
+        paths << path;
+    for (const QString &path : m_servers.keys())
+        paths << path;
+    for (const QString &path : std::as_const(paths)) {
+        if (path == m_currentPath)
+            continue;
+        const qint64 idle = time - m_lastShown.value(path, time);
+        if (!now && idle < kProjectIdleMs)
+            continue;
+        if (ProjectChecks *checks = m_checks.value(path); checks && !checks->busy()) {
+            m_checks.remove(path);
+            checks->disconnect(this);
+            checks->deleteLater(); // stops a check still reading (they only read)
+            m_freed = true;
+        }
+        if (ProjectPackages *packages = m_packagesTab.value(path); packages && !packages->busy()) {
+            m_packagesTab.remove(path);
+            packages->disconnect(this);
+            packages->deleteLater();
+            m_freed = true;
+        }
+        // A server that runs (or starts, or stops) stays, with its log
+        if (ProjectServer *server = m_servers.value(path); server && !server->active()) {
+            m_servers.remove(path);
+            server->disconnect(this);
+            server->deleteLater();
+            m_freed = true;
+        }
+    }
+}
+
+int Studio::loadedProjects() const
+{
+    QSet<QString> paths;
+    for (const QString &path : m_checks.keys())
+        paths << path;
+    for (const QString &path : m_packagesTab.keys())
+        paths << path;
+    for (const QString &path : m_servers.keys())
+        paths << path;
+    return static_cast<int>(paths.size());
+}
+
+void Studio::requestTab(const QString &name)
+{
+    emit tabRequested(name);
+}
+
+QStringList Studio::projectPaths() const
+{
+    QStringList paths;
+    for (const auto &project : m_projects.projects())
+        paths << project.path;
+    return paths;
 }
 
 bool Studio::commandRunning() const

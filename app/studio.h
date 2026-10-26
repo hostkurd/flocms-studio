@@ -12,6 +12,7 @@
 #include <flostudio/core/settings.h>
 #include <flostudio/core/tools.h>
 
+#include <QElapsedTimer>
 #include <QHash>
 #include <QJsonObject>
 #include <QObject>
@@ -197,6 +198,25 @@ public:
     Q_INVOKABLE void openUrl(const QString &url);
     // A hostkurd package's page on GitHub (its changelog): only those
     Q_INVOKABLE void openRepository(const QString &url);
+    // Memory management: frees what hasn't been used for a while (the
+    // least recently used first, never what is shown or busy). Screens
+    // hidden for kScreenIdleMs go (QML ShownOnce, on releaseIdle); the
+    // checks, package results and stopped server (with its log lines) of a
+    // project not shown for kProjectIdleMs go, and are read again when it
+    // is opened. A project with a running server or command, its
+    // generator forms and the project list stay. `now` frees at once
+    // whatever is idle at all (the memory test).
+    static constexpr int kScreenIdleMs = 5 * 60 * 1000;
+    static constexpr qint64 kProjectIdleMs = qint64(15) * 60 * 1000;
+    void releaseUnused(bool now);
+    // A screen freed itself on releaseIdle (ShownOnce)
+    Q_INVOKABLE void screenReleased() { m_freed = true; }
+    // How many projects have their data loaded (tests)
+    int loadedProjects() const;
+    // The project tab to show (the memory test opens each one)
+    void requestTab(const QString &name);
+    QStringList projectPaths() const;
+
     // ids from downloadOffer
     Q_INVOKABLE void startDownloads(const QStringList &ids);
     Q_INVOKABLE void cancelDownloads();
@@ -214,6 +234,12 @@ signals:
     void downloadsChanged();
     void serverChanged();
     void commandRunningChanged();
+    // QML screens hidden long enough (or at all, with `now`) are freed
+    void releaseIdle(bool now, int screenIdleMs);
+    void tabRequested(const QString &name);
+    // Something was freed a moment ago: main.cpp runs the QML engine's
+    // garbage collector, then gives the memory back to the system
+    void memoryFreed();
 
 private:
     void changeSettings(const std::function<void(FloStudio::Core::Settings &)> &change);
@@ -248,6 +274,12 @@ private:
     // connecting). Only the newest look counts: each one, and each full
     // look for the tools, takes the next number.
     QTimer m_databasePoll;
+    // Memory management: a sweep every minute; when each project was last
+    // shown (m_clock's time)
+    QTimer m_sweep;
+    QElapsedTimer m_clock;
+    QHash<QString, qint64> m_lastShown;
+    bool m_freed = false; // this sweep freed a screen or a project's data
     quint64 m_databaseLook = 0;
     QString m_mariadbState; // Studio's own server's last state, to see it stop
     QList<FloStudio::Core::ToolPackage> m_packages;

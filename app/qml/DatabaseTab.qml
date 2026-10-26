@@ -14,6 +14,9 @@ ScrollView {
     readonly property int pending: migrations.pending || 0
     readonly property bool anyRan: (migrations.rows || []).some(m => m.batch > 0)
     readonly property bool busy: !!checks && checks.busy
+    // Kept while a table filter is typed (it lives only here), or a
+    // command runs (ShownOnce)
+    readonly property bool keepLoaded: busy || filter.text !== ""
     contentWidth: availableWidth
     clip: true
 

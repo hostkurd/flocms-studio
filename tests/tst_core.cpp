@@ -1,4 +1,5 @@
 #include <flostudio/core/buildinfo.h>
+#include <flostudio/core/memory.h>
 #include <flostudio/core/version.h>
 
 #include <QRegularExpression>
@@ -9,6 +10,24 @@ class TestCore : public QObject
     Q_OBJECT
 
 private slots:
+    // The process's memory as the system counts it; giving freed memory
+    // back never makes it bigger
+    void processMemory()
+    {
+        const FloStudio::Core::ProcessMemory before = FloStudio::Core::currentProcessMemory();
+        QVERIFY(before.inUse > qint64(1024) * 1024);
+        QVERIFY(before.own > 0);
+        QVERIFY(before.own <= before.inUse + qint64(64) * 1024 * 1024);
+        {
+            QList<QByteArray> blocks;
+            for (int i = 0; i < 64; ++i)
+                blocks << QByteArray(256 * 1024, 'x');
+        }
+        FloStudio::Core::returnFreeMemory();
+        const FloStudio::Core::ProcessMemory after = FloStudio::Core::currentProcessMemory();
+        QVERIFY(after.inUse > 0);
+    }
+
     void versionComesFromCMake()
     {
         const auto info = FloStudio::Core::currentBuildInfo();

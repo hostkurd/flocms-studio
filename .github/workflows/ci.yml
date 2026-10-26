@@ -217,6 +217,20 @@ jobs:
           mkdir -p shots
           "$STUDIO" --smoke-test --screenshot shots/studio-$RUNNER_OS.png
 
+      # Memory management: what Studio uses at the start, with every page and
+      # tab opened, after it freed what is idle, and with everything opened
+      # again (shown as notices on the run)
+      - name: Memory test
+        timeout-minutes: 5
+        run: |
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
+          if [ "$RUNNER_OS" = "Windows" ]; then export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; fi
+          code=0
+          "$STUDIO" --memory-test --demo app/demo/project.json > memory.txt 2>&1 || code=$?
+          cat memory.txt
+          while IFS= read -r line; do echo "::notice title=Memory ($RUNNER_OS)::$line"; done < <(grep '^memory' memory.txt || true)
+          exit $code
+
       - name: Notices
         run: |
           python tools/make_notices.py "$APP_DIR/../THIRD-PARTY-NOTICES.txt" --qt-version "$QT_VERSION" --commit "$GITHUB_SHA"
@@ -341,6 +355,8 @@ jobs:
           .github/scripts/run_tests.sh build
           build/bin/flocms-studio --version
           build/bin/flocms-studio --smoke-test
+          build/bin/flocms-studio --memory-test --demo app/demo/project.json | tee memory.txt
+          while IFS= read -r line; do echo "::notice title=Memory (Linux)::$line"; done < <(grep '^memory' memory.txt || true)
 
       # Translated labels go through AppText.ui (the right-to-left mark), and
       # the translation files hold no direction marks or broken plurals

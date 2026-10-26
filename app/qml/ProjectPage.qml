@@ -82,6 +82,12 @@ Item {
             Qt.callLater(page.startAction, Studio.demoDialog)
     }
 
+    // The memory test opens each tab in turn
+    Connections {
+        target: Studio
+        function onTabRequested(name) { page.openTab(name) }
+    }
+
     function openTab(name) {
         page.tab = Math.max(0, ["overview", "generate", "database", "logs", "packages", "doctor"].indexOf(name))
     }

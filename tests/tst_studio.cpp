@@ -122,6 +122,48 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && !again.checkingTools() && checksDone(studio) && checksDone(again), 60000);
     }
 
+    // Memory management: a project left idle has its checks, package
+    // results and stopped server freed; the shown one and a busy one stay,
+    // and opening it again reads them anew
+    void freesTheDataOfProjectsLeftIdle()
+    {
+        const QTemporaryDir dir;
+        makeSite(dir.filePath(QStringLiteral("Sites/one")));
+        makeSite(dir.filePath(QStringLiteral("Sites/two")));
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProjectFolder(QUrl::fromLocalFile(dir.filePath(QStringLiteral("Sites"))));
+        QCOMPARE(studio.projects()->count(), 2);
+        const QStringList paths = studio.projectPaths();
+        QCOMPARE(paths.size(), 2);
+        studio.selectProject(paths.at(0));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+        studio.selectProject(paths.at(1));
+        QTRY_VERIFY_WITH_TIMEOUT(checksDone(studio), 60000);
+        QCOMPARE(studio.loadedProjects(), 2);
+
+        // Not idle long enough: kept
+        studio.releaseUnused(false);
+        QCOMPARE(studio.loadedProjects(), 2);
+
+        // Idle at all (`now`): the one not shown goes, the shown one stays
+        QSignalSpy screens(&studio, &Studio::releaseIdle);
+        QSignalSpy freed(&studio, &Studio::memoryFreed);
+        studio.releaseUnused(true);
+        QCOMPARE(screens.size(), 1);
+        QCOMPARE(studio.loadedProjects(), 1);
+        QVERIFY(studio.checks());
+        QCOMPARE(studio.currentPath(), paths.at(1));
+        QTRY_COMPARE_WITH_TIMEOUT(freed.size(), 1, 5000);
+
+        // Opened again: read anew
+        studio.selectProject(paths.at(0));
+        QVERIFY(studio.checks());
+        QCOMPARE(studio.loadedProjects(), 2);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
     void refusesAFolderThatIsNotFloCms()
     {
         const QTemporaryDir dir;
