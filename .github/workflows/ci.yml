@@ -257,13 +257,13 @@ jobs:
             app=dist/FloCMS-Studio
             mkdir -p "$app"
             cp build-static/bin/Studio.exe "$app/" || fail "no Studio.exe"
-            python tools/make_notices.py "$app/THIRD-PARTY-NOTICES.txt" "${notices[@]}" || fail "notices"
+            python tools/make_notices.py "$app/THIRD-PARTY-NOTICES.txt" "${notices[@]}" > notices.log 2>&1 || fail "notices: $(tail -2 notices.log | tr '\n' ' ')"
             cp LICENSE "$app/LICENSE.txt"
             echo "STUDIO=$app/Studio.exe" >> "$GITHUB_ENV"
           else
             app="dist/FloCMS Studio.app"
             cp -R "build-static/bin/FloCMS Studio.app" dist/ || fail "could not copy the app bundle"
-            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" "${notices[@]}" || fail "notices"
+            python tools/make_notices.py "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt" "${notices[@]}" > notices.log 2>&1 || fail "notices: $(tail -2 notices.log | tr '\n' ' ')"
             cp LICENSE "$app/Contents/Resources/LICENSE.txt"
             # Only macOS's own rpaths: drop the build folder's
             for rp in $(otool -l "$app/Contents/MacOS/FloCMS Studio" | awk '/cmd LC_RPATH/{getline; getline; print $2}' | sort -u); do

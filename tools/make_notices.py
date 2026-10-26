@@ -38,8 +38,14 @@ def license_ids(entry: dict) -> list[str]:
     return [word for word in text.split() if word not in ("AND", "OR", "WITH")]
 
 
+# The Qt modules whose code is in Studio. A static Qt's list also has the
+# modules only its build tools use (qtshadertools, qttools): left out.
+SHIPPED_MODULES = {"qtbase", "qtdeclarative", "qtsvg"}
+
+
 def attribution_lines(path: Path) -> tuple[list[str], set[str]]:
-    entries = json.loads(path.read_text(encoding="utf-8"))
+    entries = [e for e in json.loads(path.read_text(encoding="utf-8"))
+               if e.get("QtModule", "qtbase") in SHIPPED_MODULES]
     used: set[str] = set()
     lines = ["", "Qt itself contains third-party code. These are the components listed",
              "by the Qt modules above, with their licenses:", ""]
@@ -124,14 +130,18 @@ def main() -> None:
     lines += ["- The fonts built into FloCMS Studio:", "", fonts.read_text(encoding="utf-8").rstrip(), ""]
 
     texts = [ROOT / "licenses" / "LGPL-3.0-only.txt", ROOT / "licenses" / "GPL-3.0-only.txt"]
+    missing: list[str] = []
     for license_id in sorted(used):
         text = ROOT / "licenses" / "qt" / f"{license_id}.txt"
         if license_id.startswith("LicenseRef-") and not text.exists():
             continue  # Qt's own reference ids; the copyright lines above carry them
         if not text.exists():
-            raise SystemExit(f"missing license text: {text}")
+            missing.append(license_id)
+            continue
         if text.name not in ("GPL-3.0-only.txt",):
             texts.append(text)
+    if missing:
+        raise SystemExit("missing license texts in licenses/qt/: " + ", ".join(missing))
     for text in texts:
         body = text.read_text(encoding="utf-8").rstrip()
         lines += ["", "=" * 72, text.stem, "=" * 72, "", body, ""]
