@@ -92,6 +92,18 @@ Item {
         page.tab = Math.max(0, ["overview", "generate", "database", "logs", "packages", "doctor"].indexOf(name))
     }
 
+    // Kept (ShownOnce in Main.qml) while a tab other than the Overview is
+    // the one open, or one of its tabs keeps itself: freeing this page
+    // would free them and open the Overview again
+    readonly property bool keepLoaded: {
+        if (page.tab !== 0)
+            return true
+        for (let i = 0; i < tabStack.children.length; ++i) {
+            if (tabStack.children[i].keep === true)
+                return true
+        }
+        return false
+    }
     readonly property bool hasAdmin: ["siteAdmin", "siteAdminApi", "admin", "apiAdmin"].indexOf(info.type) >= 0
     property int tab: Math.max(0, ["overview", "generate", "database", "logs", "packages", "doctor"].indexOf(Studio.demoTab))
 
@@ -242,6 +254,7 @@ Item {
         }
 
         StackLayout {
+            id: tabStack
             visible: !page.info.error
             Layout.fillWidth: true
             Layout.fillHeight: true

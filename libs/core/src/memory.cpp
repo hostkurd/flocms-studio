@@ -8,11 +8,10 @@
 // psapi's GetProcessMemoryInfo is kernel32's K32GetProcessMemoryInfo
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
-#include <vector>
 #elif defined(Q_OS_MACOS)
 #include <mach/mach.h>
 #include <malloc/malloc.h>
-#else
+#elif defined(Q_OS_LINUX)
 #include <QFile>
 #include <QList>
 #include <malloc.h>
@@ -57,7 +56,7 @@ ProcessMemory currentProcessMemory()
         memory.inUse = static_cast<qint64>(info.phys_footprint);
         memory.own = static_cast<qint64>(info.phys_footprint);
     }
-#else
+#elif defined(Q_OS_LINUX)
     QFile file(QStringLiteral("/proc/self/status"));
     if (file.open(QIODevice::ReadOnly)) {
         const QByteArray status = file.readAll();
@@ -71,14 +70,13 @@ ProcessMemory currentProcessMemory()
 void returnFreeMemory()
 {
 #if defined(Q_OS_WIN)
-    const DWORD count = GetProcessHeaps(0, nullptr);
-    std::vector<HANDLE> heaps(count);
-    const DWORD got = heaps.empty() ? 0 : GetProcessHeaps(count, heaps.data());
-    for (DWORD i = 0; i < got && i < count; ++i)
-        HeapCompact(heaps[i], 0);
+    // Only the process heap (the C runtime's, where Qt allocates): other
+    // DLLs' private heaps may be unlocked (HEAP_NO_SERIALIZE) and in use
+    // on another thread
+    HeapCompact(GetProcessHeap(), 0);
 #elif defined(Q_OS_MACOS)
     malloc_zone_pressure_relief(nullptr, 0);
-#elif defined(__GLIBC__)
+#elif defined(Q_OS_LINUX) && defined(__GLIBC__)
     malloc_trim(0);
 #endif
 }

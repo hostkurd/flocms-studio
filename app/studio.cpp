@@ -617,7 +617,10 @@ void Studio::releaseUnused(bool now)
     // system (allocators keep freed memory for reuse otherwise)
     const auto giveBack = qScopeGuard([this] {
         if (m_freed)
-            QTimer::singleShot(1000, this, [this] { emit memoryFreed(); });
+            QTimer::singleShot(1000, this, [this] {
+                if (!m_closing)
+                    emit memoryFreed();
+            });
     });
     // A demo's data comes from its file and isn't read again
     if (m_demo)
@@ -635,7 +638,9 @@ void Studio::releaseUnused(bool now)
     for (const QString &path : std::as_const(paths)) {
         if (path == m_currentPath)
             continue;
-        const qint64 idle = time - m_lastShown.value(path, time);
+        // Never shown (a server left from a crash, found at the start):
+        // idle since Studio started
+        const qint64 idle = time - m_lastShown.value(path, 0);
         if (!now && idle < kProjectIdleMs)
             continue;
         if (ProjectChecks *checks = m_checks.value(path); checks && !checks->busy()) {
@@ -657,6 +662,20 @@ void Studio::releaseUnused(bool now)
             server->deleteLater();
             m_freed = true;
         }
+    }
+    forgetIdle();
+}
+
+void Studio::forgetIdle()
+{
+    // Times of projects with nothing loaded any more
+    for (auto it = m_lastShown.begin(); it != m_lastShown.end();) {
+        const QString &path = it.key();
+        if (path != m_currentPath && !m_checks.contains(path) && !m_packagesTab.contains(path)
+            && !m_servers.contains(path) && !m_generate.contains(path))
+            it = m_lastShown.erase(it);
+        else
+            ++it;
     }
 }
 

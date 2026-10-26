@@ -211,6 +211,9 @@ public:
     void releaseUnused(bool now);
     // A screen freed itself on releaseIdle (ShownOnce)
     Q_INVOKABLE void screenReleased() { m_freed = true; }
+    // Milliseconds since Studio started, on a clock that a change of the
+    // computer's time or a sleep doesn't move (ShownOnce's hidden time)
+    Q_INVOKABLE qint64 uptimeMs() const { return m_clock.elapsed(); }
     // How many projects have their data loaded (tests)
     int loadedProjects() const;
     // The project tab to show (the memory test opens each one)
@@ -254,6 +257,7 @@ private:
     bool currentHasAdmin() const;
     void serversChanged();
     void askDatabasePort();
+    void forgetIdle();
 
     Language *m_language;
     FloStudio::Core::Settings m_settings;

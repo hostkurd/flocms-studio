@@ -15,14 +15,15 @@ Loader {
     property int index: 0
     readonly property bool shown: parent && parent.currentIndex === index
     property bool wanted: shown
-    // When it was hidden (Date.now())
+    // When it was hidden (Studio's clock: a change of the computer's time
+    // or a sleep doesn't make every screen look idle)
     property real hiddenSince: 0
     readonly property bool keep: !!item && item.keepLoaded === true
     onShownChanged: {
         if (shown)
             wanted = true
         else
-            hiddenSince = Date.now()
+            hiddenSince = Studio.uptimeMs()
     }
     active: wanted
     Layout.fillWidth: true
@@ -31,7 +32,7 @@ Loader {
     Connections {
         target: Studio
         function onReleaseIdle(now, screenIdleMs) {
-            if (!loader.shown && loader.wanted && !loader.keep && (now || Date.now() - loader.hiddenSince >= screenIdleMs)) {
+            if (!loader.shown && loader.wanted && !loader.keep && (now || Studio.uptimeMs() - loader.hiddenSince >= screenIdleMs)) {
                 loader.wanted = false
                 Studio.screenReleased()
             }
