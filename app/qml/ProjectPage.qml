@@ -240,12 +240,16 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             currentIndex: page.tab
-            OverviewTab { info: page.info; startAction: page.startAction; openTab: page.openTab }
-            GenerateTab {}
-            DatabaseTab { startAction: page.startAction }
-            LogsTab {}
-            PackagesTab {}
-            DoctorTab {}
+            // Each tab is made the first time it is shown, then kept (what
+            // was typed or scrolled stays): fewer objects in memory and a
+            // quicker start for the tabs never opened. `index` must match
+            // the order above (StackLayout.isCurrentItem needs Qt 6.5)
+            ShownOnce { index: 0; sourceComponent: Component { OverviewTab { info: page.info; startAction: page.startAction; openTab: page.openTab } } }
+            ShownOnce { index: 1; sourceComponent: Component { GenerateTab {} } }
+            ShownOnce { index: 2; sourceComponent: Component { DatabaseTab { startAction: page.startAction } } }
+            ShownOnce { index: 3; sourceComponent: Component { LogsTab {} } }
+            ShownOnce { index: 4; sourceComponent: Component { PackagesTab {} } }
+            ShownOnce { index: 5; sourceComponent: Component { DoctorTab {} } }
         }
     }
 }

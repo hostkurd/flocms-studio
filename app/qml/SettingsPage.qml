@@ -14,17 +14,24 @@ ScrollView {
     clip: true
 
     readonly property var sections: ({ general: general, tools: tools, database: database, server: server, editor: editor, folders: folders })
+    // Where showSection last put the view: anything else is the person
+    // scrolling (a wheel, keys), which ends the settling below
+    property real shownY: -1
     function showSection() {
         const card = page.sections[Studio.settingsSection]
-        if (card && Studio.page === "settings")
+        if (card && Studio.page === "settings") {
             page.contentItem.contentY = Math.max(0, Math.min(card.y - 24, page.contentHeight - page.height))
+            page.shownY = page.contentItem.contentY
+        }
     }
     Connections {
         target: Studio
         function onPageChanged() { page.showSection() }
     }
-    // Opened on a section (a demo): kept there while the cards take their
-    // places, for the first second or until the person scrolls
+    // The page is made when first shown (ShownOnce), after the page change
+    Component.onCompleted: Qt.callLater(page.showSection)
+    // Opened on a section: kept there while the cards take their places,
+    // for a moment (a demo: 1.5 s) or until the person scrolls
     property bool settling: true
     property int settleTicks: 0
     Timer {
@@ -32,8 +39,12 @@ ScrollView {
         repeat: true
         running: page.settling
         onTriggered: {
+            if (page.shownY >= 0 && Math.abs(page.contentItem.contentY - page.shownY) > 1) {
+                page.settling = false
+                return
+            }
             page.showSection()
-            if (++page.settleTicks >= 15) page.settling = false
+            if (++page.settleTicks >= (Studio.demo ? 15 : 5)) page.settling = false
         }
     }
     Connections {

@@ -101,6 +101,8 @@ set(STUDIO_QML
     qml/OverviewTab.qml
     qml/ProblemText.qml
     qml/ServerCard.qml
+    qml/ShownOnce.qml
+    qml/Splash.qml
     qml/StatusIcon.qml
     qml/SettingsPage.qml
     qml/DownloadsDialog.qml
