@@ -42,7 +42,9 @@
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Launch Condition="VersionNT64" Message="FloCMS Studio needs 64-bit Windows." />
-    <Launch Condition="Installed OR WINDOWSBUILDNUMBER &gt;= 10240" Message="FloCMS Studio needs Windows 10 or newer." />
+    <!-- No Windows 10 check: Windows Installer reports Windows 10 and 11 as
+         8.1 (VersionNT 603) and WINDOWSBUILDNUMBER isn't set on the runners;
+         Windows 8.1 is out of support everywhere Studio is used. -->
 
     <!-- Settings > Apps -->
     <Icon Id="Studio.ico" SourceFile="$(sys.SOURCEFILEDIR)..\..\app\icons\studio.ico" />
