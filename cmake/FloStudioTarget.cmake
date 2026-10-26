@@ -60,6 +60,15 @@ function(flostudio_add_library name short)
     endif()
     add_library(FloStudio::${short} ALIAS ${name})
 
+    # Version information in each DLL, as in Studio.exe: code signing checks
+    # the product name and version of every file it signs
+    if(WIN32 AND FLOSTUDIO_SHARED_LIBS)
+        set(RC_NAME "${name}")
+        set(RC_DESCRIPTION "FloCMS Studio ${short} library")
+        configure_file("${PROJECT_SOURCE_DIR}/cmake/library.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/${name}.rc" @ONLY)
+        target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.rc")
+    endif()
+
     string(TOLOWER "${short}" lower)
     string(TOUPPER "${name}" upper)
     generate_export_header(${name}

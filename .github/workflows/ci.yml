@@ -4,7 +4,7 @@ name: CI
 # Composer and a real FloCMS project):
 #  - release:     Studio with Qt and the FloStudio libraries as DLLs (until
 #                 stage 9, which builds the single static program), tests,
-#                 smoke test, Windows installer and macOS .dmg dry runs
+#                 smoke test, Windows installer (WiX) and macOS .dmg
 #  - linux:       build and tests on Ubuntu with Qt 6.12 (shared), label
 #                 checks, screenshots of every demo screen (artifact)
 #  - sanitizers:  AddressSanitizer + UndefinedBehaviorSanitizer, Linux, macOS
@@ -24,6 +24,9 @@ on:
       - "prototypes/**"
       - ".github/workflows/rtl-check.yml"
   workflow_dispatch:
+  # The release workflow (release.yml) runs all of CI first and signs what
+  # the release job built
+  workflow_call:
 
 permissions:
   contents: read
@@ -237,27 +240,38 @@ jobs:
           cp LICENSE "$APP_DIR/../LICENSE.txt"
           if [ "$RUNNER_OS" = "Windows" ]; then cp dist/THIRD-PARTY-NOTICES.txt dist/LICENSE.txt "$APP_DIR/"; fi
 
-      - name: Windows installer dry run
+      # Code signing (CODE_SIGNING.md) signs only our own files, and checks
+      # that each says it is FloCMS Studio, with Studio's version
+      - name: Version information of our files
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $files = @(Get-Item "$env:APP_DIR/Studio.exe") + @(Get-ChildItem "$env:APP_DIR/FloStudio*.dll")
+          if ($files.Count -ne 4) { Write-Output "::error::expected Studio.exe and 3 FloStudio DLLs, found $($files.Count)"; exit 1 }
+          foreach ($f in $files) {
+            $v = $f.VersionInfo
+            if ($v.ProductName -ne 'FloCMS Studio' -or $v.ProductVersion -ne $env:VERSION -or $v.CompanyName -ne 'HostKurd') {
+              Write-Output "::error::$($f.Name): product '$($v.ProductName)' $($v.ProductVersion) by '$($v.CompanyName)', not FloCMS Studio $env:VERSION by HostKurd"; exit 1
+            }
+          }
+          Write-Output "::notice::version information: $(($files | ForEach-Object Name) -join ', ') say FloCMS Studio $env:VERSION"
+
+      # The installer (WiX, installer/windows/): built, checked, then an
+      # upgrade from an older build, the installed Studio's smoke test and an
+      # uninstall that leaves nothing behind
+      - name: Windows installer
+        if: runner.os == 'Windows'
+        timeout-minutes: 15
+        run: |
+          installer/windows/build_msi.sh "$APP_DIR" "$VERSION" "FloCMS-Studio-$VERSION-x64.msi"
+          installer/windows/build_msi.sh "$APP_DIR" 0.0.0 older.msi
+          echo "::notice::installer: FloCMS-Studio-$VERSION-x64.msi $(( $(stat -c %s "FloCMS-Studio-$VERSION-x64.msi") / 1024 )) KiB"
+
+      - name: Windows installer test
         if: runner.os == 'Windows'
         timeout-minutes: 10
-        run: |
-          iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
-          if [ ! -f "$iscc" ]; then choco install innosetup -y --no-progress > /dev/null; fi
-          "$iscc" //Q //DAppVersion="$VERSION" //DSourceDir="$(cygpath -w "$PWD/$APP_DIR")" //O"$(cygpath -w "$PWD")" installer/windows/studio.iss
-          setup="FloCMS-Studio-$VERSION-setup.exe"
-          echo "::notice::installer: $setup $(( $(stat -c %s "$setup") / 1024 )) KiB"
-          target="$(cygpath -w "$RUNNER_TEMP/studio-install")"
-          ./"$setup" //VERYSILENT //SUPPRESSMSGBOXES //CURRENTUSER //NORESTART //DIR="$target" //LOG=install.log
-          installed="$(cygpath -u "$RUNNER_TEMP")/studio-install"
-          test -f "$installed/Studio.exe" || { echo "::error::the installer did not install Studio.exe"; cat install.log; exit 1; }
-          (export PATH="/c/Windows/System32:/c/Windows:/usr/bin"; "$installed/Studio.exe" --smoke-test)
-          "$installed/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
-          for i in $(seq 1 30); do [ -f "$installed/Studio.exe" ] || break; sleep 1; done
-          if [ -f "$installed/Studio.exe" ]; then echo "::error::uninstalling left Studio.exe behind"; exit 1; fi
-          # The uninstaller removes its own files a moment after it exits.
-          for i in $(seq 1 20); do [ -z "$(find "$installed" -type f 2>/dev/null)" ] && break; sleep 1; done
-          left=$( (find "$installed" -type f 2>/dev/null || true) | sed "s|$installed/||" | tr '\n' ' ')
-          echo "::notice::installer: installed for the current user, smoke test passed, uninstalled (left behind: ${left:-nothing})"
+        shell: pwsh
+        run: installer/windows/test_msi.ps1 -Msi "FloCMS-Studio-$env:VERSION-x64.msi" -Older older.msi -Version $env:VERSION
 
       - name: macOS disk image dry run
         if: runner.os == 'macOS'
@@ -290,8 +304,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
-          name: FloCMS-Studio-windows-setup
-          path: FloCMS-Studio-*-setup.exe
+          name: FloCMS-Studio-windows-installer
+          path: FloCMS-Studio-*-x64.msi
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
@@ -308,7 +322,9 @@ jobs:
           path: |
             build.log
             deploy.log
+            install-older.log
             install.log
+            uninstall.log
             shots/
           if-no-files-found: ignore
 

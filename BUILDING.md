@@ -88,8 +88,11 @@ are skipped).
 CI's `release` job (`.github/workflows/ci.yml`) shows the exact steps:
 build, run the tests, collect Qt with `windeployqt` / `macdeployqt`, write
 the notices with `tools/make_notices.py`, then build the Windows installer
-from `installer/windows/studio.iss` with Inno Setup 6, or a `.dmg` with
-`hdiutil` on macOS.
+with `installer/windows/build_msi.sh` (WiX Toolset 5, installed as a .NET
+tool) and test it with `installer/windows/test_msi.ps1`, or a `.dmg` with
+`hdiutil` on macOS. A version tag (`v0.1.0`) runs `release.yml`: all of CI,
+then signing through SignPath and a draft GitHub release (see
+CODE_SIGNING.md).
 
 ## The final single-file build (stage 9)
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "studio-files" (a copy of what is set in
+  SignPath, kept here so changes are reviewed like code; CODE_SIGNING.md).
+  The release workflow uploads the portable folder as a GitHub artifact,
+  which GitHub sends as a zip. Only our own files are signed: Studio.exe
+  and the three FloStudio DLLs, each checked for its product name and the
+  version the release workflow passes. Qt's and Microsoft's files are
+  shipped as their makers built them, never signed by us.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <zip-file>
+    <pe-file path="Studio.exe" product-name="FloCMS Studio" product-version="${version}">
+      <authenticode-sign />
+    </pe-file>
+    <pe-file-set>
+      <include path="FloStudioCore.dll" product-name="FloCMS Studio" product-version="${version}" />
+      <include path="FloStudioDatabase.dll" product-name="FloCMS Studio" product-version="${version}" />
+      <include path="FloStudioSecurity.dll" product-name="FloCMS Studio" product-version="${version}" />
+      <for-each>
+        <authenticode-sign />
+      </for-each>
+    </pe-file-set>
+  </zip-file>
+</artifact-configuration>

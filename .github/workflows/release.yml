@@ -1,0 +1,302 @@
+name: Release
+
+# A release starts from a version tag: git tag v0.1.0 && git push origin v0.1.0
+#  1. check:    the tag is Studio's version (CMakeLists.txt)
+#  2. ci:       all of CI (ci.yml): builds, tests, the Windows installer test,
+#               the macOS disk image and the Linux AppImage
+#  3. windows-files:     sends Studio.exe and the FloStudio DLLs to SignPath,
+#               which waits for an approver (CODE_SIGNING.md) and signs them
+#  4. windows-installer: builds the installer from the signed files, sends it
+#               to SignPath too, and tests it (two jobs: each may wait up to
+#               5 hours for its approval, and a job ends after 6)
+#  5. publish:  a draft GitHub release with every file and its SHA-256, for a
+#               person to read and publish
+#
+# Signing is on once SignPath gives the project (CODE_SIGNING.md, "Setting
+# up"): the repository variables SIGNPATH_ORGANIZATION_ID,
+# SIGNPATH_PROJECT_SLUG and SIGNPATH_SIGNING_POLICY_SLUG and the secret
+# SIGNPATH_API_TOKEN. Until then the workflow still makes the draft release,
+# unsigned and said so in its title.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: version
+        run: |
+          # Only what is on main is released and signed
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME is not on main: tag a commit of main"
+            exit 1
+          fi
+          version=$(sed -nE '/^project\(FloStudio/,/\)/s/^ +VERSION ([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' CMakeLists.txt)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::the tag is $GITHUB_REF_NAME but CMakeLists.txt says $version: tag v$version, or change the version first"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "::notice::releasing FloCMS Studio $version"
+
+  ci:
+    needs: check
+    uses: ./.github/workflows/ci.yml
+
+  windows-files:
+    needs: [check, ci]
+    runs-on: windows-2022
+    # The approver has up to 5 hours in SignPath
+    timeout-minutes: 345
+    permissions:
+      contents: read
+      actions: read # SignPath reads the artifact and this job's details
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      SIGNING: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: FloCMS-Studio-windows-portable
+          path: unsigned/FloCMS-Studio
+
+      # SignPath takes files from a GitHub artifact of this run
+      - id: files
+        if: env.SIGNING == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-studio-files
+          path: unsigned/FloCMS-Studio/
+          if-no-files-found: error
+
+      - name: Sign Studio's files (SignPath)
+        if: env.SIGNING == 'true'
+        uses: signpath/github-action-submit-signing-request@ced31329c0317e779dad2eec2a7c3bb46ea1343e # v1.3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: studio-files
+          github-artifact-id: ${{ steps.files.outputs.artifact-id }}
+          parameters: |
+            version: "${{ env.VERSION }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 18000
+          output-artifact-directory: signed/FloCMS-Studio
+
+      - name: Without signing
+        if: env.SIGNING != 'true'
+        run: |
+          mkdir -p signed
+          cp -R unsigned/FloCMS-Studio signed/
+          echo "::warning::SignPath is not set up yet (CODE_SIGNING.md): this release is unsigned"
+
+      # Only Studio.exe and the FloStudio DLLs may change, and only by
+      # their signatures: every other file is the same as CI built it
+      - name: Check the signed files
+        shell: pwsh
+        run: |
+          $ours = 'Studio.exe', 'FloStudioCore.dll', 'FloStudioDatabase.dll', 'FloStudioSecurity.dll'
+          $before = Get-ChildItem unsigned/FloCMS-Studio -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path unsigned/FloCMS-Studio).Path.Length) }
+          $after = Get-ChildItem signed/FloCMS-Studio -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path signed/FloCMS-Studio).Path.Length) }
+          if (Compare-Object $before $after) { Write-Output "::error::signing changed the list of files"; exit 1 }
+          foreach ($file in $before) {
+            $name = Split-Path $file -Leaf
+            $same = (Get-FileHash "unsigned/FloCMS-Studio$file").Hash -eq (Get-FileHash "signed/FloCMS-Studio$file").Hash
+            if ($ours -contains $name -and $file -eq "\$name") {
+              if ($env:SIGNING -ne 'true') { continue }
+              $sig = Get-AuthenticodeSignature "signed/FloCMS-Studio$file"
+              if ($sig.Status -ne 'Valid') { Write-Output "::error::$name is not signed: $($sig.Status) $($sig.StatusMessage)"; exit 1 }
+              if ($sig.SignerCertificate.Subject -notmatch 'SignPath Foundation') { Write-Output "::error::$name is signed by $($sig.SignerCertificate.Subject), not SignPath Foundation"; exit 1 }
+              Write-Output "::notice::$name signed by $($sig.SignerCertificate.Subject)"
+            } elseif (-not $same) {
+              Write-Output "::error::signing changed $file, which isn't ours"; exit 1
+            }
+          }
+
+      - name: Smoke test (signed files)
+        timeout-minutes: 5
+        run: |
+          export PATH="/c/Windows/System32:/c/Windows:/usr/bin"
+          signed/FloCMS-Studio/Studio.exe --smoke-test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-studio-files
+          path: signed/FloCMS-Studio/
+          if-no-files-found: error
+
+  windows-installer:
+    needs: [check, windows-files]
+    runs-on: windows-2022
+    timeout-minutes: 345
+    permissions:
+      contents: read
+      actions: read # SignPath reads the artifact and this job's details
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      SIGNING: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-studio-files
+          path: signed/FloCMS-Studio
+
+      - name: Installer
+        timeout-minutes: 15
+        run: |
+          installer/windows/build_msi.sh signed/FloCMS-Studio "$VERSION" "FloCMS-Studio-$VERSION-x64.msi"
+          installer/windows/build_msi.sh signed/FloCMS-Studio 0.0.0 older.msi
+          mkdir -p unsigned-msi && mv "FloCMS-Studio-$VERSION-x64.msi" unsigned-msi/
+
+      - id: msi
+        if: env.SIGNING == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-studio-installer
+          path: unsigned-msi/
+          if-no-files-found: error
+
+      - name: Sign the installer (SignPath)
+        if: env.SIGNING == 'true'
+        uses: signpath/github-action-submit-signing-request@ced31329c0317e779dad2eec2a7c3bb46ea1343e # v1.3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: studio-installer
+          github-artifact-id: ${{ steps.msi.outputs.artifact-id }}
+          parameters: |
+            version: "${{ env.VERSION }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 18000
+          output-artifact-directory: signed-msi
+
+      - name: Installer without signing
+        if: env.SIGNING != 'true'
+        run: cp -R unsigned-msi signed-msi
+
+      - name: Check and test the installer
+        shell: pwsh
+        run: |
+          $msi = "signed-msi/FloCMS-Studio-$env:VERSION-x64.msi"
+          if (-not (Test-Path $msi)) { Write-Output "::error::no $msi"; exit 1 }
+          if ($env:SIGNING -eq 'true') {
+            $sig = Get-AuthenticodeSignature $msi
+            if ($sig.Status -ne 'Valid') { Write-Output "::error::the installer is not signed: $($sig.Status)"; exit 1 }
+            if ($sig.SignerCertificate.Subject -notmatch 'SignPath Foundation') { Write-Output "::error::the installer is signed by $($sig.SignerCertificate.Subject), not SignPath Foundation"; exit 1 }
+            Write-Output "::notice::installer signed by $($sig.SignerCertificate.Subject)"
+          }
+          installer/windows/test_msi.ps1 -Msi $msi -Older older.msi -Version $env:VERSION
+
+      - name: Release files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory release | Out-Null
+          Copy-Item "signed-msi/FloCMS-Studio-$env:VERSION-x64.msi" release/
+          Compress-Archive -Path signed/FloCMS-Studio -DestinationPath "release/FloCMS-Studio-$env:VERSION-windows-x64-portable.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: release/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-windows-logs
+          path: |
+            install-older.log
+            install.log
+            uninstall.log
+          if-no-files-found: ignore
+
+  publish:
+    needs: [check, windows-installer]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # the draft release
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      SIGNED: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-windows
+          path: release
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: FloCMS-Studio-macos
+          path: macos
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: FloCMS-Studio-linux
+          path: linux
+
+      - name: Draft release
+        run: |
+          mv macos/FloCMS-Studio-*.dmg "release/FloCMS-Studio-$VERSION-macos-universal.dmg"
+          # The Linux test build (D14): its AppImage only
+          appimage=$(ls linux/*.AppImage | head -1)
+          [ -n "$appimage" ] || { echo "::error::no AppImage"; exit 1; }
+          mv "$appimage" "release/FloCMS-Studio-$VERSION-linux-x86_64.AppImage"
+          (cd release && sha256sum -- * > SHA256SUMS.txt)
+          title="FloCMS Studio $VERSION"
+          if [ "$SIGNED" != "true" ]; then title="$title (unsigned)"; fi
+          {
+            echo "## FloCMS Studio $VERSION"
+            echo
+            echo "- **Windows 10 and 11 (64-bit):** \`FloCMS-Studio-$VERSION-x64.msi\` installs for your user only (no administrator rights) and adds Studio to the Start menu; uninstall it from Settings > Apps. Or unzip the portable folder and run \`Studio.exe\`."
+            echo "- **macOS 14.4 or newer (Intel and Apple Silicon):** open the \`.dmg\` and drag FloCMS Studio to Applications. The app isn't notarized yet: the first time macOS refuses to open it, go to System Settings > Privacy & Security and choose Open Anyway."
+            echo "- **Linux (test build):** the \`.AppImage\`; make it executable and run it."
+            echo
+            if [ "$SIGNED" = "true" ]; then
+              echo "The Windows files are signed. Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). See the [code signing policy](https://github.com/$GITHUB_REPOSITORY/blob/main/CODE_SIGNING.md)."
+            else
+              echo "These files are **not signed yet**: Windows SmartScreen will warn before the first start. See the [code signing policy](https://github.com/$GITHUB_REPOSITORY/blob/main/CODE_SIGNING.md)."
+            fi
+            echo
+            echo "\`SHA256SUMS.txt\` lists every file's SHA-256. Built by GitHub Actions from commit $GITHUB_SHA ([run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
+          } > notes.md
+          gh release create "$GITHUB_REF_NAME" release/* --draft --verify-tag --title "$title" --notes-file notes.md
+          echo "::notice::draft release $title: read it on GitHub, then publish it"
