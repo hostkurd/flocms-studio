@@ -158,10 +158,12 @@ Rectangle {
                     required property var modelData
                     // MariaDB: Studio's own server when it has one (D11),
                     // unless it is stopped and another one (XAMPP, Laragon…)
-                    // answers: then that one, and Studio's can still start
+                    // answers: then that one. Starting and stopping Studio's
+                    // server is on the Overview's Database card and in
+                    // Settings, not here.
                     readonly property bool mine: modelData.tool === "mariadb" && Studio.mariadb.state !== "none"
                     // (Studio's failing to start because that one holds the
-                    // port counts as stopped: its dialog says so)
+                    // port counts as stopped)
                     readonly property bool ownIdle: ownState === "stopped" || (ownState === "failed" && Studio.mariadb.error === "db_port_busy")
                     readonly property bool own: mine && !(ownIdle && modelData.state === "running")
                     readonly property string ownState: Studio.mariadb.state
@@ -169,8 +171,10 @@ Rectangle {
                     Layout.leftMargin: 6
                     Layout.rightMargin: 6
                     implicitHeight: 30
-                    spacing: 6
-                    AppText { ui: Texts.toolName(modelData.tool); Layout.fillWidth: true }
+                    spacing: 10
+                    // The name keeps its width; the state takes the rest and
+                    // is cut if it must be
+                    AppText { ui: Texts.toolName(modelData.tool); Layout.minimumWidth: implicitWidth }
                     AppText {
                         visible: !toolRow.own
                         readonly property bool bad: modelData.state === "missing" || modelData.state === "unsupported" || modelData.state === "failed"
@@ -178,28 +182,20 @@ Rectangle {
                         font.family: modelData.state === "found" || (modelData.state === "running" && !!modelData.version) ? Theme.monoFont : Lang.uiFont
                         font.pixelSize: 13
                         color: bad ? Theme.badText : (modelData.state === "optional" ? Theme.muted : Theme.okText)
+                        horizontalAlignment: Text.AlignRight
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
                     }
                     AppText {
                         visible: toolRow.own
                         ui: Texts.mariadbState(toolRow.ownState) + (toolRow.ownState === "running" ? " · " + Studio.mariadb.port : "")
                         font.pixelSize: 13
                         color: toolRow.ownState === "running" ? Theme.okText : (toolRow.ownState === "failed" ? Theme.badText : Theme.muted)
-                    }
-                    AppButton {
-                        visible: toolRow.mine && toolRow.ownState !== "starting" && toolRow.ownState !== "stopping"
-                        small: true
-                        implicitWidth: 30
-                        leftPadding: 0
-                        rightPadding: 0
-                        iconPath: toolRow.ownState === "running" ? Icons.stop : Icons.play
-                        iconFilled: true
-                        danger: toolRow.ownState === "running"
-                        text: ""
-                        Accessible.name: toolRow.ownState === "running" ? qsTr("Stop the database server")
-                                         : (toolRow.own ? qsTr("Start the database server") : qsTr("Start Studio's own MariaDB"))
-                        ToolTip.visible: hovered
-                        ToolTip.text: Accessible.name
-                        onClicked: toolRow.ownState === "running" ? Studio.mariadb.stop() : Studio.mariadb.start()
+                        horizontalAlignment: Text.AlignRight
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
                     }
                 }
             }

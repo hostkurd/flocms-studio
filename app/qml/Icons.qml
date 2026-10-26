@@ -23,6 +23,9 @@ QtObject {
     readonly property string download: "M12 4v11M7 10l5 5l5-5M5 20h14"
     readonly property string refresh: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"
     readonly property string trash: "M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"
+    readonly property string table: "M4 5h16v14H4zM4 10h16M10 10v9"
+    readonly property string database: "M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3s-8-1.3-8-3s3.6-3 8-3M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"
+    readonly property string bolt: "M13 3L5 13.5h6L10 21l8-10.5h-6z"
     readonly property string shield: "M12 3l8 3v6c0 5-3.5 8-8 9c-4.5-1-8-4-8-9V6z"
 
     // The path flipped left to right (x → 24 − x), for icons that point a

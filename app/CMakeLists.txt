@@ -69,6 +69,9 @@ set(STUDIO_QML
     qml/DashedBox.qml
     qml/AppButton.qml
     qml/Card.qml
+    qml/CommandTile.qml
+    qml/DatabaseCard.qml
+    qml/DoctorCard.qml
     qml/Pill.qml
     qml/KeyValue.qml
     qml/Field.qml
