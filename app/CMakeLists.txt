@@ -28,6 +28,9 @@ if(WIN32)
     set_target_properties(Studio PROPERTIES OUTPUT_NAME "Studio" WIN32_EXECUTABLE ON)
     configure_file(studio.rc.in "${CMAKE_CURRENT_BINARY_DIR}/studio.rc" @ONLY)
     target_sources(Studio PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/studio.rc")
+    # The segment heap: memory freed after a while goes back to the system
+    # (MSVC merges this with the manifest it makes)
+    target_sources(Studio PRIVATE windows/studio.manifest)
 elseif(APPLE)
     # The same minimum as the program itself (CI passes Qt's minimum).
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
