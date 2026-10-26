@@ -29,8 +29,17 @@ win() { cygpath -w "$1"; }
 wix build -arch x64 -nologo \
   -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext \
   -d Version="$version" -d SourceDir="$(win "$source")" -d LicenseRtf="$(win "$work/license.rtf")" \
-  -o "$(win "$PWD/$out")" "$(win "$here/studio.wxs")" || fail "wix build failed"
+  -o "$(win "$PWD/$out")" "$(win "$here/studio.wxs")" > "$work/build.txt" 2>&1 || {
+  # Job logs can't always be read from outside GitHub: WiX's messages as annotations
+  grep -iE "error|warning" "$work/build.txt" | head -20 | while IFS= read -r line; do echo "::error::wix: $line"; done
+  fail "wix build failed"
+}
+cat "$work/build.txt"
 # The .wixpdb next to it is for debugging the package, not for shipping
 rm -f "${out%.msi}.wixpdb"
-wix msi validate -nologo -sice ICE38 -sice ICE64 -sice ICE91 "$(win "$PWD/$out")" || fail "the package failed Windows Installer's checks"
+wix msi validate -nologo -sice ICE38 -sice ICE64 -sice ICE91 "$(win "$PWD/$out")" > "$work/validate.txt" 2>&1 || {
+  grep -iE "error|warning|ICE" "$work/validate.txt" | head -20 | while IFS= read -r line; do echo "::error::wix: $line"; done
+  fail "the package failed Windows Installer's checks"
+}
+cat "$work/validate.txt"
 rm -rf "$work"
