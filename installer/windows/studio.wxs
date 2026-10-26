@@ -49,7 +49,7 @@
     <Property Id="ARPPRODUCTICON" Value="Studio.ico" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/hostkurd/flocms-studio" />
     <Property Id="ARPHELPLINK" Value="https://github.com/hostkurd/flocms-studio/issues" />
-    <Property Id="ARPNOMODIFY" Value="1" />
+    <!-- WixUI_Minimal sets ARPNOMODIFY itself -->
     <Property Id="ARPNOREPAIR" Value="1" />
 
     <StandardDirectory Id="LocalAppDataFolder">
