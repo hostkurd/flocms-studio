@@ -297,7 +297,7 @@ jobs:
           # ("cert-only" reads certificates but can't connect)
           tls=$("$STUDIO" --version | tr -d '\r' | sed -n 's/^TLS: //p')
           echo "::notice::TLS backends: $tls"
-          if [ -z "$(echo "$tls" | tr ',' '\n' | tr -d ' ' | grep -vxE 'none|cert-only|')" ]; then
+          if [ -z "$(echo "$tls" | tr ',' '\n' | tr -d ' ' | awk 'NF && $0 != "none" && $0 != "cert-only"')" ]; then
             echo "::error::no TLS backend inside Studio: downloads would fail"; exit 1
           fi
           if [ "$RUNNER_OS" = "Windows" ]; then
