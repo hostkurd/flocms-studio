@@ -20,7 +20,7 @@ jobs:
       - name: try
         timeout-minutes: 8
         run: |
-          sudo apt-get install -y -qq weston > /dev/null
+          sudo apt-get install -y -qq weston libopengl0 libegl1 libgl1 libxkbcommon0 libfontconfig1 > /dev/null
           weston --version | sed 's/^/::notice::/'
           dir="$RUNNER_TEMP/wl"; mkdir -p "$dir/run" && chmod 700 "$dir/run"
           tar -C "$dir" -xzf linux-dist/FloCMS-Studio-*-linux-x86_64.tar.gz
