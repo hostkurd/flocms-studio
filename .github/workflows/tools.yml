@@ -98,6 +98,7 @@ jobs:
       - name: Download, install and run this system's PHP and Composer
         env:
           FLOSTUDIO_ONLINE: "1"
+          QTEST_FUNCTION_TIMEOUT: "1800000"
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           .github/scripts/run_tests.sh build -R tst_downloads -V
@@ -111,6 +112,9 @@ jobs:
       - name: Studio's own MariaDB server (download, set up, start, stop)
         env:
           FLOSTUDIO_ONLINE: "1"
+          # Qt Test stops a test function after 5 minutes, and the download
+          # from archive.mariadb.org alone can take that long: 30 minutes
+          QTEST_FUNCTION_TIMEOUT: "1800000"
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then export PATH="$QT_DIR/bin:$PATH"; fi
           status=0
