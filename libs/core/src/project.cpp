@@ -56,6 +56,16 @@ QString commandString(const QMap<QString, QString> &env, const QString &key, con
     return it.value();
 }
 
+// Letter case in paths, as the usual disks have it
+Qt::CaseSensitivity pathCase()
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+    return Qt::CaseInsensitive;
+#else
+    return Qt::CaseSensitive;
+#endif
+}
+
 QString canonical(const QString &dir)
 {
     const QString path = QFileInfo(dir).canonicalFilePath();
@@ -278,12 +288,8 @@ Result<Done> moveProjectToTrash(const QString &dir, const QStringList &studioFol
     const QString folder = canonical(dir);
     if (info.isRoot() || QFileInfo(folder).isRoot())
         return Error{QStringLiteral("delete_protected"), QDir::toNativeSeparators(dir)};
-#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
-    constexpr Qt::CaseSensitivity cs = Qt::CaseInsensitive; // the usual disks
-#else
-    constexpr Qt::CaseSensitivity cs = Qt::CaseSensitive;
-#endif
-    const auto inside = [cs](const QString &path, const QString &parent) {
+    const auto inside = [](const QString &path, const QString &parent) {
+        const Qt::CaseSensitivity cs = pathCase();
         return path.compare(parent, cs) == 0
                || path.startsWith(parent.endsWith(u'/') ? parent : parent + u'/', cs);
     };
