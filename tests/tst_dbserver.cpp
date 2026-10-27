@@ -12,6 +12,7 @@
 #include <flostudio/core/wizard.h>
 
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QHostAddress>
 #include <QSet>
@@ -325,6 +326,8 @@ private slots:
             const auto it = std::find_if(packages.begin(), packages.end(), [](const ToolPackage &p) { return p.tool == u"mariadb"; });
             if (it == packages.end())
                 QSKIP("Studio downloads no MariaDB for this computer");
+            QElapsedTimer downloadTime;
+            downloadTime.start();
             QObject installer;
             bool installed = false;
             Result<QString> program = Error{};
@@ -333,7 +336,8 @@ private slots:
             QVERIFY2(program.ok(), qUtf8Printable(program ? QString() : program.error().code + u' ' + program.error().detail));
             mariadbd = program.value();
             version = mariadbSeries(it->version);
-            qInfo("downloaded MariaDB %s: %s", qUtf8Printable(it->version), qUtf8Printable(mariadbd));
+            qInfo("downloaded MariaDB %s in %lld s: %s", qUtf8Printable(it->version),
+                  static_cast<long long>(downloadTime.elapsed() / 1000), qUtf8Printable(mariadbd));
         }
         if (mariadbd.isEmpty())
             QSKIP("neither FLOSTUDIO_MARIADBD nor FLOSTUDIO_ONLINE is set");
