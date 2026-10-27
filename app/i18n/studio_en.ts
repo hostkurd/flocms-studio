@@ -1,6 +1,75 @@
 <?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="en">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="44" />
+        <source>Version %1</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="48" />
+        <source>Create, run and change FloCMS projects. Every action runs a real `php flo` or `composer` command in the project and shows it.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="56" />
+        <source>This build</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="71" />
+        <source>Copy version info</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="77" />
+        <source>Copied. Paste it into a bug report.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="88" />
+        <source>Project</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="92" />
+        <source>Project page</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="93" />
+        <source>Releases</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="94" />
+        <source>Report a problem</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="95" />
+        <source>Code signing policy</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="102" />
+        <location filename="../qml/AboutPage.qml" line="111" />
+        <source>License</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="104" />
+        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with where to get their source code.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="112" />
+        <source>Third-party notices</source>
+        <translation type="unfinished" />
+    </message>
+</context>
+<context>
     <name>CommandOutput</name>
     <message>
         <location filename="../qml/CommandOutput.qml" line="58" />
@@ -2948,6 +3017,7 @@
     </message>
     <message>
         <location filename="../qml/Sidebar.qml" line="138" />
+        <location filename="../qml/Sidebar.qml" line="244" />
         <source>FloCMS Studio %1</source>
         <translation type="unfinished" />
     </message>
@@ -2964,6 +3034,16 @@
     <message>
         <location filename="../qml/Sidebar.qml" line="211" />
         <source>Download…</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="235" />
+        <source>About FloCMS Studio %1</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="251" />
+        <source>About FloCMS Studio</source>
         <translation type="unfinished" />
     </message>
 </context>

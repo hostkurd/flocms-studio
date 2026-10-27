@@ -276,10 +276,13 @@ jobs:
       - name: Draft release
         run: |
           mv macos/FloCMS-Studio-*.dmg "release/FloCMS-Studio-$VERSION-macos-universal.dmg"
-          # The Linux test build (D14): its AppImage only
+          # Linux: the .deb and the AppImage
           appimage=$(ls linux/*.AppImage | head -1)
           [ -n "$appimage" ] || { echo "::error::no AppImage"; exit 1; }
           mv "$appimage" "release/FloCMS-Studio-$VERSION-linux-x86_64.AppImage"
+          debfile=$(ls linux/*.deb | head -1)
+          [ -n "$debfile" ] || { echo "::error::no .deb"; exit 1; }
+          mv "$debfile" "release/FloCMS-Studio-$VERSION-amd64.deb"
           (cd release && sha256sum -- * > SHA256SUMS.txt)
           title="FloCMS Studio $VERSION"
           if [ "$SIGNED" != "true" ]; then title="$title (unsigned)"; fi
@@ -288,7 +291,8 @@ jobs:
             echo
             echo "- **Windows 10 and 11 (64-bit):** \`FloCMS-Studio-$VERSION-x64.msi\` installs for your user only (no administrator rights) and adds Studio to the Start menu; uninstall it from Settings > Apps. Or unzip the portable folder and run \`Studio.exe\`."
             echo "- **macOS 14.4 or newer (Intel and Apple Silicon):** open the \`.dmg\` and drag FloCMS Studio to Applications. The app isn't notarized yet: the first time macOS refuses to open it, go to System Settings > Privacy & Security and choose Open Anyway."
-            echo "- **Linux (test build):** the \`.AppImage\`; make it executable and run it."
+            echo "- **Ubuntu 24.04+ / Debian 13+:** \`FloCMS-Studio-$VERSION-amd64.deb\`: open it (or \`sudo apt install ./FloCMS-Studio-$VERSION-amd64.deb\`); FloCMS Studio is then in the app menu. Remove it with \`sudo apt remove flocms-studio\`."
+            echo "- **Other Linux:** the \`.AppImage\`: right-click it, Properties, allow it to run as a program, then run it."
             echo
             if [ "$SIGNED" = "true" ]; then
               echo "The Windows files are signed. Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). See the [code signing policy](https://github.com/$GITHUB_REPOSITORY/blob/main/CODE_SIGNING.md)."

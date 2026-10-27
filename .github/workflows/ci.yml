@@ -465,11 +465,13 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           arch: linux_gcc_64
+          # (Qt's base install has the Wayland client plugins: its
+          # "qtwayland" archive, which package_linux.sh bundles)
           cache: true
           setup-python: false
 
       - name: Linux packages
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build patchelf
 
       - name: Build
         run: |
@@ -515,9 +517,9 @@ jobs:
           path: shots/
           if-no-files-found: ignore
 
-      # A Linux build to try (D14: the Linux release comes after Windows
-      # and macOS): an AppImage, and the same folder as a .tar.gz
-      - name: Linux AppImage
+      # The Linux packages: a .deb (Ubuntu 24.04+, Debian 13+), an AppImage,
+      # and the same folder as a .tar.gz
+      - name: Linux packages (.deb, AppImage)
         env:
           QMAKE: ${{ env.QT_ROOT_DIR }}/bin/qmake
         run: .github/scripts/package_linux.sh build linux-dist
@@ -527,6 +529,55 @@ jobs:
           name: FloCMS-Studio-linux
           path: linux-dist/
           if-no-files-found: error
+
+      # The .deb as a user gets it: apt installs it with what it depends on,
+      # the menu entry is valid, the installed Studio passes its smoke test,
+      # and removing it leaves nothing
+      - name: Linux .deb test
+        timeout-minutes: 10
+        run: |
+          fail() { echo "::error::.deb: $*"; exit 1; }
+          deb=$(ls linux-dist/*.deb | head -1)
+          [ -n "$deb" ] || fail "no .deb"
+          sudo apt-get install -y -qq desktop-file-utils > /dev/null
+          sudo apt-get install -y -qq "./$deb" > deb-install.log 2>&1 || { tail -20 deb-install.log; fail "apt could not install it"; }
+          desktop-file-validate /usr/share/applications/flocms-studio.desktop || fail "the menu entry is not valid"
+          [ -f /usr/share/icons/hicolor/256x256/apps/flocms-studio.png ] || fail "no icon"
+          [ -f /opt/flocms-studio/usr/share/doc/flocms-studio/THIRD-PARTY-NOTICES.txt ] || fail "no notices"
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH LD_LIBRARY_PATH
+          export QT_QPA_PLATFORM=offscreen XDG_RUNTIME_DIR="$RUNNER_TEMP/deb-xdg"
+          mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
+          (cd / && flocms-studio --version) | tr '\n' ';' | sed 's/^/::notice::.deb: /'; echo
+          (cd / && flocms-studio --smoke-test) || fail "the installed Studio's smoke test failed"
+          sudo apt-get remove -y -qq flocms-studio > /dev/null || fail "apt could not remove it"
+          for path in /opt/flocms-studio /usr/bin/flocms-studio /usr/share/applications/flocms-studio.desktop; do
+            [ ! -e "$path" ] || fail "removing it left $path"
+          done
+          echo "::notice::.deb: installed with apt, menu entry valid, smoke test passed, removed with nothing left"
+
+      # On a Wayland desktop (Ubuntu's default) the packages use Wayland,
+      # not X11: the folder's smoke test on a headless Weston
+      - name: Linux on Wayland
+        timeout-minutes: 10
+        run: |
+          fail() { echo "::error::wayland: $*"; exit 1; }
+          sudo apt-get install -y -qq weston > /dev/null
+          dir="$RUNNER_TEMP/wl"; mkdir -p "$dir/run" && chmod 700 "$dir/run"
+          tar -C "$dir" -xzf linux-dist/FloCMS-Studio-*-linux-x86_64.tar.gz
+          export XDG_RUNTIME_DIR="$dir/run"
+          weston --backend=headless --renderer=pixman --socket=wayland-ci --idle-time=0 > "$dir/weston.log" 2>&1 &
+          weston=$!
+          trap 'kill $weston 2> /dev/null || true' EXIT
+          for i in $(seq 1 30); do [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] && break; sleep 1; done
+          [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] || { tail -5 "$dir/weston.log"; fail "weston did not start"; }
+          code=0
+          env -u DISPLAY -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML2_IMPORT_PATH -u QML_IMPORT_PATH \
+            WAYLAND_DISPLAY=wayland-ci QT_QPA_PLATFORM=wayland timeout 120 "$dir/FloCMS-Studio/AppRun" --smoke-test > "$dir/studio.log" 2>&1 || code=$?
+          if [ $code -ne 0 ]; then
+            tail -15 "$dir/studio.log" | sed 's/^/::error::/'
+            fail "the smoke test on Wayland ended with $code"
+          fi
+          echo "::notice::wayland: the packaged Studio passed its smoke test on Wayland (headless Weston): $(grep 'smoke test' "$dir/studio.log" | tail -1)"
 
       # Website + admin panel on the runner's MySQL (root/root)
       - name: Real FloCMS project

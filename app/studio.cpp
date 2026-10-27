@@ -1058,6 +1058,12 @@ void Studio::showSettings(const QString &section)
     emit pageChanged();
 }
 
+void Studio::showAbout()
+{
+    m_page = QStringLiteral("about");
+    emit pageChanged();
+}
+
 void Studio::showSettingsFromWizard(const QString &section)
 {
     m_keepWizard = true; // coming back keeps what was typed
@@ -1114,7 +1120,7 @@ void Studio::refreshProjects()
     serversChanged();
     if (m_projects.indexOf(m_currentPath) < 0)
         m_currentPath = m_projects.count() > 0 ? m_projects.projects().constFirst().path : QString();
-    if (m_page != u"settings" && m_page != u"new")
+    if (m_page != u"settings" && m_page != u"new" && m_page != u"about")
         m_page = m_currentPath.isEmpty() ? QStringLiteral("welcome") : QStringLiteral("project");
     loadCurrent();
     emit pageChanged();

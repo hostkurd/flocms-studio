@@ -1,5 +1,6 @@
 // FloCMS Studio: starts the app shell (stage 3). See README.md.
 
+#include "appinfo.h"
 #include "language.h"
 #include "singleinstance.h"
 #include "studio.h"
@@ -14,10 +15,6 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QNetworkProxyFactory>
-#include <QtNetwork/qtnetworkglobal.h>
-#if QT_CONFIG(ssl)
-#include <QSslSocket>
-#endif
 #include <QQuickStyle>
 #include <QGuiApplication>
 #include <QIcon>
@@ -254,17 +251,7 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     if (parser.isSet(versionOpt)) {
-        // The TLS backends (plugins) Studio's downloads can use: a release
-        // build with Qt inside must have one (CI checks this line)
-#if QT_CONFIG(ssl)
-        const QStringList tls = QSslSocket::availableBackends();
-#else
-        const QStringList tls;
-#endif
-        const QByteArray text = (FloStudio::Core::toText(FloStudio::Core::currentBuildInfo()) + QStringLiteral("\nTLS: ")
-                                 + (tls.isEmpty() ? QStringLiteral("none") : tls.join(QStringLiteral(", "))))
-                                    .toUtf8()
-                                + '\n';
+        const QByteArray text = AppInfo::report().toUtf8() + '\n';
         return std::fwrite(text.constData(), 1, size_t(text.size()), stdout) == size_t(text.size()) ? 0 : 1;
     }
 
@@ -308,6 +295,7 @@ int main(int argc, char *argv[])
     // Before the engine, so they outlive it: it holds them as singletons
     Language language;
     Studio studio(&language);
+    AppInfo appInfo; // before the engine, so it outlives it
     QQmlApplicationEngine engine;
     language.setEngine(&engine);
     // Singletons that stay C++'s (qmlRegisterSingletonInstance does the
@@ -319,6 +307,10 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<Studio>("FloStudio.Backend", 1, 0, "Studio", [&studio](QQmlEngine *, QJSEngine *) -> QObject * {
         QJSEngine::setObjectOwnership(&studio, QJSEngine::CppOwnership);
         return &studio;
+    });
+    qmlRegisterSingletonType<AppInfo>("FloStudio.Backend", 1, 0, "AppInfo", [&appInfo](QQmlEngine *, QJSEngine *) -> QObject * {
+        QJSEngine::setObjectOwnership(&appInfo, QJSEngine::CppOwnership);
+        return &appInfo;
     });
 
     if (parser.isSet(demoOpt)) {

@@ -53,7 +53,7 @@ class Studio : public QObject
     // The project "Delete project…" is working on, empty when none
     Q_PROPERTY(QString deleting READ deleting NOTIFY deletingChanged)
     // Pages and projects
-    Q_PROPERTY(QString page READ page NOTIFY pageChanged)          // welcome, project, settings
+    Q_PROPERTY(QString page READ page NOTIFY pageChanged)          // welcome, project, settings, new, about
     Q_PROPERTY(QString settingsSection READ settingsSection NOTIFY pageChanged)
     Q_PROPERTY(ProjectsModel *projects READ projects CONSTANT)
     Q_PROPERTY(QString currentPath READ currentPath NOTIFY currentChanged)
@@ -193,6 +193,7 @@ public:
     Q_INVOKABLE void deleteProject(const QString &path, bool database);
     Q_INVOKABLE void selectProject(const QString &path);
     Q_INVOKABLE void showSettings(const QString &section = QStringLiteral("general"));
+    Q_INVOKABLE void showAbout();
     Q_INVOKABLE void showProjects();
     Q_INVOKABLE void showNewProject();
     // From the wizard ("Change in Settings"): New project keeps its form
