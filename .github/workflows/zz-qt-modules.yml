@@ -1,0 +1,15 @@
+name: Qt modules (temporary)
+on:
+  push:
+    branches: [feat/linux-deb-about]
+    paths: [".github/workflows/zz-qt-modules.yml"]
+permissions:
+  contents: read
+jobs:
+  list:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          python3 -m pip install -q aqtinstall
+          aqt list-qt linux desktop --modules 6.12.0 linux_gcc_64 2>&1 | tr ' ' '\n' | grep -v '^$' | tr '\n' ' ' | sed 's/^/::notice::modules: /'; echo
+          aqt list-qt linux desktop --archives 6.12.0 linux_gcc_64 2>&1 | tr '\n' ' ' | sed 's/^/::notice::archives: /'; echo
