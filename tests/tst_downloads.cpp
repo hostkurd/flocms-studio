@@ -516,7 +516,8 @@ private slots:
             if (p.tool == u"php" && settings.phpPath.isEmpty()) {
                 settings.phpPath = result.value();
                 const PhpStatus php = detectPhp(settings);
-                QCOMPARE(php.info.version, p.version);
+                // windows.php.net names a rebuild "8.5.12-1"; PHP itself says 8.5.12
+                QCOMPARE(php.info.version, p.version.section(u'-', 0, 0));
                 QVERIFY(php.supported);
                 const MissingExtensions missing = missingExtensions(php.info.extensions, QStringLiteral("mysql"));
                 QVERIFY2(missing.required.isEmpty() && missing.recommended.isEmpty(),
