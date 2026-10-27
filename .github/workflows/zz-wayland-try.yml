@@ -1,0 +1,40 @@
+name: Wayland try (temporary)
+on:
+  push:
+    branches: [feat/linux-deb-about]
+    paths: [".github/workflows/zz-wayland-try.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  try:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: FloCMS-Studio-linux
+          path: linux-dist
+          run-id: 40567841729
+          github-token: ${{ github.token }}
+      - name: try
+        timeout-minutes: 8
+        run: |
+          sudo apt-get install -y -qq weston > /dev/null
+          weston --version | sed 's/^/::notice::/'
+          dir="$RUNNER_TEMP/wl"; mkdir -p "$dir/run" && chmod 700 "$dir/run"
+          tar -C "$dir" -xzf linux-dist/FloCMS-Studio-*-linux-x86_64.tar.gz
+          export XDG_RUNTIME_DIR="$dir/run"
+          for renderer in pixman gl; do
+            weston --backend=headless --renderer=$renderer --socket=wl-$renderer --idle-time=0 > "$dir/weston-$renderer.log" 2>&1 &
+            wpid=$!
+            for i in $(seq 1 20); do [ -S "$XDG_RUNTIME_DIR/wl-$renderer" ] && break; sleep 1; done
+            echo "::notice::weston $renderer socket: $(ls $XDG_RUNTIME_DIR | tr '\n' ' ') $(tail -2 $dir/weston-$renderer.log | tr '\n' ' ')"
+            for backend in default software; do
+              extra=(); [ $backend = software ] && extra=(QT_QUICK_BACKEND=software)
+              code=0
+              env -u DISPLAY WAYLAND_DISPLAY=wl-$renderer QT_QPA_PLATFORM=wayland QT_DEBUG_PLUGINS=0 "${extra[@]}" timeout 60 "$dir/FloCMS-Studio/AppRun" --smoke-test > "$dir/s.log" 2>&1 || code=$?
+              echo "::notice::renderer=$renderer quick=$backend exit=$code: $(tail -8 $dir/s.log | tr '\n' '|' | cut -c1-900)"
+            done
+            kill $wpid || true
+          done
