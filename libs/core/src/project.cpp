@@ -68,8 +68,13 @@ Qt::CaseSensitivity pathCase()
 
 QString canonical(const QString &dir)
 {
-    const QString path = QFileInfo(dir).canonicalFilePath();
-    return path.isEmpty() ? QDir::cleanPath(QFileInfo(dir).absoluteFilePath()) : path;
+    if (const QString path = QFileInfo(dir).canonicalFilePath(); !path.isEmpty())
+        return path;
+    // "a/x/../b" when x isn't there: b, resolved like any other path
+    // (macOS: /var is /private/var)
+    const QString clean = QDir::cleanPath(QFileInfo(dir).absoluteFilePath());
+    const QString path = QFileInfo(clean).canonicalFilePath();
+    return path.isEmpty() ? clean : path;
 }
 
 } // namespace

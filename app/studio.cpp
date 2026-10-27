@@ -16,7 +16,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFutureWatcher>
-#include <QPointer>
 #include <QScopeGuard>
 #include <QTimer>
 #include <QStandardPaths>
@@ -624,12 +623,14 @@ void Studio::deleteProject(const QString &path, bool database)
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 void Studio::stopServerThen(const QString &path, const std::function<void()> &next)
 {
-    QPointer<ProjectServer> server = m_servers.value(path);
+    ProjectServer *server = m_servers.value(path);
     if (!server || !server->active()) {
         next();
         return;
     }
-    // Once, whichever comes first: stopped, freed, or 30 s
+    // Once, whichever comes first: stopped, freed, or 30 s. `alive` says
+    // whether the server is still there (it is freed with its project).
+    auto alive = std::make_shared<bool>(true);
     auto done = std::make_shared<bool>(false);
     const auto go = [this, done, next](bool stopped) {
         if (*done)
@@ -643,13 +644,15 @@ void Studio::stopServerThen(const QString &path, const std::function<void()> &ne
             deleteDone(QStringLiteral("delete_server"), {});
     };
     QObject::disconnect(m_deleteWait);
-    ProjectServer *sender = server.data();
-    m_deleteWait = connect(sender, &ProjectServer::changed, this, [server, go] {
-        if (server && !server->active())
+    m_deleteWait = connect(server, &ProjectServer::changed, this, [server, alive, go] {
+        if (*alive && !server->active())
             go(true);
     });
-    connect(sender, &QObject::destroyed, this, [go] { go(true); });
-    QTimer::singleShot(30000, this, [server, go] { go(!server || !server->active()); });
+    connect(server, &QObject::destroyed, this, [alive, go] {
+        *alive = false;
+        go(true);
+    });
+    QTimer::singleShot(30000, this, [server, alive, go] { go(!*alive || !server->active()); });
     if (server->state() != u"stopping")
         server->stop();
 }
