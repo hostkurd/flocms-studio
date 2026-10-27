@@ -12,11 +12,19 @@ qtdeclarative sources (tests and examples left out), and licenses/qt/ holds
 the license texts they refer to. Update both when Qt's version changes.
 --attributions replaces the list (build_static_qt.py writes one).
 
+The fonts built into Studio (app/fonts/LICENSES.txt, SIL OFL 1.1) and
+QtKeychain (BSD-3-Clause, linked into Studio) are listed too.
+
+--static: the release build, with Qt linked into the program (stage 9):
+the notice says how to use your own Qt with it (build from source).
+
 Usage:
   python3 tools/make_notices.py <output> --qt-version 6.12.0 [--commit SHA]
                                 [--attributions qt-attributions.json]
+                                [--static] [--qtkeychain <QtKeychain's COPYING>]
 """
 import argparse
+import re
 import json
 from pathlib import Path
 
@@ -30,8 +38,14 @@ def license_ids(entry: dict) -> list[str]:
     return [word for word in text.split() if word not in ("AND", "OR", "WITH")]
 
 
+# The Qt modules whose code is in Studio. A static Qt's list also has the
+# modules only its build tools use (qtshadertools, qttools): left out.
+SHIPPED_MODULES = {"qtbase", "qtdeclarative", "qtsvg"}
+
+
 def attribution_lines(path: Path) -> tuple[list[str], set[str]]:
-    entries = json.loads(path.read_text(encoding="utf-8"))
+    entries = [e for e in json.loads(path.read_text(encoding="utf-8"))
+               if e.get("QtModule", "qtbase") in SHIPPED_MODULES]
     used: set[str] = set()
     lines = ["", "Qt itself contains third-party code. These are the components listed",
              "by the Qt modules above, with their licenses:", ""]
@@ -63,6 +77,8 @@ def main() -> None:
     parser.add_argument("--qt-version", required=True)
     parser.add_argument("--commit", default="")
     parser.add_argument("--attributions", type=Path)
+    parser.add_argument("--static", action="store_true")
+    parser.add_argument("--qtkeychain", type=Path)
     args = parser.parse_args()
 
     minor = ".".join(args.qt_version.split(".")[:2])
@@ -81,10 +97,20 @@ def main() -> None:
         f"Qt source code: {qt_source}",
         f"FloCMS Studio source code for this build: {source}",
         "",
-        "You may change Qt and use your changed version with FloCMS Studio:",
-        "replace the Qt libraries that come with it, or build FloCMS Studio",
-        "against your Qt as BUILDING.md in the source code explains.",
     ]
+    if args.static:
+        lines += [
+            "Qt is linked into the FloCMS Studio program. You may change Qt and",
+            "use your changed version with FloCMS Studio: build FloCMS Studio from",
+            "the source code of this build (above) against your Qt, as BUILDING.md",
+            "in the source code explains. Everything needed to do so is public.",
+        ]
+    else:
+        lines += [
+            "You may change Qt and use your changed version with FloCMS Studio:",
+            "replace the Qt libraries that come with it, or build FloCMS Studio",
+            "against your Qt as BUILDING.md in the source code explains.",
+        ]
     attributions = args.attributions or ROOT / "licenses" / f"qt-{args.qt_version}-attributions.json"
     if not attributions.exists():
         raise SystemExit(f"missing {attributions}: list Qt {args.qt_version}'s third-party code first")
@@ -92,15 +118,30 @@ def main() -> None:
     lines += attribution_text
     lines.append("")
 
+    # Linked or built in besides Qt
+    lines += ["", "Also in FloCMS Studio:", ""]
+    if args.qtkeychain:
+        if not args.qtkeychain.exists():
+            raise SystemExit(f"missing {args.qtkeychain}: QtKeychain's license (build folder, _deps/qtkeychain-src)")
+        pin = re.search(r"GIT_TAG \S+ # (\S+)", (ROOT / "libs" / "security" / "CMakeLists.txt").read_text(encoding="utf-8"))
+        lines += [f"- QtKeychain {pin.group(1) if pin else ''} (https://github.com/frankosterfeld/qtkeychain), BSD-3-Clause:", "",
+                  args.qtkeychain.read_text(encoding="utf-8", errors="replace").rstrip(), ""]
+    fonts = ROOT / "app" / "fonts" / "LICENSES.txt"
+    lines += ["- The fonts built into FloCMS Studio:", "", fonts.read_text(encoding="utf-8").rstrip(), ""]
+
     texts = [ROOT / "licenses" / "LGPL-3.0-only.txt", ROOT / "licenses" / "GPL-3.0-only.txt"]
+    missing: list[str] = []
     for license_id in sorted(used):
         text = ROOT / "licenses" / "qt" / f"{license_id}.txt"
         if license_id.startswith("LicenseRef-") and not text.exists():
             continue  # Qt's own reference ids; the copyright lines above carry them
         if not text.exists():
-            raise SystemExit(f"missing license text: {text}")
+            missing.append(license_id)
+            continue
         if text.name not in ("GPL-3.0-only.txt",):
             texts.append(text)
+    if missing:
+        raise SystemExit("missing license texts in licenses/qt/: " + ", ".join(missing))
     for text in texts:
         body = text.read_text(encoding="utf-8").rstrip()
         lines += ["", "=" * 72, text.stem, "=" * 72, "", body, ""]

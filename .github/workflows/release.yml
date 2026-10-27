@@ -4,7 +4,7 @@ name: Release
 #  1. check:    the tag is Studio's version (CMakeLists.txt)
 #  2. ci:       all of CI (ci.yml): builds, tests, the Windows installer test,
 #               the macOS disk image and the Linux AppImage
-#  3. windows-files:     sends Studio.exe and the FloStudio DLLs to SignPath,
+#  3. windows-files:     sends Studio.exe to SignPath,
 #               which waits for an approver (CODE_SIGNING.md) and signs them
 #  4. windows-installer: builds the installer from the signed files, sends it
 #               to SignPath too, and tests it (two jobs: each may wait up to
@@ -115,12 +115,12 @@ jobs:
           cp -R unsigned/FloCMS-Studio signed/
           echo "::warning::SignPath is not set up yet (CODE_SIGNING.md): this release is unsigned"
 
-      # Only Studio.exe and the FloStudio DLLs may change, and only by
-      # their signatures: every other file is the same as CI built it
+      # Only Studio.exe may change, and only by its signature: the other
+      # files are the same as CI built them
       - name: Check the signed files
         shell: pwsh
         run: |
-          $ours = 'Studio.exe', 'FloStudioCore.dll', 'FloStudioDatabase.dll', 'FloStudioSecurity.dll'
+          $ours = @('Studio.exe')
           $before = Get-ChildItem unsigned/FloCMS-Studio -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path unsigned/FloCMS-Studio).Path.Length) }
           $after = Get-ChildItem signed/FloCMS-Studio -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path signed/FloCMS-Studio).Path.Length) }
           if (Compare-Object $before $after) { Write-Output "::error::signing changed the list of files"; exit 1 }

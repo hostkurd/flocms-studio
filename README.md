@@ -31,7 +31,7 @@ tools/           clang-tidy runner, release notices, fixture capture
 prototypes/      stage 0 Kurdish and RTL check (throwaway)
 ```
 
-Until the final release, Studio ships as a folder: `Studio.exe` with the FloStudio and Qt DLLs on Windows, a `FloCMS Studio.app` bundle on macOS. The final release links everything into one `Studio.exe`. Each library can only use the ones it depends on: Database and Security use Core, Core uses only Qt.
+Releases are one program: `Studio.exe` on Windows (with its license texts beside it), one `FloCMS Studio.app` on macOS, with Qt, the FloStudio libraries and on Windows the C++ runtime linked in. Day-to-day builds use Qt's shared libraries. Each library can only use the ones it depends on: Database and Security use Core, Core uses only Qt.
 
 ## Building
 
