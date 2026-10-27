@@ -472,7 +472,7 @@ jobs:
           setup-python: false
 
       - name: Linux packages
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-x11-0 libxcb-cursor0 libsecret-1-dev ninja-build patchelf
 
       - name: Build
         run: |
@@ -555,6 +555,24 @@ jobs:
             [ ! -e "$path" ] || fail "removing it left $path"
           done
           echo "::notice::.deb: installed with apt, menu entry valid, smoke test passed, removed with nothing left"
+
+      # On a Wayland desktop (Ubuntu's default) the packages use Wayland,
+      # not X11: the folder's smoke test on a headless Weston
+      - name: Linux on Wayland
+        timeout-minutes: 10
+        run: |
+          fail() { echo "::error::wayland: $*"; exit 1; }
+          sudo apt-get install -y -qq weston > /dev/null
+          dir="$RUNNER_TEMP/wl"; mkdir -p "$dir/run" && chmod 700 "$dir/run"
+          tar -C "$dir" -xzf linux-dist/FloCMS-Studio-*-linux-x86_64.tar.gz
+          export XDG_RUNTIME_DIR="$dir/run"
+          weston --backend=headless --socket=wayland-ci --idle-time=0 > "$dir/weston.log" 2>&1 &
+          for i in $(seq 1 30); do [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] && break; sleep 1; done
+          [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] || { tail -5 "$dir/weston.log"; fail "weston did not start"; }
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH LD_LIBRARY_PATH DISPLAY
+          WAYLAND_DISPLAY=wayland-ci QT_QPA_PLATFORM=wayland "$dir/FloCMS-Studio/AppRun" --smoke-test > "$dir/studio.log" 2>&1 \
+            || { tail -15 "$dir/studio.log" | sed 's/^/::error::/'; fail "the smoke test on Wayland failed"; }
+          echo "::notice::wayland: the packaged Studio passed its smoke test on Wayland (headless Weston)"
 
       # Website + admin panel on the runner's MySQL (root/root)
       - name: Real FloCMS project

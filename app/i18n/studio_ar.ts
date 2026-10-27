@@ -18,53 +18,53 @@
         <translation>هذا الإصدار المبني</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="68" />
+        <location filename="../qml/AboutPage.qml" line="71" />
         <source>Copy version info</source>
         <translation>نسخ معلومات الإصدار</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="74" />
+        <location filename="../qml/AboutPage.qml" line="77" />
         <source>Copied. Paste it into a bug report.</source>
         <translation>نُسخت. الصقها في بلاغ المشكلة.</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="85" />
+        <location filename="../qml/AboutPage.qml" line="88" />
         <source>Project</source>
         <translation>المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="89" />
+        <location filename="../qml/AboutPage.qml" line="92" />
         <source>Project page</source>
         <translation>صفحة المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="90" />
+        <location filename="../qml/AboutPage.qml" line="93" />
         <source>Releases</source>
         <translation>الإصدارات</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="91" />
+        <location filename="../qml/AboutPage.qml" line="94" />
         <source>Report a problem</source>
         <translation>الإبلاغ عن مشكلة</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="92" />
+        <location filename="../qml/AboutPage.qml" line="95" />
         <source>Code signing policy</source>
         <translation>سياسة توقيع الشيفرة</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="99" />
-        <location filename="../qml/AboutPage.qml" line="108" />
+        <location filename="../qml/AboutPage.qml" line="102" />
+        <location filename="../qml/AboutPage.qml" line="111" />
         <source>License</source>
         <translation>الترخيص</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="101" />
-        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.</source>
-        <translation>FloCMS Studio برنامج حر بترخيص MIT. يستخدم Qt بترخيص GNU LGPL v3، وQtKeychain، وخطوطًا بترخيص SIL Open Font License؛ وتذكرها كلها إشعارات الأطراف الثالثة مع شيفرتها المصدرية.</translation>
+        <location filename="../qml/AboutPage.qml" line="104" />
+        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with where to get their source code.</source>
+        <translation>FloCMS Studio برنامج حر بترخيص MIT. يستخدم Qt بترخيص GNU LGPL v3، وQtKeychain، وخطوطًا بترخيص SIL Open Font License؛ وتذكرها كلها إشعارات الأطراف الثالثة مع مكان الحصول على شيفرتها المصدرية.</translation>
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="109" />
+        <location filename="../qml/AboutPage.qml" line="112" />
         <source>Third-party notices</source>
         <translation>إشعارات الأطراف الثالثة</translation>
     </message>

@@ -101,7 +101,7 @@ ScrollView {
             Layout.fillWidth: true
             SectionLabel { ui: qsTr("License") }
             AppText {
-                ui: qsTr("FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.")
+                ui: qsTr("FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with where to get their source code.")
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }

@@ -295,6 +295,7 @@ int main(int argc, char *argv[])
     // Before the engine, so they outlive it: it holds them as singletons
     Language language;
     Studio studio(&language);
+    AppInfo appInfo; // before the engine, so it outlives it
     QQmlApplicationEngine engine;
     language.setEngine(&engine);
     // Singletons that stay C++'s (qmlRegisterSingletonInstance does the
@@ -307,7 +308,6 @@ int main(int argc, char *argv[])
         QJSEngine::setObjectOwnership(&studio, QJSEngine::CppOwnership);
         return &studio;
     });
-    AppInfo appInfo;
     qmlRegisterSingletonType<AppInfo>("FloStudio.Backend", 1, 0, "AppInfo", [&appInfo](QQmlEngine *, QJSEngine *) -> QObject * {
         QJSEngine::setObjectOwnership(&appInfo, QJSEngine::CppOwnership);
         return &appInfo;

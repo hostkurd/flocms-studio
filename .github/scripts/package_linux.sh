@@ -42,9 +42,10 @@ export LD_LIBRARY_PATH="$appdir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # so Wayland desktops don't fall back to X11; offscreen for the check below
 plugins=$("$QMAKE" -query QT_INSTALL_PLUGINS)/platforms
 extra="libqoffscreen.so"
-for plugin in libqwayland-generic.so libqwayland-egl.so; do
-  [ -f "$plugins/$plugin" ] && extra="$extra;$plugin"
+for plugin in "$plugins"/libqwayland*.so; do
+  [ -f "$plugin" ] && extra="$extra;$(basename "$plugin")"
 done
+case "$extra" in *qwayland*) ;; *) fail "this Qt has no Wayland platform plugin (install the qtwayland module)";; esac
 export EXTRA_PLATFORM_PLUGINS="$extra"
 version=$(QT_QPA_PLATFORM=offscreen "$build/bin/flocms-studio" --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' || echo dev)
 export LDAI_OUTPUT="$out/FloCMS-Studio-$version-x86_64.AppImage"
@@ -58,11 +59,21 @@ export LDAI_OUTPUT="$out/FloCMS-Studio-$version-x86_64.AppImage"
 # The folder runs on its own: no build folder, no Qt from elsewhere
 (env -u LD_LIBRARY_PATH QT_QPA_PLATFORM=offscreen XDG_RUNTIME_DIR="$work" "$appdir/AppRun" --smoke-test) \
   || fail "the packaged Studio did not pass its smoke test"
-if ls "$appdir"/usr/plugins/platforms/libqwayland-*.so > /dev/null 2>&1; then
-  echo "::notice::linux package: Wayland platform plugins inside"
-else
-  echo "::warning::linux package: no Wayland platform plugin (this Qt has none): Wayland desktops use X11"
-fi
+# Wayland needs its platform plugin and the plugins it loads for windows
+# (title bars, xdg-shell) and graphics; linuxdeploy-plugin-qt takes only
+# the platform one, so the others are copied from Qt with what they need
+qtplugins=$("$QMAKE" -query QT_INSTALL_PLUGINS)
+for kind in wayland-shell-integration wayland-decoration-client wayland-graphics-integration-client; do
+  [ -d "$qtplugins/$kind" ] || continue
+  if [ ! -d "$appdir/usr/plugins/$kind" ]; then
+    cp -r "$qtplugins/$kind" "$appdir/usr/plugins/"
+    # Their own rpath, like the plugins linuxdeploy copied
+    for so in "$appdir/usr/plugins/$kind"/*.so; do patchelf --set-rpath '$ORIGIN/../../lib' "$so" || fail "patchelf $so"; done
+  fi
+done
+ls "$appdir"/usr/plugins/platforms/libqwayland*.so > /dev/null 2>&1 || fail "no Wayland platform plugin in the package"
+[ -d "$appdir/usr/plugins/wayland-shell-integration" ] || fail "no Wayland shell integration in the package"
+echo "::notice::linux package: Wayland plugins inside: $(cd "$appdir/usr/plugins" && ls -d platforms/libqwayland*.so wayland-* | tr '\n' ' ')"
 tar -C "$work" -czf "$out/FloCMS-Studio-$version-linux-x86_64.tar.gz" FloCMS-Studio
 
 # --- The .deb ---
@@ -70,9 +81,18 @@ case "$version" in [0-9]*) ;; *) fail "no version for the .deb ($version)";; esa
 deb="$work/deb"
 mkdir -p "$deb/DEBIAN" "$deb/opt/flocms-studio" "$deb/usr/bin" "$deb/usr/share/applications" "$deb/usr/share/doc/flocms-studio"
 cp -a "$appdir"/. "$deb/opt/flocms-studio/"
+# The system's own libraries come from apt (Depends below), not the copies
+# linuxdeploy took from the build machine: a newer system's Mesa and glib
+# must not meet older copies of them. Qt, ICU and ours stay.
+find "$deb/opt/flocms-studio/usr/lib" -maxdepth 1 \( -type f -o -type l \) \
+  ! -name 'libQt6*' ! -name 'libicu*' ! -name 'libFloStudio*' -delete
+# linuxdeploy writes some files world-writable; installed as root they must not be
+chmod -R u+rwX,go+rX,go-w "$deb"
 # The command: the folder's AppRun, which sets up its Qt
 cat > "$deb/usr/bin/flocms-studio" <<'SH'
 #!/bin/sh
+# Only Studio's own Qt (as CI tests it)
+unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH
 exec /opt/flocms-studio/AppRun "$@"
 SH
 chmod 755 "$deb/usr/bin/flocms-studio"
@@ -83,7 +103,8 @@ for size in 64 128 256 512; do
 done
 cp "$root/LICENSE" "$deb/usr/share/doc/flocms-studio/copyright"
 # The system libraries the folder's programs and libraries need (Qt and
-# ours are inside it)
+# ours are inside it). DEBIAN/ must already be there: dpkg-shlibdeps then
+# reads the $ORIGIN rpaths, else it picks the system's own Qt.
 shlibs="$work/shlibs"; mkdir -p "$shlibs/debian"
 printf 'Source: flocms-studio\n\nPackage: flocms-studio\nArchitecture: amd64\n' > "$shlibs/debian/control"
 mapfile -t elfs < <(find "$deb/opt" -type f \( -name '*.so*' -o -perm -u+x \) -exec sh -c 'head -c 4 "$1" | grep -q "ELF" && echo "$1"' _ {} \;)
@@ -98,7 +119,8 @@ Version: $version
 Architecture: amd64
 Maintainer: HostKurd <https://github.com/hostkurd/flocms-studio/issues>
 Installed-Size: $(du -sk --exclude=DEBIAN "$deb" | cut -f1)
-Depends: $depends
+Depends: $depends, libssl3t64 | libssl3
+Recommends: libsecret-1-0
 Section: devel
 Priority: optional
 Homepage: https://github.com/hostkurd/flocms-studio

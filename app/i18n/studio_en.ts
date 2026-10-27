@@ -18,53 +18,53 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="68" />
+        <location filename="../qml/AboutPage.qml" line="71" />
         <source>Copy version info</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="74" />
+        <location filename="../qml/AboutPage.qml" line="77" />
         <source>Copied. Paste it into a bug report.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="85" />
+        <location filename="../qml/AboutPage.qml" line="88" />
         <source>Project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="89" />
+        <location filename="../qml/AboutPage.qml" line="92" />
         <source>Project page</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="90" />
+        <location filename="../qml/AboutPage.qml" line="93" />
         <source>Releases</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="91" />
+        <location filename="../qml/AboutPage.qml" line="94" />
         <source>Report a problem</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="92" />
+        <location filename="../qml/AboutPage.qml" line="95" />
         <source>Code signing policy</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="99" />
-        <location filename="../qml/AboutPage.qml" line="108" />
+        <location filename="../qml/AboutPage.qml" line="102" />
+        <location filename="../qml/AboutPage.qml" line="111" />
         <source>License</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="101" />
-        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.</source>
+        <location filename="../qml/AboutPage.qml" line="104" />
+        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with where to get their source code.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/AboutPage.qml" line="109" />
+        <location filename="../qml/AboutPage.qml" line="112" />
         <source>Third-party notices</source>
         <translation type="unfinished" />
     </message>

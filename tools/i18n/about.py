@@ -16,9 +16,9 @@ T = {
  "Report a problem": ("الإبلاغ عن مشكلة", "ڕاپۆرتکردنی کێشە"),
  "Code signing policy": ("سياسة توقيع الشيفرة", "سیاسەتی واژۆکردنی کۆد"),
  "License": ("الترخيص", "مۆڵەت"),
- "FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.":
-   ("FloCMS Studio برنامج حر بترخيص MIT. يستخدم Qt بترخيص GNU LGPL v3، وQtKeychain، وخطوطًا بترخيص SIL Open Font License؛ وتذكرها كلها إشعارات الأطراف الثالثة مع شيفرتها المصدرية.",
-    "FloCMS Studio نەرمەکاڵایەکی ئازادە بە مۆڵەتی MIT. Qt بە مۆڵەتی GNU LGPL v3، و QtKeychain، و فۆنتەکان بە مۆڵەتی SIL Open Font License بەکاردەهێنێت؛ ئاگادارییەکانی لایەنی سێیەم هەموویان لەگەڵ کۆدی سەرچاوەیان دەژمێرن."),
+ "FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with where to get their source code.":
+   ("FloCMS Studio برنامج حر بترخيص MIT. يستخدم Qt بترخيص GNU LGPL v3، وQtKeychain، وخطوطًا بترخيص SIL Open Font License؛ وتذكرها كلها إشعارات الأطراف الثالثة مع مكان الحصول على شيفرتها المصدرية.",
+    "FloCMS Studio نەرمەکاڵایەکی ئازادە بە مۆڵەتی MIT. Qt بە مۆڵەتی GNU LGPL v3، و QtKeychain، و فۆنتەکان بە مۆڵەتی SIL Open Font License بەکاردەهێنێت؛ ئاگادارییەکانی لایەنی سێیەم هەموویان دەژمێرن و دەڵێن کۆدی سەرچاوەیان لە کوێیە."),
  "Third-party notices": ("إشعارات الأطراف الثالثة", "ئاگادارییەکانی لایەنی سێیەم"),
  "About FloCMS Studio %1": ("حول FloCMS Studio %1", "دەربارەی FloCMS Studio %1"),
  "About FloCMS Studio": ("حول FloCMS Studio", "دەربارەی FloCMS Studio"),
