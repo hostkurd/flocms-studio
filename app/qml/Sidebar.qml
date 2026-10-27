@@ -222,6 +222,35 @@ Rectangle {
                 iconPath: Icons.gear
                 onClicked: Studio.showSettings("general")
             }
+            // The version; it opens the About page
+            ItemDelegate {
+                id: versionLink
+                Layout.fillWidth: true
+                implicitHeight: 28
+                leftPadding: 10
+                rightPadding: 10
+                topPadding: 0
+                bottomPadding: 0
+                hoverEnabled: true
+                Accessible.name: qsTr("About FloCMS Studio %1").arg(AppInfo.version)
+                Accessible.role: Accessible.Button
+                background: Rectangle {
+                    radius: 8
+                    color: Studio.page === "about" ? Theme.selectedBg : (versionLink.down ? Theme.pressedBg : (versionLink.hovered ? Theme.hoverBg : "transparent"))
+                    border.color: versionLink.visualFocus ? Theme.accent : "transparent"
+                    border.width: 2
+                }
+                contentItem: AppText {
+                    ui: qsTr("FloCMS Studio %1").arg(AppInfo.version)
+                    color: Theme.muted
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                }
+                ToolTip.visible: hovered
+                ToolTip.delay: 600
+                ToolTip.text: qsTr("About FloCMS Studio")
+                onClicked: Studio.showAbout()
+            }
         }
     }
 }

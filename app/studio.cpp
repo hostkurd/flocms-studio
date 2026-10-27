@@ -1058,6 +1058,12 @@ void Studio::showSettings(const QString &section)
     emit pageChanged();
 }
 
+void Studio::showAbout()
+{
+    m_page = QStringLiteral("about");
+    emit pageChanged();
+}
+
 void Studio::showSettingsFromWizard(const QString &section)
 {
     m_keepWizard = true; // coming back keeps what was typed

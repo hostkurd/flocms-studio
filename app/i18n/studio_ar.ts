@@ -1,6 +1,75 @@
 <?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ar">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="44" />
+        <source>Version %1</source>
+        <translation>الإصدار %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="48" />
+        <source>Create, run and change FloCMS projects. Every action runs a real `php flo` or `composer` command in the project and shows it.</source>
+        <translation>أنشئ مشاريع FloCMS وشغّلها وعدّلها. كل إجراء يشغّل أمر `php flo` أو `composer` حقيقيًا في المشروع ويعرضه.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="56" />
+        <source>This build</source>
+        <translation>هذا الإصدار المبني</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="68" />
+        <source>Copy version info</source>
+        <translation>نسخ معلومات الإصدار</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="74" />
+        <source>Copied. Paste it into a bug report.</source>
+        <translation>نُسخت. الصقها في بلاغ المشكلة.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="85" />
+        <source>Project</source>
+        <translation>المشروع</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="89" />
+        <source>Project page</source>
+        <translation>صفحة المشروع</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="90" />
+        <source>Releases</source>
+        <translation>الإصدارات</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="91" />
+        <source>Report a problem</source>
+        <translation>الإبلاغ عن مشكلة</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="92" />
+        <source>Code signing policy</source>
+        <translation>سياسة توقيع الشيفرة</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="99" />
+        <location filename="../qml/AboutPage.qml" line="108" />
+        <source>License</source>
+        <translation>الترخيص</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="101" />
+        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.</source>
+        <translation>FloCMS Studio برنامج حر بترخيص MIT. يستخدم Qt بترخيص GNU LGPL v3، وQtKeychain، وخطوطًا بترخيص SIL Open Font License؛ وتذكرها كلها إشعارات الأطراف الثالثة مع شيفرتها المصدرية.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="109" />
+        <source>Third-party notices</source>
+        <translation>إشعارات الأطراف الثالثة</translation>
+    </message>
+</context>
+<context>
     <name>CommandOutput</name>
     <message>
         <location filename="../qml/CommandOutput.qml" line="58" />
@@ -3040,6 +3109,7 @@
     </message>
     <message>
         <location filename="../qml/Sidebar.qml" line="138" />
+        <location filename="../qml/Sidebar.qml" line="244" />
         <source>FloCMS Studio %1</source>
         <translation>FloCMS Studio %1</translation>
     </message>
@@ -3057,6 +3127,16 @@
         <location filename="../qml/Sidebar.qml" line="211" />
         <source>Download…</source>
         <translation>تنزيل…</translation>
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="235" />
+        <source>About FloCMS Studio %1</source>
+        <translation>حول FloCMS Studio %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="251" />
+        <source>About FloCMS Studio</source>
+        <translation>حول FloCMS Studio</translation>
     </message>
 </context>
 <context>

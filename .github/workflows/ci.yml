@@ -465,6 +465,9 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           arch: linux_gcc_64
+          # Wayland's platform plugins, so the Linux packages run natively on
+          # Wayland desktops (Ubuntu's default) instead of through X11
+          modules: qtwayland
           cache: true
           setup-python: false
 
@@ -515,9 +518,9 @@ jobs:
           path: shots/
           if-no-files-found: ignore
 
-      # A Linux build to try (D14: the Linux release comes after Windows
-      # and macOS): an AppImage, and the same folder as a .tar.gz
-      - name: Linux AppImage
+      # The Linux packages: a .deb (Ubuntu 24.04+, Debian 13+), an AppImage,
+      # and the same folder as a .tar.gz
+      - name: Linux packages (.deb, AppImage)
         env:
           QMAKE: ${{ env.QT_ROOT_DIR }}/bin/qmake
         run: .github/scripts/package_linux.sh build linux-dist
@@ -527,6 +530,31 @@ jobs:
           name: FloCMS-Studio-linux
           path: linux-dist/
           if-no-files-found: error
+
+      # The .deb as a user gets it: apt installs it with what it depends on,
+      # the menu entry is valid, the installed Studio passes its smoke test,
+      # and removing it leaves nothing
+      - name: Linux .deb test
+        timeout-minutes: 10
+        run: |
+          fail() { echo "::error::.deb: $*"; exit 1; }
+          deb=$(ls linux-dist/*.deb | head -1)
+          [ -n "$deb" ] || fail "no .deb"
+          sudo apt-get install -y -qq desktop-file-utils > /dev/null
+          sudo apt-get install -y -qq "./$deb" > deb-install.log 2>&1 || { tail -20 deb-install.log; fail "apt could not install it"; }
+          desktop-file-validate /usr/share/applications/flocms-studio.desktop || fail "the menu entry is not valid"
+          [ -f /usr/share/icons/hicolor/256x256/apps/flocms-studio.png ] || fail "no icon"
+          [ -f /opt/flocms-studio/usr/share/doc/flocms-studio/THIRD-PARTY-NOTICES.txt ] || fail "no notices"
+          unset QT_PLUGIN_PATH QML2_IMPORT_PATH QML_IMPORT_PATH LD_LIBRARY_PATH
+          export QT_QPA_PLATFORM=offscreen XDG_RUNTIME_DIR="$RUNNER_TEMP/deb-xdg"
+          mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
+          (cd / && flocms-studio --version) | tr '\n' ';' | sed 's/^/::notice::.deb: /'; echo
+          (cd / && flocms-studio --smoke-test) || fail "the installed Studio's smoke test failed"
+          sudo apt-get remove -y -qq flocms-studio > /dev/null || fail "apt could not remove it"
+          for path in /opt/flocms-studio /usr/bin/flocms-studio /usr/share/applications/flocms-studio.desktop; do
+            [ ! -e "$path" ] || fail "removing it left $path"
+          done
+          echo "::notice::.deb: installed with apt, menu entry valid, smoke test passed, removed with nothing left"
 
       # Website + admin panel on the runner's MySQL (root/root)
       - name: Real FloCMS project

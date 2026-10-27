@@ -1,6 +1,75 @@
 <?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ku">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="44" />
+        <source>Version %1</source>
+        <translation>وەشانی %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="48" />
+        <source>Create, run and change FloCMS projects. Every action runs a real `php flo` or `composer` command in the project and shows it.</source>
+        <translation>پڕۆژەکانی FloCMS دروست بکە، کاریان پێ بکە و بیانگۆڕە. هەر کارێک فەرمانێکی ڕاستەقینەی `php flo` یان `composer` لە پڕۆژەکەدا کار پێ دەکات و پیشانی دەدات.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="56" />
+        <source>This build</source>
+        <translation>ئەم بیلدە</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="68" />
+        <source>Copy version info</source>
+        <translation>زانیاری وەشان کۆپی بکە</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="74" />
+        <source>Copied. Paste it into a bug report.</source>
+        <translation>کۆپی کرا. لە ڕاپۆرتی کێشەکەدا دایبنێ.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="85" />
+        <source>Project</source>
+        <translation>پڕۆژە</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="89" />
+        <source>Project page</source>
+        <translation>پەڕەی پڕۆژە</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="90" />
+        <source>Releases</source>
+        <translation>وەشانەکان</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="91" />
+        <source>Report a problem</source>
+        <translation>ڕاپۆرتکردنی کێشە</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="92" />
+        <source>Code signing policy</source>
+        <translation>سیاسەتی واژۆکردنی کۆد</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="99" />
+        <location filename="../qml/AboutPage.qml" line="108" />
+        <source>License</source>
+        <translation>مۆڵەت</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="101" />
+        <source>FloCMS Studio is free software under the MIT License. It uses Qt under the GNU LGPL v3, QtKeychain, and fonts under the SIL Open Font License; the third-party notices list them all, with their source code.</source>
+        <translation>FloCMS Studio نەرمەکاڵایەکی ئازادە بە مۆڵەتی MIT. Qt بە مۆڵەتی GNU LGPL v3، و QtKeychain، و فۆنتەکان بە مۆڵەتی SIL Open Font License بەکاردەهێنێت؛ ئاگادارییەکانی لایەنی سێیەم هەموویان لەگەڵ کۆدی سەرچاوەیان دەژمێرن.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AboutPage.qml" line="109" />
+        <source>Third-party notices</source>
+        <translation>ئاگادارییەکانی لایەنی سێیەم</translation>
+    </message>
+</context>
+<context>
     <name>CommandOutput</name>
     <message>
         <location filename="../qml/CommandOutput.qml" line="58" />
@@ -2948,6 +3017,7 @@
     </message>
     <message>
         <location filename="../qml/Sidebar.qml" line="138" />
+        <location filename="../qml/Sidebar.qml" line="244" />
         <source>FloCMS Studio %1</source>
         <translation>FloCMS Studio %1</translation>
     </message>
@@ -2965,6 +3035,16 @@
         <location filename="../qml/Sidebar.qml" line="211" />
         <source>Download…</source>
         <translation>داگرتن…</translation>
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="235" />
+        <source>About FloCMS Studio %1</source>
+        <translation>دەربارەی FloCMS Studio %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/Sidebar.qml" line="251" />
+        <source>About FloCMS Studio</source>
+        <translation>دەربارەی FloCMS Studio</translation>
     </message>
 </context>
 <context>

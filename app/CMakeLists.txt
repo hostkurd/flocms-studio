@@ -112,6 +112,7 @@ set(STUDIO_QML
     qml/Splash.qml
     qml/StatusIcon.qml
     qml/SettingsPage.qml
+    qml/AboutPage.qml
     qml/DownloadsDialog.qml
     qml/DatabaseSettings.qml
     qml/MariadbProblem.qml
