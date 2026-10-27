@@ -389,13 +389,28 @@ jobs:
           cp -R "$APP_DIR" dist/LICENSE.txt dist/THIRD-PARTY-NOTICES.txt "$staging/"
           ln -s /Applications "$staging/Applications"
           dmg="FloCMS-Studio-$VERSION.dmg"
-          hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > /dev/null
+          # hdiutil on GitHub's macOS runners sometimes fails with "Resource
+          # busy" (a scanner holding the new image): try again, then say why
+          made=false
+          for attempt in 1 2 3 4 5; do
+            if hdiutil create -volname "FloCMS Studio" -srcfolder "$staging" -ov -format UDZO "$dmg" > hdiutil.log 2>&1; then
+              made=true; break
+            fi
+            echo "::warning::disk image: hdiutil create failed (try $attempt): $(tail -1 hdiutil.log)"
+            sleep $((attempt * 10))
+          done
+          [ "$made" = true ] || { echo "::error::disk image: hdiutil create failed: $(tail -2 hdiutil.log | tr '\n' ' ')"; exit 1; }
           echo "::notice::disk image: $dmg $(( $(stat -f %z "$dmg") / 1024 )) KiB"
           # Move the build folder away, so the app can only use what is inside
           # it (the static Qt and its build are away already).
           mv build build-moved
           mnt="$RUNNER_TEMP/mnt"
-          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
+          for attempt in 1 2 3; do
+            hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > hdiutil.log 2>&1 && break
+            echo "::warning::disk image: hdiutil attach failed (try $attempt): $(tail -1 hdiutil.log)"
+            sleep 10
+          done
+          [ -d "$mnt/FloCMS Studio.app" ] || { echo "::error::disk image: could not mount it: $(tail -2 hdiutil.log | tr '\n' ' ')"; exit 1; }
           "$mnt/FloCMS Studio.app/Contents/MacOS/FloCMS Studio" --smoke-test
           hdiutil detach "$mnt" > /dev/null
           mv build-moved build
