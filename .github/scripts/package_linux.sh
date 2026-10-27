@@ -38,14 +38,15 @@ python3 "$root/tools/make_notices.py" "$doc/THIRD-PARTY-NOTICES.txt" --qt-versio
 # The QML Studio uses, and only the platform plugins a desktop needs
 export QML_SOURCES_PATHS="$root/app/qml"
 export LD_LIBRARY_PATH="$appdir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-# xcb comes by itself; Wayland when this Qt has it (CI installs qtwayland),
+# xcb comes by itself; Wayland from Qt's qtwayland archive (Qt 6.12 names
+# the plugin libqwayland.so, earlier ones libqwayland-egl/-generic.so),
 # so Wayland desktops don't fall back to X11; offscreen for the check below
 plugins=$("$QMAKE" -query QT_INSTALL_PLUGINS)/platforms
 extra="libqoffscreen.so"
 for plugin in "$plugins"/libqwayland*.so; do
   [ -f "$plugin" ] && extra="$extra;$(basename "$plugin")"
 done
-case "$extra" in *qwayland*) ;; *) fail "this Qt has no Wayland platform plugin (install the qtwayland module)";; esac
+case "$extra" in *qwayland*) ;; *) fail "this Qt has no Wayland platform plugin (its qtwayland archive)";; esac
 export EXTRA_PLATFORM_PLUGINS="$extra"
 version=$(QT_QPA_PLATFORM=offscreen "$build/bin/flocms-studio" --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' || echo dev)
 export LDAI_OUTPUT="$out/FloCMS-Studio-$version-x86_64.AppImage"

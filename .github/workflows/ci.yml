@@ -465,9 +465,8 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           arch: linux_gcc_64
-          # Wayland's platform plugins, so the Linux packages run natively on
-          # Wayland desktops (Ubuntu's default) instead of through X11
-          modules: qtwayland
+          # (Qt's base install has the Wayland client plugins: its
+          # "qtwayland" archive, which package_linux.sh bundles)
           cache: true
           setup-python: false
 
