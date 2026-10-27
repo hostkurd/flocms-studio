@@ -85,7 +85,9 @@ private slots:
         settings.databaseOtherPort = 3310;
         settings.databaseUser = QStringLiteral("dev");
         settings.databaseProjects = {QStringLiteral("C:\\Sites\\shop")};
+        settings.hiddenProjects = {QStringLiteral("C:\\Sites\\old"), QStringLiteral(" "), QStringLiteral("C:\\Sites\\old")};
         QVERIFY(saveSettings(settings, dir.path()).ok());
+        settings.hiddenProjects = {QStringLiteral("C:\\Sites\\old")}; // blanks and twice: once
         QCOMPARE(loadSettings(dir.path()).value(), settings);
 
         write(dir.path(), R"({"databaseServer":"found","databaseFound":"  ","databaseSeries":"latest",

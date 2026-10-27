@@ -22,6 +22,7 @@ QtObject {
     readonly property string arrowDown: "M12 5v14M6 13l6 6l6-6"
     readonly property string download: "M12 4v11M7 10l5 5l5-5M5 20h14"
     readonly property string refresh: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"
+    readonly property string more: "M5 12h.01M12 12h.01M19 12h.01"
     readonly property string trash: "M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"
     readonly property string table: "M4 5h16v14H4zM4 10h16M10 10v9"
     readonly property string database: "M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3s-8-1.3-8-3s3.6-3 8-3M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"

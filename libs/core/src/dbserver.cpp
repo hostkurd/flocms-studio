@@ -789,6 +789,23 @@ QString sqlString(const QString &text)
     return u'\'' + value + u'\'';
 }
 
+QString dropProjectDatabaseSql(const QString &database, const QString &user, bool dropUser)
+{
+    static const QStringList system{QStringLiteral("mysql"), QStringLiteral("information_schema"),
+                                    QStringLiteral("performance_schema"), QStringLiteral("sys")};
+    if (database.trimmed().isEmpty() || system.contains(database.trimmed().toLower()))
+        return {};
+    QString sql = QStringLiteral("DROP DATABASE IF EXISTS %1;\n").arg(sqlIdentifier(database));
+    static const QStringList accounts{QStringLiteral("root"), QStringLiteral("mariadb.sys"), QStringLiteral("mysql"),
+                                      QStringLiteral("PUBLIC")};
+    if (dropUser && !user.trimmed().isEmpty() && !accounts.contains(user.trimmed(), Qt::CaseInsensitive)) {
+        for (const char *host : {"localhost", "127.0.0.1"})
+            sql += QStringLiteral("DROP USER IF EXISTS %1@'%2';\n").arg(sqlString(user), QLatin1String(host));
+        sql += QStringLiteral("FLUSH PRIVILEGES;\n");
+    }
+    return sql;
+}
+
 int freeDatabasePort(int from, int tries)
 {
     for (int port = from; port < from + tries && port <= 65535; ++port) {

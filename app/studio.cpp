@@ -6,6 +6,8 @@
 #include "projectserver.h"
 
 #include <flostudio/core/buildinfo.h>
+#include <flostudio/core/dbserver.h>
+#include <flostudio/core/process.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/server.h>
 
@@ -15,12 +17,16 @@
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <QScopeGuard>
+#include <QTimer>
+#include <QStandardPaths>
 #include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QStyleHints>
 #include <QtConcurrent>
 
+#include <algorithm>
+#include <memory>
 #include <utility>
 
 using namespace FloStudio::Core;
@@ -287,6 +293,7 @@ Result<Done> Studio::startDemo(const QString &file)
     m_phpChoices = demo.value(QStringLiteral("phpChoices")).toArray().toVariantList();
     m_downloads = demo.value(QStringLiteral("downloads")).toArray().toVariantList();
     m_current = demo.value(QStringLiteral("current")).toObject().toVariantMap();
+    m_demoDeleteChoices = demo.value(QStringLiteral("deleteChoices")).toObject().toVariantMap();
     m_currentPath = m_current.value(QStringLiteral("path")).toString();
     m_page = demo.value(QStringLiteral("page")).toString(QStringLiteral("project"));
     m_settingsSection = demo.value(QStringLiteral("settingsSection")).toString(QStringLiteral("general"));
@@ -493,24 +500,263 @@ void Studio::addProject(const QUrl &folder)
         setProblem(QStringLiteral("not_flocms"), path);
         return;
     }
-    changeSettings([&path](Settings &s) { s.projects << path; });
+    // Opened again after "Remove from Studio": shown again
+    changeSettings([&path](Settings &s) {
+        s.projects << path;
+        s.hiddenProjects.removeIf([&path](const QString &hidden) { return sameFolder(hidden, path); });
+    });
     refreshProjects();
     selectProject(projectSummary(path).path);
 }
 
-void Studio::removeProject(const QString &path)
+bool Studio::projectBusy(const QString &path) const
 {
     const ProjectGenerate *generate = m_generate.value(path);
     const ProjectPackages *packages = m_packagesTab.value(path);
-    if (const ProjectChecks *checks = m_checks.value(path);
-        (checks && checks->busy()) || (generate && generate->busy()) || (packages && packages->busy())) {
+    const ProjectChecks *checks = m_checks.value(path);
+    return (checks && checks->busy()) || (generate && generate->busy()) || (packages && packages->busy());
+}
+
+void Studio::removeProject(const QString &path)
+{
+    if (!m_deleting.isEmpty()) {
+        setProblem(QStringLiteral("delete_running"), m_deleting);
+        return;
+    }
+    if (projectBusy(path)) {
         setProblem(QStringLiteral("project_busy"), path);
         return;
     }
-    changeSettings([&path](Settings &s) { s.projects.removeAll(path); });
+    forgetProject(path, false);
+}
+
+void Studio::forgetProject(const QString &path, bool deleted)
+{
+    // Its website server: Studio no longer shows it, so it doesn't run on
+    if (ProjectServer *server = m_servers.value(path); server && server->active())
+        server->stop();
+    const bool inFolder = std::any_of(m_settings.projectFolders.begin(), m_settings.projectFolders.end(),
+                                      [&path](const QString &folder) {
+                                          return sameFolder(QFileInfo(path).absolutePath(), folder);
+                                      });
+    const auto same = [&path](const QString &other) { return sameFolder(other, path) || other == path; };
+    changeSettings([&](Settings &s) {
+        s.projects.removeIf(same);
+        if (deleted)
+            s.hiddenProjects.removeIf(same);
+        else if (inFolder && std::none_of(s.hiddenProjects.begin(), s.hiddenProjects.end(), same))
+            s.hiddenProjects << path; // else the folder's scan shows it again
+    });
     if (m_currentPath == path)
         m_currentPath.clear();
+    m_lastShown.remove(path);
     refreshProjects();
+    if (m_page == u"project" && m_currentPath.isEmpty())
+        showProjects();
+}
+
+QVariantMap Studio::deleteChoices(const QString &path) const
+{
+    if (m_demo)
+        return m_demoDeleteChoices;
+    QVariantMap choices{{QStringLiteral("onStudioServer"), false}, {QStringLiteral("databaseShared"), false}};
+    const auto info = projectInfo(path);
+    if (!info)
+        return choices;
+    const DatabaseConfig &db = info.value().database;
+    const auto onStudioServer = [this](const DatabaseConfig &config) {
+        const bool local = config.host == u"127.0.0.1" || config.host == u"localhost";
+        return m_mariadb.state() != u"none" && config.driver == u"mysql" && local && !config.usesDsn
+               && config.port == m_mariadb.port();
+    };
+    // Only a database the wizard made for this project on Studio's server
+    const bool ours = m_mariadb.usedBy(path) && onStudioServer(db)
+                      && !dropProjectDatabaseSql(db.name, db.username, false).isEmpty();
+    // Kept when any other project Studio knows uses the same database
+    QStringList others = m_settings.databaseProjects;
+    for (const auto &project : m_projects.projects())
+        others << project.path;
+    bool shared = false;
+    for (const QString &other : std::as_const(others)) {
+        if (shared || sameFolder(other, path))
+            continue;
+        if (const auto otherInfo = projectInfo(other);
+            otherInfo && onStudioServer(otherInfo.value().database) && otherInfo.value().database.name == db.name)
+            shared = true;
+    }
+    choices.insert(QStringLiteral("onStudioServer"), ours && !shared);
+    choices.insert(QStringLiteral("databaseShared"), ours && shared);
+    choices.insert(QStringLiteral("database"), db.name);
+    choices.insert(QStringLiteral("user"), db.username);
+    choices.insert(QStringLiteral("configured"), db.configured);
+    return choices;
+}
+
+void Studio::deleteProject(const QString &path, bool database)
+{
+    if (m_demo)
+        return;
+    if (!m_deleting.isEmpty()) {
+        setProblem(QStringLiteral("delete_running"), m_deleting);
+        return;
+    }
+    if (projectBusy(path)) {
+        setProblem(QStringLiteral("project_busy"), path);
+        return;
+    }
+    // Read what to drop now: the .env goes with the folder. Only the
+    // database: its user may be older than the project (the wizard's
+    // CREATE USER IF NOT EXISTS takes one that is there), so it stays.
+    QString sql;
+    if (database) {
+        const QVariantMap choices = deleteChoices(path);
+        if (choices.value(QStringLiteral("onStudioServer")).toBool())
+            sql = dropProjectDatabaseSql(choices.value(QStringLiteral("database")).toString(), {}, false);
+    }
+    m_deleting = path;
+    emit deletingChanged();
+    stopServerThen(path, [this, path, sql] { trashProject(path, sql); });
+}
+
+// The analyzer misses that connect() hands its slot object to Qt, and
+// reports it where a line NOLINT can't reach
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+void Studio::stopServerThen(const QString &path, const std::function<void()> &next)
+{
+    ProjectServer *server = m_servers.value(path);
+    if (!server || !server->active()) {
+        next();
+        return;
+    }
+    // Once, whichever comes first: stopped, freed, or 30 s. `alive` says
+    // whether the server is still there (it is freed with its project).
+    auto alive = std::make_shared<bool>(true);
+    auto done = std::make_shared<bool>(false);
+    const auto go = [this, done, next](bool stopped) {
+        if (*done)
+            return;
+        *done = true;
+        QObject::disconnect(m_deleteWait);
+        m_deleteWait = {};
+        if (stopped)
+            next();
+        else
+            deleteDone(QStringLiteral("delete_server"), {});
+    };
+    QObject::disconnect(m_deleteWait);
+    m_deleteWait = connect(server, &ProjectServer::changed, this, [server, alive, go] {
+        if (*alive && !server->active())
+            go(true);
+    });
+    connect(server, &QObject::destroyed, this, [alive, go] {
+        *alive = false;
+        go(true);
+    });
+    QTimer::singleShot(30000, this, [server, alive, go] { go(!*alive || !server->active()); });
+    if (server->state() != u"stopping")
+        server->stop();
+}
+
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
+void Studio::trashProject(const QString &path, const QString &dropSql)
+{
+    // A command started while the server stopped: not now
+    if (projectBusy(path)) {
+        deleteDone(QStringLiteral("project_busy"), path);
+        return;
+    }
+    // Never a folder of Studio's own (settings, downloads, database data),
+    // and never one that is or holds the home folder, Documents, Desktop,
+    // Downloads, a project folder or another project
+    const QStringList studio{settingsFolder(), toolsFolder(),
+                             QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
+    QStringList keep = m_settings.projectFolders;
+    for (const auto location : {QStandardPaths::HomeLocation, QStandardPaths::DocumentsLocation,
+                                QStandardPaths::DesktopLocation, QStandardPaths::DownloadLocation})
+        keep << QStandardPaths::writableLocation(location);
+    for (const auto &project : m_projects.projects()) {
+        if (!sameFolder(project.path, path))
+            keep << project.path;
+    }
+    if (const auto moved = moveProjectToTrash(path, studio, keep); !moved) {
+        deleteDone(moved.error().code, moved.error().detail);
+        return;
+    }
+    forgetProject(path, true);
+    if (dropSql.isEmpty()) {
+        forgetDatabaseOf(path);
+        deleteDone();
+        return;
+    }
+    dropDatabase(path, dropSql);
+}
+
+void Studio::forgetDatabaseOf(const QString &path)
+{
+    changeSettings([&path](Settings &s) {
+        s.databaseProjects.removeIf([&path](const QString &other) {
+            return other == QDir::toNativeSeparators(path) || sameFolder(other, path);
+        });
+    });
+}
+
+void Studio::dropDatabase(const QString &path, const QString &sql)
+{
+    // Studio's server first, if it isn't running (as the wizard does)
+    if (m_mariadb.state() != u"running") {
+        QObject::disconnect(m_deleteWait);
+        m_deleteWait = connect(&m_mariadb, &MariadbServer::changed, this, [this, path, sql] {
+            const QString state = m_mariadb.state();
+            if (state == u"running") {
+                QObject::disconnect(m_deleteWait);
+                m_deleteWait = {};
+                dropDatabase(path, sql);
+            } else if (state != u"starting") {
+                QObject::disconnect(m_deleteWait);
+                m_deleteWait = {};
+                deleteDone(QStringLiteral("db_drop"), m_mariadb.detail());
+            }
+        });
+        if (m_mariadb.state() != u"starting")
+            m_mariadb.start();
+        // start() refused (no program, a port in use): nothing will change
+        if (m_mariadb.state() != u"starting" && m_mariadb.state() != u"running") {
+            QObject::disconnect(m_deleteWait);
+            m_deleteWait = {};
+            deleteDone(QStringLiteral("db_drop"), m_mariadb.detail());
+        }
+        return;
+    }
+    const Command command = m_mariadb.rootSqlCommand(sql);
+    if (command.program.isEmpty()) {
+        deleteDone(QStringLiteral("db_drop"), {});
+        return;
+    }
+    auto errors = std::make_shared<QStringList>();
+    startStreaming(
+        command, this,
+        [errors](const OutputLine &line) {
+            if (line.error)
+                *errors << line.text;
+        },
+        [this, path, errors](int exitCode, bool crashed) {
+            if (exitCode != 0 || crashed) {
+                deleteDone(QStringLiteral("db_drop"), errors->join(u'\n'));
+                return;
+            }
+            // Only now: a database that wasn't dropped stays on record
+            forgetDatabaseOf(path);
+            deleteDone();
+        });
+}
+
+void Studio::deleteDone(const QString &code, const QString &detail)
+{
+    if (!code.isEmpty())
+        setProblem(code, detail);
+    m_deleting.clear();
+    emit deletingChanged();
 }
 
 void Studio::selectProject(const QString &path)
@@ -845,7 +1091,7 @@ void Studio::refreshProjects()
 {
     if (m_demo)
         return;
-    m_projects.setProjects(listProjects(m_settings.projectFolders, m_settings.projects));
+    m_projects.setProjects(listProjects(m_settings.projectFolders, m_settings.projects, m_settings.hiddenProjects));
     // A project no longer listed: its server stops, its log goes
     for (const QString &path : m_servers.keys()) {
         if (m_projects.indexOf(path) < 0)

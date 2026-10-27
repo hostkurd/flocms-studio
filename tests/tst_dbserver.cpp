@@ -198,6 +198,23 @@ private slots:
         QCOMPARE(sqlString(QStringLiteral("it's \\ ok")), QStringLiteral("'it''s \\\\ ok'"));
     }
 
+    // "Delete project": the project's database, its user only when asked,
+    // never MariaDB's own databases or accounts
+    void dropsAProjectsDatabase()
+    {
+        QCOMPARE(dropProjectDatabaseSql(QStringLiteral("shop"), QStringLiteral("shop_user"), false),
+                 QStringLiteral("DROP DATABASE IF EXISTS `shop`;\n"));
+        QCOMPARE(dropProjectDatabaseSql(QStringLiteral("my`db"), QStringLiteral("it's"), true),
+                 QStringLiteral("DROP DATABASE IF EXISTS `my``db`;\n"
+                                "DROP USER IF EXISTS 'it''s'@'localhost';\n"
+                                "DROP USER IF EXISTS 'it''s'@'127.0.0.1';\n"
+                                "FLUSH PRIVILEGES;\n"));
+        for (const char *system : {"mysql", "MySQL", "information_schema", "performance_schema", "sys", "", "  "})
+            QVERIFY2(dropProjectDatabaseSql(QLatin1String(system), QStringLiteral("u"), true).isEmpty(), system);
+        for (const char *account : {"root", "ROOT", "mariadb.sys", ""})
+            QVERIFY2(!dropProjectDatabaseSql(QStringLiteral("shop"), QLatin1String(account), true).contains(u"DROP USER"), account);
+    }
+
     void readsMissingLibraries()
     {
         QCOMPARE(missingSharedLibrary(QStringLiteral("/x/bin/mariadbd: error while loading shared libraries: libaio.so.1: "

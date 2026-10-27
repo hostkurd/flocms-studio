@@ -94,6 +94,8 @@ set(STUDIO_QML
     qml/CheckRow.qml
     qml/CommandOutput.qml
     qml/ConfirmDialog.qml
+    qml/DeleteProjectDialog.qml
+    qml/ProjectMenu.qml
     qml/DatabaseTab.qml
     qml/DoctorTab.qml
     qml/FormField.qml

@@ -30,6 +30,7 @@ const QStringList &knownKeys()
         QStringLiteral("databaseServer"), QStringLiteral("databaseFound"),  QStringLiteral("databaseSeries"),
         QStringLiteral("databasePort"),   QStringLiteral("databaseAutoStart"), QStringLiteral("databaseHost"),
         QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"), QStringLiteral("databaseProjects"),
+        QStringLiteral("hiddenProjects"),
     };
     return keys;
 }
@@ -103,6 +104,7 @@ Settings normalized(Settings settings)
     settings.composerPath = settings.composerPath.trimmed();
     settings.projectFolders = cleanList(settings.projectFolders);
     settings.projects = cleanList(settings.projects);
+    settings.hiddenProjects = cleanList(settings.hiddenProjects);
     settings.databaseProjects = cleanList(settings.databaseProjects);
     return settings;
 }
@@ -117,6 +119,7 @@ QJsonObject toJson(const Settings &settings)
     json.insert(QStringLiteral("editorCommand"), settings.editorCommand);
     json.insert(QStringLiteral("projectFolders"), QJsonArray::fromStringList(settings.projectFolders));
     json.insert(QStringLiteral("projects"), QJsonArray::fromStringList(settings.projects));
+    json.insert(QStringLiteral("hiddenProjects"), QJsonArray::fromStringList(settings.hiddenProjects));
     json.insert(QStringLiteral("serverPort"), settings.serverPort);
     json.insert(QStringLiteral("serverNetwork"), settings.serverNetwork);
     json.insert(QStringLiteral("databaseServer"), settings.databaseServer);
@@ -146,6 +149,7 @@ Settings settingsFromJson(const QJsonObject &json)
     text("editorCommand", settings.editorCommand);
     settings.projectFolders = stringList(json.value(QStringLiteral("projectFolders")));
     settings.projects = stringList(json.value(QStringLiteral("projects")));
+    settings.hiddenProjects = stringList(json.value(QStringLiteral("hiddenProjects")));
     const QJsonValue port = json.value(QStringLiteral("serverPort"));
     if (port.isDouble())
         settings.serverPort = port.toInt(0); // 0 (not a whole number) becomes the default

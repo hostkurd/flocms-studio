@@ -133,7 +133,24 @@ FLOSTUDIOCORE_EXPORT Result<ProjectInfo> projectInfo(const QString &dir);
 // Every project Studio knows: the sub-folders of projectFolders that are
 // FloCMS projects, and each of projects (shown as missing when gone). One
 // entry per folder, sorted by folder name for the current language.
+// hidden: projects removed from Studio that a projectFolder would find
+// again (they are left out of the scan; one added by hand is still shown).
 FLOSTUDIOCORE_EXPORT QList<ProjectSummary> listProjects(const QStringList &projectFolders,
-                                                       const QStringList &projects);
+                                                       const QStringList &projects,
+                                                       const QStringList &hidden = {});
+
+// True when two paths are the same folder (links resolved, cleaned).
+FLOSTUDIOCORE_EXPORT bool sameFolder(const QString &a, const QString &b);
+
+// "Delete project": moves the project's folder to the Recycle Bin / Trash
+// (never deletes it for good without Windows asking), so the user can get
+// it back. Only a FloCMS project folder that isn't a link; never a drive,
+// one that holds or is inside studioFolders (Studio's settings, downloads,
+// database data), or one that is or holds a keepFolder (home, Documents,
+// project folders, other projects).
+// Error codes: not_flocms, delete_link, delete_protected, trash_failed
+// (detail: the path).
+FLOSTUDIOCORE_EXPORT Result<Done> moveProjectToTrash(const QString &dir, const QStringList &studioFolders = {},
+                                                    const QStringList &keepFolders = {});
 
 } // namespace FloStudio::Core

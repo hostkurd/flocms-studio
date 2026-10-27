@@ -27,6 +27,7 @@ struct Settings
 
     QStringList projectFolders; // folders whose sub-folders are scanned
     QStringList projects;       // projects added one by one
+    QStringList hiddenProjects; // removed from Studio, inside a projectFolder
 
     int serverPort = 8000;      // the first port `php flo serve` tries
     bool serverNetwork = false; // listen on 0.0.0.0 instead of 127.0.0.1

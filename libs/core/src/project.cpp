@@ -11,6 +11,17 @@
 
 #include <algorithm>
 
+#ifdef Q_OS_WIN
+#include <string>
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
+#endif
+
 namespace FloStudio::Core {
 
 namespace {
@@ -45,10 +56,25 @@ QString commandString(const QMap<QString, QString> &env, const QString &key, con
     return it.value();
 }
 
+// Letter case in paths, as the usual disks have it
+Qt::CaseSensitivity pathCase()
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+    return Qt::CaseInsensitive;
+#else
+    return Qt::CaseSensitive;
+#endif
+}
+
 QString canonical(const QString &dir)
 {
-    const QString path = QFileInfo(dir).canonicalFilePath();
-    return path.isEmpty() ? QDir::cleanPath(QFileInfo(dir).absoluteFilePath()) : path;
+    if (const QString path = QFileInfo(dir).canonicalFilePath(); !path.isEmpty())
+        return path;
+    // "a/x/../b" when x isn't there: b, resolved like any other path
+    // (macOS: /var is /private/var)
+    const QString clean = QDir::cleanPath(QFileInfo(dir).absoluteFilePath());
+    const QString path = QFileInfo(clean).canonicalFilePath();
+    return path.isEmpty() ? clean : path;
 }
 
 } // namespace
@@ -250,8 +276,69 @@ Result<ProjectInfo> projectInfo(const QString &dir)
     return info;
 }
 
-QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStringList &projects)
+bool sameFolder(const QString &a, const QString &b)
 {
+    return !a.isEmpty() && !b.isEmpty() && canonical(a) == canonical(b);
+}
+
+Result<Done> moveProjectToTrash(const QString &dir, const QStringList &studioFolders, const QStringList &keepFolders)
+{
+    if (!isProject(dir))
+        return Error{QStringLiteral("not_flocms"), dir};
+    // A link (or a Windows junction) to the folder: Studio would trash the
+    // link and say the project is gone
+    const QFileInfo info(dir);
+    if (info.isSymLink() || info.isJunction())
+        return Error{QStringLiteral("delete_link"), QDir::toNativeSeparators(dir)};
+    const QString folder = canonical(dir);
+    if (info.isRoot() || QFileInfo(folder).isRoot())
+        return Error{QStringLiteral("delete_protected"), QDir::toNativeSeparators(dir)};
+    const auto inside = [](const QString &path, const QString &parent) {
+        const Qt::CaseSensitivity cs = pathCase();
+        return path.compare(parent, cs) == 0
+               || path.startsWith(parent.endsWith(u'/') ? parent : parent + u'/', cs);
+    };
+    // Studio's own folders: neither inside the project nor holding it
+    for (const QString &other : studioFolders) {
+        if (other.isEmpty())
+            continue;
+        const QString keep = canonical(other);
+        if (inside(keep, folder) || inside(folder, keep))
+            return Error{QStringLiteral("delete_protected"), QDir::toNativeSeparators(dir)};
+    }
+    // Folders that may hold projects but never be one: home, Documents,
+    // project folders, other projects
+    for (const QString &other : keepFolders) {
+        if (!other.isEmpty() && inside(canonical(other), folder))
+            return Error{QStringLiteral("delete_protected"), QDir::toNativeSeparators(dir)};
+    }
+#ifdef Q_OS_WIN
+    // Not QFile::moveToTrash: it deletes for good what the Recycle Bin can't
+    // take (too big, a network drive) without asking. Here Windows asks
+    // first (FOF_WANTNUKEWARNING), and "No" deletes nothing.
+    std::wstring from = QDir::toNativeSeparators(folder).toStdWString();
+    from.push_back(L'\0'); // a list of paths ends with two
+    SHFILEOPSTRUCTW operation{};
+    operation.wFunc = FO_DELETE;
+    operation.pFrom = from.c_str();
+    operation.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_WANTNUKEWARNING | FOF_SILENT | FOF_NOERRORUI;
+    const int result = SHFileOperationW(&operation);
+    if (result != 0 || operation.fAnyOperationsAborted || QFileInfo::exists(folder))
+        return Error{QStringLiteral("trash_failed"), QDir::toNativeSeparators(dir)};
+#else
+    QString trashed;
+    if (!QFile::moveToTrash(folder, &trashed) || QFileInfo::exists(folder))
+        return Error{QStringLiteral("trash_failed"), QDir::toNativeSeparators(dir)};
+#endif
+    return Done{};
+}
+
+QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStringList &projects,
+                                   const QStringList &hidden)
+{
+    QStringList hiddenKeys;
+    for (const QString &dir : hidden)
+        hiddenKeys << canonical(dir);
     QStringList seen;
     QList<ProjectSummary> list;
     const auto add = [&](const QString &dir) {
@@ -265,7 +352,7 @@ QList<ProjectSummary> listProjects(const QStringList &projectFolders, const QStr
         const QFileInfoList entries =
             QDir(folder).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name | QDir::IgnoreCase);
         for (const QFileInfo &entry : entries) {
-            if (isProject(entry.filePath()))
+            if (!hiddenKeys.contains(canonical(entry.filePath())) && isProject(entry.filePath()))
                 add(entry.filePath());
         }
     }

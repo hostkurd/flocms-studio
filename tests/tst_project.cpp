@@ -253,6 +253,58 @@ private slots:
         QVERIFY(list.at(2).missing);
         QCOMPARE(list.at(0).home, Home::Api);
         QVERIFY(!list.at(1).hasAdmin);
+
+        // Removed from Studio: the folder's scan leaves it out; added by
+        // hand it still shows
+        QStringList shown;
+        for (const ProjectSummary &project : listProjects({sites}, {}, {sites + QStringLiteral("/./Alpha")}))
+            shown << project.folderName;
+        QCOMPARE(shown, QStringList{QStringLiteral("beta")});
+        QCOMPARE(listProjects({sites}, {sites + QStringLiteral("/Alpha")}, {sites + QStringLiteral("/Alpha")}).size(), 2);
+        QVERIFY(sameFolder(sites + QStringLiteral("/beta"), sites + QStringLiteral("/x/../beta")));
+        QVERIFY(!sameFolder(sites + QStringLiteral("/beta"), sites + QStringLiteral("/Alpha")));
+        QVERIFY(!sameFolder(QString(), QString()));
+    }
+
+    // "Delete project": to the Recycle Bin / Trash, only a FloCMS project,
+    // never one holding or inside a folder Studio needs
+    void movesAProjectToTheTrash()
+    {
+        const QTemporaryDir dir;
+        const QString notes = dir.filePath(QStringLiteral("notes"));
+        QDir().mkpath(notes);
+        QCOMPARE(moveProjectToTrash(notes).error().code, QStringLiteral("not_flocms"));
+        QVERIFY(QFileInfo::exists(notes));
+
+        const QString site = dir.filePath(QStringLiteral("shop"));
+        makeSite(site);
+        QDir().mkpath(site + QStringLiteral("/storage/studio"));
+        QCOMPARE(moveProjectToTrash(site, {site + QStringLiteral("/storage/studio")}).error().code,
+                 QStringLiteral("delete_protected"));
+        QCOMPARE(moveProjectToTrash(site, {dir.path()}).error().code, QStringLiteral("delete_protected"));
+        QVERIFY(QFileInfo::exists(site));
+
+        // A folder that may hold projects but never be one: the project
+        // itself, or one inside it, listed as such
+        QCOMPARE(moveProjectToTrash(site, {}, {site}).error().code, QStringLiteral("delete_protected"));
+        QCOMPARE(moveProjectToTrash(site, {}, {site + QStringLiteral("/storage")}).error().code,
+                 QStringLiteral("delete_protected"));
+#ifndef Q_OS_WIN
+        const QString link = dir.filePath(QStringLiteral("shop-link"));
+        QVERIFY(QFile::link(site, link));
+        QCOMPARE(moveProjectToTrash(link).error().code, QStringLiteral("delete_link"));
+        QVERIFY(QFileInfo::exists(site));
+#endif
+
+        // Not into the developer's own Trash (Linux; macOS and Windows
+        // have one Trash / Recycle Bin)
+        const QTemporaryDir data;
+        qputenv("XDG_DATA_HOME", data.path().toLocal8Bit());
+        const auto moved = moveProjectToTrash(site, {dir.filePath(QStringLiteral("elsewhere"))}, {dir.path()});
+        if (!moved && moved.error().code == u"trash_failed")
+            QSKIP("this system has no trash for the temporary folder");
+        QVERIFY2(moved.ok(), moved.ok() ? "" : qPrintable(moved.error().code));
+        QVERIFY(!QFileInfo::exists(site));
     }
 };
 
