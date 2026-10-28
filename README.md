@@ -4,14 +4,18 @@
 
 A desktop app that creates, runs and changes [FloCMS](https://github.com/HostKurd/FloCMS) projects. Every action runs a real `php flo` or `composer` command in the project and shows it.
 
-This repo is the native app, written in C++ with Qt 6, for Windows and macOS first and Linux later. With it you can:
+This repo is the native app, written in C++ with Qt 6, for Windows, macOS and Linux. With it you can:
 
-- create a FloCMS project step by step, with PHP, Composer and MariaDB downloaded for you when they are missing
+- create a FloCMS project step by step, with PHP, Composer and MariaDB downloaded for you when they are missing (on macOS, Studio uses Homebrew's MariaDB)
 - run the website and a MariaDB server of Studio's own, or use the one XAMPP, Laragon or another stack already runs
-- see a project at a glance, run its migrations, read its logs, check it with Doctor, update its packages and generate admin resources and migrations
+- see a project at a glance, run its migrations, read its logs, check it with Doctor, update its packages, and generate admin resources, pages, blocks and widgets, controllers and migrations
 - use it in English, Arabic or Central Kurdish
 
 The first version, built with Tauri, is [`hostkurd/flocms-studio-lite`](https://github.com/hostkurd/flocms-studio-lite). This app's logic is written from FloCMS's own code and tested against real FloCMS output (`tests/fixtures/`), not ported from it.
+
+## User guide
+
+The guide is in [`docs/`](docs/) and on [flocms.com/docs/studio](https://flocms.com/docs/studio): [install Studio](docs/install.md), [your first project](docs/first-project.md), and [which button runs which command](docs/command-line.md).
 
 ## Download
 
