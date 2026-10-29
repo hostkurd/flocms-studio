@@ -50,6 +50,9 @@ The Studio program takes a few options of its own:
 ```bash
 flocms-studio --version     # the version and build details
 flocms-studio --help        # every option
+flocms-studio --open <folder>  # open this FloCMS project (FloServer uses this)
 ```
+
+`--open` adds the folder to Studio if it isn't there yet and opens it. When Studio is already running, that Studio opens it and the new one closes. On Windows, Studio records where its program is in the registry (`HKEY_CURRENT_USER\Software\HostKurd\FloCMS Studio`, value `Path`), so FloServer can find it.
 
 On Windows the program is `Studio.exe`; on macOS it is inside `FloCMS Studio.app`. The [About page](troubleshooting.md#report-a-problem) has **Copy version info** with the same details.

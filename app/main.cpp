@@ -23,6 +23,7 @@
 #include <QMutexLocker>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QSettings>
 #include <QStringList>
 #include <QTimer>
 
@@ -115,6 +116,19 @@ void attachParentConsole()
         freopen_s(&ignored, "CONOUT$", "w", stdout);
         freopen_s(&ignored, "CONOUT$", "w", stderr);
     }
+}
+#endif
+
+#ifdef Q_OS_WIN
+// Where FloServer finds Studio to open a project in it (D14): this
+// program's path in HKCU\Software\HostKurd\FloCMS Studio, value Path
+// (REG_SZ), written only when it differs
+void recordProgramPath()
+{
+    QSettings key(QStringLiteral("HKEY_CURRENT_USER\\Software\\HostKurd\\FloCMS Studio"), QSettings::NativeFormat);
+    const QString program = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    if (key.value(QStringLiteral("Path")).toString() != program)
+        key.setValue(QStringLiteral("Path"), program);
 }
 #endif
 
@@ -247,7 +261,11 @@ int main(int argc, char *argv[])
                                        QStringLiteral("With --demo: print the memory in use at the start, after opening "
                                                       "every page and tab, and after freeing what is idle; then quit. "
                                                       "Fails on any warning."));
-    parser.addOptions({versionOpt, smokeOpt, shotOpt, demoOpt, languageOpt, themeOpt, memoryOpt});
+    const QCommandLineOption openOpt(QStringLiteral("open"),
+                                     QStringLiteral("Open this FloCMS project folder (adding it to Studio), in the "
+                                                    "Studio that is running if there is one."),
+                                     QStringLiteral("folder"));
+    parser.addOptions({versionOpt, smokeOpt, shotOpt, demoOpt, languageOpt, themeOpt, memoryOpt, openOpt});
     parser.process(app);
 
     if (parser.isSet(versionOpt)) {
@@ -259,9 +277,17 @@ int main(int argc, char *argv[])
     // One Studio per user: started again, the running one comes to the
     // front and this one quits. Tests, screenshots and demos run beside it.
     const bool alone = !smoke && !parser.isSet(shotOpt) && !parser.isSet(demoOpt) && !parser.isSet(memoryOpt);
+    // --open: a full path, so the running Studio (started elsewhere) reads it the same
+    const QString openFolder = parser.isSet(openOpt) && !parser.value(openOpt).isEmpty()
+                                   ? QDir::toNativeSeparators(QDir::cleanPath(QDir::current().absoluteFilePath(parser.value(openOpt))))
+                                   : QString();
     SingleInstance instance(FloStudio::Core::settingsFolder());
-    if (alone && !instance.claim())
+    if (alone && !instance.claim(openFolder))
         return 0;
+#ifdef Q_OS_WIN
+    if (alone)
+        recordProgramPath();
+#endif
     // Closing: no longer answers, so a Studio started now runs instead of
     // asking this one
     QObject::connect(&app, &QCoreApplication::aboutToQuit, &instance, &SingleInstance::release);
@@ -324,6 +350,11 @@ int main(int argc, char *argv[])
             studio.setTheme(parser.value(themeOpt));
     } else {
         studio.start();
+        // A folder from FloServer (D14): here, or from a second copy
+        if (alone && !openFolder.isEmpty())
+            studio.openFolderFromOutside(openFolder);
+        QObject::connect(&instance, &SingleInstance::openRequested, &studio,
+                         [&studio](const QString &folder) { studio.openFolderFromOutside(folder); });
     }
 
     // A small window at once, while the main one is made: on a cold start

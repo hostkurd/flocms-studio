@@ -13,7 +13,7 @@ ScrollView {
     contentWidth: availableWidth
     clip: true
 
-    readonly property var sections: ({ general: general, tools: tools, database: database, server: server, editor: editor, folders: folders })
+    readonly property var sections: ({ floserver: floserver, general: general, tools: tools, database: database, server: server, editor: editor, folders: folders })
     // Where showSection last put the view: anything else is the person
     // scrolling (a wheel, keys), which ends the settling below
     property real shownY: -1
@@ -79,6 +79,50 @@ ScrollView {
 
         Heading { level: 1; ui: qsTr("Settings"); Layout.topMargin: 24; Layout.leftMargin: 28 }
 
+        // --- FloServer (design D14): its PHP and Composer, per project ---
+        Card {
+            id: floserver
+            readonly property bool found: !!Studio.floServer.found
+            Layout.fillWidth: true
+            Layout.leftMargin: 28
+            Layout.rightMargin: 28
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Heading { text: "FloServer"; Layout.fillWidth: true }
+                Pill {
+                    visible: floserver.found
+                    text: qsTr("FloServer %1 found").arg(Studio.floServer.version || "")
+                    color: Theme.okBg
+                    fg: Theme.okText
+                }
+            }
+            AppSwitch {
+                // On only while FloServer is there: Studio then uses the PHP and Composer of before
+                checked: Studio.useFloServer && floserver.found
+                enabled: floserver.found
+                text: qsTr("Use FloServer's PHP and Composer")
+                Layout.fillWidth: true
+                onToggled: Studio.setUseFloServer(checked)
+            }
+            AppText {
+                visible: floserver.found
+                ui: qsTr("Turning this off brings back the PHP and Composer you had before.")
+                color: Theme.muted
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            AppText {
+                visible: !floserver.found
+                ui: qsTr("FloServer isn't installed on this computer.")
+                color: Theme.muted
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+        }
+
         // --- General ---
         Card {
             id: general
@@ -143,11 +187,44 @@ ScrollView {
             Layout.fillWidth: true
             Layout.leftMargin: 28
             Layout.rightMargin: 28
+            // FloServer's in use (D14): each project's PHP from its floserver.json
+            readonly property bool floServer: Studio.useFloServer && !!Studio.floServer.found
             Heading { ui: qsTr("PHP and tools") }
             AppText { ui: qsTr("PHP to use"); font.weight: Font.DemiBold }
+            ColumnLayout {
+                visible: tools.floServer
+                spacing: 6
+                Layout.fillWidth: true
+                AppText {
+                    ui: qsTr("FloServer, per project (the version in each project's floserver.json)")
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                }
+                Flow {
+                    visible: (Studio.floServer.php || []).length > 0
+                    Layout.fillWidth: true
+                    spacing: 6
+                    Repeater {
+                        model: Studio.floServer.php || []
+                        delegate: Pill {
+                            required property string modelData
+                            text: "PHP " + modelData
+                            mono: true
+                            color: Theme.rule
+                            fg: Theme.navText
+                        }
+                    }
+                }
+                AppText {
+                    visible: (Studio.floServer.php || []).length === 0
+                    ui: qsTr("FloServer has no PHP installed yet.")
+                    color: Theme.warnText
+                    font.pixelSize: 13
+                }
+            }
             ButtonGroup { id: phpGroup }
             Repeater {
-                model: Studio.phpChoices
+                model: tools.floServer ? [] : Studio.phpChoices
                 delegate: ChoiceRow {
                     required property var modelData
                     Layout.fillWidth: true
@@ -161,20 +238,35 @@ ScrollView {
                 }
             }
             AppText {
-                visible: Studio.phpChoices.length === 0 && !Studio.checkingTools
+                visible: !tools.floServer && Studio.phpChoices.length === 0 && !Studio.checkingTools
                 ui: qsTr("No PHP found on this computer.")
                 color: Theme.badText
             }
+            // FloServer installs its own PHP and Composer: only MariaDB is
+            // still downloaded here then (Studio's database server)
             Flow {
                 Layout.fillWidth: true
                 spacing: 8
-                AppButton { text: qsTr("Choose another…"); onClicked: pickPhp.open() }
-                AppButton { text: qsTr("Search again"); iconPath: Icons.refresh; enabled: !Studio.checkingTools; onClicked: Studio.refreshTools() }
-                AppButton { text: qsTr("Download PHP, Composer or MariaDB…"); iconPath: Icons.download; onClicked: page.downloadRequested() }
+                AppButton { visible: !tools.floServer; text: qsTr("Choose another…"); onClicked: pickPhp.open() }
+                AppButton { visible: !tools.floServer; text: qsTr("Search again"); iconPath: Icons.refresh; enabled: !Studio.checkingTools; onClicked: Studio.refreshTools() }
+                AppButton {
+                    visible: !tools.floServer || !Studio.mariadbFromHomebrew
+                    text: tools.floServer ? qsTr("Download MariaDB…") : qsTr("Download PHP, Composer or MariaDB…")
+                    iconPath: Icons.download
+                    onClicked: page.downloadRequested()
+                }
             }
             Rectangle { Layout.fillWidth: true; height: 1; color: Theme.rule; Layout.topMargin: 6; Layout.bottomMargin: 6 }
             AppText { ui: qsTr("Composer"); font.weight: Font.DemiBold }
+            AppText {
+                visible: tools.floServer
+                ui: Studio.floServer.composer ? qsTr("FloServer's Composer %1").arg(Studio.floServer.composer)
+                                              : qsTr("FloServer has no Composer installed yet.")
+                color: Studio.floServer.composer ? Theme.text : Theme.warnText
+                Layout.fillWidth: true
+            }
             RowLayout {
+                visible: !tools.floServer
                 Layout.fillWidth: true
                 spacing: 8
                 Mono {

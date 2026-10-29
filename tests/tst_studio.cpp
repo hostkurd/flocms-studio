@@ -31,6 +31,8 @@
 #include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLocalSocket>
+#include <QScopeGuard>
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
@@ -236,6 +238,114 @@ private slots:
         QVERIFY(next.claim());
         QVERIFY(timer.elapsed() < 2000);
         QCOMPARE(next.socketName(), first.socketName());
+    }
+
+    // --open from a second copy (D14: FloServer opens a project in Studio):
+    // the running Studio gets the folder; anything that isn't one line with
+    // an absolute path is refused, and the second copy runs itself
+    void aSecondCopyHandsOverAFolder()
+    {
+        const QTemporaryDir dir;
+        const QString folder = dir.filePath(QStringLiteral("settings"));
+        SingleInstance first(folder);
+        QVERIFY(first.claim());
+        QSignalSpy opened(&first, &SingleInstance::openRequested);
+        QSignalSpy shown(&first, &SingleInstance::activateRequested);
+        const QString project = QDir::toNativeSeparators(dir.filePath(QStringLiteral("Sites/مشروع shop")));
+        const auto second = QtConcurrent::run([folder, project] {
+            SingleInstance copy(folder);
+            return copy.claim(project);
+        });
+        QTRY_VERIFY_WITH_TIMEOUT(second.isFinished(), 10000);
+        QCOMPARE(second.result(), false);
+        QCOMPARE(opened.size(), 1);
+        QCOMPARE(opened.at(0).at(0).toString(), project);
+        QCOMPARE(shown.size(), 1);
+
+        // Messages that aren't ours: no answer, nothing opened
+        for (const QByteArray &message : {QByteArray("open relative/folder\n"), QByteArray("open \n"),
+                                          QByteArray("opn /x\n"), QByteArray("open /a\rb\n"), QByteArray(9000, 'x')}) {
+            QLocalSocket socket;
+            socket.connectToServer(first.socketName());
+            QVERIFY(socket.waitForConnected(2000));
+            socket.write(message);
+            QVERIFY(socket.waitForBytesWritten(2000));
+            QTRY_COMPARE_WITH_TIMEOUT(socket.state(), QLocalSocket::UnconnectedState, 5000);
+            QVERIFY(!socket.readAll().contains("ok"));
+        }
+        QCOMPARE(opened.size(), 1);
+        // A path with a line break can't be sent: that copy opens it itself
+        const auto third = QtConcurrent::run([folder] {
+            SingleInstance copy(folder);
+            return copy.claim(QStringLiteral("/a\nshow"));
+        });
+        QTRY_VERIFY_WITH_TIMEOUT(third.isFinished(), 10000);
+        QCOMPARE(third.result(), true);
+        QCOMPARE(shown.size(), 1);
+    }
+
+    void opensAFolderFromOutside()
+    {
+        const QTemporaryDir dir;
+        makeSite(dir.filePath(QStringLiteral("Sites/shop")));
+        makeSite(dir.filePath(QStringLiteral("elsewhere/blog")));
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.addProjectFolder(QUrl::fromLocalFile(dir.filePath(QStringLiteral("Sites"))));
+        // Not a folder, not FloCMS: a problem, nothing added
+        QVERIFY(!studio.openFolderFromOutside(dir.filePath(QStringLiteral("nothing"))));
+        QCOMPARE(studio.problem().value(QStringLiteral("code")).toString(), QStringLiteral("project_missing"));
+        QVERIFY(!studio.openFolderFromOutside(dir.filePath(QStringLiteral("elsewhere"))));
+        QCOMPARE(studio.problem().value(QStringLiteral("code")).toString(), QStringLiteral("not_flocms"));
+        QCOMPARE(studio.projects()->count(), 1);
+        // One Studio lists already: selected, not added twice
+        QVERIFY(studio.openFolderFromOutside(dir.filePath(QStringLiteral("Sites/shop/"))));
+        QCOMPARE(studio.current().value(QStringLiteral("name")).toString(), QStringLiteral("shop"));
+        QVERIFY(loadSettings(settingsFolder()).value().projects.isEmpty());
+        // A new one: added and opened
+        QVERIFY(studio.openFolderFromOutside(dir.filePath(QStringLiteral("elsewhere/blog"))));
+        QCOMPARE(studio.page(), QStringLiteral("project"));
+        QCOMPARE(studio.current().value(QStringLiteral("name")).toString(), QStringLiteral("blog"));
+        QCOMPARE(studio.projects()->count(), 2);
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
+    }
+
+    // D14: FloServer's PHP and Composer while the switch is on; off brings
+    // back the PHP chosen before
+    void usesFloServerWhileTurnedOn()
+    {
+        const QTemporaryDir dir;
+        const QString shims = dir.filePath(QStringLiteral("data/shims"));
+        writeFile(dir.filePath(QStringLiteral("data/integration.json")),
+                  QStringLiteral(R"({"schema": 1, "floserver_version": "0.1.0", "cli": "", "shims": "%1",
+                                     "runtimes": [{"name": "php", "version": "8.4.15"}, {"name": "php", "version": "8.5.12"},
+                                                  {"name": "composer", "version": "2.9.1"}]})")
+                      .arg(QDir::fromNativeSeparators(shims)).toUtf8());
+        qputenv("FLOSERVER_DATA_DIR", dir.filePath(QStringLiteral("data")).toUtf8());
+        const auto unset = qScopeGuard([] { qunsetenv("FLOSERVER_DATA_DIR"); });
+        Language language;
+        Studio studio(&language);
+        studio.start();
+        studio.setPhpPath(QStringLiteral("/my/php"));
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        const QVariantMap floServer = studio.floServer();
+        QVERIFY(floServer.value(QStringLiteral("found")).toBool());
+        QCOMPARE(floServer.value(QStringLiteral("version")).toString(), QStringLiteral("0.1.0"));
+        QCOMPARE(floServer.value(QStringLiteral("php")).toStringList(), (QStringList{QStringLiteral("8.5.12"), QStringLiteral("8.4.15")}));
+        QCOMPARE(floServer.value(QStringLiteral("composer")).toString(), QStringLiteral("2.9.1"));
+        QVERIFY(!studio.useFloServer());
+
+        studio.setUseFloServer(true);
+        QVERIFY(studio.useFloServer());
+        Settings saved = loadSettings(settingsFolder()).value();
+        QVERIFY(saved.useFloServer);
+        QCOMPARE(saved.phpPath, QStringLiteral("/my/php")); // kept
+        studio.setUseFloServer(false);
+        saved = loadSettings(settingsFolder()).value();
+        QVERIFY(!saved.useFloServer);
+        QCOMPARE(saved.phpPath, QStringLiteral("/my/php"));
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
     }
 
     // Studio starts even when the lock can't help: a settings folder that

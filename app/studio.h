@@ -97,6 +97,11 @@ class Studio : public QObject
     Q_PROPERTY(QString databaseHost READ databaseHost NOTIFY settingsChanged)
     Q_PROPERTY(int databaseOtherPort READ databaseOtherPort NOTIFY settingsChanged)
     Q_PROPERTY(QString databaseUser READ databaseUser NOTIFY settingsChanged)
+    // FloServer (design D14): {found, version, php: [versions, newest
+    // first], composer}, as last looked for with the tools; and whether
+    // Studio uses its PHP and Composer
+    Q_PROPERTY(QVariantMap floServer READ floServer NOTIFY toolsChanged)
+    Q_PROPERTY(bool useFloServer READ useFloServer NOTIFY settingsChanged)
     Q_PROPERTY(bool demo READ demo CONSTANT)
     // A demo can open on a dialog ("downloads")
     Q_PROPERTY(QString demoDialog READ demoDialog CONSTANT)
@@ -156,6 +161,8 @@ public:
     QString databaseHost() const { return m_settings.databaseHost; }
     int databaseOtherPort() const { return m_settings.databaseOtherPort; }
     QString databaseUser() const { return m_settings.databaseUser; }
+    QVariantMap floServer() const { return m_floServer; }
+    bool useFloServer() const { return m_settings.useFloServer; }
     bool demo() const { return m_demo; }
     QString demoDialog() const { return m_demoDialog; }
     QString demoTab() const { return m_demoTab; }
@@ -168,6 +175,8 @@ public:
     Q_INVOKABLE void setEditorCommand(const QString &command);
     Q_INVOKABLE void setPhpPath(const QString &path);
     Q_INVOKABLE void setComposerPath(const QString &path);
+    // D14: phpPath and composerPath stay, so off brings them back
+    Q_INVOKABLE void setUseFloServer(bool use);
     // D9: studio, found (with the found server's client program), other
     Q_INVOKABLE void setDatabaseServer(const QString &kind, const QString &found = {});
     Q_INVOKABLE void setOtherDatabase(const QString &host, int port, const QString &user);
@@ -176,6 +185,10 @@ public:
     // "Open existing folder…": a FloCMS project is added and opened;
     // anything else is a problem (not_flocms).
     Q_INVOKABLE void addProject(const QUrl &folder);
+    // --open <folder> and a second Studio's `open` (D14: FloServer opens a
+    // project in Studio): a FloCMS project is added and opened; anything
+    // else is a problem (not_flocms, project_missing). False then.
+    bool openFolderFromOutside(const QString &folder);
     // "Remove from Studio": the project leaves the list (its website
     // server stops); its files stay. One found in a project folder stays
     // hidden until it is opened again with "Open existing folder…".
@@ -301,6 +314,7 @@ private:
     QVariantMap m_current;
     QVariantList m_tools;
     QVariantList m_phpChoices;
+    QVariantMap m_floServer{{QStringLiteral("found"), false}};
     bool m_checking = false;
     bool m_recheck = false;
     // Another MariaDB (XAMPP, Laragon…) started or stopped after the tools

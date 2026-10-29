@@ -8,7 +8,9 @@ class QLocalServer;
 
 // One Studio per user: the first copy holds a lock file and listens on a
 // local socket only this user can open; a second copy asks it to show
-// its window and, once it has answered, quits. Studio always starts when
+// its window (`show`), or to open a folder (`open <path>`, from --open:
+// FloServer opens a project in Studio, D14) and, once it has answered,
+// quits. Studio always starts when
 // nothing answers: a lock left by a Studio that crashed (here or on
 // another computer sharing the home folder), a settings folder that can't
 // be written, a Studio that is closing. Two copies at worst, never none.
@@ -26,7 +28,8 @@ public:
     // False only when a running Studio answered that it shows itself:
     // then this copy should quit. True: run (alone, or when nothing
     // answered).
-    bool claim();
+    // With `openFolder`, a running Studio is asked to open it instead.
+    bool claim(const QString &openFolder = {});
     // Closing: no longer answers, so a new copy started now runs
     void release();
     // The socket's name: from a random secret in the settings folder (only
@@ -37,10 +40,13 @@ public:
 signals:
     // A second copy was started: show the window
     void activateRequested();
+    // A second copy was started with --open: open this folder (an absolute
+    // path; Studio checks it is a FloCMS project), then show the window
+    void openRequested(const QString &folder);
 
 private:
     enum class Answer { Shown, NoAnswer };
-    Answer askRunningCopy();
+    Answer askRunningCopy(const QString &openFolder);
     void listen();
 
     QString m_folder;

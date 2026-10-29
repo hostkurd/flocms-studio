@@ -118,6 +118,7 @@ Rectangle {
             SectionLabel { ui: qsTr("Settings"); Layout.leftMargin: 10; Layout.bottomMargin: 6 }
             Repeater {
                 model: [
+                    { id: "floserver", name: "FloServer" },
                     { id: "general", name: qsTr("General") },
                     { id: "tools", name: qsTr("PHP and tools") },
                     { id: "database", name: qsTr("Database server") },
