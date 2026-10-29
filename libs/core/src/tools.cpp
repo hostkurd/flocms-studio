@@ -1,4 +1,5 @@
 #include <flostudio/core/downloads.h>
+#include <flostudio/core/floserver.h>
 #include <flostudio/core/process.h>
 #include <flostudio/core/tools.h>
 
@@ -246,6 +247,13 @@ QString findTool(const QString &nameOrPath)
 
 Result<QString> phpProgram(const Settings &settings)
 {
+    // FloServer's shim: each project gets the PHP in its floserver.json (D14)
+    if (const auto floServer = floServerInUse(settings)) {
+        const QString shim = floServerShim(*floServer, QStringLiteral("php"));
+        if (shim.isEmpty())
+            return Error{QStringLiteral("php_not_found"), floServerShimPath(*floServer, QStringLiteral("php"))};
+        return shim;
+    }
     const QString wanted = settings.phpPath.isEmpty() ? QStringLiteral("php") : settings.phpPath;
     const QString path = findTool(wanted);
     if (path.isEmpty())
@@ -255,10 +263,19 @@ Result<QString> phpProgram(const Settings &settings)
 
 Result<ComposerLaunch> composerLaunch(const Settings &settings)
 {
-    const QString wanted = settings.composerPath.isEmpty() ? QStringLiteral("composer") : settings.composerPath;
-    QString path = findTool(wanted);
-    if (path.isEmpty() && settings.composerPath.isEmpty())
-        path = findTool(QStringLiteral("composer.phar"));
+    QString path;
+    QString wanted;
+    if (const auto floServer = floServerInUse(settings)) {
+        // FloServer's shim, a program of its own that runs Composer with
+        // the project's PHP (D14): it goes on as a native program below
+        wanted = floServerShimPath(*floServer, QStringLiteral("composer"));
+        path = floServerShim(*floServer, QStringLiteral("composer"));
+    } else {
+        wanted = settings.composerPath.isEmpty() ? QStringLiteral("composer") : settings.composerPath;
+        path = findTool(wanted);
+        if (path.isEmpty() && settings.composerPath.isEmpty())
+            path = findTool(QStringLiteral("composer.phar"));
+    }
     if (path.isEmpty())
         return Error{QStringLiteral("composer_not_found"), wanted};
 
@@ -381,6 +398,7 @@ PhpStatus detectPhp(const Settings &settings)
     Command command;
     command.program = program.value();
     command.arguments = {QStringLiteral("-r"), phpProbeCode()};
+    command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
     const Captured out = runCaptured(command, 15000);
     php.info = out.succeeded() ? parsePhpProbe(out.out) : PhpInfo{};
     php.tool = status(program.value(), php.info.version, QStringLiteral("php_not_found"));
@@ -397,6 +415,7 @@ ToolStatus detectComposer(const Settings &settings)
     command.program = launch->program;
     command.arguments = launch->arguments + QStringList{QStringLiteral("--version"), QStringLiteral("--no-ansi"),
                                                         QStringLiteral("--no-interaction")};
+    command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
     const Captured out = runCaptured(command, 30000);
     // Composer 2.8 prints the version on stdout and its notes on stderr;
     // read both in case a version prints it elsewhere.
@@ -589,7 +608,7 @@ Result<Done> openInEditor(const Settings &settings, const QString &folder)
     const QFileInfo target(folder);
     process.setWorkingDirectory(target.isDir() ? folder : target.absolutePath());
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
-    environment.insert(QStringLiteral("PATH"), toolSearchPath().join(QDir::listSeparator()));
+    environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
     process.setProcessEnvironment(environment);
     if (!process.startDetached())
         return Error{QStringLiteral("editor_failed"), program};

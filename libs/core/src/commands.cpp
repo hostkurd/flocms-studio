@@ -1,5 +1,6 @@
 #include <flostudio/core/commands.h>
 #include <flostudio/core/env.h>
+#include <flostudio/core/floserver.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/tools.h>
 
@@ -113,6 +114,9 @@ Result<Command> prepareCommand(const Settings &settings, const CommandRequest &r
     // No colours, no questions, whatever the user's own settings say
     command.environment.insert(QStringLiteral("NO_COLOR"), QStringLiteral("1"));
     command.environment.insert(QStringLiteral("COMPOSER_NO_INTERACTION"), QStringLiteral("1"));
+    // FloServer's shims first (D14): what the command starts itself (php,
+    // composer) is the project's version too
+    command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
 
     QStringList arguments = request.arguments;
     arguments << QStringLiteral("--no-interaction") << QStringLiteral("--no-ansi");

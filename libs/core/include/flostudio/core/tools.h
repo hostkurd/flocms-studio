@@ -22,7 +22,8 @@ namespace FloStudio::Core {
 // calls this once on a worker thread at start). Relative entries are left
 // out. Last come Studio's own downloads (installedToolFolders, read on
 // every call). The same list becomes the PATH of every command Studio
-// starts.
+// starts, after FloServer's shims when Studio uses FloServer
+// (commandSearchPath, floserver.h).
 FLOSTUDIOCORE_EXPORT QStringList toolSearchPath();
 
 // The usual install folders of PHP, Composer and MySQL/MariaDB on this
@@ -53,7 +54,11 @@ struct ComposerLaunch
     bool operator==(const ComposerLaunch &) const = default;
 };
 
-// Error codes: php_not_found, composer_not_found.
+// With FloServer in use (Settings::useFloServer and FloServer found,
+// floserver.h), FloServer's php and composer shims, whatever phpPath and
+// composerPath say: its composer is a native program (setupBinary empty, so
+// `php flo setup` finds it first on the PATH). Error codes: php_not_found,
+// composer_not_found.
 FLOSTUDIOCORE_EXPORT Result<QString> phpProgram(const Settings &settings);
 FLOSTUDIOCORE_EXPORT Result<ComposerLaunch> composerLaunch(const Settings &settings);
 

@@ -30,7 +30,7 @@ const QStringList &knownKeys()
         QStringLiteral("databaseServer"), QStringLiteral("databaseFound"),  QStringLiteral("databaseSeries"),
         QStringLiteral("databasePort"),   QStringLiteral("databaseAutoStart"), QStringLiteral("databaseHost"),
         QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"), QStringLiteral("databaseProjects"),
-        QStringLiteral("hiddenProjects"),
+        QStringLiteral("hiddenProjects"), QStringLiteral("useFloServer"),
     };
     return keys;
 }
@@ -131,6 +131,7 @@ QJsonObject toJson(const Settings &settings)
     json.insert(QStringLiteral("databaseOtherPort"), settings.databaseOtherPort);
     json.insert(QStringLiteral("databaseUser"), settings.databaseUser);
     json.insert(QStringLiteral("databaseProjects"), QJsonArray::fromStringList(settings.databaseProjects));
+    json.insert(QStringLiteral("useFloServer"), settings.useFloServer);
     return json;
 }
 
@@ -168,9 +169,12 @@ Settings settingsFromJson(const QJsonObject &json)
         if (value.isDouble())
             *out = value.toInt(0);
     }
-    const QJsonValue autoStart = json.value(QStringLiteral("databaseAutoStart"));
-    if (autoStart.isBool())
-        settings.databaseAutoStart = autoStart.toBool();
+    for (const auto &[key, out] : {std::pair{"databaseAutoStart", &settings.databaseAutoStart},
+                                   std::pair{"useFloServer", &settings.useFloServer}}) {
+        const QJsonValue value = json.value(QLatin1String(key));
+        if (value.isBool())
+            *out = value.toBool();
+    }
     for (auto it = json.begin(); it != json.end(); ++it) {
         if (!knownKeys().contains(it.key()))
             settings.unknown.insert(it.key(), it.value());

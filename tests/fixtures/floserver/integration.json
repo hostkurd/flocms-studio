@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "floserver_version": "0.1.0",
+  "cli": "@ROOT@opt/floserver/bin/flo",
+  "shims": "@ROOT@home/ali/.local/share/floserver/shims",
+  "runtimes": [
+    {
+      "name": "php",
+      "version": "8.3.27"
+    },
+    {
+      "name": "php",
+      "version": "8.5.12"
+    },
+    {
+      "name": "composer",
+      "version": "2.9.1"
+    },
+    {
+      "name": "mariadb",
+      "version": "11.4.13"
+    },
+    {
+      "name": "mariadb",
+      "version": "11.8.9"
+    },
+    {
+      "name": "",
+      "version": "1.0"
+    },
+    "junk"
+  ],
+  "databases": [
+    {
+      "series": "11.4",
+      "version": "11.4.13",
+      "port": 3306
+    },
+    {
+      "series": "11.8",
+      "port": 0
+    },
+    {
+      "series": "x",
+      "port": 3307
+    }
+  ]
+}

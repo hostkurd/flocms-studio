@@ -51,6 +51,11 @@ struct Settings
     int databaseOtherPort = 3306;
     QString databaseUser = QStringLiteral("root");
 
+    // FloServer's PHP and Composer (design D14, floserver.h): used when
+    // FloServer is found. phpPath and composerPath stay as they are, so
+    // turning it off brings them back.
+    bool useFloServer = false;
+
     // Keys this version doesn't know, written back unchanged, so a newer
     // Studio's settings survive a run of an older one.
     QJsonObject unknown;
