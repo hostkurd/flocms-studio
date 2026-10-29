@@ -243,6 +243,12 @@ void Studio::start()
             m_mariadb.start();
     });
     refreshTools(); // and Studio's MariaDB programs
+    // FloServer installed or removed while Studio was in the background:
+    // Settings and the PHP in use agree again (D14)
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
+        if (state == Qt::ApplicationActive)
+            refreshFloServer();
+    });
     m_clock.start();
     m_sweep.setInterval(60 * 1000);
     connect(&m_sweep, &QTimer::timeout, this, [this] { releaseUnused(false); });
@@ -1101,6 +1107,7 @@ void Studio::openLogFile()
 
 void Studio::showSettings(const QString &section)
 {
+    refreshFloServer();
     m_page = QStringLiteral("settings");
     m_settingsSection = section;
     emit pageChanged();
@@ -1230,6 +1237,21 @@ void Studio::refreshTools()
     watcher->setFuture(QtConcurrent::run(findTools, m_settings, m_packages));
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
+// phpProgram() reads integration.json on every call; Settings shows what
+// was read with the tools. Read again (a small file): when it changed, the
+// tools are looked for again, as the PHP and Composer in use changed too
+void Studio::refreshFloServer()
+{
+    if (m_demo || m_closing)
+        return;
+    const QVariantMap now = floServerMap(readFloServerIntegration(floServerDataFolder()));
+    if (now == m_floServer)
+        return;
+    m_floServer = now;
+    emit toolsChanged();
+    refreshTools();
+}
 
 // Whether a server listens on 3306 now: the MariaDB row follows another
 // server (XAMPP, Laragon…) started or stopped while Studio is open

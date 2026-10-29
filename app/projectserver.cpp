@@ -3,6 +3,7 @@
 #include "logmodel.h"
 
 #include <flostudio/core/commands.h>
+#include <flostudio/core/floserver.h>
 #include <flostudio/core/output.h>
 #include <flostudio/core/process.h>
 #include <flostudio/core/server.h>
@@ -302,8 +303,11 @@ void ProjectServer::learnTimeZone(const Settings &settings)
     command.program = php.value();
     command.arguments = {QStringLiteral("-r"), QStringLiteral("echo date('P');")};
     // Not the project folder: on Windows a running program's folder can't
-    // be deleted or renamed, and this needs nothing from the project
-    command.workingDir = QFileInfo(php.value()).absolutePath();
+    // be deleted or renamed, and this needs nothing from the project. But
+    // FloServer's shim picks the PHP by the floserver.json of the folder it
+    // runs in (D14): then the project's, for the PHP its pages run with
+    command.workingDir = floServerInUse(settings) ? m_projectDir : QFileInfo(php.value()).absolutePath();
+    command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
     auto *watcher = new QFutureWatcher<Captured>(this); // a child of this, deleted when it finishes
     connect(watcher, &QFutureWatcher<Captured>::finished, this, [this, watcher] {
         const Captured out = watcher->result();

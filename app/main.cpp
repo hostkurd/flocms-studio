@@ -282,8 +282,16 @@ int main(int argc, char *argv[])
                                    ? QDir::toNativeSeparators(QDir::cleanPath(QDir::current().absoluteFilePath(parser.value(openOpt))))
                                    : QString();
     SingleInstance instance(FloStudio::Core::settingsFolder());
-    if (alone && !instance.claim(openFolder))
+    if (alone && !instance.claim(openFolder)) {
+        // The running Studio came to the front but wasn't sent the folder
+        if (!openFolder.isEmpty() && !SingleInstance::canHandOver(openFolder)) {
+            const QByteArray text = "Studio is running already and could not be asked to open this folder: "
+                                    + openFolder.toUtf8() + '\n';
+            (void)std::fwrite(text.constData(), 1, size_t(text.size()), stderr);
+            return 1;
+        }
         return 0;
+    }
 #ifdef Q_OS_WIN
     if (alone)
         recordProgramPath();

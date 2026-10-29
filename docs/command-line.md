@@ -53,6 +53,6 @@ flocms-studio --help        # every option
 flocms-studio --open <folder>  # open this FloCMS project (FloServer uses this)
 ```
 
-`--open` adds the folder to Studio if it isn't there yet and opens it. When Studio is already running, that Studio opens it and the new one closes. On Windows, Studio records where its program is in the registry (`HKEY_CURRENT_USER\Software\HostKurd\FloCMS Studio`, value `Path`), so FloServer can find it.
+`--open` adds the folder to Studio if it isn't there yet and opens it. When Studio is already running, that Studio opens it and the new one closes. A folder path that can't be handed over (more than one line, or longer than about 8 KB) only brings the running Studio to the front: the new one says it couldn't open the folder and closes. On Windows, Studio records where its program is in the registry (`HKEY_CURRENT_USER\Software\HostKurd\FloCMS Studio`, value `Path`), so FloServer can find it; uninstalling Studio removes it.
 
 On Windows the program is `Studio.exe`; on macOS it is inside `FloCMS Studio.app`. The [About page](troubleshooting.md#report-a-problem) has **Copy version info** with the same details.

@@ -6,7 +6,7 @@
 
 When [FloServer](https://github.com/hostkurd/floserver) is installed on this computer, the card says **FloServer `<version>` found**, and **Use FloServer's PHP and Composer** (off at first) makes Studio run every `php` and `composer` command through FloServer's shims. Each project then gets the PHP version in its `floserver.json`, and FloServer's shims come first on the `PATH` of the commands Studio starts. "Turning this off brings back the PHP and Composer you had before." Studio's database server is not changed by it.
 
-When FloServer isn't installed, the card says so and the switch can't be turned on. Studio finds FloServer by its `integration.json` file, in `%LOCALAPPDATA%\FloServer` on Windows, `~/Library/Application Support/FloServer` on macOS and `~/.local/share/floserver` on Linux (or the folder in `FLOSERVER_DATA_DIR`).
+When FloServer isn't installed, the card says so and the switch can't be turned on. If FloServer is removed while the switch is on, the card says Studio uses the PHP and Composer below until FloServer is back, and the switch can still be turned off. Studio looks for FloServer again each time Settings opens and when Studio comes back to the front. Studio finds FloServer by its `integration.json` file, in `%LOCALAPPDATA%\FloServer` on Windows, `~/Library/Application Support/FloServer` on macOS and `~/.local/share/floserver` on Linux (or the folder in `FLOSERVER_DATA_DIR`).
 
 ## General
 

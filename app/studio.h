@@ -98,7 +98,8 @@ class Studio : public QObject
     Q_PROPERTY(int databaseOtherPort READ databaseOtherPort NOTIFY settingsChanged)
     Q_PROPERTY(QString databaseUser READ databaseUser NOTIFY settingsChanged)
     // FloServer (design D14): {found, version, php: [versions, newest
-    // first], composer}, as last looked for with the tools; and whether
+    // first], composer}, as last looked for with the tools, Settings
+    // shown or Studio brought to the front; and whether
     // Studio uses its PHP and Composer
     Q_PROPERTY(QVariantMap floServer READ floServer NOTIFY toolsChanged)
     Q_PROPERTY(bool useFloServer READ useFloServer NOTIFY settingsChanged)
@@ -300,6 +301,10 @@ private:
     bool currentHasAdmin() const;
     void serversChanged();
     void askDatabasePort();
+    // FloServer's integration.json read again (Settings shown, Studio
+    // back in front): Settings never shows another FloServer than the
+    // one in use
+    void refreshFloServer();
     void forgetIdle();
 
     Language *m_language;

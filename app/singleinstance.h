@@ -28,8 +28,13 @@ public:
     // False only when a running Studio answered that it shows itself:
     // then this copy should quit. True: run (alone, or when nothing
     // answered).
-    // With `openFolder`, a running Studio is asked to open it instead.
+    // With `openFolder`, a running Studio is asked to open it instead;
+    // one that can't be handed over (canHandOver) is not sent: that Studio
+    // is only asked to show itself.
     bool claim(const QString &openFolder = {});
+    // Whether `open <folder>` can be sent: one line, an absolute path,
+    // the message at most 8 KB
+    static bool canHandOver(const QString &folder);
     // Closing: no longer answers, so a new copy started now runs
     void release();
     // The socket's name: from a random secret in the settings folder (only

@@ -387,6 +387,25 @@ DatabaseProduct databaseVersion(const QString &output)
     return {};
 }
 
+namespace {
+
+// Where detectPhp and detectComposer run FloServer's shims (D14): not
+// wherever Studio was started (that may be inside a project, whose
+// floserver.json would pick the PHP), but FloServer's own data folder,
+// never in a project. There the shim runs FloServer's newest PHP (or the
+// next php on the PATH when FloServer has none): Settings lists every
+// version, and each project's own runs in its folder. Empty (Studio's
+// folder, which doesn't matter then) without FloServer.
+QString floServerProbeFolder(const Settings &settings)
+{
+    if (!floServerInUse(settings))
+        return {};
+    const QString folder = floServerDataFolder();
+    return QFileInfo(folder).isDir() ? folder : QString();
+}
+
+} // namespace
+
 PhpStatus detectPhp(const Settings &settings)
 {
     PhpStatus php;
@@ -399,6 +418,7 @@ PhpStatus detectPhp(const Settings &settings)
     command.program = program.value();
     command.arguments = {QStringLiteral("-r"), phpProbeCode()};
     command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
+    command.workingDir = floServerProbeFolder(settings);
     const Captured out = runCaptured(command, 15000);
     php.info = out.succeeded() ? parsePhpProbe(out.out) : PhpInfo{};
     php.tool = status(program.value(), php.info.version, QStringLiteral("php_not_found"));
@@ -416,6 +436,7 @@ ToolStatus detectComposer(const Settings &settings)
     command.arguments = launch->arguments + QStringList{QStringLiteral("--version"), QStringLiteral("--no-ansi"),
                                                         QStringLiteral("--no-interaction")};
     command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
+    command.workingDir = floServerProbeFolder(settings);
     const Captured out = runCaptured(command, 30000);
     // Composer 2.8 prints the version on stdout and its notes on stderr;
     // read both in case a version prints it elsewhere.

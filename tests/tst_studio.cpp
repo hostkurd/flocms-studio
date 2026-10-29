@@ -274,14 +274,35 @@ private slots:
             QVERIFY(!socket.readAll().contains("ok"));
         }
         QCOMPARE(opened.size(), 1);
-        // A path with a line break can't be sent: that copy opens it itself
-        const auto third = QtConcurrent::run([folder] {
-            SingleInstance copy(folder);
-            return copy.claim(QStringLiteral("/a\nshow"));
-        });
-        QTRY_VERIFY_WITH_TIMEOUT(third.isFinished(), 10000);
-        QCOMPARE(third.result(), true);
-        QCOMPARE(shown.size(), 1);
+        // A connection that sends no whole line is closed after a while
+        {
+            QLocalSocket socket;
+            socket.connectToServer(first.socketName());
+            QVERIFY(socket.waitForConnected(2000));
+            socket.write("open /never/ending");
+            QVERIFY(socket.waitForBytesWritten(2000));
+            QTRY_COMPARE_WITH_TIMEOUT(socket.state(), QLocalSocket::UnconnectedState, 5000);
+        }
+        // A folder that can't be sent (a line break, too long, relative):
+        // the running Studio is asked to show itself, at once, and no
+        // second Studio runs
+        QVERIFY(!SingleInstance::canHandOver(QStringLiteral("/a\nshow")));
+        QVERIFY(!SingleInstance::canHandOver(QStringLiteral("relative")));
+        QVERIFY(!SingleInstance::canHandOver(QDir::rootPath() + QString(9000, u'x')));
+        QVERIFY(SingleInstance::canHandOver(project));
+        for (const QString &bad : {QStringLiteral("/a\nshow"), QDir::rootPath() + QString(9000, u'x')}) {
+            QElapsedTimer clock;
+            clock.start();
+            const auto third = QtConcurrent::run([folder, bad] {
+                SingleInstance copy(folder);
+                return copy.claim(bad);
+            });
+            QTRY_VERIFY_WITH_TIMEOUT(third.isFinished(), 10000);
+            QCOMPARE(third.result(), false);
+            QVERIFY2(clock.elapsed() < 2000, qPrintable(QString::number(clock.elapsed())));
+        }
+        QCOMPARE(opened.size(), 1);
+        QCOMPARE(shown.size(), 3);
     }
 
     void opensAFolderFromOutside()
@@ -341,6 +362,13 @@ private slots:
         Settings saved = loadSettings(settingsFolder()).value();
         QVERIFY(saved.useFloServer);
         QCOMPARE(saved.phpPath, QStringLiteral("/my/php")); // kept
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools(), 60000);
+        // FloServer removed while Studio runs: Settings, when shown, says
+        // so at once (the switch stays on, so it can be turned off)
+        QVERIFY(QFile::remove(dir.filePath(QStringLiteral("data/integration.json"))));
+        studio.showSettings(QStringLiteral("floserver"));
+        QVERIFY(!studio.floServer().value(QStringLiteral("found")).toBool());
+        QVERIFY(studio.useFloServer());
         studio.setUseFloServer(false);
         saved = loadSettings(settingsFolder()).value();
         QVERIFY(!saved.useFloServer);

@@ -19,4 +19,7 @@ T = {
  "FloServer has no PHP installed yet.": ("لم يُثبَّت أي PHP في FloServer بعد.", "هێشتا هیچ PHP یەک لە FloServer دا دانەمەزراوە."),
  "FloServer's Composer %1": ("Composer %1 من FloServer", "Composer %1 ی FloServer"),
  "FloServer has no Composer installed yet.": ("لم يُثبَّت Composer في FloServer بعد.", "هێشتا Composer لە FloServer دا دانەمەزراوە."),
+ "FloServer can't be found now, so Studio uses the PHP and Composer below until it is back.":
+   ("تعذّر العثور على FloServer الآن، لذا يستخدم Studio PHP وComposer أدناه إلى أن يعود.",
+    "ئێستا FloServer نادۆزرێتەوە، بۆیە Studio تا دەگەڕێتەوە PHP و Composer ی خوارەوە بەکاردەهێنێت."),
 }

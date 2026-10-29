@@ -4,6 +4,7 @@
 #  3. runs the installed Studio's smoke test, with only Windows on PATH
 #  4. checks the Start menu shortcut
 #  5. uninstalls from Settings > Apps' command: nothing of Studio is left
+#     (files, shortcut, registry: the installer's key and Studio's Path)
 # Usage: test_msi.ps1 -Msi <this.msi> -Older <older.msi> -Version <x.y.z>
 param(
     [Parameter(Mandatory)] [string] $Msi,
@@ -65,6 +66,12 @@ Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH, Env:QML_IMPORT_PATH -Error
 $smoke = Start-Process (Join-Path $folder 'Studio.exe') -ArgumentList '--smoke-test' -Wait -PassThru -NoNewWindow
 if ($smoke.ExitCode -ne 0) { Fail "the installed Studio's smoke test ended with $($smoke.ExitCode)" }
 
+# Studio writes its path for FloServer when it starts (D14, not with
+# --smoke-test): written here as Studio would, for uninstalling to remove
+$studioKey = 'HKCU:\Software\HostKurd\FloCMS Studio'
+New-Item -Path $studioKey -Force | Out-Null
+New-ItemProperty -Path $studioKey -Name 'Path' -Value (Join-Path $folder 'Studio.exe') -PropertyType String -Force | Out-Null
+
 # What Settings > Apps runs to uninstall
 $uninstall = $entries[0].Code
 Run-Msi @('/x', $uninstall) 'uninstall.log'
@@ -73,5 +80,6 @@ if (Test-Path $shortcut) { Fail "uninstalling left the Start menu shortcut" }
 $left = @(Get-ChildItem $folder -Recurse -Force -ErrorAction SilentlyContinue)
 if ($left.Count -ne 0 -or (Test-Path $folder)) { Fail "uninstalling left $($left.Count) files in $folder" }
 if (Test-Path 'HKCU:\Software\HostKurd\FloCMS Studio Installer') { Fail "uninstalling left the installer's registry key" }
+if (Test-Path $studioKey) { Fail "uninstalling left Studio's path for FloServer in the registry" }
 
 Write-Output "::notice::installer: upgraded from the older version, $files files ($kib KiB) for the current user, shortcut and smoke test passed, uninstalled with nothing left"

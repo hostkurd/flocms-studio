@@ -2777,211 +2777,216 @@
         <translation>FloServer %1 دۆزرایەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="104" />
+        <location filename="../qml/SettingsPage.qml" line="105" />
         <source>Use FloServer's PHP and Composer</source>
         <translation>بەکارهێنانی PHP و Composer ی FloServer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="110" />
+        <location filename="../qml/SettingsPage.qml" line="111" />
         <source>Turning this off brings back the PHP and Composer you had before.</source>
         <translation>کوژاندنەوەی ئەمە PHP و Composer ی پێشووت دەگەڕێنێتەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="118" />
+        <location filename="../qml/SettingsPage.qml" line="119" />
+        <source>FloServer can't be found now, so Studio uses the PHP and Composer below until it is back.</source>
+        <translation>ئێستا FloServer نادۆزرێتەوە، بۆیە Studio تا دەگەڕێتەوە PHP و Composer ی خوارەوە بەکاردەهێنێت.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="127" />
         <source>FloServer isn't installed on this computer.</source>
         <translation>FloServer لەسەر ئەم کۆمپیوتەرە دانەمەزراوە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="132" />
+        <location filename="../qml/SettingsPage.qml" line="141" />
         <source>General</source>
         <translation>گشتی</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="140" />
-        <location filename="../qml/SettingsPage.qml" line="142" />
+        <location filename="../qml/SettingsPage.qml" line="149" />
+        <location filename="../qml/SettingsPage.qml" line="151" />
         <source>Language</source>
         <translation>زمان</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="148" />
-        <location filename="../qml/SettingsPage.qml" line="169" />
+        <location filename="../qml/SettingsPage.qml" line="157" />
+        <location filename="../qml/SettingsPage.qml" line="178" />
         <source>System</source>
         <translation>سیستەم</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="153" />
+        <location filename="../qml/SettingsPage.qml" line="162" />
         <source>Changes right away. Arabic and Kurdish turn the whole window right to left.</source>
         <translation>دەستبەجێ دەگۆڕێت. عەرەبی و کوردی هەموو پەنجەرەکە دەکەنە ڕاست بۆ چەپ.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="162" />
-        <location filename="../qml/SettingsPage.qml" line="164" />
+        <location filename="../qml/SettingsPage.qml" line="171" />
+        <location filename="../qml/SettingsPage.qml" line="173" />
         <source>Theme</source>
         <translation>ڕووکار</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="167" />
+        <location filename="../qml/SettingsPage.qml" line="176" />
         <source>Light</source>
         <translation>ڕووناک</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="168" />
+        <location filename="../qml/SettingsPage.qml" line="177" />
         <source>Dark</source>
         <translation>تاریک</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="174" />
+        <location filename="../qml/SettingsPage.qml" line="183" />
         <source>System follows the computer's dark mode.</source>
         <translation>سیستەم دۆخی تاریکی کۆمپیوتەرەکە پەیڕەو دەکات.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="192" />
+        <location filename="../qml/SettingsPage.qml" line="201" />
         <source>PHP and tools</source>
         <translation>PHP و ئامرازەکان</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="193" />
+        <location filename="../qml/SettingsPage.qml" line="202" />
         <source>PHP to use</source>
         <translation>ئەو PHP ـەی بەکاردێت</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="199" />
+        <location filename="../qml/SettingsPage.qml" line="208" />
         <source>FloServer, per project (the version in each project's floserver.json)</source>
         <translation>FloServer، بۆ هەر پرۆژەیەک (ئەو وەشانەی لە floserver.json ی هەر پرۆژەیەکدا هەیە)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="220" />
+        <location filename="../qml/SettingsPage.qml" line="229" />
         <source>FloServer has no PHP installed yet.</source>
         <translation>هێشتا هیچ PHP یەک لە FloServer دا دانەمەزراوە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="234" />
+        <location filename="../qml/SettingsPage.qml" line="243" />
         <source>PHP %1 · downloaded by Studio</source>
         <translation>PHP %1 · Studio دایگرتووە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="235" />
+        <location filename="../qml/SettingsPage.qml" line="244" />
         <source>PHP %1 · found on this computer</source>
         <translation>PHP %1 · لەم کۆمپیوتەرەدا دۆزرایەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="236" />
+        <location filename="../qml/SettingsPage.qml" line="245" />
         <source>PHP %1 · chosen by you</source>
         <translation>PHP %1 · خۆت هەڵتبژاردووە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="242" />
+        <location filename="../qml/SettingsPage.qml" line="251" />
         <source>No PHP found on this computer.</source>
         <translation>هیچ PHP ـێک لەم کۆمپیوتەرەدا نەدۆزرایەوە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="250" />
+        <location filename="../qml/SettingsPage.qml" line="259" />
         <source>Choose another…</source>
         <translation>یەکێکی تر هەڵبژێرە…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="251" />
+        <location filename="../qml/SettingsPage.qml" line="260" />
         <source>Search again</source>
         <translation>دووبارە گەڕان</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="254" />
+        <location filename="../qml/SettingsPage.qml" line="263" />
         <source>Download PHP, Composer or MariaDB…</source>
         <translation>داگرتنی PHP، Composer یان MariaDB…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="254" />
+        <location filename="../qml/SettingsPage.qml" line="263" />
         <source>Download MariaDB…</source>
         <translation>داگرتنی MariaDB…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="260" />
+        <location filename="../qml/SettingsPage.qml" line="269" />
         <source>Composer</source>
         <translation>Composer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="263" />
+        <location filename="../qml/SettingsPage.qml" line="272" />
         <source>FloServer's Composer %1</source>
         <translation>Composer %1 ی FloServer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="264" />
+        <location filename="../qml/SettingsPage.qml" line="273" />
         <source>FloServer has no Composer installed yet.</source>
         <translation>هێشتا Composer لە FloServer دا دانەمەزراوە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="275" />
+        <location filename="../qml/SettingsPage.qml" line="284" />
         <source>Not found</source>
         <translation>نەدۆزرایەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="279" />
+        <location filename="../qml/SettingsPage.qml" line="288" />
         <source>Choose…</source>
         <translation>هەڵبژاردن…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="280" />
+        <location filename="../qml/SettingsPage.qml" line="289" />
         <source>Use the one found</source>
         <translation>ئەوەی دۆزرایەوە بەکاربهێنە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="283" />
+        <location filename="../qml/SettingsPage.qml" line="292" />
         <source>Downloads go into `%1`, for your user only. No administrator rights are needed.</source>
         <translation>داگیراوەکان دەچنە `%1`، تەنها بۆ بەکارهێنەرەکەت. مافی بەڕێوەبەر پێویست نییە.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="306" />
+        <location filename="../qml/SettingsPage.qml" line="315" />
         <source>Server</source>
         <translation>سێرڤەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="309" />
-        <location filename="../qml/SettingsPage.qml" line="317" />
+        <location filename="../qml/SettingsPage.qml" line="318" />
+        <location filename="../qml/SettingsPage.qml" line="326" />
         <source>First port to try</source>
         <translation>یەکەم پۆرت بۆ تاقیکردنەوە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="323" />
+        <location filename="../qml/SettingsPage.qml" line="332" />
         <source>Let other devices on the network open the site (phones for testing)</source>
         <translation>ڕێگە بدە ئامێرەکانی تری سەر تۆڕەکە ماڵپەڕەکە بکەنەوە (مۆبایل بۆ تاقیکردنەوە)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="328" />
+        <location filename="../qml/SettingsPage.qml" line="337" />
         <source>`php flo serve` takes the next free port when this one is in use. On the network, the site listens on `0.0.0.0`: only do this on networks you trust.</source>
         <translation>`php flo serve` پۆرتی بەتاڵی دواتر وەردەگرێت ئەگەر ئەم پۆرتە بەکارهاتبێت. لەسەر تۆڕ، ماڵپەڕەکە لەسەر `0.0.0.0` گوێ دەگرێت: تەنها لەسەر تۆڕێک ئەمە بکە کە متمانەت پێیەتی.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="342" />
+        <location filename="../qml/SettingsPage.qml" line="351" />
         <source>Editor</source>
         <translation>دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="347" />
+        <location filename="../qml/SettingsPage.qml" line="356" />
         <source>Editor command</source>
         <translation>فەرمانی دەستکاریکەر</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="351" />
+        <location filename="../qml/SettingsPage.qml" line="360" />
         <source>`{folder}` becomes the project's folder; quotes group words. For example `code "{folder}"` or `phpstorm {folder}`.</source>
         <translation>`{folder}` دەبێتە فۆڵدەری پڕۆژەکە؛ دوو کەوانە وشەکان کۆدەکاتەوە. بۆ نموونە `code "{folder}"` یان `phpstorm {folder}`.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="366" />
+        <location filename="../qml/SettingsPage.qml" line="375" />
         <source>Project folders</source>
         <translation>فۆڵدەرەکانی پڕۆژە</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="368" />
+        <location filename="../qml/SettingsPage.qml" line="377" />
         <source>Studio lists every FloCMS project inside these folders.</source>
         <translation>Studio هەموو پڕۆژەکانی FloCMS ـی ناو ئەم فۆڵدەرانە پیشان دەدات.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="378" />
+        <location filename="../qml/SettingsPage.qml" line="387" />
         <source>Remove</source>
         <translation>لابردن</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="381" />
+        <location filename="../qml/SettingsPage.qml" line="390" />
         <source>Add a folder…</source>
         <translation>زیادکردنی فۆڵدەر…</translation>
     </message>

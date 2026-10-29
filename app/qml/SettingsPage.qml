@@ -98,9 +98,10 @@ ScrollView {
                 }
             }
             AppSwitch {
-                // On only while FloServer is there: Studio then uses the PHP and Composer of before
-                checked: Studio.useFloServer && floserver.found
-                enabled: floserver.found
+                // Can be turned on only while FloServer is there, and off always
+                // (FloServer gone: Studio uses the PHP and Composer of before)
+                checked: Studio.useFloServer
+                enabled: floserver.found || Studio.useFloServer
                 text: qsTr("Use FloServer's PHP and Composer")
                 Layout.fillWidth: true
                 onToggled: Studio.setUseFloServer(checked)
@@ -109,6 +110,14 @@ ScrollView {
                 visible: floserver.found
                 ui: qsTr("Turning this off brings back the PHP and Composer you had before.")
                 color: Theme.muted
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            AppText {
+                visible: !floserver.found && Studio.useFloServer
+                ui: qsTr("FloServer can't be found now, so Studio uses the PHP and Composer below until it is back.")
+                color: Theme.warnText
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
