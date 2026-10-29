@@ -269,7 +269,9 @@ private slots:
             socket.connectToServer(first.socketName());
             QVERIFY(socket.waitForConnected(2000));
             socket.write(message);
-            QVERIFY(socket.waitForBytesWritten(2000));
+            // Not waitForBytesWritten: it blocks this thread, which is also
+            // the running Studio's, so on Windows the pipe never drains.
+            QTRY_COMPARE_WITH_TIMEOUT(socket.bytesToWrite(), qint64(0), 2000);
             QTRY_COMPARE_WITH_TIMEOUT(socket.state(), QLocalSocket::UnconnectedState, 5000);
             QVERIFY(!socket.readAll().contains("ok"));
         }
@@ -280,7 +282,9 @@ private slots:
             socket.connectToServer(first.socketName());
             QVERIFY(socket.waitForConnected(2000));
             socket.write("open /never/ending");
-            QVERIFY(socket.waitForBytesWritten(2000));
+            // Not waitForBytesWritten: it blocks this thread, which is also
+            // the running Studio's, so on Windows the pipe never drains.
+            QTRY_COMPARE_WITH_TIMEOUT(socket.bytesToWrite(), qint64(0), 2000);
             QTRY_COMPARE_WITH_TIMEOUT(socket.state(), QLocalSocket::UnconnectedState, 5000);
         }
         // A folder that can't be sent (a line break, too long, relative):
