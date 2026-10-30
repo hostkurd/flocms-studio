@@ -809,7 +809,11 @@ QString dropProjectDatabaseSql(const QString &database, const QString &user, boo
 int freeDatabasePort(int from, int tries)
 {
     for (int port = from; port < from + tries && port <= 65535; ++port) {
-        if (portAnswers(QStringLiteral("127.0.0.1"), port, 200))
+        // Whether something listens (binding is refused), not whether a
+        // connection succeeds: some machines (seen on GitHub's macOS 15
+        // runners; VPNs and security tools do it too) accept connections on
+        // closed localhost ports, and every port then looked taken.
+        if (portListening(port))
             continue;
         QTcpServer probe;
         if (probe.listen(QHostAddress::LocalHost, static_cast<quint16>(port)))
