@@ -40,7 +40,7 @@ The page shows the project's name and folder, these buttons, and six tabs:
 - **Open folder**: opens the project folder in your file manager.
 - **Open in editor**: opens the folder in your editor. Set the editor in [Settings > Editor](settings.md#editor).
 - **Start server** / **Stop server**: see [The server and the database](server-and-database.md#the-website-server).
-- **More**: **Remove from Studio** and **Delete project…**.
+- **More**: **Open terminal** (Ctrl+`, ⌘` on macOS): your terminal in the project's folder, with the PHP and Composer Studio uses first (see [Settings > Editor](settings.md#editor)). Then **Remove from Studio** and **Delete project…**.
 
 The tabs are **Overview**, **Generate**, **Database**, **Logs**, **Packages** and **Doctor**.
 

@@ -560,11 +560,15 @@ bool NewProjectWizard::failedAtDatabaseCheck() const
 
 bool NewProjectWizard::canSkipDatabase() const
 {
+    if (m_demo)
+        return m_demoCanSkip;
     return failedAtDatabaseCheck();
 }
 
 bool NewProjectWizard::missingDatabase() const
 {
+    if (m_demo)
+        return m_demoMissing;
     // Stays offered when creating it failed, so it can be tried again (A-D4)
     return failedAtDatabaseCheck() && m_project.mysql && !m_project.createDatabase && m_databaseMissing;
 }
@@ -717,6 +721,10 @@ void NewProjectWizard::showDemo(const QVariantMap &demo)
     m_lines = demo.value(QStringLiteral("lines")).toStringList();
     m_state = demo.value(QStringLiteral("state"), QStringLiteral("editing")).toString();
     m_projectPath = demo.value(QStringLiteral("projectPath")).toString();
+    m_demo = true;
+    m_demoMissing = demo.value(QStringLiteral("missingDatabase")).toBool();
+    m_demoCanSkip = demo.value(QStringLiteral("canSkipDatabase")).toBool();
+    m_skippedDatabase = demo.value(QStringLiteral("skippedDatabase")).toBool();
     emit formChanged();
     emit stepsChanged();
     emit linesChanged();

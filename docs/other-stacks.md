@@ -20,7 +20,7 @@ The downloads dialog shows where each tool comes from: **From XAMPP**, **From La
 
 In [Settings > Database server](settings.md#database-server), choose the server Studio found, for example "XAMPP · MariaDB 10.4". Its note says "start and stop it in XAMPP" (or Laragon). For any other server found, it says "Studio doesn't start or stop it". The sidebar shows the server as running when something listens on its port.
 
-For a new project on that server, the [Database step](first-project.md#step-2-database) starts with server `127.0.0.1`, port `3306` and user `root`, with an empty password, as XAMPP has. The database must exist already: create it in phpMyAdmin, HeidiSQL or `mysql` first. Studio writes what you give into the project's `.env`.
+For a new project on that server, the [Database step](first-project.md#step-2-database) starts with server `127.0.0.1`, port `3306` and user `root`, with an empty password, as XAMPP has. When the database doesn't exist yet, step 4 offers **Create database "…"**, or create it in phpMyAdmin, HeidiSQL or `mysql` first. Studio writes what you give into the project's `.env`.
 
 With **Another server**, Studio fills in the host, port and user you set in Settings.
 

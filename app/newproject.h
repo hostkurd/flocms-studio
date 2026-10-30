@@ -150,6 +150,9 @@ private:
     bool m_madeFolder = false;                 // the folder is this run's
     bool m_skippedDatabase = false;            // the database steps were skipped
     bool m_databaseMissing = false;            // db:check said the database isn't there
+    bool m_demo = false;                       // showDemo() was called
+    bool m_demoMissing = false;                // a demo's missingDatabase and canSkipDatabase
+    bool m_demoCanSkip = false;
     QStringList m_envSecrets;                  // the new .env's, read after create and env
     QVariantList m_steps;
     QStringList m_lines;

@@ -6,6 +6,8 @@ qt_add_executable(Studio
     logmodel.cpp
     mariadbserver.h
     mariadbserver.cpp
+    databasesetup.h
+    databasesetup.cpp
     newproject.h
     newproject.cpp
     singleinstance.h
@@ -97,6 +99,7 @@ set(STUDIO_QML
     qml/ConfirmDialog.qml
     qml/DeleteProjectDialog.qml
     qml/ProjectMenu.qml
+    qml/DatabaseSetupForm.qml
     qml/DatabaseTab.qml
     qml/DoctorTab.qml
     qml/FormField.qml

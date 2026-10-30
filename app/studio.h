@@ -1,5 +1,6 @@
 #pragma once
 
+#include "databasesetup.h"
 #include "logmodel.h"
 #include "mariadbserver.h"
 #include "newproject.h"
@@ -74,6 +75,8 @@ class Studio : public QObject
     Q_PROPERTY(bool commandRunning READ commandRunning NOTIFY commandRunningChanged)
     // The new project wizard (stage 6); page "new" shows it
     Q_PROPERTY(NewProjectWizard *wizard READ wizard CONSTANT)
+    // The Database tab's set-up card for a project with no database
+    Q_PROPERTY(DatabaseSetup *databaseSetup READ databaseSetup CONSTANT)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -148,6 +151,7 @@ public:
     ProjectPackages *packagesTab() const { return m_packagesTab.value(m_currentPath); }
     bool commandRunning() const;
     NewProjectWizard *wizard() { return &m_wizard; }
+    DatabaseSetup *databaseSetup() { return &m_databaseSetup; }
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -362,4 +366,5 @@ private:
     QHash<QString, ProjectGenerate *> m_generate; // the same
     QHash<QString, ProjectPackages *> m_packagesTab; // the same
     NewProjectWizard m_wizard{&m_settings};
+    DatabaseSetup m_databaseSetup{&m_settings, &m_mariadb};
 };

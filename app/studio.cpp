@@ -192,6 +192,14 @@ Studio::Studio(Language *language, QObject *parent)
     // A new project is listed (in a project folder, or on its own); the
     // wizard's page stays until the person opens it
     m_wizard.setMariadb(&m_mariadb);
+    // The set-up card wrote .env: the project and its Database tab follow
+    connect(&m_databaseSetup, &DatabaseSetup::envWritten, this, [this](const QString &path) {
+        if (path != m_currentPath)
+            return;
+        loadCurrent();
+        if (ProjectChecks *checks = m_checks.value(path))
+            checks->refreshDatabase();
+    });
     connect(this, &Studio::settingsChanged, &m_wizard, &NewProjectWizard::serverChoiceChanged);
     connect(&m_wizard, &NewProjectWizard::stepsChanged, this, &Studio::commandRunningChanged);
     connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
@@ -325,6 +333,8 @@ Result<Done> Studio::startDemo(const QString &file)
         m_problem = demo.value(QStringLiteral("problem")).toObject().toVariantMap();
     if (demo.contains(QStringLiteral("wizard")))
         m_wizard.showDemo(demo.value(QStringLiteral("wizard")).toObject().toVariantMap());
+    if (demo.contains(QStringLiteral("databaseSetup")))
+        m_databaseSetup.showDemo(demo.value(QStringLiteral("databaseSetup")).toObject().toVariantMap());
     // The open project's Doctor and database, server and log, and which
     // others are running
     if (!m_currentPath.isEmpty()) {

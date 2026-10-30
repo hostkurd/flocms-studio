@@ -86,7 +86,7 @@ Card {
     }
     RichText {
         visible: !card.db.configured
-        raw: qsTr("Set `DB_NAME` (and `DB_USERNAME` for MySQL) in `.env`. The Database tab will do this for you.")
+        raw: qsTr("This project has no database yet. Studio can make one and write the `DB_` lines into `.env`.")
         color: Theme.muted
         font.pixelSize: 13
         wrapMode: Text.Wrap
@@ -177,7 +177,8 @@ Card {
         }
         AppButton {
             visible: !card.canStart && !card.canStop && card.pending === 0
-            text: qsTr("Database tab")
+            primary: !card.db.configured
+            text: card.db.configured ? qsTr("Database tab") : qsTr("Set up database")
             onClicked: card.openTab("database")
         }
     }

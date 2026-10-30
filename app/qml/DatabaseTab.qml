@@ -20,6 +20,23 @@ ScrollView {
     contentWidth: availableWidth
     clip: true
 
+    // No database yet (design note of 30 Oct, part C): the Connection card
+    // holds the set-up, and stays so while a set-up runs or waits on the
+    // person, even once .env has the lines
+    readonly property var config: Studio.current.database || ({})
+    readonly property var setup: Studio.databaseSetup
+    readonly property bool setupShown: !config.configured
+        || (setup.projectDir === Studio.currentPath && ["running", "missing", "failed"].indexOf(setup.state) >= 0)
+    function freshSetup() {
+        if (!tab.config.configured && Studio.currentPath)
+            tab.setup.reset(Studio.currentPath)
+    }
+    Component.onCompleted: freshSetup()
+    Connections {
+        target: Studio
+        function onCurrentChanged() { tab.freshSetup() }
+    }
+
     // "10.11.14-MariaDB-0ubuntu0.24.04.1" → "MariaDB 10.11.14"
     function serverName(driver, server) {
         if (driver === "sqlite")
@@ -74,23 +91,25 @@ ScrollView {
                         spacing: 8
                         Rectangle {
                             width: 8; height: 8; radius: 4
-                            color: tab.db.state === "done" ? Theme.ok : (tab.db.state === "failed" ? Theme.bad : Theme.idle)
+                            color: tab.setupShown ? Theme.idle
+                                 : (tab.db.state === "done" ? Theme.ok : (tab.db.state === "failed" ? Theme.bad : Theme.idle))
                         }
                         AppText {
-                            ui: tab.db.state === "done" ? tab.serverName(tab.db.driver, tab.db.server)
-                                : (tab.db.state === "failed" ? qsTr("Can't connect") : qsTr("Checking…"))
+                            ui: tab.setupShown ? qsTr("Not set up yet")
+                                : (tab.db.state === "done" ? tab.serverName(tab.db.driver, tab.db.server)
+                                : (tab.db.state === "failed" ? qsTr("Can't connect") : qsTr("Checking…")))
                             font.weight: Font.DemiBold
                         }
                     }
                 }
                 ColumnLayout {
-                    visible: !!tab.db.database
+                    visible: !tab.setupShown && !!tab.db.database
                     spacing: 4
                     SectionLabel { ui: qsTr("Database") }
                     Mono { text: tab.db.database || "" }
                 }
                 ColumnLayout {
-                    visible: tab.db.driver !== "sqlite" && !!tab.db.host
+                    visible: !tab.setupShown && tab.db.driver !== "sqlite" && !!tab.db.host
                     spacing: 4
                     SectionLabel { ui: qsTr("Host") }
                     Mono { text: (tab.db.host || "") + (tab.db.port ? ":" + tab.db.port : "") }
@@ -107,6 +126,7 @@ ScrollView {
                     onClicked: Studio.openEnvFile()
                 }
                 AppButton {
+                    visible: !tab.setupShown
                     small: true
                     text: qsTr("Refresh")
                     iconPath: Icons.refresh
@@ -114,8 +134,13 @@ ScrollView {
                     onClicked: tab.checks.refreshDatabase()
                 }
             }
+            DatabaseSetupForm {
+                visible: tab.setupShown
+                setup: tab.setup
+                Layout.fillWidth: true
+            }
             Rectangle {
-                visible: tab.offerStart
+                visible: !tab.setupShown && tab.offerStart
                 Layout.fillWidth: true
                 implicitHeight: startRow.implicitHeight + 24
                 radius: 10
@@ -142,12 +167,21 @@ ScrollView {
                     }
                 }
             }
-            MariadbProblem { visible: tab.onStudioServer && code !== ""; Layout.fillWidth: true }
-            ProblemText { report: tab.db; visible: !tab.offerStart && (tab.db.state === "failed") }
+            MariadbProblem { visible: !tab.setupShown && tab.onStudioServer && code !== ""; Layout.fillWidth: true }
+            ProblemText { report: tab.db; visible: !tab.setupShown && !tab.offerStart && (tab.db.state === "failed") }
+        }
+
+        AppText {
+            visible: tab.setupShown
+            ui: qsTr("The migrations and tables show here once the database is set up.")
+            color: Theme.muted
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
         }
 
         GridLayout {
             id: cards
+            visible: !tab.setupShown
             Layout.fillWidth: true
             columns: tab.availableWidth > 900 ? 2 : 1
             columnSpacing: 16
