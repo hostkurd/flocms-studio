@@ -11,6 +11,7 @@
 #include <flostudio/core/process.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/server.h>
+#include <flostudio/core/terminal.h>
 
 #include <QDesktopServices>
 #include <QDir>
@@ -485,6 +486,11 @@ void Studio::setServerNetwork(bool network)
 void Studio::setEditorCommand(const QString &command)
 {
     changeSettings([&command](Settings &s) { s.editorCommand = command; });
+}
+
+void Studio::setTerminalCommand(const QString &command)
+{
+    changeSettings([&command](Settings &s) { s.terminalCommand = command.trimmed(); });
 }
 
 void Studio::setPhpPath(const QString &path)
@@ -1295,6 +1301,12 @@ void Studio::askDatabasePort()
 void Studio::openInEditor(const QString &path)
 {
     if (const auto opened = FloStudio::Core::openInEditor(m_settings, path); !opened)
+        setProblem(opened.error().code, opened.error().detail);
+}
+
+void Studio::openTerminal(const QString &path)
+{
+    if (const auto opened = FloStudio::Core::openTerminal(m_settings, path); !opened)
         setProblem(opened.error().code, opened.error().detail);
 }
 

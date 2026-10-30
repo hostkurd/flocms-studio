@@ -363,6 +363,24 @@ ScrollView {
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
+            // Open terminal (design note of 30 Oct, B-D2)
+            Heading { ui: qsTr("Terminal"); Layout.topMargin: 10 }
+            Field {
+                Layout.fillWidth: true
+                mono: true
+                text: Studio.terminalCommand
+                placeholderText: Qt.platform.os === "windows" ? qsTr("Automatic: Windows Terminal, else PowerShell")
+                               : (Qt.platform.os === "osx" ? qsTr("Automatic: Terminal") : qsTr("Automatic: this system's terminal"))
+                Accessible.name: qsTr("Terminal command")
+                onEditingFinished: Studio.setTerminalCommand(text)
+            }
+            RichText {
+                raw: qsTr("Empty: Studio picks the terminal and puts its PHP and Composer first in it. Or a command with `{folder}`, for example `wezterm start --cwd \"{folder}\"`.")
+                color: Theme.muted
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
         }
 
         // --- Project folders ---

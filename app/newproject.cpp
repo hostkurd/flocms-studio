@@ -6,6 +6,7 @@
 #include <flostudio/core/env.h>
 #include <flostudio/core/output.h>
 #include <flostudio/core/process.h>
+#include <flostudio/core/wizard.h>
 #include <flostudio/security/secrets.h>
 
 #include <QDir>
@@ -75,6 +76,7 @@ void NewProjectWizard::reset()
         m_project.parentDir = QDir::toNativeSeparators(QDir::home().filePath(QStringLiteral("Sites")));
     m_project.port = m_settings ? m_settings->serverPort : 8000;
     m_project.dbUser = QStringLiteral("root");
+    m_pickedServer.clear();
     m_steps.clear();
     m_lines.clear();
     m_plan.clear();
@@ -82,6 +84,8 @@ void NewProjectWizard::reset()
     m_projectPath.clear();
     m_current = -1;
     m_madeFolder = false;
+    m_skippedDatabase = false;
+    m_databaseMissing = false;
     m_envSecrets.clear();
     emit formChanged();
     emit stepsChanged();
@@ -109,7 +113,8 @@ QVariantMap NewProjectWizard::form() const
             {QStringLiteral("dbPassword"), m_project.dbPassword},
             {QStringLiteral("rememberPassword"), m_rememberPassword},
             {QStringLiteral("createDatabase"), m_project.createDatabase},
-            {QStringLiteral("server"), defaultServer()},
+            {QStringLiteral("server"), chosenServer()},
+            {QStringLiteral("defaultServer"), defaultServer()},
             {QStringLiteral("adminName"), m_project.adminName},
             {QStringLiteral("adminEmail"), m_project.adminEmail},
             {QStringLiteral("adminPassword"), m_project.adminPassword}};
@@ -203,7 +208,7 @@ void NewProjectWizard::set(const QString &field, const QVariant &value)
         if (m_project.mysql && !wasMysql)
             applyServerDefaults();
     } else if (field == u"createDatabase") {
-        m_project.createDatabase = value.toBool() && defaultServer() == u"studio";
+        m_project.createDatabase = value.toBool() && chosenServer() == u"studio";
         if (m_project.createDatabase) {
             m_project.dbHost = QStringLiteral("127.0.0.1");
             m_project.dbPort = m_mariadb ? m_mariadb->port() : 3306;
@@ -213,6 +218,13 @@ void NewProjectWizard::set(const QString &field, const QVariant &value)
             m_project.dbUser = QStringLiteral("root");
             m_project.dbPassword.clear();
         }
+    } else if (field == u"server") {
+        // This project only; Settings keeps the default (D-D1)
+        if (text != u"studio" && text != u"found" && text != u"other")
+            return;
+        m_pickedServer = text;
+        if (m_project.mysql && chosenServer() != m_appliedServer)
+            applyServerDefaults();
     } else if (field == u"dbHost") {
         m_project.dbHost = text;
     } else if (field == u"dbPort") {
@@ -248,6 +260,14 @@ QString NewProjectWizard::defaultServer() const
     return chosen;
 }
 
+QString NewProjectWizard::chosenServer() const
+{
+    if (m_pickedServer.isEmpty())
+        return defaultServer();
+    const bool own = m_mariadb && m_mariadb->state() != u"none";
+    return m_pickedServer == u"studio" && !own ? defaultServer() : m_pickedServer;
+}
+
 void NewProjectWizard::setMariadb(MariadbServer *server)
 {
     m_mariadb = server;
@@ -258,7 +278,7 @@ void NewProjectWizard::serverChoiceChanged()
 {
     if (m_state != u"editing")
         return;
-    if (m_project.mysql && defaultServer() != m_appliedServer)
+    if (m_project.mysql && chosenServer() != m_appliedServer)
         applyServerDefaults();
     // Studio's server's port may have changed in Settings
     if (m_project.mysql && m_project.createDatabase && m_mariadb && m_project.dbPort != m_mariadb->port())
@@ -268,7 +288,7 @@ void NewProjectWizard::serverChoiceChanged()
 
 void NewProjectWizard::applyServerDefaults()
 {
-    const QString server = defaultServer();
+    const QString server = chosenServer();
     m_appliedServer = server;
     m_project.createDatabase = server == u"studio";
     if (server == u"studio") {
@@ -456,6 +476,7 @@ void NewProjectWizard::cancel()
 void NewProjectWizard::runFrom(int index)
 {
     m_state = QStringLiteral("running");
+    m_databaseMissing = false;
     for (int i = index; i < m_steps.size(); ++i)
         setStep(i, QStringLiteral("waiting"));
     emit formChanged(); // problems() and ready() depend on the state
@@ -466,18 +487,7 @@ void NewProjectWizard::runStep(int index)
 {
     m_current = index;
     if (index >= m_plan.size()) {
-        m_state = QStringLiteral("done");
-        m_projectPath = QDir::toNativeSeparators(newProjectFolder(m_project));
-        // A password that worked is saved, if the person wanted that
-        // Studio's server: the project is marked as its, for the Database tab
-        if (m_project.mysql && m_project.createDatabase && m_mariadb)
-            m_mariadb->addProject(m_projectPath);
-        // The password Studio made is always kept (its checkbox isn't shown)
-        if (m_project.mysql && (m_rememberPassword || m_project.createDatabase) && !m_project.dbPassword.isEmpty() && secureStore())
-            Security::savePassword(Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser),
-                                   m_project.dbPassword, this, [](const Result<QString> &) {});
-        emit stepsChanged();
-        emit created(m_projectPath);
+        finish(true);
         return;
     }
     const WizardStep &step = m_plan.at(index);
@@ -522,6 +532,92 @@ void NewProjectWizard::runStep(int index)
                 problem.message = message;
             stepDone(index, ok, problem);
         });
+}
+
+void NewProjectWizard::finish(bool saveDatabaseLogin)
+{
+    m_state = QStringLiteral("done");
+    m_projectPath = QDir::toNativeSeparators(newProjectFolder(m_project));
+    // Studio's server: the project is marked as its, for the Database tab
+    if (m_project.mysql && m_project.createDatabase && m_mariadb)
+        m_mariadb->addProject(m_projectPath);
+    // A password that worked is saved, if the person wanted that; the
+    // password Studio made is always kept (its checkbox isn't shown)
+    if (saveDatabaseLogin && m_project.mysql && (m_rememberPassword || m_project.createDatabase)
+        && !m_project.dbPassword.isEmpty() && secureStore())
+        Security::savePassword(Security::databaseAccount(m_project.dbHost, m_project.dbPort, m_project.dbUser),
+                               m_project.dbPassword, this, [](const Result<QString> &) {});
+    emit stepsChanged();
+    emit formChanged();
+    emit created(m_projectPath);
+}
+
+bool NewProjectWizard::failedAtDatabaseCheck() const
+{
+    return m_state == u"failed" && !m_running && m_current >= 0 && m_current < m_plan.size()
+           && m_plan.at(m_current).id == u"db-check";
+}
+
+bool NewProjectWizard::canSkipDatabase() const
+{
+    return failedAtDatabaseCheck();
+}
+
+bool NewProjectWizard::missingDatabase() const
+{
+    // Stays offered when creating it failed, so it can be tried again (A-D4)
+    return failedAtDatabaseCheck() && m_project.mysql && !m_project.createDatabase && m_databaseMissing;
+}
+
+void NewProjectWizard::createDatabase()
+{
+    if (!m_settings || !missingDatabase())
+        return;
+    const int index = m_current;
+    const auto command = createDatabaseCommand(*m_settings, databaseLogin(m_project), newProjectFolder(m_project));
+    m_state = QStringLiteral("running");
+    setStep(index, QStringLiteral("running"));
+    emit formChanged();
+    if (!command) {
+        stepDone(index, false, {command.error().code, command.error().detail, {}});
+        return;
+    }
+    addLine(QStringLiteral("› ") + command.value().shown);
+    m_output.clear();
+    m_running = startStreaming(
+        command.value(), this,
+        [this](const OutputLine &line) {
+            if (line.error)
+                m_output << line.text;
+            addLine(line.text);
+        },
+        [this, index](int exitCode, bool crashed) {
+            if (m_running)
+                m_running->deleteLater();
+            m_running = nullptr;
+            if (exitCode == 0 && !crashed) {
+                runFrom(index); // db:check again, then the rest (A-D3)
+                return;
+            }
+            // The server's own words in place of db:check's (A-D4)
+            const QString message = m_output.join(u'\n').trimmed();
+            stepDone(index, false, message.isEmpty() ? StepProblem{QStringLiteral("db_create_other"), {}, {}}
+                                                     : StepProblem{{}, {}, message});
+        });
+}
+
+void NewProjectWizard::skipDatabaseSteps()
+{
+    if (!canSkipDatabase())
+        return;
+    for (int i = m_current; i < m_plan.size(); ++i) {
+        const QString &id = m_plan.at(i).id;
+        if (id == u"db-check" || id == u"migrate" || id == u"admin")
+            setStep(i, QStringLiteral("skipped"));
+    }
+    m_skippedDatabase = true;
+    // The password never worked: nothing is saved (A-D5)
+    finish(false);
 }
 
 void NewProjectWizard::runCreateDatabase(int index)
@@ -594,6 +690,9 @@ void NewProjectWizard::stepDone(int index, bool ok, const StepProblem &problem)
     if (index < m_plan.size() && (m_plan.at(index).id == u"create" || m_plan.at(index).kind == StepKind::WriteEnv))
         readEnvSecrets();
     setStep(index, ok ? QStringLiteral("done") : QStringLiteral("failed"), problem);
+    if (!ok && index < m_plan.size() && m_plan.at(index).id == u"db-check"
+        && isUnknownDatabase(problem.message + u'\n' + problem.detail))
+        m_databaseMissing = true;
     if (!ok) {
         m_state = QStringLiteral("failed");
         emit stepsChanged();

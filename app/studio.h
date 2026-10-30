@@ -44,6 +44,7 @@ class Studio : public QObject
     Q_PROPERTY(int serverPort READ serverPort NOTIFY settingsChanged)
     Q_PROPERTY(bool serverNetwork READ serverNetwork NOTIFY settingsChanged)
     Q_PROPERTY(QString editorCommand READ editorCommand NOTIFY settingsChanged)
+    Q_PROPERTY(QString terminalCommand READ terminalCommand NOTIFY settingsChanged)
     Q_PROPERTY(QString phpPath READ phpPath NOTIFY settingsChanged)
     Q_PROPERTY(QString composerPath READ composerPath NOTIFY settingsChanged)
     Q_PROPERTY(QStringList projectFolders READ projectFolders NOTIFY settingsChanged)
@@ -128,6 +129,7 @@ public:
     int serverPort() const { return m_settings.serverPort; }
     bool serverNetwork() const { return m_settings.serverNetwork; }
     QString editorCommand() const { return m_settings.editorCommand; }
+    QString terminalCommand() const { return m_settings.terminalCommand; }
     QString phpPath() const { return m_settings.phpPath; }
     QString composerPath() const { return m_settings.composerPath; }
     QStringList projectFolders() const { return m_settings.projectFolders; }
@@ -174,6 +176,7 @@ public:
     Q_INVOKABLE void setServerPort(int port);
     Q_INVOKABLE void setServerNetwork(bool network);
     Q_INVOKABLE void setEditorCommand(const QString &command);
+    Q_INVOKABLE void setTerminalCommand(const QString &command);
     Q_INVOKABLE void setPhpPath(const QString &path);
     Q_INVOKABLE void setComposerPath(const QString &path);
     // D14: phpPath and composerPath stay, so off brings them back
@@ -218,6 +221,9 @@ public:
     Q_INVOKABLE void refreshTools();
     Q_INVOKABLE void openInEditor(const QString &path);
     Q_INVOKABLE void openFolder(const QString &path);
+    // The person's terminal in the folder, Studio's PHP and Composer first
+    // on its PATH (design note of 30 Oct, part B)
+    Q_INVOKABLE void openTerminal(const QString &path);
     Q_INVOKABLE void dismissProblem();
     // The open project's server and log
     Q_INVOKABLE void startServer();

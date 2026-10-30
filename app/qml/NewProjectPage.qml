@@ -71,6 +71,12 @@ Item {
         onAccepted: page.wizard.startOver()
     }
 
+    // Skip the database steps (design note of 30 Oct, A-D5 and A-D6)
+    ConfirmDialog {
+        id: skipDialog
+        onAccepted: page.wizard.skipDatabaseSteps()
+    }
+
     FolderDialog {
         id: parentFolder
         title: qsTr("Where to make the project")
@@ -291,6 +297,30 @@ Item {
                         ]
                         onChosen: (value) => page.wizard.set("database", value)
                     }
+                    // The server, for this project only (design note of 30 Oct, D-D1)
+                    ColumnLayout {
+                        visible: page.form.database === "mysql" && Studio.mariadb.state !== "none"
+                        spacing: 6
+                        Layout.fillWidth: true
+                        Segmented {
+                            enabled: !page.started
+                            label: qsTr("Server")
+                            value: page.form.server === "studio" ? "studio" : "another"
+                            options: [
+                                { value: "studio", text: qsTr("Studio's MariaDB %1").arg(Studio.mariadb.series) },
+                                { value: "another", text: qsTr("Another server") }
+                            ]
+                            onChosen: (value) => page.wizard.set("server", value === "studio" ? "studio"
+                                                                  : (page.form.defaultServer === "studio" ? "other" : page.form.defaultServer))
+                        }
+                        AppText {
+                            ui: qsTr("For this project only. The default for new projects is in Settings.")
+                            color: Theme.muted
+                            font.pixelSize: 13
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                    }
                     RichText {
                         visible: page.form.database === "sqlite"
                         raw: qsTr("The database is the file `storage/database.sqlite`, made by the first migration. Nothing to install; good for trying things and small sites.")
@@ -323,7 +353,6 @@ Item {
                                 color: Studio.mariadb.state === "running" ? Theme.okBg : Theme.rule
                                 fg: Studio.mariadb.state === "running" ? Theme.okText : Theme.muted
                             }
-                            AppButton { small: true; text: qsTr("Change in Settings"); onClicked: Studio.showSettingsFromWizard("database") }
                         }
                     }
                     ColumnLayout {
@@ -381,7 +410,7 @@ Item {
                         rowSpacing: 18
                         FormField {
                             label: qsTr("Database name")
-                            hint: qsTr("It must exist already: create it in phpMyAdmin, HeidiSQL or `mysql`.")
+                            hint: qsTr("If it doesn't exist yet, Studio offers to create it when it makes the project.")
                             problem: page.problems.dbName || ""
                             Layout.fillWidth: true
                             Field { mono: true; text: page.form.dbName; Layout.fillWidth: true; Accessible.name: qsTr("Database name"); onTextEdited: page.wizard.set("dbName", text); onEditingFinished: page.wizard.touch("dbName") }
@@ -494,12 +523,23 @@ Item {
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
-                                Mono {
-                                    text: modelData.id === "env" ? "" : modelData.shown
+                                RowLayout {
                                     visible: modelData.id !== "env"
-                                    color: modelData.state === "waiting" || !modelData.state ? Theme.muted : Theme.text
-                                    wrapMode: Text.WrapAnywhere
+                                    spacing: 8
                                     Layout.fillWidth: true
+                                    Mono {
+                                        text: modelData.id === "env" ? "" : modelData.shown
+                                        color: modelData.state === "waiting" || modelData.state === "skipped" || !modelData.state ? Theme.muted : Theme.text
+                                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                        Layout.fillWidth: true
+                                    }
+                                    Pill {
+                                        visible: modelData.state === "skipped"
+                                        text: qsTr("Skipped")
+                                        color: Theme.rule
+                                        fg: Theme.muted
+                                        Layout.alignment: Qt.AlignTop
+                                    }
                                 }
                                 RichText {
                                     visible: modelData.id === "env"
@@ -517,12 +557,55 @@ Item {
                                     Layout.fillWidth: true
                                 }
                                 Mono {
-                                    visible: !!modelData.message || (!!modelData.detail && modelData.code !== "step_exit")
+                                    visible: modelData.state !== "skipped" && (!!modelData.message || (!!modelData.detail && modelData.code !== "step_exit"))
                                     text: modelData.message || modelData.detail || ""
                                     color: Theme.badText
                                     font.pixelSize: 12
-                                    wrapMode: Text.WrapAnywhere
+                                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                                     Layout.fillWidth: true
+                                }
+                                // db:check failed: create the database, or go on without it (A-D1)
+                                Rectangle {
+                                    visible: modelData.id === "db-check" && modelData.state === "failed" && page.wizard.canSkipDatabase
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 6
+                                    implicitHeight: databaseChoice.implicitHeight + 28
+                                    radius: 8
+                                    color: Theme.optionSelectedBg
+                                    border.color: Theme.border
+                                    ColumnLayout {
+                                        id: databaseChoice
+                                        anchors.fill: parent
+                                        anchors.margins: 14
+                                        spacing: 12
+                                        RichText {
+                                            raw: page.wizard.missingDatabase
+                                                 ? qsTr("The server on `%1:%2` answered, but it has no database called `%3`. Studio can create it with the login from step 2, then go on.")
+                                                       .arg(page.form.dbHost).arg(page.form.dbPort).arg(page.form.dbName)
+                                                 : qsTr("You can also finish the project without its database steps and set the database up later.")
+                                            wrapMode: Text.Wrap
+                                            Layout.fillWidth: true
+                                        }
+                                        Flow {
+                                            spacing: 10
+                                            Layout.fillWidth: true
+                                            AppButton {
+                                                visible: page.wizard.missingDatabase
+                                                primary: true
+                                                text: qsTr("Create database \u201C%1\u201D").arg(page.form.dbName)
+                                                onClicked: page.wizard.createDatabase()
+                                            }
+                                            AppButton {
+                                                text: qsTr("Skip database steps…")
+                                                onClicked: skipDialog.ask({
+                                                    title: qsTr("Skip the database steps?"),
+                                                    message: qsTr("The project is made, but its database isn't ready: no tables and no admin user. Create the database `%1` (or correct the `DB_` lines in `.env`), then run the migrations on the Database tab and create the admin with `php flo user:create` in a terminal (More, Open terminal).").arg(page.form.dbName),
+                                                    confirmText: qsTr("Skip and finish"),
+                                                    danger: false
+                                                })
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -540,6 +623,33 @@ Item {
                         font.weight: Font.DemiBold
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
+                    }
+                    // The database steps were skipped: what is left (A-D6)
+                    Rectangle {
+                        visible: page.wizard.state === "done" && page.wizard.skippedDatabase
+                        Layout.fillWidth: true
+                        implicitHeight: skippedNote.implicitHeight + 28
+                        radius: 8
+                        color: Theme.warnBg
+                        ColumnLayout {
+                            id: skippedNote
+                            anchors.fill: parent
+                            anchors.margins: 14
+                            spacing: 6
+                            AppText {
+                                ui: qsTr("Its database isn't ready: no tables and no admin user.")
+                                color: Theme.warnText
+                                font.weight: Font.DemiBold
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            RichText {
+                                raw: qsTr("Create the database `%1` (or correct the `DB_` lines in `.env`), then run the migrations on the Database tab and create the admin with `php flo user:create` in a terminal.").arg(page.form.dbName)
+                                color: Theme.warnText
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                        }
                     }
                     RichText {
                         visible: page.wizard.state === "failed"
@@ -600,6 +710,11 @@ Item {
                         text: qsTr("Try again")
                         iconPath: Icons.refresh
                         onClicked: page.create()
+                    }
+                    AppButton {
+                        visible: page.wizard.state === "done" && page.wizard.skippedDatabase
+                        text: qsTr("Open terminal")
+                        onClicked: Studio.openTerminal(page.wizard.projectPath)
                     }
                     AppButton {
                         visible: page.wizard.state === "done"
