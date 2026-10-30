@@ -506,6 +506,7 @@ jobs:
           python prototypes/rtl-check/check_ts.py app/i18n/studio_ar.ts app/i18n/studio_ckb.ts
 
       - name: Screenshots of every screen
+        timeout-minutes: 20
         env:
           QT_QPA_PLATFORM: offscreen
         run: .github/scripts/screenshots.sh build/bin/flocms-studio shots
