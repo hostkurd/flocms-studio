@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "generated": "2026-10-27",
+  "generated": "2026-10-30",
   "tools": [
     {
       "id": "php-8.5",
@@ -147,13 +147,13 @@
     {
       "id": "composer",
       "tool": "composer",
-      "version": "2.10.3",
+      "version": "2.11.0",
       "platform": "any",
       "urls": [
-        "https://getcomposer.org/download/2.10.3/composer.phar"
+        "https://getcomposer.org/download/2.11.0/composer.phar"
       ],
-      "sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6",
-      "size": 3642137,
+      "sha256": "9674f12a2a181100d889ebfd0b4510805b3e94cea57869b14b383753d602599b",
+      "size": 3786815,
       "archive": "phar",
       "source": "getcomposer.org",
       "hashFrom": "source"
