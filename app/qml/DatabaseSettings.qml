@@ -57,7 +57,7 @@ ColumnLayout {
     Card {
         Layout.fillWidth: true
         Heading { ui: qsTr("Database server") }
-        AppText { ui: qsTr("Server new projects use"); font.weight: Font.DemiBold }
+        AppText { ui: qsTr("Default server for new projects"); font.weight: Font.DemiBold }
         ButtonGroup { id: serverGroup }
         OptionRow {
             visible: section.hasOwn
@@ -135,7 +135,7 @@ ColumnLayout {
             }
         }
         RichText {
-            raw: qsTr("Existing projects keep the server in their `.env`.")
+            raw: qsTr("Each project can pick its own when it is made or set up. Existing projects keep the server in their `.env`.")
             color: Theme.muted
             font.pixelSize: 13
             wrapMode: Text.Wrap

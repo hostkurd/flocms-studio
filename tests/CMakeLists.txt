@@ -28,6 +28,7 @@ flostudio_add_test(tst_tools FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_floserver FloStudio::Core)
 flostudio_add_test(tst_server FloStudio::Core Qt6::Network)
 flostudio_add_test(tst_wizard FloStudio::Core)
+flostudio_add_test(tst_terminal FloStudio::Core)
 flostudio_add_test(tst_generators FloStudio::Core)
 flostudio_add_test(tst_packages FloStudio::Core)
 flostudio_add_test(tst_commands FloStudio::Core)
@@ -42,6 +43,7 @@ flostudio_add_test(tst_security FloStudio::Security)
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Gui Qml Network)
 flostudio_add_test(tst_studio FloStudio::Core FloStudio::Database FloStudio::Security Qt6::Gui Qt6::Qml Qt6::Network Qt6::Concurrent)
 target_sources(tst_studio PRIVATE
+    ../app/databasesetup.cpp ../app/databasesetup.h
     ../app/language.cpp ../app/language.h
     ../app/logmodel.cpp ../app/logmodel.h
     ../app/mariadbserver.cpp ../app/mariadbserver.h

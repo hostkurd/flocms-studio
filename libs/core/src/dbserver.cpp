@@ -357,7 +357,9 @@ private:
         QFile::setPermissions(files.folder, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
         if (!files.socket.isEmpty())
             QDir().mkpath(QFileInfo(files.socket).path());
-        run([port] { return portAnswers(QStringLiteral("127.0.0.1"), port, 400); }, [this, files](bool busy) {
+        // Bound, not answering: some machines accept connections on closed
+        // ports (#33), and every port would look taken
+        run([port] { return portListening(port); }, [this, files](bool busy) {
             if (!going())
                 return;
             if (busy)
@@ -468,7 +470,7 @@ private:
         if (!writeConfig(networking))
             return;
         // Still free? The set-up may have taken a minute
-        if (networking && portAnswers(QStringLiteral("127.0.0.1"), m_start.port, 300))
+        if (networking && portListening(m_start.port))
             return fail(Error{QStringLiteral("db_port_busy"), QString::number(m_start.port)});
         QFile::remove(m_start.files.pidFile);
         m_logFrom = fileSize(m_start.files.errorLog);
@@ -492,7 +494,7 @@ private:
         const int port = m_start.port;
         const QString socket = m_start.files.socket;
         run([networking, port, socket] {
-            return networking ? portAnswers(QStringLiteral("127.0.0.1"), port, 300) : QFileInfo::exists(socket);
+            return networking ? portListening(port) : QFileInfo::exists(socket);
         }, [this, networking](bool ready) {
             if (!going() || !alive(m_process))
                 return;

@@ -30,7 +30,7 @@ Studio looks for tools on your `PATH`, then (on macOS and Linux) your login shel
 
 ## Database server
 
-- **Server new projects use**: **Studio's MariaDB**, the server found on this computer (XAMPP, Laragon or another), or **Another server** with its **Host**, **Port** and **User**. "Existing projects keep the server in their `.env`."
+- **Default server for new projects**: **Studio's MariaDB**, the server found on this computer (XAMPP, Laragon or another), or **Another server** with its **Host**, **Port** and **User**. Each project can pick its own when it is made or set up; existing projects keep the server in their `.env`.
 - **Studio's MariaDB**, once you have one: **Start** / **Stop**, **Open log**, **Version** (when you have more than one), **Databases folder** with **Open folder**, **Port**, the password of **User `root`** (**Show**, **Copy**), **Start the server when Studio opens**, **Delete its databases…** and **Remove MariaDB…**.
 
 See [The server and the database](server-and-database.md#studios-mariadb).
@@ -47,6 +47,8 @@ See [The server and the database](server-and-database.md#studios-mariadb).
 ```text
 code "{folder}"
 ```
+
+**Terminal** is how **Open terminal** starts a terminal. Empty (the default), Studio picks it: Windows Terminal, else PowerShell (Windows); Terminal (macOS); `$TERMINAL`, `x-terminal-emulator`, GNOME Terminal, Konsole or Xfce Terminal (Linux). It starts in the project's folder with Studio's PHP and Composer first: a folder of small `php` and `composer` launchers (`terminal-bin` in Studio's data folder) goes first on the `PATH`, and the first line says which PHP and Composer they run. Or give a command like the editor's, for example `wezterm start --cwd "{folder}"`; Studio then starts it with the launchers first on the `PATH` it hands over, which a terminal that is already running may not pass on.
 
 For PhpStorm, for example: `phpstorm {folder}`. Studio also opens a project's `.env` with this command (**Edit in `.env`** in the **Database** tab).
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "databasesetup.h"
 #include "logmodel.h"
 #include "mariadbserver.h"
 #include "newproject.h"
@@ -44,6 +45,7 @@ class Studio : public QObject
     Q_PROPERTY(int serverPort READ serverPort NOTIFY settingsChanged)
     Q_PROPERTY(bool serverNetwork READ serverNetwork NOTIFY settingsChanged)
     Q_PROPERTY(QString editorCommand READ editorCommand NOTIFY settingsChanged)
+    Q_PROPERTY(QString terminalCommand READ terminalCommand NOTIFY settingsChanged)
     Q_PROPERTY(QString phpPath READ phpPath NOTIFY settingsChanged)
     Q_PROPERTY(QString composerPath READ composerPath NOTIFY settingsChanged)
     Q_PROPERTY(QStringList projectFolders READ projectFolders NOTIFY settingsChanged)
@@ -73,6 +75,8 @@ class Studio : public QObject
     Q_PROPERTY(bool commandRunning READ commandRunning NOTIFY commandRunningChanged)
     // The new project wizard (stage 6); page "new" shows it
     Q_PROPERTY(NewProjectWizard *wizard READ wizard CONSTANT)
+    // The Database tab's set-up card for a project with no database
+    Q_PROPERTY(DatabaseSetup *databaseSetup READ databaseSetup CONSTANT)
     // Tools: [{tool, state, version, path, detail}]; state: checking, found,
     // missing, failed, unsupported (PHP older than FloCMS needs), optional
     Q_PROPERTY(QVariantList tools READ tools NOTIFY toolsChanged)
@@ -128,6 +132,7 @@ public:
     int serverPort() const { return m_settings.serverPort; }
     bool serverNetwork() const { return m_settings.serverNetwork; }
     QString editorCommand() const { return m_settings.editorCommand; }
+    QString terminalCommand() const { return m_settings.terminalCommand; }
     QString phpPath() const { return m_settings.phpPath; }
     QString composerPath() const { return m_settings.composerPath; }
     QStringList projectFolders() const { return m_settings.projectFolders; }
@@ -146,6 +151,7 @@ public:
     ProjectPackages *packagesTab() const { return m_packagesTab.value(m_currentPath); }
     bool commandRunning() const;
     NewProjectWizard *wizard() { return &m_wizard; }
+    DatabaseSetup *databaseSetup() { return &m_databaseSetup; }
     QVariantList tools() const { return m_tools; }
     bool checkingTools() const { return m_checking; }
     QVariantList phpChoices() const { return m_phpChoices; }
@@ -174,6 +180,7 @@ public:
     Q_INVOKABLE void setServerPort(int port);
     Q_INVOKABLE void setServerNetwork(bool network);
     Q_INVOKABLE void setEditorCommand(const QString &command);
+    Q_INVOKABLE void setTerminalCommand(const QString &command);
     Q_INVOKABLE void setPhpPath(const QString &path);
     Q_INVOKABLE void setComposerPath(const QString &path);
     // D14: phpPath and composerPath stay, so off brings them back
@@ -218,6 +225,9 @@ public:
     Q_INVOKABLE void refreshTools();
     Q_INVOKABLE void openInEditor(const QString &path);
     Q_INVOKABLE void openFolder(const QString &path);
+    // The person's terminal in the folder, Studio's PHP and Composer first
+    // on its PATH (design note of 30 Oct, part B)
+    Q_INVOKABLE void openTerminal(const QString &path);
     Q_INVOKABLE void dismissProblem();
     // The open project's server and log
     Q_INVOKABLE void startServer();
@@ -356,4 +366,5 @@ private:
     QHash<QString, ProjectGenerate *> m_generate; // the same
     QHash<QString, ProjectPackages *> m_packagesTab; // the same
     NewProjectWizard m_wizard{&m_settings};
+    DatabaseSetup m_databaseSetup{&m_settings, &m_mariadb};
 };

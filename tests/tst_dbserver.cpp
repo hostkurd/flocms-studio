@@ -422,7 +422,7 @@ private slots:
         QVERIFY(!databaseServerRunning(server));
         QCOMPARE(exits, 1);
         QVERIFY(!exitCrashed);
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300), 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(start.port), 10000);
         const QString errors = databaseErrorLogTail(start.files, 40).join(u'\n');
         QVERIFY2(errors.contains(QStringLiteral(": Shutdown complete")), qUtf8Printable(errors));
 
@@ -455,7 +455,7 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(done && stoppedEarly, 60000);
         QCOMPARE(result.error().code, QStringLiteral("db_cancelled"));
         QVERIFY(!databaseServerRunning(server));
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300), 30000);
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(start.port), 30000);
         destroyNow(server);
         done = false;
         server = startDatabaseServer(start, &owner, onLine, [&](const Result<Done> &r) { result = r; done = true; }, onExit);
@@ -473,7 +473,7 @@ private slots:
         stopDatabaseServerNow(server, start.rootPassword);
         QVERIFY(!databaseServerRunning(server));
         QCOMPARE(exits, 1); // not told
-        QVERIFY(!portAnswers(QStringLiteral("127.0.0.1"), start.port, 300));
+        QVERIFY(!portListening(start.port));
         QCOMPARE(shutdowns(), before + 1);
     }
 };

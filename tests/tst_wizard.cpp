@@ -2,6 +2,7 @@
 
 #include <flostudio/core/commands.h>
 #include <flostudio/core/env.h>
+#include <flostudio/core/process.h>
 #include <flostudio/core/wizard.h>
 
 #include <QDir>
@@ -278,6 +279,74 @@ private slots:
         bad.createDatabase = false;
         QVERIFY(checkNewProject(bad).isEmpty());
         QVERIFY(!ids(newProjectSteps(bad)).contains(QStringLiteral("db-create")));
+    }
+
+    // --- A database for a project (parts A and C, 30 Oct) ---
+
+    void unknownDatabase()
+    {
+        QVERIFY(isUnknownDatabase(QStringLiteral(
+            "Cannot connect to the database (127.0.0.1:3306/testdb3): SQLSTATE[HY000] [1049] Unknown database 'testdb3'")));
+        QVERIFY(isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [1049] unknown database 'x'")));
+        QVERIFY(!isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost'")));
+        QVERIFY(!isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [2002] Connection refused")));
+        QVERIFY(!isUnknownDatabase(QStringLiteral("Unknown database driver: oracle")));
+        QVERIFY(!isUnknownDatabase(QString()));
+    }
+
+    void databaseLines()
+    {
+        const DatabaseLogin login{QStringLiteral(" 127.0.0.1 "), 3307, QStringLiteral("shop"), QStringLiteral(" shop "),
+                                  QStringLiteral("p w#")};
+        const auto env = asMap(databaseEnv(login));
+        QCOMPARE(env.value(QStringLiteral("DB_TYPE")), QStringLiteral("mysql"));
+        QCOMPARE(env.value(QStringLiteral("DB_HOST")), QStringLiteral("127.0.0.1"));
+        QCOMPARE(env.value(QStringLiteral("DB_PORT")), QStringLiteral("3307"));
+        QCOMPARE(env.value(QStringLiteral("DB_NAME")), QStringLiteral("shop"));
+        QCOMPARE(env.value(QStringLiteral("DB_USERNAME")), QStringLiteral("shop"));
+        QCOMPARE(env.value(QStringLiteral("DB_PASSWORD")), QStringLiteral("p w#"));
+        // Every key is one Studio may write into an existing .env
+        for (auto it = env.cbegin(); it != env.cend(); ++it)
+            QVERIFY2(writableEnvKeys().contains(it.key()), qPrintable(it.key()));
+    }
+
+    void databaseLoginChecks()
+    {
+        DatabaseLogin login{QStringLiteral("127.0.0.1"), 3306, QStringLiteral("shop"), QStringLiteral("root"), QString()};
+        QVERIFY(checkDatabaseLogin(login, false).isEmpty());
+        // Studio makes the user: not root, and a password
+        const auto made = checkDatabaseLogin(login, true);
+        QVERIFY(made.contains(FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_invalid")}));
+        QVERIFY(made.contains(FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")}));
+        login.name = QStringLiteral("shop`; DROP");
+        login.port = 0;
+        login.host.clear();
+        const auto bad = checkDatabaseLogin(login, false);
+        QVERIFY(bad.contains(FieldProblem{QStringLiteral("dbName"), QStringLiteral("db_name_invalid")}));
+        QVERIFY(bad.contains(FieldProblem{QStringLiteral("dbPort"), QStringLiteral("db_port_invalid")}));
+        QVERIFY(bad.contains(FieldProblem{QStringLiteral("dbHost"), QStringLiteral("db_host_invalid")}));
+    }
+
+    void createDatabaseCommandKeepsThePasswordOut()
+    {
+        Settings settings;
+        settings.phpPath = QStringLiteral("php");
+        const DatabaseLogin login{QStringLiteral("127.0.0.1"), 1, QStringLiteral("shop_db"), QStringLiteral("shop"),
+                                  QStringLiteral("s3cret-pass")};
+        const QTemporaryDir dir;
+        const auto command = createDatabaseCommand(settings, login, dir.path());
+        if (!command)
+            QSKIP("no PHP on this computer");
+        QVERIFY(!command.value().arguments.join(u' ').contains(QStringLiteral("s3cret-pass")));
+        QVERIFY(!command.value().shown.contains(QStringLiteral("s3cret-pass")));
+        QVERIFY(command.value().shown.contains(QStringLiteral("shop_db")));
+        QVERIFY(command.value().input.contains("s3cret-pass"));
+        // The code runs: nothing listens on port 1, so it says why and fails
+        const Captured out = runCaptured(command.value(), 60000);
+        QVERIFY(out.started);
+        QVERIFY(!out.succeeded());
+        QVERIFY(!out.err.trimmed().isEmpty());
+        QVERIFY(!out.err.contains(QStringLiteral("s3cret-pass")));
     }
 };
 

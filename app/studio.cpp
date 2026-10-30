@@ -11,6 +11,7 @@
 #include <flostudio/core/process.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/server.h>
+#include <flostudio/core/terminal.h>
 
 #include <QDesktopServices>
 #include <QDir>
@@ -191,6 +192,15 @@ Studio::Studio(Language *language, QObject *parent)
     // A new project is listed (in a project folder, or on its own); the
     // wizard's page stays until the person opens it
     m_wizard.setMariadb(&m_mariadb);
+    connect(&m_databaseSetup, &DatabaseSetup::changed, this, &Studio::commandRunningChanged);
+    // The set-up card wrote .env: the project and its Database tab follow
+    connect(&m_databaseSetup, &DatabaseSetup::envWritten, this, [this](const QString &path) {
+        if (path != m_currentPath)
+            return;
+        loadCurrent();
+        if (ProjectChecks *checks = m_checks.value(path))
+            checks->refreshDatabase();
+    });
     connect(this, &Studio::settingsChanged, &m_wizard, &NewProjectWizard::serverChoiceChanged);
     connect(&m_wizard, &NewProjectWizard::stepsChanged, this, &Studio::commandRunningChanged);
     connect(&m_wizard, &NewProjectWizard::created, this, [this](const QString &path) {
@@ -324,6 +334,8 @@ Result<Done> Studio::startDemo(const QString &file)
         m_problem = demo.value(QStringLiteral("problem")).toObject().toVariantMap();
     if (demo.contains(QStringLiteral("wizard")))
         m_wizard.showDemo(demo.value(QStringLiteral("wizard")).toObject().toVariantMap());
+    if (demo.contains(QStringLiteral("databaseSetup")))
+        m_databaseSetup.showDemo(demo.value(QStringLiteral("databaseSetup")).toObject().toVariantMap());
     // The open project's Doctor and database, server and log, and which
     // others are running
     if (!m_currentPath.isEmpty()) {
@@ -485,6 +497,11 @@ void Studio::setServerNetwork(bool network)
 void Studio::setEditorCommand(const QString &command)
 {
     changeSettings([&command](Settings &s) { s.editorCommand = command; });
+}
+
+void Studio::setTerminalCommand(const QString &command)
+{
+    changeSettings([&command](Settings &s) { s.terminalCommand = command.trimmed(); });
 }
 
 void Studio::setPhpPath(const QString &path)
@@ -1006,7 +1023,7 @@ QStringList Studio::projectPaths() const
 
 bool Studio::commandRunning() const
 {
-    return m_wizard.state() == u"running"
+    return m_wizard.state() == u"running" || m_databaseSetup.state() == u"running"
            || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); })
            || std::any_of(m_generate.cbegin(), m_generate.cend(), [](const ProjectGenerate *generate) { return generate->busy(); })
            || std::any_of(m_packagesTab.cbegin(), m_packagesTab.cend(), [](const ProjectPackages *packages) { return packages->busy(); });
@@ -1295,6 +1312,12 @@ void Studio::askDatabasePort()
 void Studio::openInEditor(const QString &path)
 {
     if (const auto opened = FloStudio::Core::openInEditor(m_settings, path); !opened)
+        setProblem(opened.error().code, opened.error().detail);
+}
+
+void Studio::openTerminal(const QString &path)
+{
+    if (const auto opened = FloStudio::Core::openTerminal(m_settings, path); !opened)
         setProblem(opened.error().code, opened.error().detail);
 }
 

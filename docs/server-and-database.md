@@ -24,7 +24,7 @@ On macOS and Linux, a project's server can keep running after Studio crashes. At
 
 ## Choose the database server
 
-[Settings > Database server](settings.md#database-server) sets the server new projects use (**Server new projects use**):
+[Settings > Database server](settings.md#database-server) sets the default server for new projects (**Default server for new projects**). Each project can pick its own when it is made (step 2 of the [new project](first-project.md#step-2-database) form) or set up (below):
 
 - **Studio's MariaDB**: the MariaDB Studio downloaded, which Studio starts and stops.
 - **A server found on this computer**, for example XAMPP's or Laragon's. Studio doesn't start or stop it: start and stop it in XAMPP or Laragon. See [XAMPP, Laragon and other stacks](other-stacks.md).
@@ -33,6 +33,15 @@ On macOS and Linux, a project's server can keep running after Studio crashes. At
 "Existing projects keep the server in their `.env`." The choice only changes the defaults of the [new project](first-project.md#step-2-database) form.
 
 When you have made no choice, new projects use Studio's MariaDB when you have one, else the server found on this computer.
+
+## Set up a database for an existing project
+
+A project with no database yet (no `DB_NAME` in `.env`) shows "Not set up yet" on its Overview and Database tab, with **Set up database**. Choose the server for this project:
+
+- **Studio's MariaDB**: give the **Database** and **User** names (the project's folder name by default). Studio starts its MariaDB when it is stopped, makes the database and a user that can only reach it, writes the `DB_` lines into `.env` and keeps the password in the system's secure store. The project then counts as one of Studio's server's, so its Database tab can start that server.
+- **Another server**: give the **Database**, **User**, **Server**, **Port** and **Password**. Studio writes the `DB_` lines into `.env` and runs `php flo db:check`. When the database isn't there, **Create database "…"** creates it with that login.
+
+Then run the migrations on the Database tab, and create the first admin with `php flo user:create` in a terminal (**More > Open terminal**). To move a project that has a database to another server, change its `DB_` lines with **Edit in `.env`**; its data doesn't move with it.
 
 ## Studio's MariaDB
 

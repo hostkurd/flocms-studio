@@ -14,6 +14,13 @@ Item {
     readonly property var info: Studio.current
     readonly property string serverState: Studio.server.state || "stopped"
     readonly property bool running: serverState === "running"
+    // Open terminal (B-D1): Ctrl+` while the project shows; on macOS the
+    // Control key (Meta to Qt), since ⌘` switches the app's windows there
+    Shortcut {
+        sequence: Qt.platform.os === "osx" ? "Meta+`" : "Ctrl+`"
+        enabled: page.visible && !!page.info.path && !page.info.error
+        onActivated: Studio.openTerminal(page.info.path)
+    }
     // Asks what plan() says, then runs it
     function startAction(action) {
         const checks = Studio.checks
@@ -210,6 +217,7 @@ Item {
                         id: projectMenu
                         y: moreButton.height + 4
                         x: Lang.rtl ? 0 : moreButton.width - width
+                        onTerminalChosen: Studio.openTerminal(page.info.path)
                         onRemoveChosen: Studio.removeProject(page.info.path)
                         onDeleteChosen: deleteDialog.ask(page.info.path, page.info.name)
                     }

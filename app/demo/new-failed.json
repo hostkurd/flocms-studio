@@ -95,6 +95,7 @@
       "    php flo admin:install",
       "› php flo db:check",
       " ERROR  SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"
-    ]
+    ],
+    "canSkipDatabase": true
   }
 }

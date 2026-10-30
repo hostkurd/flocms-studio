@@ -43,12 +43,12 @@ Choose **SQLite: a file in the project** or **MySQL / MariaDB**.
 
 With SQLite, the database is the file `storage/database.sqlite`, made by the first migration. Nothing else is asked.
 
-With MySQL or MariaDB, what you see depends on the server in [Settings > Database server](server-and-database.md#choose-the-database-server):
+With MySQL or MariaDB, choose the **Server** for this project: **Studio's MariaDB** or **Another server**. It starts at the default in [Settings > Database server](server-and-database.md#choose-the-database-server) and changes this project only. (The choice shows when Studio has its own MariaDB.)
 
 - **On Studio's MariaDB**: Studio shows its server, its address and its state. Under **The project's database**, choose:
   - **Studio makes a new database and a user for this project**. You set the **Database name** and the **User**. Studio makes a password, writes it into the project's `.env` and keeps it in the system's secure store. The user can only reach this database.
   - **Use a database that exists already**. You give the name, user and password.
-- **On another server** (XAMPP, Laragon, or one you set), you give the **Database name** (it must exist already), the **Server** and **Port**, the **User** and the **Password**. The password is written to `DB_PASSWORD` in `.env`. Leave it empty for XAMPP's `root`. **Remember the password in…** saves it in the system's secure store for your next project on the same server, and **Use saved** fills it in.
+- **On another server** (XAMPP, Laragon, or one you set), you give the **Database name** (if it doesn't exist yet, Studio offers to create it in step 4), the **Server** and **Port**, the **User** and the **Password**. The password is written to `DB_PASSWORD` in `.env`. Leave it empty for XAMPP's `root`. **Remember the password in…** saves it in the system's secure store for your next project on the same server, and **Use saved** fills it in.
 
 ## Step 3: First admin
 
@@ -70,6 +70,12 @@ The **Create** step lists what Studio will do. Click **Create the project** to s
 | Check the database | `php flo db:check` (MySQL / MariaDB only) |
 | Run the migrations | `php flo migrate --force` (this also makes the SQLite file) |
 | Create the first admin | `php flo user:create --name=<name> --email=<email> --role=super-admin --password-stdin` |
+
+### When `db:check` fails
+
+When the server answered but has no database of that name (MySQL/MariaDB error 1049, "Unknown database"), the step offers **Create database "…"**. Studio runs `CREATE DATABASE … CHARACTER SET utf8mb4` on that server with the login from step 2, through the project's PHP (the password goes on the command's input, never on its command line), then goes on from `db:check`. When the login may not create databases, the server's message shows and you can fix the rights and try again.
+
+Whatever made `db:check` fail, **Skip database steps…** finishes the project without `db:check`, the migrations and the first admin. Studio asks first; the steps then show **Skipped**, and the finished screen says what is left: create the database (or correct the `DB_` lines in `.env`), run the migrations on the project's [Database tab](migrations.md), and create the admin with `php flo user:create` in a terminal (**Open terminal**). The password from step 2 is not saved.
 
 Studio adds `--no-interaction` and `--no-ansi` to every command, so no command stops on a question. Composer's `create-project` and `require` also get `--no-progress`.
 

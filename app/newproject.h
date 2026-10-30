@@ -39,6 +39,14 @@ class NewProjectWizard : public QObject
     Q_PROPERTY(QString state READ state NOTIFY stepsChanged)
     Q_PROPERTY(QString projectPath READ projectPath NOTIFY stepsChanged)
     Q_PROPERTY(bool secureStore READ secureStore CONSTANT)
+    // db:check failed (design note of 30 Oct, part A): the server answered
+    // but has no such database, so Studio offers to create it
+    // (missingDatabase); any db:check failure can be skipped
+    // (canSkipDatabase), after which the run is done without its database
+    // steps (skippedDatabase)
+    Q_PROPERTY(bool missingDatabase READ missingDatabase NOTIFY stepsChanged)
+    Q_PROPERTY(bool canSkipDatabase READ canSkipDatabase NOTIFY stepsChanged)
+    Q_PROPERTY(bool skippedDatabase READ skippedDatabase NOTIFY stepsChanged)
 
 public:
     NewProjectWizard(const FloStudio::Core::Settings *settings, QObject *parent = nullptr);
@@ -55,6 +63,9 @@ public:
     QString state() const { return m_state; }
     QString projectPath() const { return m_projectPath; }
     bool secureStore() const;
+    bool missingDatabase() const;
+    bool canSkipDatabase() const;
+    bool skippedDatabase() const { return m_skippedDatabase; }
 
     // A fresh form (the folder from Settings' project folders).
     Q_INVOKABLE void reset();
@@ -75,6 +86,12 @@ public:
     // After a failure: deletes the folder this run made, and the form
     // starts again.
     Q_INVOKABLE void startOver();
+    // After db:check found no database: creates it with the project's
+    // login, then goes on from db:check (A-D3).
+    Q_INVOKABLE void createDatabase();
+    // After db:check failed: marks the database steps skipped and finishes
+    // the run without them (A-D5).
+    Q_INVOKABLE void skipDatabaseSteps();
 
     // The demo: the form and the run from the demo file.
     void showDemo(const QVariantMap &demo);
@@ -97,8 +114,13 @@ private:
     void runFrom(int index);
     void runStep(int index);
     void runCreateDatabase(int index);
+    void finish(bool saveDatabaseLogin);
+    bool failedAtDatabaseCheck() const;
     // The server MySQL projects use by default (Settings, D9): studio, found, other
     QString defaultServer() const;
+    // The server this project uses: the one picked on step 2 (design note
+    // of 30 Oct, D-D1), else the default
+    QString chosenServer() const;
     void applyServerDefaults();
     // Why a step failed: a code Texts.problem knows (with its detail), or
     // what the command itself said
@@ -119,12 +141,18 @@ private:
     MariadbServer *m_mariadb = nullptr;          // Studio's
     QMetaObject::Connection m_waitForServer;     // db-create waits for it to start
     QString m_appliedServer;                     // the server the database fields were filled for
+    QString m_pickedServer;                      // picked on step 2; empty: Settings' default
     FloStudio::Core::NewProject m_project;
     QString m_typedName;
     bool m_rememberPassword = true;
     QStringList m_touched;
     QList<FloStudio::Core::WizardStep> m_plan; // made when the run starts, again on retry
     bool m_madeFolder = false;                 // the folder is this run's
+    bool m_skippedDatabase = false;            // the database steps were skipped
+    bool m_databaseMissing = false;            // db:check said the database isn't there
+    bool m_demo = false;                       // showDemo() was called
+    bool m_demoMissing = false;                // a demo's missingDatabase and canSkipDatabase
+    bool m_demoCanSkip = false;
     QStringList m_envSecrets;                  // the new .env's, read after create and env
     QVariantList m_steps;
     QStringList m_lines;
