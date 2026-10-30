@@ -14,9 +14,10 @@ Item {
     readonly property var info: Studio.current
     readonly property string serverState: Studio.server.state || "stopped"
     readonly property bool running: serverState === "running"
-    // Open terminal (B-D1): Ctrl+` (⌘` on macOS) while the project shows
+    // Open terminal (B-D1): Ctrl+` while the project shows; on macOS the
+    // Control key (Meta to Qt), since ⌘` switches the app's windows there
     Shortcut {
-        sequence: "Ctrl+`"
+        sequence: Qt.platform.os === "osx" ? "Meta+`" : "Ctrl+`"
         enabled: page.visible && !!page.info.path && !page.info.error
         onActivated: Studio.openTerminal(page.info.path)
     }

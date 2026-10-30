@@ -81,6 +81,9 @@ T = {
  "Studio could not write the `php` and `composer` launchers for the terminal.":
    ("لم يتمكن Studio من كتابة مشغّلَي `php` و`composer` للطرفية.",
     "Studio نەیتوانی دەستپێکەرەکانی `php` و `composer` بۆ تێرمیناڵەکە بنووسێت."),
+ "Studio is setting up another project's database. This one can be set up when that is done.":
+   ("يُعدّ Studio قاعدة بيانات مشروع آخر الآن. يمكن إعداد هذا المشروع بعد انتهاء ذلك.",
+    "Studio ئێستا داتابەیسی پڕۆژەیەکی تر ڕێکدەخات. ئەم پڕۆژەیە دوای تەواوبوونی ئەو دەتوانرێت ڕێکبخرێت."),
  "The server did not create the database.": ("لم ينشئ الخادم قاعدة البيانات.", "سێرڤەر داتابەیسەکەی دروست نەکرد."),
 }
 

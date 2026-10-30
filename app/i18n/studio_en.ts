@@ -514,7 +514,7 @@
     </message>
     <message>
         <location filename="../qml/DatabaseSetupForm.qml" line="74" />
-        <location filename="../qml/DatabaseSetupForm.qml" line="78" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="83" />
         <source>Password</source>
         <translation type="unfinished" />
     </message>
@@ -524,52 +524,52 @@
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="87" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="99" />
         <source>On Studio's MariaDB (`127.0.0.1:%1`). Studio makes the user's password and keeps it in %2.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="88" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="100" />
         <source>Studio's MariaDB is stopped: Studio starts it first (port `%1`). It makes the user's password and keeps it in %2.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="89" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="101" />
         <source>The database may exist already; if not, Studio offers to create it.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="98" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="110" />
         <source>Setting up…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="98" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="110" />
         <source>Set up database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="105" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="117" />
         <source>Starting Studio's MariaDB…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="106" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="118" />
         <source>Creating the database…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="106" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="118" />
         <source>Checking the connection…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="124" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="136" />
         <source>The server on `%1:%2` answered, but it has no database called `%3`. Studio can create it with this login.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="131" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="143" />
         <source>Create database “%1”</source>
         <translation type="unfinished" />
     </message>
@@ -577,82 +577,87 @@
 <context>
     <name>DatabaseTab</name>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="89" />
+        <location filename="../qml/DatabaseTab.qml" line="95" />
         <source>Connection</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="98" />
+        <location filename="../qml/DatabaseTab.qml" line="104" />
         <source>Not set up yet</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="100" />
+        <location filename="../qml/DatabaseTab.qml" line="106" />
         <source>Can't connect</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="100" />
+        <location filename="../qml/DatabaseTab.qml" line="106" />
         <source>Checking…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="108" />
+        <location filename="../qml/DatabaseTab.qml" line="114" />
         <source>Database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="114" />
+        <location filename="../qml/DatabaseTab.qml" line="120" />
         <source>Host</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="119" />
+        <location filename="../qml/DatabaseTab.qml" line="125" />
         <source>From</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="125" />
+        <location filename="../qml/DatabaseTab.qml" line="131" />
         <source>Edit in `.env`</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="131" />
+        <location filename="../qml/DatabaseTab.qml" line="137" />
         <source>Refresh</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="156" />
+        <location filename="../qml/DatabaseTab.qml" line="150" />
+        <source>Studio is setting up another project's database. This one can be set up when that is done.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qml/DatabaseTab.qml" line="169" />
         <source>This project uses Studio's MariaDB (`127.0.0.1:%1`), which is stopped.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="162" />
+        <location filename="../qml/DatabaseTab.qml" line="175" />
         <source>Starting…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="162" />
+        <location filename="../qml/DatabaseTab.qml" line="175" />
         <source>Start the database server</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="176" />
+        <location filename="../qml/DatabaseTab.qml" line="189" />
         <source>The migrations and tables show here once the database is set up.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="201" />
+        <location filename="../qml/DatabaseTab.qml" line="214" />
         <source>Migrations</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="203" />
+        <location filename="../qml/DatabaseTab.qml" line="216" />
         <source>Roll back last batch</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/DatabaseTab.qml" line="209" />
+        <location filename="../qml/DatabaseTab.qml" line="222" />
         <source>Run %Ln migration(s)</source>
         <translation>
             <numerusform>Run %Ln migration</numerusform>
@@ -660,97 +665,97 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="209" />
+        <location filename="../qml/DatabaseTab.qml" line="222" />
         <source>Up to date</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="217" />
+        <location filename="../qml/DatabaseTab.qml" line="230" />
         <source>No migrations yet.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="228" />
+        <location filename="../qml/DatabaseTab.qml" line="241" />
         <source>Status</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="229" />
+        <location filename="../qml/DatabaseTab.qml" line="242" />
         <source>Migration</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="230" />
+        <location filename="../qml/DatabaseTab.qml" line="243" />
         <source>Package</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="231" />
+        <location filename="../qml/DatabaseTab.qml" line="244" />
         <source>Batch</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="246" />
+        <location filename="../qml/DatabaseTab.qml" line="259" />
         <source>Waiting</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="247" />
+        <location filename="../qml/DatabaseTab.qml" line="260" />
         <source>Ran · changed since</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="248" />
+        <location filename="../qml/DatabaseTab.qml" line="261" />
         <source>Ran · file gone</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="249" />
+        <location filename="../qml/DatabaseTab.qml" line="262" />
         <source>Ran</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="262" />
+        <location filename="../qml/DatabaseTab.qml" line="275" />
         <source>Runs: %1</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="263" />
+        <location filename="../qml/DatabaseTab.qml" line="276" />
         <source>Seed…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="264" />
+        <location filename="../qml/DatabaseTab.qml" line="277" />
         <source>Drop all and migrate…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="267" />
+        <location filename="../qml/DatabaseTab.qml" line="280" />
         <source>On a production site Studio asks first, then runs the command with --force.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="291" />
+        <location filename="../qml/DatabaseTab.qml" line="304" />
         <source>Tables</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="294" />
+        <location filename="../qml/DatabaseTab.qml" line="307" />
         <source>Table name</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="295" />
+        <location filename="../qml/DatabaseTab.qml" line="308" />
         <source>Filter the tables</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="311" />
+        <location filename="../qml/DatabaseTab.qml" line="324" />
         <source>Open in admin</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/DatabaseTab.qml" line="319" />
+        <location filename="../qml/DatabaseTab.qml" line="332" />
         <source>%Ln table(s) and their row counts. Edit data in the admin panel.</source>
         <translation>
             <numerusform>%Ln table and its row count. Edit data in the admin panel.</numerusform>
@@ -2326,7 +2331,7 @@
 <context>
     <name>NewProjectWizard</name>
     <message>
-        <location filename="../newproject.cpp" line="649" />
+        <location filename="../newproject.cpp" line="666" />
         <source>Starting Studio's MariaDB %1</source>
         <translation type="unfinished" />
     </message>
@@ -2714,12 +2719,12 @@
 <context>
     <name>ProjectPage</name>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="35" />
+        <location filename="../qml/ProjectPage.qml" line="36" />
         <source>Run the migrations on this production site?</source>
         <translation type="unfinished" />
     </message>
     <message numerus="yes">
-        <location filename="../qml/ProjectPage.qml" line="36" />
+        <location filename="../qml/ProjectPage.qml" line="37" />
         <source>`APP_ENV` says this is a production site. %Ln migration(s) will change its database.</source>
         <translation>
             <numerusform>`APP_ENV` says this is a production site. %Ln migration will change its database.</numerusform>
@@ -2727,137 +2732,137 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="37" />
+        <location filename="../qml/ProjectPage.qml" line="38" />
         <source>Run migrations</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="40" />
+        <location filename="../qml/ProjectPage.qml" line="41" />
         <source>Roll back the last batch?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="41" />
+        <location filename="../qml/ProjectPage.qml" line="42" />
         <source>This undoes the migrations of the last batch. Tables or columns they made, and the data in them, are dropped.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="42" />
+        <location filename="../qml/ProjectPage.qml" line="43" />
         <source>Roll back</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="45" />
+        <location filename="../qml/ProjectPage.qml" line="46" />
         <source>Seed the database?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="46" />
+        <location filename="../qml/ProjectPage.qml" line="47" />
         <source>This runs `database/seeders/DatabaseSeeder`, which adds rows to the tables.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="47" />
+        <location filename="../qml/ProjectPage.qml" line="48" />
         <source>Seed</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="50" />
+        <location filename="../qml/ProjectPage.qml" line="51" />
         <source>Drop every table and migrate again?</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="51" />
+        <location filename="../qml/ProjectPage.qml" line="52" />
         <source>`migrate:fresh` deletes every table in this database, with all its data, then runs every migration again. This can't be undone.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="52" />
+        <location filename="../qml/ProjectPage.qml" line="53" />
         <source>Drop and migrate</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="61" />
+        <location filename="../qml/ProjectPage.qml" line="62" />
         <source>This is a production site.</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="174" />
+        <location filename="../qml/ProjectPage.qml" line="175" />
         <source>Open site</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="181" />
+        <location filename="../qml/ProjectPage.qml" line="182" />
         <source>Open admin</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="186" />
+        <location filename="../qml/ProjectPage.qml" line="187" />
         <source>Open folder</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="191" />
+        <location filename="../qml/ProjectPage.qml" line="192" />
         <source>Open in editor</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="199" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Stop server</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="199" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Start server</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="210" />
+        <location filename="../qml/ProjectPage.qml" line="211" />
         <source>Deleting…</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="210" />
+        <location filename="../qml/ProjectPage.qml" line="211" />
         <source>More</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="213" />
+        <location filename="../qml/ProjectPage.qml" line="214" />
         <source>More actions for this project</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="237" />
+        <location filename="../qml/ProjectPage.qml" line="238" />
         <source>Remove from Studio</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Overview</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Generate</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Database</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Logs</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Packages</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Doctor</source>
         <translation type="unfinished" />
     </message>

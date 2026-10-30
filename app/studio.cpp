@@ -192,6 +192,7 @@ Studio::Studio(Language *language, QObject *parent)
     // A new project is listed (in a project folder, or on its own); the
     // wizard's page stays until the person opens it
     m_wizard.setMariadb(&m_mariadb);
+    connect(&m_databaseSetup, &DatabaseSetup::changed, this, &Studio::commandRunningChanged);
     // The set-up card wrote .env: the project and its Database tab follow
     connect(&m_databaseSetup, &DatabaseSetup::envWritten, this, [this](const QString &path) {
         if (path != m_currentPath)
@@ -1022,7 +1023,7 @@ QStringList Studio::projectPaths() const
 
 bool Studio::commandRunning() const
 {
-    return m_wizard.state() == u"running"
+    return m_wizard.state() == u"running" || m_databaseSetup.state() == u"running"
            || std::any_of(m_checks.cbegin(), m_checks.cend(), [](const ProjectChecks *checks) { return checks->busy(); })
            || std::any_of(m_generate.cbegin(), m_generate.cend(), [](const ProjectGenerate *generate) { return generate->busy(); })
            || std::any_of(m_packagesTab.cbegin(), m_packagesTab.cend(), [](const ProjectPackages *packages) { return packages->busy(); });

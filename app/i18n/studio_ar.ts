@@ -526,7 +526,7 @@
     </message>
     <message>
         <location filename="../qml/DatabaseSetupForm.qml" line="74" />
-        <location filename="../qml/DatabaseSetupForm.qml" line="78" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="83" />
         <source>Password</source>
         <translation>كلمة المرور</translation>
     </message>
@@ -536,52 +536,52 @@
         <translation>تُكتب في `DB_PASSWORD` في `.env` حيث يقرؤها FloCMS. فارغة لمستخدم root في XAMPP.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="87" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="99" />
         <source>On Studio's MariaDB (`127.0.0.1:%1`). Studio makes the user's password and keeps it in %2.</source>
         <translation>على MariaDB الخاص بـ Studio (`127.0.0.1:%1`). ينشئ Studio كلمة مرور المستخدم ويحفظها في %2.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="88" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="100" />
         <source>Studio's MariaDB is stopped: Studio starts it first (port `%1`). It makes the user's password and keeps it in %2.</source>
         <translation>MariaDB الخاص بـ Studio متوقف: سيشغّله Studio أولًا (المنفذ `%1`). وينشئ كلمة مرور المستخدم ويحفظها في %2.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="89" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="101" />
         <source>The database may exist already; if not, Studio offers to create it.</source>
         <translation>قد تكون قاعدة البيانات موجودة؛ وإن لم تكن، يعرض Studio إنشاءها.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="98" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="110" />
         <source>Setting up…</source>
         <translation>جارٍ الإعداد…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="98" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="110" />
         <source>Set up database</source>
         <translation>إعداد قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="105" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="117" />
         <source>Starting Studio's MariaDB…</source>
         <translation>جارٍ تشغيل MariaDB الخاص بـ Studio…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="106" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="118" />
         <source>Creating the database…</source>
         <translation>جارٍ إنشاء قاعدة البيانات…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="106" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="118" />
         <source>Checking the connection…</source>
         <translation>جارٍ فحص الاتصال…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="124" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="136" />
         <source>The server on `%1:%2` answered, but it has no database called `%3`. Studio can create it with this login.</source>
         <translation>استجاب الخادم على `%1:%2`، لكن لا توجد عليه قاعدة بيانات باسم `%3`. يستطيع Studio إنشاءها ببيانات الدخول هذه.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseSetupForm.qml" line="131" />
+        <location filename="../qml/DatabaseSetupForm.qml" line="143" />
         <source>Create database “%1”</source>
         <translation>إنشاء قاعدة البيانات «%1»</translation>
     </message>
@@ -589,82 +589,87 @@
 <context>
     <name>DatabaseTab</name>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="89" />
+        <location filename="../qml/DatabaseTab.qml" line="95" />
         <source>Connection</source>
         <translation>الاتصال</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="98" />
+        <location filename="../qml/DatabaseTab.qml" line="104" />
         <source>Not set up yet</source>
         <translation>لم تُضبط بعد</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="100" />
+        <location filename="../qml/DatabaseTab.qml" line="106" />
         <source>Can't connect</source>
         <translation>تعذّر الاتصال</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="100" />
+        <location filename="../qml/DatabaseTab.qml" line="106" />
         <source>Checking…</source>
         <translation>جارٍ الفحص…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="108" />
+        <location filename="../qml/DatabaseTab.qml" line="114" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="114" />
+        <location filename="../qml/DatabaseTab.qml" line="120" />
         <source>Host</source>
         <translation>المضيف</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="119" />
+        <location filename="../qml/DatabaseTab.qml" line="125" />
         <source>From</source>
         <translation>من</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="125" />
+        <location filename="../qml/DatabaseTab.qml" line="131" />
         <source>Edit in `.env`</source>
         <translation>تعديل في `.env`</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="131" />
+        <location filename="../qml/DatabaseTab.qml" line="137" />
         <source>Refresh</source>
         <translation>تحديث</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="156" />
+        <location filename="../qml/DatabaseTab.qml" line="150" />
+        <source>Studio is setting up another project's database. This one can be set up when that is done.</source>
+        <translation>يُعدّ Studio قاعدة بيانات مشروع آخر الآن. يمكن إعداد هذا المشروع بعد انتهاء ذلك.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DatabaseTab.qml" line="169" />
         <source>This project uses Studio's MariaDB (`127.0.0.1:%1`), which is stopped.</source>
         <translation>يستخدم هذا المشروع MariaDB الخاص بـ Studio (`127.0.0.1:%1`)، وهو متوقف.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="162" />
+        <location filename="../qml/DatabaseTab.qml" line="175" />
         <source>Starting…</source>
         <translation>جارٍ التشغيل…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="162" />
+        <location filename="../qml/DatabaseTab.qml" line="175" />
         <source>Start the database server</source>
         <translation>تشغيل خادم قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="176" />
+        <location filename="../qml/DatabaseTab.qml" line="189" />
         <source>The migrations and tables show here once the database is set up.</source>
         <translation>تظهر الترحيلات والجداول هنا بعد إعداد قاعدة البيانات.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="201" />
+        <location filename="../qml/DatabaseTab.qml" line="214" />
         <source>Migrations</source>
         <translation>الترحيلات</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="203" />
+        <location filename="../qml/DatabaseTab.qml" line="216" />
         <source>Roll back last batch</source>
         <translation>التراجع عن آخر دفعة</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/DatabaseTab.qml" line="209" />
+        <location filename="../qml/DatabaseTab.qml" line="222" />
         <source>Run %Ln migration(s)</source>
         <translation>
             <numerusform>تشغيل %Ln ترحيل</numerusform>
@@ -676,97 +681,97 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="209" />
+        <location filename="../qml/DatabaseTab.qml" line="222" />
         <source>Up to date</source>
         <translation>محدّثة</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="217" />
+        <location filename="../qml/DatabaseTab.qml" line="230" />
         <source>No migrations yet.</source>
         <translation>لا توجد ترحيلات بعد.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="228" />
+        <location filename="../qml/DatabaseTab.qml" line="241" />
         <source>Status</source>
         <translation>الحالة</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="229" />
+        <location filename="../qml/DatabaseTab.qml" line="242" />
         <source>Migration</source>
         <translation>الترحيل</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="230" />
+        <location filename="../qml/DatabaseTab.qml" line="243" />
         <source>Package</source>
         <translation>الحزمة</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="231" />
+        <location filename="../qml/DatabaseTab.qml" line="244" />
         <source>Batch</source>
         <translation>الدفعة</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="246" />
+        <location filename="../qml/DatabaseTab.qml" line="259" />
         <source>Waiting</source>
         <translation>بالانتظار</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="247" />
+        <location filename="../qml/DatabaseTab.qml" line="260" />
         <source>Ran · changed since</source>
         <translation>نُفّذ · تغيّر بعدها</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="248" />
+        <location filename="../qml/DatabaseTab.qml" line="261" />
         <source>Ran · file gone</source>
         <translation>نُفّذ · الملف غير موجود</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="249" />
+        <location filename="../qml/DatabaseTab.qml" line="262" />
         <source>Ran</source>
         <translation>نُفّذ</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="262" />
+        <location filename="../qml/DatabaseTab.qml" line="275" />
         <source>Runs: %1</source>
         <translation>يشغّل: %1</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="263" />
+        <location filename="../qml/DatabaseTab.qml" line="276" />
         <source>Seed…</source>
         <translation>تعبئة البيانات…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="264" />
+        <location filename="../qml/DatabaseTab.qml" line="277" />
         <source>Drop all and migrate…</source>
         <translation>حذف الكل والترحيل من جديد…</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="267" />
+        <location filename="../qml/DatabaseTab.qml" line="280" />
         <source>On a production site Studio asks first, then runs the command with --force.</source>
         <translation>على موقع الإنتاج يسأل Studio أولًا، ثم يشغّل الأمر مع --force.</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="291" />
+        <location filename="../qml/DatabaseTab.qml" line="304" />
         <source>Tables</source>
         <translation>الجداول</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="294" />
+        <location filename="../qml/DatabaseTab.qml" line="307" />
         <source>Table name</source>
         <translation>اسم الجدول</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="295" />
+        <location filename="../qml/DatabaseTab.qml" line="308" />
         <source>Filter the tables</source>
         <translation>تصفية الجداول</translation>
     </message>
     <message>
-        <location filename="../qml/DatabaseTab.qml" line="311" />
+        <location filename="../qml/DatabaseTab.qml" line="324" />
         <source>Open in admin</source>
         <translation>فتح في لوحة الإدارة</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/DatabaseTab.qml" line="319" />
+        <location filename="../qml/DatabaseTab.qml" line="332" />
         <source>%Ln table(s) and their row counts. Edit data in the admin panel.</source>
         <translation>
             <numerusform>%Ln جدول وعدد صفوفها. عدّل البيانات في لوحة الإدارة.</numerusform>
@@ -2398,7 +2403,7 @@
 <context>
     <name>NewProjectWizard</name>
     <message>
-        <location filename="../newproject.cpp" line="649" />
+        <location filename="../newproject.cpp" line="666" />
         <source>Starting Studio's MariaDB %1</source>
         <translation>جارٍ تشغيل MariaDB %1 من Studio</translation>
     </message>
@@ -2798,12 +2803,12 @@
 <context>
     <name>ProjectPage</name>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="35" />
+        <location filename="../qml/ProjectPage.qml" line="36" />
         <source>Run the migrations on this production site?</source>
         <translation>تشغيل الترحيلات على موقع الإنتاج هذا؟</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/ProjectPage.qml" line="36" />
+        <location filename="../qml/ProjectPage.qml" line="37" />
         <source>`APP_ENV` says this is a production site. %Ln migration(s) will change its database.</source>
         <translation>
             <numerusform>يقول `APP_ENV` إن هذا موقع إنتاج. لن يغيّر أي ترحيل قاعدة بياناته.</numerusform>
@@ -2815,137 +2820,137 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="37" />
+        <location filename="../qml/ProjectPage.qml" line="38" />
         <source>Run migrations</source>
         <translation>تشغيل الترحيلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="40" />
+        <location filename="../qml/ProjectPage.qml" line="41" />
         <source>Roll back the last batch?</source>
         <translation>التراجع عن آخر دفعة؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="41" />
+        <location filename="../qml/ProjectPage.qml" line="42" />
         <source>This undoes the migrations of the last batch. Tables or columns they made, and the data in them, are dropped.</source>
         <translation>يتراجع هذا عن ترحيلات آخر دفعة. تُحذف الجداول أو الأعمدة التي أنشأتها، والبيانات التي فيها.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="42" />
+        <location filename="../qml/ProjectPage.qml" line="43" />
         <source>Roll back</source>
         <translation>تراجع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="45" />
+        <location filename="../qml/ProjectPage.qml" line="46" />
         <source>Seed the database?</source>
         <translation>تعبئة قاعدة البيانات؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="46" />
+        <location filename="../qml/ProjectPage.qml" line="47" />
         <source>This runs `database/seeders/DatabaseSeeder`, which adds rows to the tables.</source>
         <translation>يشغّل هذا `database/seeders/DatabaseSeeder` الذي يضيف صفوفًا إلى الجداول.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="47" />
+        <location filename="../qml/ProjectPage.qml" line="48" />
         <source>Seed</source>
         <translation>تعبئة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="50" />
+        <location filename="../qml/ProjectPage.qml" line="51" />
         <source>Drop every table and migrate again?</source>
         <translation>حذف كل الجداول والترحيل من جديد؟</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="51" />
+        <location filename="../qml/ProjectPage.qml" line="52" />
         <source>`migrate:fresh` deletes every table in this database, with all its data, then runs every migration again. This can't be undone.</source>
         <translation>يحذف `migrate:fresh` كل جدول في قاعدة البيانات هذه مع كل بياناته، ثم يشغّل كل الترحيلات من جديد. لا يمكن التراجع عن هذا.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="52" />
+        <location filename="../qml/ProjectPage.qml" line="53" />
         <source>Drop and migrate</source>
         <translation>حذف وترحيل</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="61" />
+        <location filename="../qml/ProjectPage.qml" line="62" />
         <source>This is a production site.</source>
         <translation>هذا موقع إنتاج.</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="174" />
+        <location filename="../qml/ProjectPage.qml" line="175" />
         <source>Open site</source>
         <translation>فتح الموقع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="181" />
+        <location filename="../qml/ProjectPage.qml" line="182" />
         <source>Open admin</source>
         <translation>فتح لوحة الإدارة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="186" />
+        <location filename="../qml/ProjectPage.qml" line="187" />
         <source>Open folder</source>
         <translation>فتح المجلد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="191" />
+        <location filename="../qml/ProjectPage.qml" line="192" />
         <source>Open in editor</source>
         <translation>فتح في المحرر</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="199" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Stop server</source>
         <translation>إيقاف الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="199" />
+        <location filename="../qml/ProjectPage.qml" line="200" />
         <source>Start server</source>
         <translation>تشغيل الخادم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="210" />
+        <location filename="../qml/ProjectPage.qml" line="211" />
         <source>Deleting…</source>
         <translation>جارٍ الحذف…</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="210" />
+        <location filename="../qml/ProjectPage.qml" line="211" />
         <source>More</source>
         <translation>المزيد</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="213" />
+        <location filename="../qml/ProjectPage.qml" line="214" />
         <source>More actions for this project</source>
         <translation>إجراءات أخرى لهذا المشروع</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="237" />
+        <location filename="../qml/ProjectPage.qml" line="238" />
         <source>Remove from Studio</source>
         <translation>إزالة من Studio</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Overview</source>
         <translation>نظرة عامة</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Generate</source>
         <translation>المولّدات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Database</source>
         <translation>قاعدة البيانات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Logs</source>
         <translation>السجلات</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Packages</source>
         <translation>الحزم</translation>
     </message>
     <message>
-        <location filename="../qml/ProjectPage.qml" line="256" />
+        <location filename="../qml/ProjectPage.qml" line="257" />
         <source>Doctor</source>
         <translation>الفحص</translation>
     </message>

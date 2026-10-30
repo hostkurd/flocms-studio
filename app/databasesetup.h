@@ -35,6 +35,9 @@ class DatabaseSetup : public QObject
     Q_PROPERTY(QString step READ step NOTIFY changed)
     Q_PROPERTY(QString code READ code NOTIFY changed)
     Q_PROPERTY(QString message READ message NOTIFY changed)
+    // Set up was clicked for projectDir and it isn't done: the card stays
+    // on its tab even once .env has the DB_ lines
+    Q_PROPERTY(bool active READ active NOTIFY changed)
 
 public:
     DatabaseSetup(const FloStudio::Core::Settings *settings, MariadbServer *mariadb, QObject *parent = nullptr);
@@ -49,6 +52,7 @@ public:
     QString step() const { return m_step; }
     QString code() const { return m_code; }
     QString message() const { return m_message; }
+    bool active() const { return m_started && m_state != u"done"; }
 
     // A fresh card for the project: names from its folder, the server from
     // Settings' default (D-D1). Does nothing while one runs.
@@ -90,4 +94,5 @@ private:
     QProcess *m_running = nullptr;
     QStringList m_output;
     bool m_demo = false;
+    bool m_started = false; // start() since the last reset()
 };

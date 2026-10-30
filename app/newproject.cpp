@@ -577,15 +577,31 @@ void NewProjectWizard::createDatabase()
 {
     if (!m_settings || !missingDatabase())
         return;
+    // Fields fixed since the failure: checked, and into .env first, so
+    // db:check reads the database that is made (as retry() does)
+    m_touched << QStringLiteral("*");
+    if (!ready()) {
+        emit formChanged();
+        return;
+    }
     const int index = m_current;
-    const auto command = createDatabaseCommand(*m_settings, databaseLogin(m_project), newProjectFolder(m_project));
+    const QString folder = newProjectFolder(m_project);
+    if (const auto written = writeEnvValues(folder, newProjectEnv(m_project)); !written) {
+        // Create stays offered: m_databaseMissing is kept
+        setStep(index, QStringLiteral("failed"), {written.error().code, written.error().detail, {}});
+        emit stepsChanged();
+        return;
+    }
+    readEnvSecrets();
+    const auto command = createDatabaseCommand(*m_settings, databaseLogin(m_project), folder);
+    if (!command) {
+        setStep(index, QStringLiteral("failed"), {command.error().code, command.error().detail, {}});
+        emit stepsChanged();
+        return;
+    }
     m_state = QStringLiteral("running");
     setStep(index, QStringLiteral("running"));
     emit formChanged();
-    if (!command) {
-        stepDone(index, false, {command.error().code, command.error().detail, {}});
-        return;
-    }
     addLine(QStringLiteral("› ") + command.value().shown);
     m_output.clear();
     m_running = startStreaming(
@@ -620,8 +636,9 @@ void NewProjectWizard::skipDatabaseSteps()
             setStep(i, QStringLiteral("skipped"));
     }
     m_skippedDatabase = true;
-    // The password never worked: nothing is saved (A-D5)
-    finish(false);
+    // A password that never worked isn't saved (A-D5); one Studio made for
+    // the user it created is
+    finish(m_project.createDatabase);
 }
 
 void NewProjectWizard::runCreateDatabase(int index)

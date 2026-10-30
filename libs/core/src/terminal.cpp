@@ -11,6 +11,9 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 
+#include <algorithm>
+#include <string>
+
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -35,10 +38,13 @@ QString psQuote(const QString &text)
     return u'\'' + quoted + u'\'';
 }
 
-// "text" for a .cmd file: paths can't hold ", so quoting is enough
+// "text" for a .cmd file: paths can't hold ", and % is doubled so cmd.exe
+// doesn't read it as a variable
 QString cmdQuote(const QString &text)
 {
-    return u'"' + text + u'"';
+    QString quoted = text;
+    quoted.replace(u'%', QStringLiteral("%%"));
+    return u'"' + quoted + u'"';
 }
 
 // The platform's own separators, whatever system builds the command
@@ -135,16 +141,45 @@ Result<Done> writeTerminalLaunchers(const QString &folder, const TerminalTools &
     return Done{};
 }
 
+namespace {
+
+// cmd.exe reads a .cmd file in the console's code page, not UTF-8: a path
+// with other letters (an Arabic or Kurdish user name) gets its 8.3 short
+// name, which is plain ASCII, when Windows has one
+QString asciiPath(const QString &path)
+{
+#ifdef Q_OS_WIN
+    const bool ascii = std::all_of(path.cbegin(), path.cend(), [](QChar c) { return c.unicode() < 0x80; });
+    if (ascii)
+        return path;
+    const std::wstring wide = QDir::toNativeSeparators(path).toStdWString();
+    const DWORD size = GetShortPathNameW(wide.c_str(), nullptr, 0);
+    if (size == 0)
+        return path;
+    std::wstring shortName(size, L'\0');
+    const DWORD written = GetShortPathNameW(wide.c_str(), shortName.data(), size);
+    if (written == 0 || written >= size)
+        return path;
+    shortName.resize(written);
+    return QString::fromStdWString(shortName);
+#else
+    return path;
+#endif
+}
+
+} // namespace
+
 Result<TerminalTools> terminalTools(const Settings &settings)
 {
     const auto php = phpProgram(settings);
     if (!php)
         return php.error();
     TerminalTools tools;
-    tools.php = php.value();
+    tools.php = asciiPath(php.value());
     if (const auto composer = composerLaunch(settings)) {
-        tools.composer = composer.value().program;
-        tools.composerArguments = composer.value().arguments;
+        tools.composer = asciiPath(composer.value().program);
+        for (const QString &argument : composer.value().arguments)
+            tools.composerArguments << asciiPath(argument);
         tools.composerBatch = isBatch(tools.composer);
     }
     return tools;
@@ -160,14 +195,82 @@ QString terminalBanner(const TerminalTools &tools)
     return line;
 }
 
+namespace {
+
+// What the starter does once in the folder (B-D3), as sh: the launchers
+// first on PATH, the line, then the person's shell. zsh and bash re-read
+// their startup files, which may put other folders first (macOS's
+// path_helper, Homebrew), so they get Studio's own: zsh through ZDOTDIR
+// (its files read the person's, then put the launchers first and put
+// ZDOTDIR back), bash through --rcfile. Other shells just start.
+QString shellStarter(const QString &folder, const QString &bin, const QString &banner, const QString &shellDir,
+                     const QString &mode)
+{
+    return QStringLiteral("cd %1 || exit 1\n"
+                          "PATH=%2:\"$PATH\"; export PATH\n"
+                          "FLOSTUDIO_BIN=%2; export FLOSTUDIO_BIN\n"
+                          "printf '%s\\n' %3\n"
+                          "s=\"${SHELL:-/bin/sh}\"\n"
+                          "case \"$s\" in\n"
+                          "  */zsh) FLOSTUDIO_HOME_ZDOTDIR=\"${ZDOTDIR:-$HOME}\"; export FLOSTUDIO_HOME_ZDOTDIR\n"
+                          "         ZDOTDIR=%4/zsh; export ZDOTDIR; exec \"$s\" %5 ;;\n"
+                          "  */bash) exec \"$s\" --rcfile %4/bashrc -i ;;\n"
+                          "  *) exec \"$s\" %5 ;;\n"
+                          "esac\n")
+        .arg(folder, bin, banner, shellDir, mode);
+}
+
+// The arguments a known Linux terminal takes before the program to run
+QStringList linuxTerminalArguments(const QString &program, const QString &folder)
+{
+    const QString name = QFileInfo(program).fileName();
+    if (name == u"gnome-terminal")
+        return {QStringLiteral("--working-directory=") + folder, QStringLiteral("--")};
+    if (name == u"konsole")
+        return {QStringLiteral("--workdir"), folder, QStringLiteral("-e")};
+    if (name == u"xfce4-terminal")
+        return {QStringLiteral("--working-directory=") + folder, QStringLiteral("-x")};
+    // xterm's way, which x-terminal-emulator and most others follow
+    return {QStringLiteral("-e")};
+}
+
+} // namespace
+
+QString terminalShellFolder(const QString &binFolder)
+{
+    return QFileInfo(binFolder).dir().filePath(QStringLiteral("terminal-shell"));
+}
+
+QList<QPair<QString, QByteArray>> terminalShellFiles()
+{
+    const auto source = [](const char *file) {
+        return QStringLiteral("[ -r \"$FLOSTUDIO_HOME_ZDOTDIR/%1\" ] && . \"$FLOSTUDIO_HOME_ZDOTDIR/%1\"\n")
+            .arg(QLatin1String(file));
+    };
+    const QString first = QStringLiteral("PATH=\"$FLOSTUDIO_BIN:$PATH\"; export PATH\n");
+    return {
+        {QStringLiteral("zsh/.zshenv"), source(".zshenv").toUtf8()},
+        {QStringLiteral("zsh/.zprofile"), source(".zprofile").toUtf8()},
+        // The last file Studio's ZDOTDIR serves: the person's own .zlogin
+        // and later shells read theirs again
+        {QStringLiteral("zsh/.zshrc"),
+         (source(".zshrc") + first
+          + QStringLiteral("if [ \"$FLOSTUDIO_HOME_ZDOTDIR\" = \"$HOME\" ]; then unset ZDOTDIR; "
+                           "else ZDOTDIR=\"$FLOSTUDIO_HOME_ZDOTDIR\"; fi\n"))
+             .toUtf8()},
+        {QStringLiteral("bashrc"), (QStringLiteral("[ -r \"$HOME/.bashrc\" ] && . \"$HOME/.bashrc\"\n") + first).toUtf8()},
+    };
+}
+
 Result<TerminalCommand> terminalCommand(TerminalPlatform platform, const QString &terminalTemplate, const QString &folder,
-                                        const QString &binFolder, const QString &banner,
+                                        const QString &binFolder, const TerminalTools &tools,
                                         const std::function<QString(const QString &)> &find, const QString &terminalEnv)
 {
     TerminalCommand command;
     command.workingDir = folder;
     const QString shownFolder = nativePath(folder, platform);
     const QString bin = nativePath(binFolder, platform);
+    const QString banner = nativePath(terminalBanner(tools), platform);
 
     // The person's own command: no starter
     if (!terminalTemplate.trimmed().isEmpty()) {
@@ -183,14 +286,27 @@ Result<TerminalCommand> terminalCommand(TerminalPlatform platform, const QString
 
     switch (platform) {
     case TerminalPlatform::Windows: {
-        const QString script = QStringLiteral("$env:PATH = %1 + ';' + $env:PATH\nWrite-Host %2\n")
-                                   .arg(psQuote(bin), psQuote(banner));
+        // PowerShell functions call the programs themselves (the .cmd
+        // launchers would hand the arguments to cmd.exe, which reads & ^ %
+        // itself); PATH has the launchers for programs PHP starts
+        QString script = QStringLiteral("$env:PATH = %1 + ';' + $env:PATH\n").arg(psQuote(bin));
+        script += QStringLiteral("function global:php { & %1 @args }\n").arg(psQuote(nativePath(tools.php, platform)));
+        if (!tools.composer.isEmpty()) {
+            QString call = psQuote(nativePath(tools.composer, platform));
+            for (const QString &argument : tools.composerArguments)
+                call += u' ' + psQuote(nativePath(argument, platform));
+            script += QStringLiteral("function global:composer { & %1 @args }\n").arg(call);
+        }
+        script += QStringLiteral("Write-Host %1\n").arg(psQuote(banner));
         const QStringList shell{QStringLiteral("-NoExit"), QStringLiteral("-NoLogo"), QStringLiteral("-EncodedCommand"),
                                 encodedCommand(script)};
         const QString powershell = find(QStringLiteral("powershell"));
         if (const QString wt = find(QStringLiteral("wt")); !wt.isEmpty()) {
+            // Windows Terminal splits its command line at ; even in quotes
+            QString wtFolder = shownFolder;
+            wtFolder.replace(u';', QStringLiteral("\\;"));
             command.program = wt;
-            command.arguments = QStringList{QStringLiteral("-d"), shownFolder,
+            command.arguments = QStringList{QStringLiteral("-d"), wtFolder,
                                             powershell.isEmpty() ? QStringLiteral("powershell.exe") : powershell}
                                 + shell;
             return command;
@@ -210,9 +326,9 @@ Result<TerminalCommand> terminalCommand(TerminalPlatform platform, const QString
         const QString hash = QString::fromLatin1(
             QCryptographicHash::hash(folder.toUtf8(), QCryptographicHash::Sha1).toHex().left(12));
         command.scriptPath = QFileInfo(binFolder).dir().filePath(QStringLiteral("terminal-%1.command").arg(hash));
-        command.script = (QStringLiteral("#!/bin/sh\ncd %1 || exit 1\nPATH=%2:\"$PATH\"; export PATH\n"
-                                         "printf '%s\\n' %3\nexec \"${SHELL:-/bin/zsh}\" -l\n")
-                              .arg(shQuote(folder), shQuote(binFolder), shQuote(banner)))
+        command.script = (QStringLiteral("#!/bin/sh\n")
+                          + shellStarter(shQuote(folder), shQuote(binFolder), shQuote(banner),
+                                         shQuote(terminalShellFolder(binFolder)), QStringLiteral("-l")))
                              .toUtf8();
         command.program = open;
         command.arguments = {QStringLiteral("-a"), QStringLiteral("Terminal"), command.scriptPath};
@@ -221,33 +337,20 @@ Result<TerminalCommand> terminalCommand(TerminalPlatform platform, const QString
     case TerminalPlatform::Linux: {
         const QStringList starter{
             QStringLiteral("sh"), QStringLiteral("-c"),
-            QStringLiteral("cd \"$1\" || exit 1; PATH=\"$2:$PATH\"; export PATH; printf '%s\\n' \"$3\"; "
-                           "exec \"${SHELL:-/bin/sh}\" -i"),
-            QStringLiteral("sh"), folder, binFolder, banner};
-        // $TERMINAL and x-terminal-emulator take the program after -e
-        for (const QString &name : {terminalEnv.trimmed(), QStringLiteral("x-terminal-emulator")}) {
+            shellStarter(QStringLiteral("\"$1\""), QStringLiteral("\"$2\""), QStringLiteral("\"$3\""),
+                         QStringLiteral("\"$4\""), QStringLiteral("-i")),
+            QStringLiteral("sh"), folder, binFolder, banner, terminalShellFolder(binFolder)};
+        // $TERMINAL first, then the ones whose way is known, then the
+        // system's choice
+        for (const QString &name : {terminalEnv.trimmed(), QStringLiteral("gnome-terminal"), QStringLiteral("konsole"),
+                                    QStringLiteral("xfce4-terminal"), QStringLiteral("x-terminal-emulator")}) {
             if (name.isEmpty())
                 continue;
             if (const QString program = find(name); !program.isEmpty()) {
                 command.program = program;
-                command.arguments = QStringList{QStringLiteral("-e")} + starter;
+                command.arguments = linuxTerminalArguments(program, folder) + starter;
                 return command;
             }
-        }
-        if (const QString program = find(QStringLiteral("gnome-terminal")); !program.isEmpty()) {
-            command.program = program;
-            command.arguments = QStringList{QStringLiteral("--working-directory=") + folder, QStringLiteral("--")} + starter;
-            return command;
-        }
-        if (const QString program = find(QStringLiteral("konsole")); !program.isEmpty()) {
-            command.program = program;
-            command.arguments = QStringList{QStringLiteral("--workdir"), folder, QStringLiteral("-e")} + starter;
-            return command;
-        }
-        if (const QString program = find(QStringLiteral("xfce4-terminal")); !program.isEmpty()) {
-            command.program = program;
-            command.arguments = QStringList{QStringLiteral("--working-directory=") + folder, QStringLiteral("-x")} + starter;
-            return command;
         }
         return Error{QStringLiteral("terminal_not_found"), QStringLiteral("x-terminal-emulator")};
     }
@@ -263,8 +366,18 @@ Result<Done> openTerminal(const Settings &settings, const QString &folder)
     const QString bin = terminalBinFolder();
     if (const auto written = writeTerminalLaunchers(bin, tools.value()); !written)
         return written.error();
-    const auto command = terminalCommand(currentTerminalPlatform(), settings.terminalCommand, folder, bin,
-                                         terminalBanner(tools.value()), [](const QString &name) { return findTool(name); },
+    if (currentTerminalPlatform() != TerminalPlatform::Windows) {
+        const QDir shell(terminalShellFolder(bin));
+        for (const auto &[name, contents] : terminalShellFiles()) {
+            const QString path = shell.filePath(name);
+            QDir().mkpath(QFileInfo(path).absolutePath());
+            QSaveFile file(path);
+            if (!file.open(QIODevice::WriteOnly) || file.write(contents) != contents.size() || !file.commit())
+                return Error{QStringLiteral("terminal_bin"), path};
+        }
+    }
+    const auto command = terminalCommand(currentTerminalPlatform(), settings.terminalCommand, folder, bin, tools.value(),
+                                         [](const QString &name) { return findTool(name); },
                                          qEnvironmentVariable("TERMINAL"));
     if (!command)
         return command.error();

@@ -290,6 +290,7 @@ private slots:
         QVERIFY(isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [1049] unknown database 'x'")));
         QVERIFY(!isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost'")));
         QVERIFY(!isUnknownDatabase(QStringLiteral("SQLSTATE[HY000] [2002] Connection refused")));
+        QVERIFY(!isUnknownDatabase(QStringLiteral("Unknown database driver: oracle")));
         QVERIFY(!isUnknownDatabase(QString()));
     }
 

@@ -75,7 +75,19 @@ ColumnLayout {
             hint: qsTr("Written to `DB_PASSWORD` in `.env`, where FloCMS reads it. Empty for XAMPP's root.")
             problem: form.problems.dbPassword || ""
             Layout.fillWidth: true
-            Field { enabled: !form.busy; echoMode: TextInput.Password; Layout.fillWidth: true; Accessible.name: qsTr("Password"); onTextEdited: form.setup.set("password", text) }
+            Field {
+                id: passwordField
+                enabled: !form.busy
+                echoMode: TextInput.Password
+                Layout.fillWidth: true
+                Accessible.name: qsTr("Password")
+                onTextEdited: form.setup.set("password", text)
+                // A fresh card (another project, or after a reset) has none
+                Connections {
+                    target: form.setup
+                    function onChanged() { if (!form.values.hasPassword && passwordField.text !== "") passwordField.text = "" }
+                }
+            }
         }
     }
     RowLayout {

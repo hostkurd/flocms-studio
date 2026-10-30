@@ -168,7 +168,7 @@ QList<FieldProblem> checkDatabaseLogin(const DatabaseLogin &login, bool studioMa
 
 bool isUnknownDatabase(const QString &message)
 {
-    return message.contains(QStringLiteral("[1049]")) || message.contains(QStringLiteral("Unknown database"), Qt::CaseInsensitive);
+    return message.contains(QStringLiteral("[1049]")) || message.contains(QStringLiteral("Unknown database '"), Qt::CaseInsensitive);
 }
 
 QString createDatabasePhpCode()

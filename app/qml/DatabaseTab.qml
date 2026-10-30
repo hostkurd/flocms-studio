@@ -25,16 +25,22 @@ ScrollView {
     // person, even once .env has the lines
     readonly property var config: Studio.current.database || ({})
     readonly property var setup: Studio.databaseSetup
-    readonly property bool setupShown: !config.configured
-        || (setup.projectDir === Studio.currentPath && ["running", "missing", "failed"].indexOf(setup.state) >= 0)
+    readonly property bool setupShown: !config.configured || (setup.projectDir === Studio.currentPath && setup.active)
+    // The card belongs to this project (one set-up runs at a time)
+    readonly property bool setupHere: setup.projectDir === Studio.currentPath
     function freshSetup() {
-        if (!tab.config.configured && Studio.currentPath)
+        if (!tab.config.configured && Studio.currentPath && tab.setup.projectDir !== Studio.currentPath
+                || tab.setup.state === "done")
             tab.setup.reset(Studio.currentPath)
     }
     Component.onCompleted: freshSetup()
     Connections {
         target: Studio
         function onCurrentChanged() { tab.freshSetup() }
+    }
+    Connections {
+        target: tab.setup
+        function onChanged() { if (!tab.config.configured) Qt.callLater(tab.freshSetup) }
     }
 
     // "10.11.14-MariaDB-0ubuntu0.24.04.1" → "MariaDB 10.11.14"
@@ -135,8 +141,15 @@ ScrollView {
                 }
             }
             DatabaseSetupForm {
-                visible: tab.setupShown
+                visible: tab.setupShown && tab.setupHere
                 setup: tab.setup
+                Layout.fillWidth: true
+            }
+            AppText {
+                visible: tab.setupShown && !tab.setupHere
+                ui: qsTr("Studio is setting up another project's database. This one can be set up when that is done.")
+                color: Theme.muted
+                wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
             Rectangle {

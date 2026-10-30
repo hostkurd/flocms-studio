@@ -63,7 +63,7 @@ Popup {
             KeyNavigation.up: deleteItem
             text: qsTr("Open terminal")
             iconPath: Icons.terminal
-            shortcut: Qt.platform.os === "osx" ? "\u2318`" : "Ctrl+`"
+            shortcut: Qt.platform.os === "osx" ? "\u2303`" : "Ctrl+`"
             onClicked: { menu.close(); menu.terminalChosen() }
         }
         Rectangle {

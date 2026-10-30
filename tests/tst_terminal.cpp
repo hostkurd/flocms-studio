@@ -23,6 +23,13 @@ QString text(const QList<QPair<QString, QByteArray>> &files, const QString &name
     return {};
 }
 
+TerminalTools phpAt(const QString &php)
+{
+    TerminalTools tools;
+    tools.php = php;
+    return tools;
+}
+
 // A lookup that knows only these programs
 std::function<QString(const QString &)> only(const QStringList &names)
 {
@@ -45,6 +52,11 @@ private slots:
         const auto files = terminalLaunchers(tools, TerminalPlatform::Windows);
         QCOMPARE(files.size(), 2);
         QCOMPARE(text(files, QStringLiteral("php.cmd")), QStringLiteral("@\"D:\\xampp\\php\\php.exe\" %*\r\n"));
+        // % in a path is doubled for cmd.exe
+        TerminalTools percent;
+        percent.php = QStringLiteral("C:/100%/php.exe");
+        QCOMPARE(text(terminalLaunchers(percent, TerminalPlatform::Windows), QStringLiteral("php.cmd")),
+                 QStringLiteral("@\"C:\\100%%\\php.exe\" %*\r\n"));
         QCOMPARE(text(files, QStringLiteral("composer.cmd")),
                  QStringLiteral("@\"D:\\xampp\\php\\php.exe\" \"C:\\ProgramData\\ComposerSetup\\bin\\composer.phar\" %*\r\n"));
         // A .bat Composer is called, so the launcher goes on after it
@@ -107,9 +119,12 @@ private slots:
 
     void windowsTerminal()
     {
+        TerminalTools tools;
+        tools.php = QStringLiteral("C:/php/php.exe");
+        tools.composer = QStringLiteral("C:/php/php.exe");
+        tools.composerArguments = {QStringLiteral("C:/Tools/it's/composer.phar")};
         const auto wt = terminalCommand(TerminalPlatform::Windows, {}, QStringLiteral("C:/Sites/shop"),
-                                        QStringLiteral("C:/Users/me/AppData/Local/Studio/terminal-bin"),
-                                        QStringLiteral("FloCMS Studio: php C:\\php\\php.exe"),
+                                        QStringLiteral("C:/Users/me/AppData/Local/Studio/terminal-bin"), tools,
                                         only({QStringLiteral("wt"), QStringLiteral("powershell")}));
         QVERIFY(wt.ok());
         QCOMPARE(wt.value().program, QStringLiteral("/bin/wt"));
@@ -123,15 +138,22 @@ private slots:
         const QString script = QString::fromUtf16(reinterpret_cast<const char16_t *>(utf16.constData()), utf16.size() / 2);
         QVERIFY2(script.contains(QStringLiteral("$env:PATH = 'C:\\Users\\me\\AppData\\Local\\Studio\\terminal-bin' + ';' + $env:PATH")),
                  qPrintable(script));
-        QVERIFY(script.contains(QStringLiteral("Write-Host 'FloCMS Studio: php C:\\php\\php.exe'")));
+        QVERIFY(script.contains(QStringLiteral("Write-Host 'FloCMS Studio: php C:\\php\\php.exe, composer C:\\Tools\\it''s\\composer.phar'")));
+        QVERIFY2(script.contains(QStringLiteral("function global:php { & 'C:\\php\\php.exe' @args }")), qPrintable(script));
+        QVERIFY(script.contains(
+            QStringLiteral("function global:composer { & 'C:\\php\\php.exe' 'C:\\Tools\\it''s\\composer.phar' @args }")));
+        // Windows Terminal splits at ; even in quotes
+        const auto semi = terminalCommand(TerminalPlatform::Windows, {}, QStringLiteral("C:/a;b"), QStringLiteral("C:/bin"),
+                                          tools, only({QStringLiteral("wt"), QStringLiteral("powershell")}));
+        QCOMPARE(semi.value().arguments.value(1), QStringLiteral("C:\\a\\;b"));
 
         // No Windows Terminal: PowerShell in a console of its own
         const auto ps = terminalCommand(TerminalPlatform::Windows, {}, QStringLiteral("C:/Sites/shop"), QStringLiteral("C:/bin"),
-                                        QStringLiteral("x"), only({QStringLiteral("powershell")}));
+                                        tools, only({QStringLiteral("powershell")}));
         QCOMPARE(ps.value().program, QStringLiteral("/bin/powershell"));
         QCOMPARE(ps.value().workingDir, QStringLiteral("C:/Sites/shop"));
         QVERIFY(ps.value().newConsole);
-        QCOMPARE(terminalCommand(TerminalPlatform::Windows, {}, QStringLiteral("C:/a"), QStringLiteral("C:/b"), {}, only({}))
+        QCOMPARE(terminalCommand(TerminalPlatform::Windows, {}, QStringLiteral("C:/a"), QStringLiteral("C:/b"), tools, only({}))
                      .error()
                      .code,
                  QStringLiteral("terminal_not_found"));
@@ -141,7 +163,7 @@ private slots:
     {
         const auto mac = terminalCommand(TerminalPlatform::MacOS, {}, QStringLiteral("/Users/me/Sites/it's"),
                                          QStringLiteral("/Users/me/Library/Application Support/Studio/terminal-bin"),
-                                         QStringLiteral("FloCMS Studio: php /opt/php"), only({QStringLiteral("open")}));
+                                         phpAt(QStringLiteral("/opt/php")), only({QStringLiteral("open")}));
         QVERIFY(mac.ok());
         QCOMPARE(mac.value().program, QStringLiteral("/bin/open"));
         QCOMPARE(mac.value().arguments.mid(0, 2), (QStringList{QStringLiteral("-a"), QStringLiteral("Terminal")}));
@@ -151,7 +173,11 @@ private slots:
         const QString script = QString::fromUtf8(mac.value().script);
         QVERIFY2(script.contains(QStringLiteral("cd '/Users/me/Sites/it'\\''s' || exit 1")), qPrintable(script));
         QVERIFY(script.contains(QStringLiteral("PATH='/Users/me/Library/Application Support/Studio/terminal-bin':\"$PATH\"")));
-        QVERIFY(script.contains(QStringLiteral("exec \"${SHELL:-/bin/zsh}\" -l")));
+        QVERIFY(script.contains(QStringLiteral("printf '%s\\n' 'FloCMS Studio: php /opt/php'")));
+        // zsh starts with Studio's start-up files, which put the launchers back first
+        QVERIFY2(script.contains(QStringLiteral("ZDOTDIR='/Users/me/Library/Application Support/Studio/terminal-shell'/zsh")),
+                 qPrintable(script));
+        QVERIFY(script.contains(QStringLiteral("exec \"$s\" -l")));
     }
 
     void linuxTerminals()
@@ -159,22 +185,26 @@ private slots:
         const QString folder = QStringLiteral("/home/me/sites/shop");
         const QString bin = QStringLiteral("/home/me/.local/share/Studio/terminal-bin");
         const auto first = [&](const QStringList &known, const QString &env = {}) {
-            return terminalCommand(TerminalPlatform::Linux, {}, folder, bin, QStringLiteral("line"), only(known), env).value();
+            return terminalCommand(TerminalPlatform::Linux, {}, folder, bin, phpAt(QStringLiteral("/p")), only(known), env).value();
         };
         const TerminalCommand env = first({QStringLiteral("alacritty"), QStringLiteral("gnome-terminal")}, QStringLiteral("alacritty"));
         QCOMPARE(env.program, QStringLiteral("/bin/alacritty"));
         QCOMPARE(env.arguments.value(0), QStringLiteral("-e"));
         QCOMPARE(env.arguments.mid(1, 2), (QStringList{QStringLiteral("sh"), QStringLiteral("-c")}));
-        QCOMPARE(env.arguments.mid(env.arguments.size() - 3), (QStringList{folder, bin, QStringLiteral("line")}));
-        QCOMPARE(first({QStringLiteral("x-terminal-emulator"), QStringLiteral("konsole")}).program,
-                 QStringLiteral("/bin/x-terminal-emulator"));
+        QCOMPARE(env.arguments.mid(env.arguments.size() - 4),
+                 (QStringList{folder, bin, QStringLiteral("FloCMS Studio: php /p"), QStringLiteral("/home/me/.local/share/Studio/terminal-shell")}));
+        // A known terminal before the system's choice, with its own way
+        QCOMPARE(first({QStringLiteral("x-terminal-emulator"), QStringLiteral("konsole")}).program, QStringLiteral("/bin/konsole"));
+        QCOMPARE(first({QStringLiteral("x-terminal-emulator")}).arguments.value(0), QStringLiteral("-e"));
+        // $TERMINAL naming a known one gets its way too
+        QCOMPARE(first({QStringLiteral("konsole")}, QStringLiteral("konsole")).arguments.value(0), QStringLiteral("--workdir"));
         const TerminalCommand gnome = first({QStringLiteral("gnome-terminal"), QStringLiteral("konsole")});
         QCOMPARE(gnome.arguments.mid(0, 2), (QStringList{QStringLiteral("--working-directory=") + folder, QStringLiteral("--")}));
         const TerminalCommand konsole = first({QStringLiteral("konsole")});
         QCOMPARE(konsole.arguments.mid(0, 3), (QStringList{QStringLiteral("--workdir"), folder, QStringLiteral("-e")}));
         const TerminalCommand xfce = first({QStringLiteral("xfce4-terminal")});
         QCOMPARE(xfce.arguments.value(1), QStringLiteral("-x"));
-        QCOMPARE(terminalCommand(TerminalPlatform::Linux, {}, folder, bin, {}, only({})).error().code,
+        QCOMPARE(terminalCommand(TerminalPlatform::Linux, {}, folder, bin, phpAt({}), only({})).error().code,
                  QStringLiteral("terminal_not_found"));
     }
 
@@ -188,7 +218,7 @@ private slots:
         const QTemporaryDir folder;
         const QTemporaryDir bin;
         const auto command = terminalCommand(TerminalPlatform::Linux, {}, folder.path(), bin.path(),
-                                             QStringLiteral("FloCMS Studio: php x"), only({QStringLiteral("konsole")}));
+                                             phpAt(QStringLiteral("x")), only({QStringLiteral("konsole")}));
         const QStringList starter = command.value().arguments.mid(3);
         // The "shell": says where it is and what PATH it got
         const QString shell = QDir(bin.path()).filePath(QStringLiteral("fake-shell"));
@@ -210,17 +240,70 @@ private slots:
 #endif
     }
 
+    // zsh and bash re-read the person's start-up files, which may put
+    // other folders first; Studio's own files put the launchers back first
+    void shellsKeepTheLaunchersFirst_data()
+    {
+        QTest::addColumn<QString>("shell");
+        QTest::newRow("bash") << QStringLiteral("/bin/bash");
+        QTest::newRow("zsh") << QStringLiteral("/bin/zsh");
+    }
+
+    void shellsKeepTheLaunchersFirst()
+    {
+#ifdef Q_OS_WIN
+        QSKIP("the shells are for macOS and Linux");
+#else
+        QFETCH(QString, shell);
+        if (!QFileInfo(shell).isExecutable())
+            QSKIP("this shell isn't on this computer");
+        const QTemporaryDir home;
+        const QTemporaryDir folder;
+        const QString bin = QDir(home.path()).filePath(QStringLiteral("data/terminal-bin"));
+        QVERIFY(QDir().mkpath(bin));
+        // The person's own files put another folder first
+        for (const char *name : {".bashrc", ".zshrc"}) {
+            QFile file(QDir(home.path()).filePath(QLatin1String(name)));
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write("PATH=\"/their/first:$PATH\"; export PATH\nTHEIRS=yes\n");
+        }
+        for (const auto &[name, contents] : terminalShellFiles()) {
+            const QString path = QDir(terminalShellFolder(bin)).filePath(name);
+            QVERIFY(QDir().mkpath(QFileInfo(path).absolutePath()));
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write(contents);
+        }
+        const auto command = terminalCommand(TerminalPlatform::Linux, {}, folder.path(), bin, phpAt(QStringLiteral("x")),
+                                             only({QStringLiteral("konsole")}));
+        Command run;
+        run.program = QStringLiteral("/bin/sh");
+        run.arguments = command.value().arguments.mid(4);
+        run.environment.insert(QStringLiteral("SHELL"), shell);
+        run.environment.insert(QStringLiteral("HOME"), home.path());
+        run.environment.insert(QStringLiteral("ZDOTDIR"), home.path());
+        run.input = "echo \"P=$PATH\"; echo \"T=$THEIRS\"; echo \"Z=${ZDOTDIR:-none}\"; exit\n";
+        const Captured out = runCaptured(run, 30000);
+        QVERIFY2(out.started, qPrintable(out.err));
+        QVERIFY2(out.out.contains(QStringLiteral("P=") + bin + u':'), qPrintable(out.out + out.err));
+        QVERIFY2(out.out.contains(QStringLiteral("T=yes")), qPrintable(out.out));
+        // zsh: ZDOTDIR is the person's again
+        if (shell.endsWith(QStringLiteral("zsh")))
+            QVERIFY2(!out.out.contains(QStringLiteral("terminal-shell")), qPrintable(out.out));
+#endif
+    }
+
     void ownCommand()
     {
         const auto own = terminalCommand(TerminalPlatform::Linux, QStringLiteral("wezterm start --cwd \"{folder}\""),
-                                         QStringLiteral("/home/me/my site"), QStringLiteral("/bin-dir"), QStringLiteral("x"),
+                                         QStringLiteral("/home/me/my site"), QStringLiteral("/bin-dir"), phpAt(QStringLiteral("x")),
                                          only({QStringLiteral("wezterm")}));
         QCOMPARE(own.value().program, QStringLiteral("/bin/wezterm"));
         QCOMPARE(own.value().arguments,
                  (QStringList{QStringLiteral("start"), QStringLiteral("--cwd"), QStringLiteral("/home/me/my site")}));
         QVERIFY(own.value().script.isEmpty());
         QCOMPARE(terminalCommand(TerminalPlatform::Linux, QStringLiteral("nothing-here {folder}"), QStringLiteral("/a"),
-                                 QStringLiteral("/b"), {}, only({}))
+                                 QStringLiteral("/b"), phpAt({}), only({}))
                      .error()
                      .code,
                  QStringLiteral("terminal_not_found"));

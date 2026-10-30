@@ -42,7 +42,8 @@ QVariantMap DatabaseSetup::form() const
             {QStringLiteral("name"), m_login.name},
             {QStringLiteral("user"), m_login.user},
             {QStringLiteral("host"), m_login.host},
-            {QStringLiteral("port"), m_login.port}};
+            {QStringLiteral("port"), m_login.port},
+            {QStringLiteral("hasPassword"), !m_login.password.isEmpty()}};
 }
 
 QList<FieldProblem> DatabaseSetup::currentProblems() const
@@ -69,7 +70,9 @@ QVariantMap DatabaseSetup::problems() const
 
 void DatabaseSetup::reset(const QString &projectDir)
 {
-    if (m_demo || m_running || m_waitForServer || (m_projectDir == projectDir && m_state != u"editing" && m_state != u"done"))
+    // Busy (here or for another project), or waiting on the person here
+    if (m_demo || m_running || m_waitForServer || m_state == u"running"
+        || (m_projectDir == projectDir && active()))
         return;
     m_projectDir = projectDir;
     const QString name = databaseNameFor(projectFolderName(QFileInfo(projectDir).fileName()));
@@ -89,6 +92,7 @@ void DatabaseSetup::reset(const QString &projectDir)
         m_login.user = QStringLiteral("root");
     }
     m_touched = false;
+    m_started = false;
     m_state = QStringLiteral("editing");
     m_step.clear();
     m_code.clear();
@@ -135,13 +139,16 @@ void DatabaseSetup::set(const QString &field, const QVariant &value)
 
 void DatabaseSetup::start()
 {
-    if (!m_settings || m_running || m_waitForServer || m_projectDir.isEmpty() || m_state == u"running")
+    // Done: a fresh reset() comes first, for whichever project shows
+    if (!m_settings || m_running || m_waitForServer || m_projectDir.isEmpty() || m_state == u"running"
+        || m_state == u"done")
         return;
     m_touched = true;
     if (!currentProblems().isEmpty()) {
         emit changed();
         return;
     }
+    m_started = true;
     m_state = QStringLiteral("running");
     m_code.clear();
     m_message.clear();
@@ -176,6 +183,13 @@ void DatabaseSetup::startStudio()
             }
         });
         m_mariadb->start();
+        // A server that can't start says nothing more: don't wait for it
+        if (m_waitForServer && m_mariadb->state() != u"starting" && m_mariadb->state() != u"running") {
+            QObject::disconnect(m_waitForServer);
+            m_waitForServer = {};
+            fail(m_mariadb->error().isEmpty() ? QStringLiteral("db_start") : m_mariadb->error(), m_mariadb->detail());
+            return;
+        }
         emit changed();
         return;
     }
@@ -275,11 +289,6 @@ bool DatabaseSetup::writeEnv()
         fail(written.error().code, written.error().detail);
         return false;
     }
-    // The password is kept for the next project on this server, as the
-    // wizard does (Studio's is always kept)
-    if (!m_login.password.isEmpty() && Security::secureStoreAvailable())
-        Security::savePassword(Security::databaseAccount(m_login.host, m_login.port, m_login.user), m_login.password, this,
-                               [](const Result<QString> &) {});
     emit envWritten(m_projectDir);
     return true;
 }
@@ -297,6 +306,11 @@ void DatabaseSetup::finish()
 {
     m_state = QStringLiteral("done");
     m_step.clear();
+    // A password that worked is kept for the next project on this server,
+    // as the wizard does (Studio's own user's too)
+    if (!m_login.password.isEmpty() && Security::secureStoreAvailable())
+        Security::savePassword(Security::databaseAccount(m_login.host, m_login.port, m_login.user), m_login.password, this,
+                               [](const Result<QString> &) {});
     m_login.password.clear();
     emit changed();
     emit envWritten(m_projectDir);

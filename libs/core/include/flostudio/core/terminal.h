@@ -67,18 +67,25 @@ struct TerminalCommand
     bool newConsole = false; // Windows: the program needs a console window of its own
 };
 
+// Studio's own shell start-up files, beside the launchers' folder:
+// zsh/.zshenv, zsh/.zprofile, zsh/.zshrc (ZDOTDIR) and bashrc (--rcfile).
+// They read the person's own files, then put the launchers first on PATH.
+FLOSTUDIOCORE_EXPORT QString terminalShellFolder(const QString &binFolder);
+FLOSTUDIOCORE_EXPORT QList<QPair<QString, QByteArray>> terminalShellFiles();
+
 // How to open the terminal. `terminalTemplate` is Settings::terminalCommand:
 // empty means automatic (B-D2) — Windows Terminal, else PowerShell;
 // Terminal.app; $TERMINAL, x-terminal-emulator, GNOME Terminal, Konsole,
 // Xfce Terminal. Else it works like the editor command ({folder}, quotes)
 // and gets no starter: Studio then only puts the launchers' folder first
 // on the PATH it starts it with. `find` turns a program name into its path
-// (empty when it isn't there); `terminalEnv` is $TERMINAL. Error code:
-// terminal_not_found.
+// (empty when it isn't there); `terminalEnv` is $TERMINAL. On Windows the
+// starter defines `php` and `composer` as PowerShell functions too. Error
+// code: terminal_not_found.
 FLOSTUDIOCORE_EXPORT Result<TerminalCommand> terminalCommand(TerminalPlatform platform,
                                                              const QString &terminalTemplate,
                                                              const QString &folder, const QString &binFolder,
-                                                             const QString &banner,
+                                                             const TerminalTools &tools,
                                                              const std::function<QString(const QString &)> &find,
                                                              const QString &terminalEnv = {});
 
