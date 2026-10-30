@@ -187,10 +187,11 @@ Result<TerminalTools> terminalTools(const Settings &settings)
 
 QString terminalBanner(const TerminalTools &tools)
 {
-    QString line = QStringLiteral("FloCMS Studio: php ") + QDir::toNativeSeparators(tools.php);
+    // The paths as given: terminalCommand() writes them the system's way
+    QString line = QStringLiteral("FloCMS Studio: php ") + tools.php;
     if (!tools.composer.isEmpty()) {
         const QString composer = tools.composerArguments.isEmpty() ? tools.composer : tools.composerArguments.constLast();
-        line += QStringLiteral(", composer ") + QDir::toNativeSeparators(composer);
+        line += QStringLiteral(", composer ") + composer;
     }
     return line;
 }

@@ -598,7 +598,7 @@ jobs:
           - os: ubuntu-24.04
             arch: linux_gcc_64
             leaks: 1
-          - os: macos-14
+          - os: macos-15
             arch: clang_64
             leaks: 0 # LeakSanitizer is not available on macOS
     env:

@@ -132,7 +132,7 @@ private slots:
         stopProcess(server);
         QTRY_VERIFY_WITH_TIMEOUT(ended, 10000);
         // php -S, the child of php flo serve, is gone too
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), 8190, 200), 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(8190), 10000);
     }
 };
 

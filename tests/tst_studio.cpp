@@ -1396,7 +1396,7 @@ private slots:
 
         studio.stopServer();
         QTRY_COMPARE_WITH_TIMEOUT(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"), 15000);
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000); // php -S went too
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(port), 10000); // php -S went too
         QVERIFY(changed.count() >= 3);
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
@@ -1416,7 +1416,7 @@ private slots:
         const int port = urlPort(studio.server().value(QStringLiteral("url")).toString());
         studio.removeProject(studio.currentPath());
         QCOMPARE(studio.server().value(QStringLiteral("state")).toString(), QStringLiteral("stopped"));
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(port), 10000);
         QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
     }
 
@@ -1437,7 +1437,7 @@ private slots:
             port = urlPort(studio.server().value(QStringLiteral("url")).toString());
             QTRY_VERIFY_WITH_TIMEOUT(!studio.checkingTools() && checksDone(studio), 60000);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(!portAnswers(QStringLiteral("127.0.0.1"), port, 300), 10000);
+        QTRY_VERIFY_WITH_TIMEOUT(!portListening(port), 10000);
         // and nothing is left noted for the next start
         QFile record(serverRecordFile(settingsFolder()));
         if (record.open(QIODevice::ReadOnly))
