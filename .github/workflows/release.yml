@@ -16,7 +16,7 @@ name: Release
 # up"): the repository variables SIGNPATH_ORGANIZATION_ID,
 # SIGNPATH_PROJECT_SLUG and SIGNPATH_SIGNING_POLICY_SLUG and the secret
 # SIGNPATH_API_TOKEN. Until then the workflow still makes the draft release,
-# unsigned and said so in its title.
+# unsigned and said so in its notes (the title is always "FloCMS Studio X").
 
 on:
   push:
@@ -285,7 +285,6 @@ jobs:
           mv "$debfile" "release/FloCMS-Studio-$VERSION-amd64.deb"
           (cd release && sha256sum -- * > SHA256SUMS.txt)
           title="FloCMS Studio $VERSION"
-          if [ "$SIGNED" != "true" ]; then title="$title (unsigned)"; fi
           {
             echo "## FloCMS Studio $VERSION"
             echo

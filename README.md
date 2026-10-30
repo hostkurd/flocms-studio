@@ -19,7 +19,7 @@ The guide is in [`docs/`](docs/) and on [flocms.com/docs/studio](https://flocms.
 
 ## Download
 
-Releases are on the [releases page](https://github.com/hostkurd/flocms-studio/releases): a Windows installer (`.msi`, for your user only, no administrator rights) and a portable folder, a macOS disk image for Intel and Apple Silicon, and for Linux a `.deb` (Ubuntu 24.04+, Debian 13+) and an AppImage. The Windows files are signed through SignPath Foundation (from the first release it accepts; until then they are marked unsigned): see the [code signing policy](CODE_SIGNING.md), which also says what Studio connects to (nothing about you is collected or sent).
+Releases are on the [releases page](https://github.com/hostkurd/flocms-studio/releases): a Windows installer (`.msi`, for your user only, no administrator rights) and a portable folder, a macOS disk image for Intel and Apple Silicon, and for Linux a `.deb` (Ubuntu 24.04+, Debian 13+) and an AppImage. The Windows files are signed through SignPath Foundation (from the first release it accepts; until then the release notes say they are not signed): see the [code signing policy](CODE_SIGNING.md), which also says what Studio connects to (nothing about you is collected or sent).
 
 ## Layout
 

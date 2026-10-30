@@ -48,7 +48,7 @@ How signing works:
 - An approver approves each signing request, one by one, after checking that it comes from the release workflow, for a version tag on `main`.
 - Every team member uses multi-factor authentication on GitHub and on SignPath.
 
-Releases made before SignPath accepted the project are unsigned and say so in their title.
+Releases made before SignPath accepted the project are unsigned and say so in their release notes.
 
 The full policy, with the team's roles, is in [CODE_SIGNING.md](../CODE_SIGNING.md).
 
