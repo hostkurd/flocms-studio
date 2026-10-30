@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(FloStudio
-    VERSION 0.1.2
+    VERSION 0.1.3
     DESCRIPTION "FloCMS Studio: create, run and change FloCMS projects"
     HOMEPAGE_URL "https://github.com/hostkurd/flocms-studio"
     LANGUAGES CXX)

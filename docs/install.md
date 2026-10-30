@@ -15,7 +15,7 @@ A newer installer replaces the installed version. An older installer stops with 
 
 The Windows files (`Studio.exe` and the `.msi`) are signed through the SignPath Foundation program for open source projects. Windows shows the publisher as **SignPath Foundation**. Each signed file also names FloCMS Studio and its version in **Properties > Details**.
 
-A release made before signing was set up has "(unsigned)" in its title. Windows SmartScreen then warns you before the first start. See [Privacy and code signing](privacy.md).
+A release made before signing was set up says in its notes that the files are not signed (releases up to 0.1.2 also had "(unsigned)" in their title). Windows SmartScreen then warns you before the first start. See [Privacy and code signing](privacy.md).
 
 ## macOS
 
