@@ -81,6 +81,13 @@
                   WorkingDirectory="INSTALLFOLDER" />
         <RegistryValue Root="HKCU" Key="Software\HostKurd\FloCMS Studio Installer"
                        Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        <!-- Studio itself writes its program's path in this key for
+             FloServer (D14, main.cpp: value Path, the key's only one), not
+             the installer; removed on uninstall with the installer's key, so
+             FloServer doesn't find a Studio that is gone. (A
+             RemoveRegistryValue would only act on install.) An upgrade
+             removes it too; the new Studio writes it again when it starts. -->
+        <RemoveRegistryKey Root="HKCU" Key="Software\HostKurd\FloCMS Studio" Action="removeOnUninstall" />
       </Component>
     </StandardDirectory>
 

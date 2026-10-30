@@ -7,6 +7,7 @@
 
 #include <flostudio/core/buildinfo.h>
 #include <flostudio/core/dbserver.h>
+#include <flostudio/core/floserver.h>
 #include <flostudio/core/process.h>
 #include <flostudio/core/project.h>
 #include <flostudio/core/server.h>
@@ -41,11 +42,25 @@ struct Found
     ToolStatus composer;
     DatabaseServerStatus database;
     QVariantList phpChoices;
+    QVariantMap floServer;
 };
+
+// FloServer's integration.json (D14), for Settings
+QVariantMap floServerMap(const std::optional<FloServerInfo> &info)
+{
+    if (!info)
+        return {{QStringLiteral("found"), false}};
+    const QStringList composer = floServerVersions(*info, QStringLiteral("composer"));
+    return {{QStringLiteral("found"), true},
+            {QStringLiteral("version"), info->version},
+            {QStringLiteral("php"), floServerVersions(*info, QStringLiteral("php"))},
+            {QStringLiteral("composer"), composer.isEmpty() ? QString() : composer.constFirst()}};
+}
 
 Found findTools(const Settings &settings, const QList<ToolPackage> &packages)
 {
     Found found;
+    found.floServer = floServerMap(readFloServerIntegration(floServerDataFolder()));
     found.php = detectPhp(settings);
     found.composer = detectComposer(settings);
     found.database = detectDatabaseServer();
@@ -228,6 +243,12 @@ void Studio::start()
             m_mariadb.start();
     });
     refreshTools(); // and Studio's MariaDB programs
+    // FloServer installed or removed while Studio was in the background:
+    // Settings and the PHP in use agree again (D14)
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
+        if (state == Qt::ApplicationActive)
+            refreshFloServer();
+    });
     m_clock.start();
     m_sweep.setInterval(60 * 1000);
     connect(&m_sweep, &QTimer::timeout, this, [this] { releaseUnused(false); });
@@ -291,6 +312,8 @@ Result<Done> Studio::startDemo(const QString &file)
     m_mariadb.showDemo(demo.value(QStringLiteral("mariadb")).toObject().toVariantMap());
     m_tools = demo.value(QStringLiteral("tools")).toArray().toVariantList();
     m_phpChoices = demo.value(QStringLiteral("phpChoices")).toArray().toVariantList();
+    m_floServer = demo.contains(QStringLiteral("floServer")) ? demo.value(QStringLiteral("floServer")).toObject().toVariantMap()
+                                                             : QVariantMap{{QStringLiteral("found"), false}};
     m_downloads = demo.value(QStringLiteral("downloads")).toArray().toVariantList();
     m_current = demo.value(QStringLiteral("current")).toObject().toVariantMap();
     m_demoDeleteChoices = demo.value(QStringLiteral("deleteChoices")).toObject().toVariantMap();
@@ -476,6 +499,12 @@ void Studio::setComposerPath(const QString &path)
     refreshTools();
 }
 
+void Studio::setUseFloServer(bool use)
+{
+    changeSettings([use](Settings &s) { s.useFloServer = use; });
+    refreshTools(); // the PHP and Composer in use change
+}
+
 void Studio::addProjectFolder(const QUrl &folder)
 {
     const QString path = localPath(folder);
@@ -494,11 +523,34 @@ void Studio::removeProjectFolder(const QString &folder)
 void Studio::addProject(const QUrl &folder)
 {
     const QString path = localPath(folder);
-    if (path.isEmpty())
-        return;
+    if (!path.isEmpty())
+        openFolderFromOutside(path);
+}
+
+bool Studio::openFolderFromOutside(const QString &folder)
+{
+    if (m_demo || folder.isEmpty())
+        return false;
+    const QString path = QDir::toNativeSeparators(QDir::cleanPath(QFileInfo(folder).absoluteFilePath()));
+    if (!QFileInfo(path).isDir()) {
+        setProblem(QStringLiteral("project_missing"), path);
+        return false;
+    }
     if (!isProject(path)) {
         setProblem(QStringLiteral("not_flocms"), path);
-        return;
+        return false;
+    }
+    // Listed already (FloServer opens a project Studio knows): that entry
+    const auto listed = [this, &path] {
+        for (const auto &project : m_projects.projects()) {
+            if (sameFolder(project.path, path))
+                return project.path;
+        }
+        return QString();
+    };
+    if (const QString known = listed(); !known.isEmpty()) {
+        selectProject(known);
+        return true;
     }
     // Opened again after "Remove from Studio": shown again
     changeSettings([&path](Settings &s) {
@@ -506,7 +558,9 @@ void Studio::addProject(const QUrl &folder)
         s.hiddenProjects.removeIf([&path](const QString &hidden) { return sameFolder(hidden, path); });
     });
     refreshProjects();
-    selectProject(projectSummary(path).path);
+    const QString known = listed();
+    selectProject(known.isEmpty() ? projectSummary(path).path : known);
+    return true;
 }
 
 bool Studio::projectBusy(const QString &path) const
@@ -1053,6 +1107,7 @@ void Studio::openLogFile()
 
 void Studio::showSettings(const QString &section)
 {
+    refreshFloServer();
     m_page = QStringLiteral("settings");
     m_settingsSection = section;
     emit pageChanged();
@@ -1172,6 +1227,7 @@ void Studio::refreshTools()
         watcher->deleteLater();
         m_tools = toolRows(found);
         m_phpChoices = found.phpChoices;
+        m_floServer = found.floServer;
         m_checking = false;
         emit toolsChanged();
         emit downloadsChanged(); // "installed" in the offer
@@ -1181,6 +1237,21 @@ void Studio::refreshTools()
     watcher->setFuture(QtConcurrent::run(findTools, m_settings, m_packages));
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+
+// phpProgram() reads integration.json on every call; Settings shows what
+// was read with the tools. Read again (a small file): when it changed, the
+// tools are looked for again, as the PHP and Composer in use changed too
+void Studio::refreshFloServer()
+{
+    if (m_demo || m_closing)
+        return;
+    const QVariantMap now = floServerMap(readFloServerIntegration(floServerDataFolder()));
+    if (now == m_floServer)
+        return;
+    m_floServer = now;
+    emit toolsChanged();
+    refreshTools();
+}
 
 // Whether a server listens on 3306 now: the MariaDB row follows another
 // server (XAMPP, Laragon…) started or stopped while Studio is open

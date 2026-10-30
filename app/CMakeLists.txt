@@ -84,6 +84,7 @@ set(STUDIO_QML
     qml/NavItem.qml
     qml/AppRadio.qml
     qml/AppCheck.qml
+    qml/AppSwitch.qml
     qml/ChoiceRow.qml
     qml/OptionRow.qml
     qml/DownloadRow.qml

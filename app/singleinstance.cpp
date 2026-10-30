@@ -9,6 +9,7 @@
 #include <QSaveFile>
 #include <QSysInfo>
 #include <QThread>
+#include <QTimer>
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -22,7 +23,17 @@
 namespace {
 
 constexpr QByteArrayView kShow = "show\n";
+constexpr QByteArrayView kOpen = "open ";
 constexpr QByteArrayView kShown = "ok\n";
+// A line longer than this is no message of ours: the connection is closed
+constexpr qint64 kMaxLine = 8192;
+// A copy that hasn't sent its line by then is closed
+constexpr int kReadTimeoutMs = 2000;
+
+QByteArray openMessage(const QString &folder)
+{
+    return kOpen.toByteArray() + folder.toUtf8() + '\n';
+}
 
 // A random secret kept in the settings folder (created the first time)
 QByteArray secretIn(const QString &folder)
@@ -92,8 +103,18 @@ void SingleInstance::release()
     m_lock.unlock();
 }
 
-bool SingleInstance::claim()
+bool SingleInstance::canHandOver(const QString &folder)
 {
+    return !folder.isEmpty() && !folder.contains(u'\n') && !folder.contains(u'\r') && !folder.contains(QChar(0))
+           && QDir::isAbsolutePath(folder) && openMessage(folder).size() <= kMaxLine;
+}
+
+bool SingleInstance::claim(const QString &openFolder)
+{
+    // A folder that can't go in one message: a running Studio is only
+    // asked to show itself (main.cpp says the folder wasn't opened), never
+    // a second Studio started for it
+    const QString handOver = canHandOver(openFolder) ? openFolder : QString();
     // About three seconds: a Studio still starting (not listening yet) or
     // closing (about to let go of the lock)
     for (int attempt = 0; attempt < 20; ++attempt) {
@@ -105,7 +126,7 @@ bool SingleInstance::claim()
         // folder that can't be written doesn't stop Studio
         if (m_lock.error() != QLockFile::LockFailedError)
             return true;
-        if (askRunningCopy() == Answer::Shown)
+        if (askRunningCopy(handOver) == Answer::Shown)
             return false;
         // Left by a Studio on another computer sharing this home folder
         // (QLockFile can't see that one's process): nothing here answers
@@ -134,14 +155,31 @@ void SingleInstance::listen()
     connect(m_server, &QLocalServer::newConnection, this, [this] {
         while (QLocalSocket *socket = m_server->nextPendingConnection()) {
             connect(socket, &QLocalSocket::disconnected, socket, &QObject::deleteLater);
+            // Nothing (or no whole line) in time: closed, so a copy that
+            // stays connected doesn't keep its socket
+            QTimer::singleShot(kReadTimeoutMs, socket, [socket] { socket->disconnectFromServer(); });
             const auto read = [this, socket] {
-                if (!socket->canReadLine())
+                if (!socket->canReadLine()) {
+                    if (socket->bytesAvailable() > kMaxLine)
+                        socket->disconnectFromServer();
                     return;
-                if (socket->readLine() == kShow.toByteArray()) {
+                }
+                const QByteArray line = socket->readLine(kMaxLine + 1);
+                // open <absolute path>: one line of UTF-8; Studio checks
+                // the folder before it opens anything
+                QString folder;
+                if (line.startsWith(kOpen.toByteArray()) && line.endsWith('\n')) {
+                    folder = QString::fromUtf8(line.mid(kOpen.size()).chopped(1));
+                    if (folder.isEmpty() || folder.contains(u'\r') || folder.contains(QChar(0)) || !QDir::isAbsolutePath(folder))
+                        folder.clear();
+                }
+                if (line == kShow.toByteArray() || !folder.isEmpty()) {
                     // Answered first: the window may not exist yet (main.cpp
                     // shows it once it does)
                     socket->write(kShown.data(), kShown.size());
                     socket->flush();
+                    if (!folder.isEmpty())
+                        emit openRequested(folder);
                     emit activateRequested();
                 }
                 socket->disconnectFromServer();
@@ -152,7 +190,7 @@ void SingleInstance::listen()
     });
 }
 
-SingleInstance::Answer SingleInstance::askRunningCopy()
+SingleInstance::Answer SingleInstance::askRunningCopy(const QString &openFolder)
 {
 #ifdef Q_OS_WIN
     // Windows lets a program bring itself to the front only when the one
@@ -163,7 +201,9 @@ SingleInstance::Answer SingleInstance::askRunningCopy()
     socket.connectToServer(m_name);
     if (!socket.waitForConnected(300))
         return Answer::NoAnswer;
-    socket.write(kShow.data(), kShow.size());
+    // claim() checked the folder (canHandOver)
+    const QByteArray message = openFolder.isEmpty() ? kShow.toByteArray() : openMessage(openFolder);
+    socket.write(message);
     if (!socket.waitForBytesWritten(300))
         return Answer::NoAnswer;
     // Shown only when the running Studio says so (one that is closing

@@ -1,6 +1,12 @@
 # Settings
 
-**Settings**, at the bottom of the sidebar, holds Studio's own settings. The sidebar then lists six sections: **General**, **PHP and tools**, **Database server**, **Server**, **Editor** and **Project folders**. **Back to projects** returns to your projects. Studio saves each change at once.
+**Settings**, at the bottom of the sidebar, holds Studio's own settings. The sidebar then lists seven sections: **FloServer**, **General**, **PHP and tools**, **Database server**, **Server**, **Editor** and **Project folders**. **Back to projects** returns to your projects. Studio saves each change at once.
+
+## FloServer
+
+When [FloServer](https://github.com/hostkurd/floserver) is installed on this computer, the card says **FloServer `<version>` found**, and **Use FloServer's PHP and Composer** (off at first) makes Studio run every `php` and `composer` command through FloServer's shims. Each project then gets the PHP version in its `floserver.json`, and FloServer's shims come first on the `PATH` of the commands Studio starts. "Turning this off brings back the PHP and Composer you had before." Studio's database server is not changed by it.
+
+When FloServer isn't installed, the card says so and the switch can't be turned on. If FloServer is removed while the switch is on, the card says Studio uses the PHP and Composer below until FloServer is back, and the switch can still be turned off. Studio looks for FloServer again each time Settings opens and when Studio comes back to the front. Studio finds FloServer by its `integration.json` file, in `%LOCALAPPDATA%\FloServer` on Windows, `~/Library/Application Support/FloServer` on macOS and `~/.local/share/floserver` on Linux (or the folder in `FLOSERVER_DATA_DIR`).
 
 ## General
 
@@ -17,6 +23,8 @@ Command output, log lines and FloCMS's own messages stay in English and read lef
 - **Download PHP, Composer or MariaDB…** opens the downloads dialog. See [Your first project](first-project.md#download-the-tools).
 
 The section also shows the folder downloads go into, for your user only.
+
+While Studio uses FloServer, **PHP to use** says "FloServer, per project (the version in each project's floserver.json)" with the PHP versions FloServer has, and **Composer** shows FloServer's Composer. **Choose another…** and **Search again** are hidden then, and the download button only offers MariaDB.
 
 Studio looks for tools on your `PATH`, then (on macOS and Linux) your login shell's `PATH`, then the usual install folders of Homebrew, Herd, XAMPP, Laragon and Composer-Setup, then its own downloads. Studio needs PHP 8.1 or newer; an older one shows as too old in the sidebar.
 

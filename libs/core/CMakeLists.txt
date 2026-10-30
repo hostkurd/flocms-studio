@@ -7,6 +7,7 @@ flostudio_add_library(FloStudioCore Core
         src/dbserver.cpp
         src/downloads.cpp
         src/env.cpp
+        src/floserver.cpp
         src/generators.cpp
         src/logs.cpp
         src/output.cpp
@@ -24,6 +25,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/commands.h
         include/flostudio/core/downloads.h
         include/flostudio/core/env.h
+        include/flostudio/core/floserver.h
         include/flostudio/core/generators.h
         include/flostudio/core/logs.h
         include/flostudio/core/memory.h

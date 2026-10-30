@@ -1,0 +1,8 @@
+{
+  "schema": 2,
+  "floserver_version": "0.9.0",
+  "cli": "@ROOT@opt/floserver/bin/flo",
+  "shims": "@ROOT@home/ali/.local/share/floserver/shims",
+  "runtimes": [],
+  "databases": []
+}

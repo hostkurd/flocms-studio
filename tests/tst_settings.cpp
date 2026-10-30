@@ -68,6 +68,23 @@ private slots:
         QCOMPARE(settings.serverNetwork, false);
     }
 
+    void floServerSettings()
+    {
+        // Design D14: off by default; saved and loaded
+        QCOMPARE(Settings{}.useFloServer, false);
+        const QTemporaryDir dir;
+        Settings settings;
+        settings.useFloServer = true;
+        settings.phpPath = QStringLiteral("/usr/bin/php8.3"); // kept: turning FloServer off brings it back
+        QVERIFY(saveSettings(settings, dir.path()).ok());
+        QCOMPARE(loadSettings(dir.path()).value(), settings);
+        // Only true and false count
+        write(dir.path(), R"({"useFloServer":"yes"})");
+        const Settings loaded = loadSettings(dir.path()).value();
+        QCOMPARE(loaded.useFloServer, false);
+        QVERIFY(!loaded.unknown.contains(QStringLiteral("useFloServer")));
+    }
+
     void databaseServerSettings()
     {
         // MariaDB design note D9, D5-D8

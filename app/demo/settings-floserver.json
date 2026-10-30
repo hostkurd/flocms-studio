@@ -1,0 +1,146 @@
+{
+  "platform": "windows-x86_64",
+  "settings": {
+    "language": "en",
+    "theme": "dark",
+    "projectFolders": [
+      "C:\\Sites"
+    ],
+    "serverPort": 8000,
+    "editorCommand": "code \"{folder}\"",
+    "useFloServer": true
+  },
+  "projects": [
+    {
+      "path": "C:\\Sites\\fectumhellas",
+      "name": "fectumhellas",
+      "home": "site",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\flocms-website",
+      "name": "flocms-website",
+      "home": "site",
+      "hasAdmin": false,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\admin-playground",
+      "name": "admin-playground",
+      "home": "admin",
+      "hasAdmin": true,
+      "hasApi": false
+    },
+    {
+      "path": "C:\\Sites\\ar-lighting-backend",
+      "name": "ar-lighting-backend",
+      "home": "api",
+      "hasAdmin": false,
+      "hasApi": true
+    }
+  ],
+  "current": {
+    "name": "fectumhellas",
+    "path": "C:\\Sites\\fectumhellas",
+    "type": "siteAdmin",
+    "appName": "Fectum Hellas",
+    "appEnv": "local",
+    "appUrl": "http://localhost:8000",
+    "appDebug": true,
+    "production": false,
+    "skeletonVersion": "2.0.0",
+    "languages": [
+      "en",
+      "ar",
+      "el"
+    ],
+    "defaultLanguage": "en",
+    "database": {
+      "driver": "mysql",
+      "name": "fectum",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "usesDsn": false,
+      "configured": true
+    },
+    "packages": [
+      {
+        "name": "hostkurd/flocms-admin",
+        "version": "0.39.3"
+      },
+      {
+        "name": "hostkurd/flocms-captcha",
+        "version": "1.1.0"
+      },
+      {
+        "name": "hostkurd/flocms-cli",
+        "version": "2.0.1"
+      },
+      {
+        "name": "hostkurd/flocms-core",
+        "version": "2.9.0"
+      },
+      {
+        "name": "hostkurd/flocms-reactive",
+        "version": "0.5.1"
+      },
+      {
+        "name": "hostkurd/flocms-uploader",
+        "version": "1.2.1"
+      }
+    ],
+    "otherPackages": 1,
+    "hasEnv": true,
+    "hasVendor": true,
+    "hasLock": true,
+    "duplicateEnvKeys": [],
+    "envByteOrderMark": false
+  },
+  "tools": [
+    {
+      "tool": "php",
+      "state": "found",
+      "version": "8.4.27",
+      "path": "C:\\php\\8.4\\php.exe"
+    },
+    {
+      "tool": "composer",
+      "state": "found",
+      "version": "2.10.3",
+      "path": "C:\\ProgramData\\ComposerSetup\\bin\\composer.bat"
+    },
+    {
+      "tool": "mariadb",
+      "state": "running",
+      "version": "11.8.9",
+      "product": "MariaDB",
+      "path": "C:\\Program Files\\MariaDB 11.8\\bin\\mariadb.exe"
+    }
+  ],
+  "page": "settings",
+  "settingsSection": "floserver",
+  "toolsFolder": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools",
+  "phpChoices": [
+    {
+      "path": "C:\\php\\8.4\\php.exe",
+      "version": "8.4.27",
+      "origin": "system"
+    },
+    {
+      "path": "C:\\Users\\khalat\\AppData\\Local\\HostKurd\\FloCMS Studio\\tools\\php-8.5\\php.exe",
+      "version": "8.5.12",
+      "origin": "studio"
+    }
+  ],
+  "floServer": {
+    "found": true,
+    "version": "0.1.0",
+    "php": [
+      "8.5.12",
+      "8.4.15",
+      "8.3.27"
+    ],
+    "composer": "2.9.1"
+  }
+}
