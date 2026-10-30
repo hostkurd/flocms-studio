@@ -24,6 +24,9 @@ struct Settings
     // How to open a project in an editor. {folder} becomes the project's
     // folder; without it the folder is added as the last argument.
     QString editorCommand = QStringLiteral("code \"{folder}\"");
+    // How to open a terminal in a project (terminal.h): empty means
+    // automatic; else like editorCommand.
+    QString terminalCommand;
 
     QStringList projectFolders; // folders whose sub-folders are scanned
     QStringList projects;       // projects added one by one

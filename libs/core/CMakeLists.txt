@@ -18,6 +18,7 @@ flostudio_add_library(FloStudioCore Core
         src/project.cpp
         src/server.cpp
         src/settings.cpp
+        src/terminal.cpp
         src/tools.cpp
         src/wizard.cpp
     HEADERS
@@ -37,6 +38,7 @@ flostudio_add_library(FloStudioCore Core
         include/flostudio/core/result.h
         include/flostudio/core/server.h
         include/flostudio/core/settings.h
+        include/flostudio/core/terminal.h
         include/flostudio/core/tools.h
         include/flostudio/core/wizard.h
         "${CMAKE_CURRENT_BINARY_DIR}/include/flostudio/core/version.h"

@@ -3,6 +3,7 @@
 #include <flostudio/core/commands.h>
 #include <flostudio/core/export.h>
 #include <flostudio/core/result.h>
+#include <flostudio/core/settings.h>
 
 #include <QByteArray>
 #include <QList>
@@ -117,5 +118,45 @@ FLOSTUDIOCORE_EXPORT QString newProjectDatabaseSql(const NewProject &project);
 // Every step for these choices. The admin's password is only in the last
 // step's input.
 FLOSTUDIOCORE_EXPORT QList<WizardStep> newProjectSteps(const NewProject &project);
+
+// --- A database for a project (design note of 30 Oct, parts A and C) ---
+
+// A MySQL/MariaDB database and the login a project uses for it.
+struct DatabaseLogin
+{
+    QString host = QStringLiteral("127.0.0.1");
+    int port = 3306;
+    QString name;
+    QString user;
+    QString password; // never shown, never in arguments
+    bool operator==(const DatabaseLogin &) const = default;
+};
+
+FLOSTUDIOCORE_EXPORT DatabaseLogin databaseLogin(const NewProject &project);
+
+// The .env lines for it: DB_TYPE=mysql, DB_HOST, DB_PORT, DB_NAME,
+// DB_USERNAME, DB_PASSWORD.
+FLOSTUDIOCORE_EXPORT QList<QPair<QString, QString>> databaseEnv(const DatabaseLogin &login);
+
+// What is wrong with it, as checkNewProject says for the wizard's fields
+// (dbHost, dbPort, dbName, dbUser, dbPassword). With studioMakesUser the
+// user is one Studio creates on its own server: letters, digits and _, not
+// root, and a password is needed.
+FLOSTUDIOCORE_EXPORT QList<FieldProblem> checkDatabaseLogin(const DatabaseLogin &login, bool studioMakesUser);
+
+// db:check (or another command) said the server answered but has no such
+// database: MySQL/MariaDB error 1049, "Unknown database".
+FLOSTUDIOCORE_EXPORT bool isUnknownDatabase(const QString &message);
+
+// The PHP code that creates the database (CREATE DATABASE IF NOT EXISTS,
+// utf8mb4) with PDO, reading the login as JSON on its input, so the
+// password is never in the arguments. Prints its error on stderr and ends
+// with 1 when it fails.
+FLOSTUDIOCORE_EXPORT QString createDatabasePhpCode();
+
+// The command for it with the PHP Studio uses (php -r), in `workingDir`,
+// the login on its input. Error code: php_not_found.
+FLOSTUDIOCORE_EXPORT Result<Command> createDatabaseCommand(const Settings &settings, const DatabaseLogin &login,
+                                                           const QString &workingDir);
 
 } // namespace FloStudio::Core

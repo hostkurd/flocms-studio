@@ -30,7 +30,7 @@ const QStringList &knownKeys()
         QStringLiteral("databaseServer"), QStringLiteral("databaseFound"),  QStringLiteral("databaseSeries"),
         QStringLiteral("databasePort"),   QStringLiteral("databaseAutoStart"), QStringLiteral("databaseHost"),
         QStringLiteral("databaseOtherPort"), QStringLiteral("databaseUser"), QStringLiteral("databaseProjects"),
-        QStringLiteral("hiddenProjects"), QStringLiteral("useFloServer"),
+        QStringLiteral("hiddenProjects"), QStringLiteral("useFloServer"), QStringLiteral("terminalCommand"),
     };
     return keys;
 }
@@ -100,6 +100,7 @@ Settings normalized(Settings settings)
     settings.editorCommand = settings.editorCommand.trimmed();
     if (settings.editorCommand.isEmpty())
         settings.editorCommand = defaults.editorCommand;
+    settings.terminalCommand = settings.terminalCommand.trimmed();
     settings.phpPath = settings.phpPath.trimmed();
     settings.composerPath = settings.composerPath.trimmed();
     settings.projectFolders = cleanList(settings.projectFolders);
@@ -117,6 +118,7 @@ QJsonObject toJson(const Settings &settings)
     json.insert(QStringLiteral("phpPath"), settings.phpPath);
     json.insert(QStringLiteral("composerPath"), settings.composerPath);
     json.insert(QStringLiteral("editorCommand"), settings.editorCommand);
+    json.insert(QStringLiteral("terminalCommand"), settings.terminalCommand);
     json.insert(QStringLiteral("projectFolders"), QJsonArray::fromStringList(settings.projectFolders));
     json.insert(QStringLiteral("projects"), QJsonArray::fromStringList(settings.projects));
     json.insert(QStringLiteral("hiddenProjects"), QJsonArray::fromStringList(settings.hiddenProjects));
@@ -148,6 +150,7 @@ Settings settingsFromJson(const QJsonObject &json)
     text("phpPath", settings.phpPath);
     text("composerPath", settings.composerPath);
     text("editorCommand", settings.editorCommand);
+    text("terminalCommand", settings.terminalCommand);
     settings.projectFolders = stringList(json.value(QStringLiteral("projectFolders")));
     settings.projects = stringList(json.value(QStringLiteral("projects")));
     settings.hiddenProjects = stringList(json.value(QStringLiteral("hiddenProjects")));

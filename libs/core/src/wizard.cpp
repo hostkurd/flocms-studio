@@ -1,8 +1,12 @@
 #include <flostudio/core/wizard.h>
 #include <flostudio/core/dbserver.h>
+#include <flostudio/core/floserver.h>
+#include <flostudio/core/tools.h>
 
 #include <QDir>
 #include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QRegularExpression>
 
 #include <algorithm>
@@ -101,25 +105,8 @@ QList<FieldProblem> checkNewProject(const NewProject &project)
     else if (!project.languages.contains(project.defaultLanguage))
         problems << FieldProblem{QStringLiteral("defaultLanguage"), QStringLiteral("default_language")};
 
-    if (project.mysql) {
-        static const QRegularExpression database(QStringLiteral("^[A-Za-z0-9_$]{1,64}$"));
-        if (!database.match(project.dbName).hasMatch())
-            problems << FieldProblem{QStringLiteral("dbName"), QStringLiteral("db_name_invalid")};
-        static const QRegularExpression newUser(QStringLiteral("^[A-Za-z0-9_]{1,80}$"));
-        if (project.dbUser.trimmed().isEmpty())
-            problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_empty")};
-        else if (project.createDatabase
-                 && (!newUser.match(project.dbUser).hasMatch() || project.dbUser.compare(QStringLiteral("root"), Qt::CaseInsensitive) == 0))
-            problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_invalid")};
-        if (project.createDatabase && project.dbPassword.isEmpty())
-            problems << FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")};
-        if (project.dbPort < 1 || project.dbPort > 65535)
-            problems << FieldProblem{QStringLiteral("dbPort"), QStringLiteral("db_port_invalid")};
-        if (project.dbHost.trimmed().isEmpty() || project.dbHost.contains(u'\n'))
-            problems << FieldProblem{QStringLiteral("dbHost"), QStringLiteral("db_host_invalid")};
-        if (project.dbPassword.contains(u'\n') || project.dbPassword.contains(u'\r'))
-            problems << FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")};
-    }
+    if (project.mysql)
+        problems << checkDatabaseLogin(databaseLogin(project), project.createDatabase);
 
     if (setupHasAdmin(project.setup)) {
         if (project.adminName.trimmed().isEmpty())
@@ -141,6 +128,85 @@ QList<FieldProblem> checkNewProject(const NewProject &project)
     return problems;
 }
 
+DatabaseLogin databaseLogin(const NewProject &project)
+{
+    return DatabaseLogin{project.dbHost, project.dbPort, project.dbName, project.dbUser, project.dbPassword};
+}
+
+QList<QPair<QString, QString>> databaseEnv(const DatabaseLogin &login)
+{
+    return {{QStringLiteral("DB_TYPE"), QStringLiteral("mysql")},
+            {QStringLiteral("DB_HOST"), login.host.trimmed()},
+            {QStringLiteral("DB_PORT"), QString::number(login.port)},
+            {QStringLiteral("DB_NAME"), login.name},
+            {QStringLiteral("DB_USERNAME"), login.user.trimmed()},
+            {QStringLiteral("DB_PASSWORD"), login.password}};
+}
+
+QList<FieldProblem> checkDatabaseLogin(const DatabaseLogin &login, bool studioMakesUser)
+{
+    QList<FieldProblem> problems;
+    static const QRegularExpression database(QStringLiteral("^[A-Za-z0-9_$]{1,64}$"));
+    if (!database.match(login.name).hasMatch())
+        problems << FieldProblem{QStringLiteral("dbName"), QStringLiteral("db_name_invalid")};
+    static const QRegularExpression newUser(QStringLiteral("^[A-Za-z0-9_]{1,80}$"));
+    if (login.user.trimmed().isEmpty())
+        problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_empty")};
+    else if (studioMakesUser
+             && (!newUser.match(login.user).hasMatch() || login.user.compare(QStringLiteral("root"), Qt::CaseInsensitive) == 0))
+        problems << FieldProblem{QStringLiteral("dbUser"), QStringLiteral("db_user_invalid")};
+    if (studioMakesUser && login.password.isEmpty())
+        problems << FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")};
+    if (login.port < 1 || login.port > 65535)
+        problems << FieldProblem{QStringLiteral("dbPort"), QStringLiteral("db_port_invalid")};
+    if (login.host.trimmed().isEmpty() || login.host.contains(u'\n'))
+        problems << FieldProblem{QStringLiteral("dbHost"), QStringLiteral("db_host_invalid")};
+    if (login.password.contains(u'\n') || login.password.contains(u'\r'))
+        problems << FieldProblem{QStringLiteral("dbPassword"), QStringLiteral("db_password_invalid")};
+    return problems;
+}
+
+bool isUnknownDatabase(const QString &message)
+{
+    return message.contains(QStringLiteral("[1049]")) || message.contains(QStringLiteral("Unknown database"), Qt::CaseInsensitive);
+}
+
+QString createDatabasePhpCode()
+{
+    // The name is checked before (checkDatabaseLogin) and quoted here too
+    return QStringLiteral(
+        "$in = json_decode(stream_get_contents(STDIN), true);"
+        "if (!is_array($in)) { fwrite(STDERR, \"No login was given.\\n\"); exit(1); }"
+        "try {"
+        " $dsn = 'mysql:host=' . $in['host'] . ';port=' . (int) $in['port'] . ';charset=utf8mb4';"
+        " $pdo = new PDO($dsn, $in['user'], $in['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 10]);"
+        " $name = '`' . str_replace('`', '``', $in['name']) . '`';"
+        " $pdo->exec('CREATE DATABASE IF NOT EXISTS ' . $name . ' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');"
+        " echo 'Database ' . $in['name'] . \" is ready.\\n\";"
+        "} catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . \"\\n\"); exit(1); }");
+}
+
+Result<Command> createDatabaseCommand(const Settings &settings, const DatabaseLogin &login, const QString &workingDir)
+{
+    const auto php = phpProgram(settings);
+    if (!php)
+        return php.error();
+    Command command;
+    command.program = php.value();
+    command.arguments = {QStringLiteral("-r"), createDatabasePhpCode()};
+    command.workingDir = workingDir;
+    command.environment.insert(QStringLiteral("PATH"), commandSearchPath(settings));
+    QJsonObject json{{QStringLiteral("host"), login.host.trimmed()},
+                     {QStringLiteral("port"), login.port},
+                     {QStringLiteral("name"), login.name},
+                     {QStringLiteral("user"), login.user.trimmed()},
+                     {QStringLiteral("password"), login.password}};
+    command.input = QJsonDocument(json).toJson(QJsonDocument::Compact);
+    command.shown = QStringLiteral("CREATE DATABASE %1 (utf8mb4) on %2:%3")
+                        .arg(login.name, login.host.trimmed(), QString::number(login.port));
+    return command;
+}
+
 QList<QPair<QString, QString>> newProjectEnv(const NewProject &project)
 {
     const QString appName = project.appName.trimmed().isEmpty() ? project.name : project.appName.trimmed();
@@ -155,12 +221,7 @@ QList<QPair<QString, QString>> newProjectEnv(const NewProject &project)
         {QStringLiteral("DEFAULT_LANG"), project.defaultLanguage},
     };
     if (project.mysql) {
-        values << QPair<QString, QString>{QStringLiteral("DB_TYPE"), QStringLiteral("mysql")}
-               << QPair<QString, QString>{QStringLiteral("DB_HOST"), project.dbHost.trimmed()}
-               << QPair<QString, QString>{QStringLiteral("DB_PORT"), QString::number(project.dbPort)}
-               << QPair<QString, QString>{QStringLiteral("DB_NAME"), project.dbName}
-               << QPair<QString, QString>{QStringLiteral("DB_USERNAME"), project.dbUser.trimmed()}
-               << QPair<QString, QString>{QStringLiteral("DB_PASSWORD"), project.dbPassword};
+        values << databaseEnv(databaseLogin(project));
     } else {
         values << QPair<QString, QString>{QStringLiteral("DB_TYPE"), QStringLiteral("sqlite")}
                << QPair<QString, QString>{QStringLiteral("DB_NAME"), QStringLiteral("storage/database.sqlite")};
